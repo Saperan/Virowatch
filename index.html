@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virowatch</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@100;300;400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        .kanit-thin {
+          font-family: "Kanit", sans-serif;
+          font-weight: 100;
+          font-style: normal;
+        }
+
+        .kanit-extralight {
+          font-family: "Kanit", sans-serif;
+          font-weight: 200;
+          font-style: normal;
+        }
+
+        .kanit-light {
+          font-family: "Kanit", sans-serif;
+          font-weight: 300;
+          font-style: normal;
+        }
+
+        .kanit-regular {
+          font-family: "Kanit", sans-serif;
+          font-weight: 400;
+          font-style: normal;
+        }
+
+        .kanit-medium {
+          font-family: "Kanit", sans-serif;
+          font-weight: 500;
+          font-style: normal;
+        }
+
+        .kanit-semibold {
+          font-family: "Kanit", sans-serif;
+          font-weight: 600;
+          font-style: normal;
+        }
+
+        .kanit-bold {
+          font-family: "Kanit", sans-serif;
+          font-weight: 700;
+          font-style: normal;
+        }
+
+        .kanit-extrabold {
+          font-family: "Kanit", sans-serif;
+          font-weight: 800;
+          font-style: normal;
+        }
+
+        .kanit-black {
+          font-family: "Kanit", sans-serif;
+          font-weight: 900;
+          font-style: normal;
+        }
+
+        .kanit-thin-italic {
+          font-family: "Kanit", sans-serif;
+          font-weight: 100;
+          font-style: italic;
+        }
+
+        .kanit-extralight-italic {
+          font-family: "Kanit", sans-serif;
+          font-weight: 200;
+          font-style: italic;
+        }
+
+        .kanit-light-italic {
+          font-family: "Kanit", sans-serif;
+          font-weight: 300;
+          font-style: italic;
+        }
+
+        .kanit-regular-italic {
+          font-family: "Kanit", sans-serif;
+          font-weight: 400;
+          font-style: italic;
+        }
+
+        .kanit-medium-italic {
+          font-family: "Kanit", sans-serif;
+          font-weight: 500;
+          font-style: italic;
+        }
+
+        .kanit-semibold-italic {
+          font-family: "Kanit", sans-serif;
+          font-weight: 600;
+          font-style: italic;
+        }
+
+        .kanit-bold-italic {
+          font-family: "Kanit", sans-serif;
+          font-weight: 700;
+          font-style: italic;
+        }
+
+        .kanit-extrabold-italic {
+          font-family: "Kanit", sans-serif;
+          font-weight: 800;
+          font-style: italic;
+        }
+        .kanit-black-italic {
+          font-family: "Kanit", sans-serif;
+          font-weight: 900;
+          font-style: italic;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #eaeaea;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 90vw;
+            margin: 20px auto;
+            padding: 10px;
+        }
+        .movie-list-wrapper {
+    overflow-x: auto; /* Horizontal scrolling */
+    overflow-y: hidden; /* Prevent vertical scrolling */
+    white-space: nowrap; /* Prevent line breaks */
+    display: flex; /* Align items in a row */
+    gap: 10px; /* Space between items */
+    padding: 10px; /* Add padding */
+    max-height: 180px; /* Constrain height */
+    scroll-snap-type: x mandatory; /* Enable snapping to items */
+}
+
+.movie-list {
+    display: flex; /* Keep the items aligned in a row */
+    gap: 20px;
+}
+
+.movie-item-banner {
+    position: relative; /* Needed for the <p> to position absolutely within this container */
+    flex: 0 0 auto; /* Prevent shrinking and keep items scrollable horizontally */
+    width: 400px;
+    height: 150px;
+    transition: transform 0.3s ease;
+}
+
+.movie-item {
+    position: relative; /* Needed for the <p> to position absolutely within this container */
+    flex: 0 0 auto; /* Prevent shrinking and keep items scrollable horizontally */
+    width: 100px;
+    height: 150px;
+    transition: transform 0.3s ease;
+}
+
+.movie-list-wrapper::-webkit-scrollbar {
+    height: 8px; /* Horizontal scrollbar height */
+}
+
+.movie-list-wrapper::-webkit-scrollbar-thumb {
+    background: #666; /* Scrollbar thumb color */
+    border-radius: 4px;
+}
+
+.movie-list-wrapper::-webkit-scrollbar-track {
+    background: #1a1a1a; /* Scrollbar track background */
+}
+        .movie-item:hover {
+            transform: scale(1.1);
+        }
+
+        .movie-item-banner:hover {
+            transform: scale(1.1);
+        }
+
+        .movie-item-banner img {
+            width: 100%;
+            height: 100%;
+            border-radius: 10%;
+        }
+
+        .movie-item img {
+            width: 100%;
+            height: 100%;
+            border-radius: 10%;
+        }
+
+        .movie-item-banner p {
+            position: absolute; /* Position the <p> relative to .movie-item */
+                bottom: 0; /* Align text at the bottom of the movie item */
+                left: 0;
+                right: 0;
+                margin: 0;
+                padding: 2px;
+                font-size: 14px;
+                font-family: "Kanit", sans-serif;
+                font-weight: 300;
+                color: #eaeaea; /* Text color */
+                background: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+                text-align: center; /* Center the text */
+                z-index: 2; /* Ensure it appears above other elements */
+                border-bottom-left-radius: 10%; /* Optional: Match container's bottom corner rounding */
+                border-bottom-right-radius: 10%; /* Optional: Match container's bottom corner rounding */
+        }
+
+        .movie-item p {
+            position: absolute; /* Position the <p> relative to .movie-item */
+                bottom: 0; /* Align text at the bottom of the movie item */
+                left: 0;
+                right: 0;
+                margin: 0;
+                padding: 2px;
+                font-size: 14px;
+                font-family: "Kanit", sans-serif;
+                font-weight: 300;
+                color: #eaeaea; /* Text color */
+                background: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+                text-align: center; /* Center the text */
+                z-index: 2; /* Ensure it appears above other elements */
+                border-bottom-left-radius: 10%; /* Optional: Match container's bottom corner rounding */
+                border-bottom-right-radius: 10%; /* Optional: Match container's bottom corner rounding */
+        }
+
+        .search-box {
+    margin-bottom: 20px;
+    padding: 15px; /* Adds padding around the search box */
+    border-radius: 10px; /* Rounds the corners */
+    display: flex; /* Enables Flexbox for alignment */
+    justify-content: center; /* Horizontally centers the input field */
+    align-items: center; /* Vertically centers the input field */
+    width: 100%; /* Ensures the search box spans the full width */
+    box-sizing: border-box; /* Prevents padding from affecting width */
+    font-family: "Kanit", sans-serif;
+}
+
+.search-box input[type="text"] {
+    background-color: #444; /* Lighter color to differentiate from the search box */
+    color: white; /* White text color for input */
+    padding: 10px 15px; /* Adds padding inside the input field */
+    border-radius: 5px; /* Rounds the corners */
+    width: 80%; /* Adjusts the input box width to fit neatly */
+    max-width: 600px; /* Ensures input field doesn't stretch too far */
+    box-sizing: border-box; /* Ensures padding doesn't affect total width */
+    font-size: 16px; /* Sets a comfortable font size */
+    outline: none; /* Removes the default focus outline */
+    font-family: "Kanit", sans-serif;
+}
+
+
+        .search-box input {
+            padding: 10px;
+            width: 80%;
+            max-width: 300px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .episode-container {
+            display: flex;
+            max-width: 100%;
+            margin-top: 20px;
+            font-family: "Kanit", sans-serif;
+        }
+
+        .sidebar {
+            flex: 0 0 200px;
+            max-width: 20%;
+            background: #2b2b2b;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .episode {
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 3px;
+            margin-bottom: 5px;
+            transition: 0.3s;
+        }
+
+        .episode:hover, .episode.active {
+            background: #444;
+        }
+
+        .player {
+            flex: 1;
+            background: #000;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 65vh;
+            max-height: 600px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .button {
+            padding: 8px 15px;
+            border-radius: 5px;
+            background: #444;
+            color: #eaeaea;
+            text-decoration: none;
+            text-align: center;
+            transition: 0.3s;
+            font-family: "Kanit", sans-serif;
+        }
+
+        .button:hover {
+            background: #666;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div>
+        <center><h1 class="kanit-light">Virowatch</h1></center>
+    </div>
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search for a movie or show...">
+    </div>
+
+    <div class="movie-list-wrapper">
+        <div class="movie-list" id="movieList">
+            <div class="movie-item-banner" data-movie="banner1">
+                <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fjohnno74.files.wordpress.com%2F2014%2F07%2Ffor-future-utube-clip.jpg&f=1&nofb=1&ipt=8ef51eb18841a46bca0c3e041933fe1d4179c16d7d73c185337ec563c3247297&ipo=images" alt="Truman Show">
+                <p class="kanit-extralight">Category: Movie</p>
+            </div>
+            <div class="movie-item" data-movie="TrumanShow">
+                <img src="https://i.ibb.co/7RcR2MM/e5-EMJEQn-Wk-Wb8-G6s-TMk-N91qiq-Uz-831065533.jpg" alt="Truman Show">
+                <p class="kanit-extralight">Truman Show</p>
+            </div>
+            <div class="movie-item" data-movie="FightClub">
+                <img src="https://img.goldposter.com/2015/04/Fight-Club_poster_goldposter_com_93.jpg" alt="Fight Club">
+                <p class="kanit-extralight">Fight Club</p>
+            </div>
+            <div class="movie-item-banner" data-movie="FightClub">
+                <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstatic1.colliderimages.com%2Fwordpress%2Fwp-content%2Fuploads%2F2020%2F10%2Fbest-tv-shows-to-binge-watch-social.png&f=1&nofb=1&ipt=c3a2246ec423cb762a27a73de87677c02a2e9a5744a3f629b646783c816126f6&ipo=images" alt="Fight Club">
+                <p class="kanit-extralight">Category: Shows</p>
+            </div>
+            <div class="movie-item-banner" data-movie="FightClub">
+                <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstatic1.colliderimages.com%2Fwordpress%2Fwp-content%2Fuploads%2F2023%2F06%2Fluffy-from-one-piece-goku-from-dragon-ball-z-and-saitama-from-one-punch-man.jpg&f=1&nofb=1&ipt=9884b84f3ade3c545c70a0d6c374c1088e77b275b3509291e452d8d64d97688c&ipo=images" alt="Fight Club">
+                <p class="kanit-extralight">Category: Anime</p>
+            </div>
+            <!-- Add more movie items here -->
+        </div>
+    </div>
+    
+
+    <div class="episode-container" id="episodeContainer">
+        <div class="sidebar" id="episodeSidebar"></div>
+
+        <div class="player">
+            <iframe id="videoPlayer" src="" allowfullscreen></iframe>
+            <div class="controls">
+                <a href="#" class="button" id="prevEpisode">Previous Episode</a>
+                <a href="#" class="button" id="nextEpisode">Next Episode</a>
+                <a href="#" class="button" id="backToMenu">Back to Main Menu</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const movieItems = document.querySelectorAll('.movie-item');
+    const videoPlayer = document.getElementById('videoPlayer');
+    const searchInput = document.getElementById('searchInput');
+    const episodeContainer = document.getElementById('episodeContainer');
+    const episodeSidebar = document.getElementById('episodeSidebar');
+    const movieListWrapper = document.querySelector('.movie-list-wrapper'); // Select movie list wrapper
+
+    movieListWrapper.addEventListener("mouseenter", () => {
+        // Enable horizontal scrolling when the mouse enters the container
+        movieListWrapper.addEventListener("wheel", handleWheel, { passive: false });
+    });
+
+    movieListWrapper.addEventListener("mouseleave", () => {
+        // Disable horizontal scrolling when the mouse leaves the container
+        movieListWrapper.removeEventListener("wheel", handleWheel);
+    });
+
+    function handleWheel(event) {
+        event.preventDefault(); // Prevent vertical scrolling
+        movieListWrapper.scrollLeft += event.deltaY; // Use deltaY to scroll horizontally
+    }
+
+    const movies = {
+        TrumanShow: [
+            'https://rumble.com/embed/v59iui1/?pub=3u4il9'
+        ],
+        FightClub: [
+            'https://rumble.com/embed/v59iuxp/?pub=3u4il9'
+        ]
+    };
+
+    let currentMovie = null;
+    let currentEpisode = 0;
+
+    movieItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const movie = item.dataset.movie;
+            currentMovie = movie;
+            currentEpisode = 0;
+
+            episodeSidebar.innerHTML = '';
+            movies[movie].forEach((src, index) => {
+                const episodeDiv = document.createElement('div');
+                episodeDiv.className = 'episode';
+                episodeDiv.dataset.episode = index;
+                episodeDiv.textContent = `Episode ${index + 1}`;
+                episodeDiv.addEventListener('click', () => loadEpisode(index));
+                episodeSidebar.appendChild(episodeDiv);
+            });
+
+            episodeContainer.style.display = 'flex';
+            videoPlayer.src = movies[movie][0];
+        });
+    });
+
+    function loadEpisode(index) {
+        currentEpisode = index;
+        videoPlayer.src = movies[currentMovie][index];
+        document.querySelectorAll('.episode').forEach(e => e.classList.remove('active'));
+        document.querySelector(`.episode[data-episode="${index}"]`).classList.add('active');
+    }
+
+    document.getElementById('prevEpisode').addEventListener('click', e => {
+        e.preventDefault();
+        if (currentEpisode > 0) loadEpisode(currentEpisode - 1);
+    });
+
+    document.getElementById('nextEpisode').addEventListener('click', e => {
+        e.preventDefault();
+        if (currentEpisode < movies[currentMovie].length - 1) loadEpisode(currentEpisode + 1);
+    });
+
+    document.getElementById('backToMenu').addEventListener('click', e => {
+        e.preventDefault();
+        window.location.href = 'https://virowatch.tiiny.site'; // Replace 'https://example.com' with your desired URL
+    });
+
+    searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+
+        // Loop through both movie-item and movie-item-banner
+        const allMovieItems = document.querySelectorAll('.movie-item, .movie-item-banner');
+        allMovieItems.forEach(item => {
+            const title = item.querySelector('p') ? item.querySelector('p').textContent.toLowerCase() : '';
+            item.style.display = title.includes(query) ? 'block' : 'none';
+        });
+    });
+</script>
+
+</body>
+</html>
