@@ -313,6 +313,7 @@
         }
 
         .button {
+            display: inline-block;
             padding: 8px 15px;
             border-radius: 5px;
             background: #444;
@@ -326,6 +327,27 @@
         .button:hover {
             background: #666;
         }
+
+        #downloadContainer {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;  /* Allows wrapping to the next line if buttons overflow */
+    margin-top: 10px;
+    width: 100%;  /* Ensures the download container spans the full width */
+        }
+
+
+        .controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;  /* Ensures wrapping when there are many buttons */
+    margin-top: 20px;
+    width: 100%; /* Ensures the controls container spans the full width */
+        }
+
     </style>
 </head>
 <body>
@@ -374,6 +396,7 @@
                 <a href="#" class="button" id="prevEpisode">Previous Episode</a>
                 <a href="#" class="button" id="nextEpisode">Next Episode</a>
                 <a href="#" class="button" id="backToMenu">Back to Main Menu</a>
+                <div id="downloadContainer"></div> <!-- This will hold the dynamic download buttons -->
             </div>
         </div>
     </div>
@@ -403,37 +426,65 @@
     }
 
     const movies = {
-        TrumanShow: [
+    TrumanShow: {
+        video: [
             'https://rumble.com/embed/v59iui1/?pub=3u4il9'
         ],
-        FightClub: [
-            'https://rumble.com/embed/v59iuxp/?pub=3u4il9'
+        downloads: [
+            'https://example.com/download1.zip', // Download 1 link // Download 2 link
+            // Add more downloads here
         ]
-    };
+    },
+    FightClub: {
+        video: [
+            'https://rumble.com/embed/v59iuxp/?pub=3u4il9'
+        ],
+        downloads: [
+            'https://example.com/fightclub_download1.zip',
+            'https://example.com/fightclub_download2.zip',
+            'https://example.com/fightclub_download3.zip',
+            // Add more downloads here
+        ]
+    }
+};
 
-    let currentMovie = null;
-    let currentEpisode = 0;
+let currentMovie = null;
+let currentEpisode = 0;
 
-    movieItems.forEach(item => {
-        item.addEventListener('click', function() {
-            const movie = item.dataset.movie;
-            currentMovie = movie;
-            currentEpisode = 0;
+movieItems.forEach(item => {
+    item.addEventListener('click', function() {
+        const movie = item.dataset.movie;
+        currentMovie = movie;
+        currentEpisode = 0;
 
-            episodeSidebar.innerHTML = '';
-            movies[movie].forEach((src, index) => {
-                const episodeDiv = document.createElement('div');
-                episodeDiv.className = 'episode';
-                episodeDiv.dataset.episode = index;
-                episodeDiv.textContent = `Episode ${index + 1}`;
-                episodeDiv.addEventListener('click', () => loadEpisode(index));
-                episodeSidebar.appendChild(episodeDiv);
-            });
+        episodeSidebar.innerHTML = '';
+        movies[movie].video.forEach((src, index) => {
+            const episodeDiv = document.createElement('div');
+            episodeDiv.className = 'episode';
+            episodeDiv.dataset.episode = index;
+            episodeDiv.textContent = `Episode ${index + 1}`;
+            episodeDiv.addEventListener('click', () => loadEpisode(index));
+            episodeSidebar.appendChild(episodeDiv);
+        });
 
-            episodeContainer.style.display = 'flex';
-            videoPlayer.src = movies[movie][0];
+        episodeContainer.style.display = 'flex';
+        videoPlayer.src = movies[movie].video[0];
+
+        // Add download buttons dynamically
+        const downloadContainer = document.getElementById('downloadContainer');
+        downloadContainer.innerHTML = ''; // Clear previous download buttons
+
+        movies[movie].downloads.forEach((downloadUrl, index) => {
+            const downloadButton = document.createElement('a');
+            downloadButton.href = downloadUrl;
+            downloadButton.className = 'button';
+            downloadButton.textContent = `Download #${index + 1}`;
+            downloadContainer.appendChild(downloadButton);
         });
     });
+});
+
+
 
     function loadEpisode(index) {
         currentEpisode = index;
