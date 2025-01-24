@@ -1,0 +1,258 @@
+.kanit-thin {
+    font-family: "Kanit", sans-serif;
+    font-weight: 100;
+    font-style: normal;
+  }
+
+  .kanit-extralight {
+    font-family: "Kanit", sans-serif;
+    font-weight: 200;
+    font-style: normal;
+  }
+
+  .kanit-light {
+    font-family: "Kanit", sans-serif;
+    font-weight: 300;
+    font-style: normal;
+  }
+
+  .kanit-regular {
+    font-family: "Kanit", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+  body {
+      font-family: Arial, sans-serif;
+      background: #1a1a1a;
+      color: #eaeaea;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+  }
+  .container {
+      max-width: 90vw;
+      margin: 20px auto;
+      padding: 10px;
+  }
+  .movie-list-wrapper {
+overflow-x: auto; /* Horizontal scrolling */
+overflow-y: hidden; /* Prevent vertical scrolling */
+white-space: nowrap; /* Prevent line breaks */
+display: flex; /* Align items in a row */
+gap: 10px; /* Space between items */
+padding: 10px; /* Add padding */
+max-height: 180px; /* Constrain height */
+scroll-snap-type: x mandatory; /* Enable snapping to items */
+}
+
+.movie-list {
+display: flex; /* Keep the items aligned in a row */
+gap: 20px;
+}
+
+.movie-item-banner {
+position: relative; /* Needed for the <p> to position absolutely within this container */
+flex: 0 0 auto; /* Prevent shrinking and keep items scrollable horizontally */
+width: 400px;
+height: 150px;
+transition: transform 0.3s ease;
+}
+
+.movie-item {
+position: relative; /* Needed for the <p> to position absolutely within this container */
+flex: 0 0 auto; /* Prevent shrinking and keep items scrollable horizontally */
+width: 100px;
+height: 150px;
+transition: transform 0.3s ease;
+}
+
+.movie-list-wrapper::-webkit-scrollbar {
+height: 8px; /* Horizontal scrollbar height */
+}
+
+.movie-list-wrapper::-webkit-scrollbar-thumb {
+background: #666; /* Scrollbar thumb color */
+border-radius: 4px;
+}
+
+.movie-list-wrapper::-webkit-scrollbar-track {
+background: #1a1a1a; /* Scrollbar track background */
+}
+  .movie-item:hover {
+      transform: scale(1.1);
+  }
+
+  .movie-item-banner:hover {
+      transform: scale(1.1);
+  }
+
+  .movie-item-banner img {
+      width: 100%;
+      height: 100%;
+      border-radius: 10%;
+  }
+
+  .movie-item img {
+      width: 100%;
+      height: 100%;
+      border-radius: 10%;
+  }
+
+  .movie-item-banner p {
+      position: absolute; /* Position the <p> relative to .movie-item */
+          bottom: 0; /* Align text at the bottom of the movie item */
+          left: 0;
+          right: 0;
+          margin: 0;
+          padding: 2px;
+          font-size: auto;
+          font-family: "Kanit", sans-serif;
+          font-weight: 300;
+          color: #eaeaea; /* Text color */
+          background: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+          text-align: center; /* Center the text */
+          z-index: 2; /* Ensure it appears above other elements */
+          border-bottom-left-radius: 10%; /* Optional: Match container's bottom corner rounding */
+          border-bottom-right-radius: 10%; /* Optional: Match container's bottom corner rounding */
+  }
+
+  .movie-item p {
+      position: absolute; /* Position the <p> relative to .movie-item */
+          bottom: 0; /* Align text at the bottom of the movie item */
+          left: 0;
+          right: 0;
+          margin: 0;
+          padding: 2px;
+          font-size: auto;
+          font-family: "Kanit", sans-serif;
+          font-weight: 300;
+          color: #eaeaea; /* Text color */
+          background: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+          text-align: center; /* Center the text */
+          z-index: 2; /* Ensure it appears above other elements */
+          border-bottom-left-radius: 10%; /* Optional: Match container's bottom corner rounding */
+          border-bottom-right-radius: 10%; /* Optional: Match container's bottom corner rounding */
+  }
+
+  .search-box {
+margin-bottom: 20px;
+padding: 15px; /* Adds padding around the search box */
+border-radius: 10px; /* Rounds the corners */
+display: flex; /* Enables Flexbox for alignment */
+justify-content: center; /* Horizontally centers the input field */
+align-items: center; /* Vertically centers the input field */
+width: 100%; /* Ensures the search box spans the full width */
+box-sizing: border-box; /* Prevents padding from affecting width */
+font-family: "Kanit", sans-serif;
+}
+
+.search-box input[type="text"] {
+background-color: #444; /* Lighter color to differentiate from the search box */
+color: white; /* White text color for input */
+padding: 10px 15px; /* Adds padding inside the input field */
+border-radius: 5px; /* Rounds the corners */
+width: 80%; /* Adjusts the input box width to fit neatly */
+max-width: 600px; /* Ensures input field doesn't stretch too far */
+box-sizing: border-box; /* Ensures padding doesn't affect total width */
+font-size: 16px; /* Sets a comfortable font size */
+outline: none; /* Removes the default focus outline */
+font-family: "Kanit", sans-serif;
+}
+
+
+  .search-box input {
+      padding: 10px;
+      width: 80%;
+      max-width: 300px;
+      border: none;
+      border-radius: 5px;
+  }
+
+  .episode-container {
+      display: flex;
+      max-width: 100%;
+      margin-top: 20px;
+      font-family: "Kanit", sans-serif;
+  }
+
+  .sidebar {
+      flex: 0 0 200px;
+      max-width: 20%;
+      background: #2b2b2b;
+      padding: 10px;
+      border-radius: 5px;
+  }
+
+  .episode {
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 3px;
+      margin-bottom: 5px;
+      transition: 0.3s;
+  }
+
+  .episode:hover, .episode.active {
+      background: #444;
+  }
+
+  .player {
+      flex: 1;
+      background: #000;
+      border-radius: 5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+  }
+
+  iframe {
+      width: 100%;
+      height: 65vh;
+      max-height: 600px;
+      border: none;
+      border-radius: 5px;
+  }
+
+  .controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+  }
+
+  .button {
+      display: inline-block;
+      padding: 8px 15px;
+      border-radius: 5px;
+      background: #444;
+      color: #eaeaea;
+      text-decoration: none;
+      text-align: center;
+      transition: 0.3s;
+      font-family: "Kanit", sans-serif;
+  }
+
+  .button:hover {
+      background: #666;
+  }
+
+  #downloadContainer {
+display: flex;
+justify-content: center;
+gap: 10px;
+flex-wrap: wrap;  /* Allows wrapping to the next line if buttons overflow */
+margin-top: 10px;
+width: 100%;  /* Ensures the download container spans the full width */
+  }
+
+
+  .controls {
+display: flex;
+justify-content: center;
+align-items: center;
+gap: 10px;
+flex-wrap: wrap;  /* Ensures wrapping when there are many buttons */
+margin-top: 20px;
+width: 100%; /* Ensures the controls container spans the full width */
+  }
