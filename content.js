@@ -764,7 +764,123 @@ isekaiquartets1: {
             { url: 'https://buzzheavier.com/jkdbm7gk3mcg', name: 'Buzzheavier download' },
         ],
     ]
-}
+},
+isekaiquartets2: {
+    video: [
+        'https://rumble.com/embed/v6agmes/?pub=3u4il9',
+        'https://rumble.com/embed/v6b3h6s/?pub=3u4il9',
+        'https://rumble.com/embed/v6agmxy/?pub=3u4il9',
+        'https://rumble.com/embed/v6b3htp/?pub=3u4il9',
+        'https://rumble.com/embed/v6agn97/?pub=3u4il9',
+        'https://rumble.com/embed/v6b3hzy/?pub=3u4il9',
+        'https://rumble.com/embed/v6agnhj/?pub=3u4il9',
+        'https://rumble.com/embed/v6b3i5s/?pub=3u4il9',
+        'https://rumble.com/embed/v6agps1/?pub=3u4il9',
+        'https://rumble.com/embed/v6b3ic1/?pub=3u4il9',
+        'https://rumble.com/embed/v6agq21/?pub=3u4il9',
+        'https://rumble.com/embed/v6b3k2y/?pub=3u4il9',
+        'https://rumble.com/embed/v6agq94/?pub=3u4il9',
+        'https://rumble.com/embed/v6b3k8s/?pub=3u4il9',
+        'https://rumble.com/embed/v6agqh1/?pub=3u4il9',
+        'https://rumble.com/embed/v6b3kga/?pub=3u4il9',
+        'https://rumble.com/embed/v6alyza/?pub=3u4il9',
+        'https://rumble.com/embed/v6b3kmj/?pub=3u4il9',
+        'https://rumble.com/embed/v6alzc7/?pub=3u4il9',
+        'https://rumble.com/embed/v6b3lb4/?pub=3u4il9',
+        'https://rumble.com/embed/v6alzea/?pub=3u4il9',
+        'https://rumble.com/embed/v6b3le1/?pub=3u4il9',
+        'https://rumble.com/embed/v6alzgs/?pub=3u4il9',
+        'https://rumble.com/embed/v6b3ljg/?pub=3u4il9'
+    ],
+    episodeTitles: [
+            '1. Join the Fight! Transfer Student',
+            'JP 1. Join the Fight! Transfer Student',
+            '2. Sneak In! The Principals Office',
+            'JP 2. Sneak In! The Principals Office',
+            '3. Uh-Oh! Detention!',
+            'JP 3. Uh-Oh! Detention!',
+            '4. Pinch! Test of Learning',
+            'JP 4. Pinch! Test of Learning',
+            '5. Work Hard! Valentines Day',
+            'JP 5. Work Hard! Valentines Day',
+            '6. Clash! Dodgeball',
+            'JP 6. Clash! Dodgeball',
+            '7. Excitement! Physicals Day',
+            'JP 7. Excitement! Physicals Day',
+            '8. Challenge! Part-Time Job',
+            'JP 8. Challenge! Part-Time Job',
+            '9. Investigate! First Errand',
+            'JP 9. Investigate! First Errand',
+            '10. Rise Up! School Festival',
+            'JP 10. Rise Up! School Festival',
+            '11. It Begins! School Festival',
+            'JP 11. It Begins! School Festival',
+            '12. The Show Begins! Showtime',
+            'JP 12. The Show Begins! Showtime'
+        ],
+    customDownloads: [
+        [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/kf1c0vaosdpi', name: 'Buzzheavier download' },
+        ],
+    ]
+},
+isekaiquartetanotherworld: {
+    video: [
+        'https://rumble.com/embed/v6b4gld/?pub=3u4il9'
+    ],
+    episodeTitles: [
+            'Movie'
+        ],
+    customDownloads: [
+    [
+{ url: 'https://buzzheavier.com/g2a2kjb0mi63', name: 'Buzzheavier download' },
+],]}
 };
 
 let currentMovie = null;
