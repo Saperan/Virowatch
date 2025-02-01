@@ -22,6 +22,19 @@ function handleWheel(event) {
 }
 
 const movies = {
+    flow: {
+        video: [
+            'https://rumble.com/embed/v6dozw1/?pub=3u4il9'
+        ],
+        episodeTitles: [
+            'Movie'
+        ],
+        customDownloads: [
+            [
+                { url: 'https://buzzheavier.com/7me4v4wzr0z6', name: 'Buzzheavier download' },
+            ],
+        ],
+    },
     trumanshow: {
         video: [
             'https://rumble.com/embed/v59iui1/?pub=3u4il9'
