@@ -55,7 +55,7 @@ const movies = {
                         { url: ':3', name: 'Buzzheavier download' },
                     ],
                     [
-                        { url: ':3', name: 'Buzzheavier download' },
+                        { url: 'https://buzzheavier.com/gr2fflek1ajb', name: 'Buzzheavier download' },
                     ],
                     [
                         { url: 'https://buzzheavier.com/9dikijlifqqs', name: 'Buzzheavier download' },
