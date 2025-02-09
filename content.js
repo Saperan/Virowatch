@@ -32,9 +32,44 @@ const movies = {
         customDownloads: [
             [
                 { url: 'https://buzzheavier.com/7me4v4wzr0z6', name: 'Buzzheavier download' },
-            ],
-        ],
-    },
+            ],],},
+            matrix1: {
+                video: [
+                    'https://rumble.com/embed/v6g5qjj/?pub=3u4il9',
+                    'https://rumble.com/embed/v6ga9d7/?pub=3u4il9',
+                    'https://rumble.com/embed/v6gbcav/?pub=3u4il9',
+                    'https://rumble.com/embed/v6gboa4/?pub=3u4il9',
+                    'https://rumble.com/embed/v6gbwz1/?pub=3u4il9',
+                    'https://rumble.com/embed/v6gc9e4/?pub=3u4il9'
+                ],
+                episodeTitles: [
+                    'English',
+                    'French',
+                    'German',
+                    'Italian',
+                    'Spanish',
+                    'Japanese'
+                ],
+                customDownloads: [
+                    [
+                        { url: ':3', name: 'Buzzheavier download' },
+                    ],
+                    [
+                        { url: ':3', name: 'Buzzheavier download' },
+                    ],
+                    [
+                        { url: 'https://buzzheavier.com/9dikijlifqqs', name: 'Buzzheavier download' },
+                    ],
+                    [
+                        { url: ':3', name: 'Buzzheavier download' },
+                    ],
+                    [
+                        { url: ':3', name: 'Buzzheavier download' },
+                    ],
+                    [
+                        { url: ':3', name: 'Buzzheavier download' },
+                    ],
+                ],},
     trumanshow: {
         video: [
             'https://rumble.com/embed/v59iui1/?pub=3u4il9'
