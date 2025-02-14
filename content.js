@@ -7,6 +7,7 @@ const movieListWrapper = document.querySelector('.movie-list-wrapper');
 const nextEpisodeButton = document.getElementById('nextEpisode');
 const prevEpisodeButton = document.getElementById('prevEpisode');
 const downloadContainer = document.getElementById('downloadContainer');
+const banners = document.querySelectorAll('.movie-item-banner');
 
 movieListWrapper.addEventListener("mouseenter", () => {
     movieListWrapper.addEventListener("wheel", handleWheel, { passive: false });
@@ -596,6 +597,92 @@ s2tgt: {
 ],
 ]},
 
+sharpe: {
+    video: [
+        'https://rumble.com/embed/v59hbk3/?pub=3u4il9',
+        'https://rumble.com/embed/v59hc1e/?pub=3u4il9',
+        'https://rumble.com/embed/v59hcyk/?pub=3u4il9',
+        'https://rumble.com/embed/v59hdmt/?pub=3u4il9',
+        'https://rumble.com/embed/v59hgnp/?pub=3u4il9',
+        'https://rumble.com/embed/v59hnfh/?pub=3u4il9',
+        'https://rumble.com/embed/v59ho4d/?pub=3u4il9',
+        'https://rumble.com/embed/v59l7p5/?pub=3u4il9',
+        'https://rumble.com/embed/v59l7zf/?pub=3u4il9',
+        'https://rumble.com/embed/v59l8v9/?pub=3u4il9',
+        'https://rumble.com/embed/v59l8x9/?pub=3u4il9',
+        'https://rumble.com/embed/v59l93x/?pub=3u4il9',
+        'https://rumble.com/embed/v59l96x/?pub=3u4il9',
+        'https://rumble.com/embed/v59l9k9/?pub=3u4il9',
+        'https://rumble.com/embed/v59hb3h/?pub=3u4il9',
+        'https://rumble.com/embed/v59l9no/?pub=3u4il9',
+        'https://rumble.com/embed/v59l9rv/?pub=3u4il9',
+        'https://rumble.com/embed/v59l9tx/?pub=3u4il9',
+        'https://rumble.com/embed/v59la4l/?pub=3u4il9'
+    ],
+    episodeTitles: [
+            '1. Sharpes Rifles',
+            '2. Sharpes Eagle',
+            '3. Sharpes Company',
+            '4. Sharpes Enemy',
+            '5. Sharpes Honour',
+            '6. Sharpes Gold',
+            '7. Sharpes Battle',
+            '8. Sharpes Sword',
+            '9. Sharpes Regiment',
+            '10. Sharpes Siege',
+            '11. Sharpes Mission',
+            '12. Sharpes Revenge',
+            '13. Sharpes Justice',
+            '14. Sharpes Waterloo',
+            '15. Sharpes Legend',
+            '16. Sharpes Challenge',
+            '17. Sharpes Challenge: Part 2',
+            '18. Sharpes Peril',
+            '19. Sharpes Peril: Part 2'
+
+        ],
+    customDownloads: [
+        [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
+        ],
+]},
+
 
     // ANIME ADD AFTER THIS
 
@@ -1072,6 +1159,7 @@ function updateDownloadButton() {
 
 function updateEpisodeSidebar() {
     episodeSidebar.innerHTML = ''; // Clear current episode list
+
     movies[currentMovie].video.forEach((videoUrl, index) => {
         const episodeDiv = document.createElement('div');
         episodeDiv.textContent = movies[currentMovie].episodeTitles[index]; // Use the episode title
@@ -1087,7 +1175,14 @@ function updateEpisodeSidebar() {
 
         episodeSidebar.appendChild(episodeDiv);
     });
+
+    // Ensure only the episode list is scrollable
+    episodeSidebar.style.maxHeight = '700px'; // Set a fixed max height
+    episodeSidebar.style.overflowY = 'auto';  // Enable scrolling when needed
+    episodeSidebar.style.overflowX = 'hidden';  // Enable scrolling when needed
 }
+
+
 
 movieItems.forEach(movie => {
     movie.addEventListener('click', () => {
@@ -1154,7 +1249,10 @@ searchInput.addEventListener('input', function () {
             }
         });
     }, 300);
-});
+    banners.forEach(banner => {
+        banner.style.display = query ? 'none' : 'block';});
+}
+);
 
 document.getElementById('backToMenu').addEventListener('click', e => {
     e.preventDefault();
