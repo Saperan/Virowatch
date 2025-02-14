@@ -928,7 +928,112 @@ isekaiquartetanotherworld: {
     customDownloads: [
     [
 { url: 'https://buzzheavier.com/g2a2kjb0mi63', name: 'Buzzheavier download' },
-],]}
+],]},
+disillusionedawstws1: {
+    video: [
+        'https://rumble.com/embed/v6hubes/?pub=3u4il9',
+        'https://rumble.com/embed/v6i966v/?pub=3u4il9',
+        'https://rumble.com/embed/v6hubjs/?pub=3u4il9',
+        'https://rumble.com/embed/v6i96cp/?pub=3u4il9',
+        'https://rumble.com/embed/v6hubod/?pub=3u4il9',
+        'https://rumble.com/embed/v6i96hp/?pub=3u4il9',
+        'https://rumble.com/embed/v6hubrp/?pub=3u4il9',
+        'https://rumble.com/embed/v6i96ma/?pub=3u4il9',
+        'https://rumble.com/embed/v6huoa4/?pub=3u4il9',
+        'https://rumble.com/embed/v6i9c3d/?pub=3u4il9',
+        'https://rumble.com/embed/v6huo0y/?pub=3u4il9',
+        'https://rumble.com/embed/v6i9c4m/?pub=3u4il9',
+        'https://rumble.com/embed/v6huobs/?pub=3u4il9',
+        'https://rumble.com/embed/v6i9c9m/?pub=3u4il9',
+        'https://rumble.com/embed/v6huogd/?pub=3u4il9',
+        'https://rumble.com/embed/v6i9cdd/?pub=3u4il9',
+        'https://rumble.com/embed/v6hv11p/?pub=3u4il9',
+        'https://rumble.com/embed/v6i9g4d/?pub=3u4il9',
+        'https://rumble.com/embed/v6hv12j/?pub=3u4il9',
+        'https://rumble.com/embed/v6i9g8j/?pub=3u4il9',
+        'https://rumble.com/embed/v6hv15v/?pub=3u4il9',
+        'https://rumble.com/embed/v6i9gbv/?pub=3u4il9',
+        'https://rumble.com/embed/v6hv19m/?pub=3u4il9',
+        'https://rumble.com/embed/v6i9gf7/?pub=3u4il9'
+    ],
+    episodeTitles: [
+            '1. Disillusioned Adventurers',
+            'JP 1. Disillusioned Adventurers',
+            '2. The Ultimate Party Is Formed? Survivors!',
+            'JP 2. The Ultimate Party Is Formed? Survivors!',
+            '3. Currans Secret',
+            'JP 3. Currans Secret',
+            '4. The Labyrinth of Bonds',
+            'JP 4. The Labyrinth of Bonds',
+            '5. A Meeting with the Iron Tigers',
+            'JP 5. A Meeting with the Iron Tigers',
+            '6. Mathematics Bare Knuckle',
+            'JP 6. Mathematics Bare Knuckle',
+            '7. Gambling Lesson',
+            'JP 7. Gambling Lesson',
+            '8. The Beautiful Paladin',
+            'JP 8. The Beautiful Paladin',
+            '9. Legend of the Labyrinth City Stepping Man?!',
+            'JP 9. Legend of the Labyrinth City Stepping Man?!',
+            '10. Labyrinth Dragnet',
+            'JP 10. Labyrinth Dragnet',
+            '11. Survivors VS Stepping Man',
+            'JP 11. Survivors VS Stepping Man',
+            '12. Adventurers Cant Save the World Yet',
+            'JP 12. Adventurers Cant Save the World Yet'
+        ],
+    customDownloads: [
+        [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],
+    ]
+},
 };
 
 let currentMovie = null;
