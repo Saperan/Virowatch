@@ -34,43 +34,43 @@ const movies = {
             [
                 { url: 'https://buzzheavier.com/7me4v4wzr0z6', name: 'Buzzheavier download' },
             ],],},
-            matrix1: {
-                video: [
-                    'https://rumble.com/embed/v6g5qjj/?pub=3u4il9',
-                    'https://rumble.com/embed/v6ga9d7/?pub=3u4il9',
-                    'https://rumble.com/embed/v6gbcav/?pub=3u4il9',
-                    'https://rumble.com/embed/v6gboa4/?pub=3u4il9',
-                    'https://rumble.com/embed/v6gbwz1/?pub=3u4il9',
-                    'https://rumble.com/embed/v6gc9e4/?pub=3u4il9'
-                ],
-                episodeTitles: [
-                    'English',
-                    'French',
-                    'German',
-                    'Italian',
-                    'Spanish',
-                    'Japanese'
-                ],
-                customDownloads: [
-                    [
-                        { url: 'https://buzzheavier.com/xpgaf4yzncq1', name: 'Buzzheavier download' },
-                    ],
-                    [
-                        { url: 'https://buzzheavier.com/gr2fflek1ajb', name: 'Buzzheavier download' },
-                    ],
-                    [
-                        { url: 'https://buzzheavier.com/9dikijlifqqs', name: 'Buzzheavier download' },
-                    ],
-                    [
-                        { url: ':3', name: 'Buzzheavier download' },
-                    ],
-                    [
-                        { url: ':3', name: 'Buzzheavier download' },
-                    ],
-                    [
-                        { url: ':3', name: 'Buzzheavier download' },
-                    ],
-                ],},
+matrix1: {
+        video: [
+            'https://rumble.com/embed/v6g5qjj/?pub=3u4il9',
+            'https://rumble.com/embed/v6ga9d7/?pub=3u4il9',
+            'https://rumble.com/embed/v6gbcav/?pub=3u4il9',
+            'https://rumble.com/embed/v6gboa4/?pub=3u4il9',
+            'https://rumble.com/embed/v6gbwz1/?pub=3u4il9',
+            'https://rumble.com/embed/v6gc9e4/?pub=3u4il9'
+        ],
+        episodeTitles: [
+            'English',
+            'French',
+            'German',
+            'Italian',
+            'Spanish',
+            'Japanese'
+        ],
+        customDownloads: [
+            [
+                { url: 'https://buzzheavier.com/xpgaf4yzncq1', name: 'Buzzheavier download' },
+            ],
+            [
+                { url: 'https://buzzheavier.com/gr2fflek1ajb', name: 'Buzzheavier download' },
+            ],
+            [
+                { url: 'https://buzzheavier.com/9dikijlifqqs', name: 'Buzzheavier download' },
+            ],
+            [
+                { url: 'https://buzzheavier.com/o794sgdyy4sd', name: 'Buzzheavier download' },
+            ],
+            [
+                { url: 'https://buzzheavier.com/ky6a2rmnryqr', name: 'Buzzheavier download' },
+            ],
+            [
+                { url: 'https://buzzheavier.com/i4zetxtmtyzx', name: 'Buzzheavier download' },
+            ],
+],},
     trumanshow: {
         video: [
             'https://rumble.com/embed/v59iui1/?pub=3u4il9'
@@ -683,6 +683,70 @@ sharpe: {
         ],
 ]},
 
+invincibles1: {
+    video: [
+        'https://rumble.com/embed/v6j85ty/?pub=4jqwl4',
+        'https://rumble.com/embed/v6j85yy/?pub=4jqwl4',
+        'https://rumble.com/embed/v6j863j/?pub=4jqwl4',
+        'https://rumble.com/embed/v6j867p/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jcftp/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jcfya/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jcg2v/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jcg5d/?pub=4jqwl4'
+    ],
+    episodeTitles: [
+            '1. Its About Time',
+            '2. Here Goes Nothing',
+            '3. Who You Calling Ugly?',
+            '4. Neil Armstrong, Eat Your Heart Out',
+            '5. That Actually Hurt',
+            '6. You Look Kinda Dead',
+            '7. We Need to Talk',
+            '8. Where I Really Come From'
+        ],
+    customDownloads: [
+]},
+
+invincibles2: {
+    video: [
+        'https://rumble.com/embed/v6jdhug/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jdi14/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jdi5a/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jdi9v/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jdtrm/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jdtya/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jdufs/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jdujy/?pub=4jqwl4'
+    ],
+    episodeTitles: [
+            '1. A Lesson for Your Next Life',
+            '2. In About Six Hours I Lose My Virginity to a Fish',
+            '3. This Missive, This Machination!',
+            '4. Its Been a While',
+            '5. This Must Come as a Shock',
+            '6. Its Not That Simple',
+            '7. Im Not Going Anywhere',
+            '8. I Thought You Were Stronger'
+        ],
+    customDownloads: [
+]},
+
+invincibles3: {
+    video: [
+        'https://rumble.com/embed/v6j7utp/?pub=4jqwl4',
+        'https://rumble.com/embed/v6j7uu4/?pub=4jqwl4',
+        'https://rumble.com/embed/v6j7uxg/?pub=4jqwl4',
+        'https://rumble.com/embed/v6j7v0s/?pub=4jqwl4'
+    ],
+    episodeTitles: [
+            '1. Youre Not Laughing Now',
+            '2. A Deal with the Devil',
+            '3. You Want a Real Costume, Right?',
+            '4. You Were My Hero'
+        ],
+    customDownloads: [
+]},
+
 
     // ANIME ADD AFTER THIS
 
@@ -1118,6 +1182,103 @@ disillusionedawstws1: {
             { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
         ],            [
             { url: 'https://buzzheavier.com/6hc88c2tkg1y', name: 'Buzzheavier download' },
+        ],
+    ]
+},
+konosuba1: {
+    video: [
+        'https://rumble.com/embed/v6jcnis/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jd4p4/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jcnns/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jd4vs/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jcnss/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jd4zj/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jcnva/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jd544/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jcti7/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jd904/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jctn7/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jd92m/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jctvy/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jd96d/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jcu0j/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jd9bs/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jcw9d/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jdd7d/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jcwcp/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jdd9g/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jcwiy/?pub=4jqwl4',
+        'https://rumble.com/embed/v6jddap/?pub=4jqwl4'
+    ],
+    episodeTitles: [
+            '1. This mysterious monster is defeated by the Isekai Tenshou!',
+            'JP 1. This mysterious monster is defeated by the Isekai Tenshou!',
+            '2. This is the end of the world!',
+            'JP 2. This is the end of the world!',
+            '3. Im in the pants!',
+            'JP 3. Im in the pants!',
+            '4. The Demon of Bakuretsu in This City!',
+            'JP 4. The Demon of Bakuretsu in This City!',
+            '5. One day at a time!',
+            'JP 5. One day at a time!',
+            '6. Lets fight together!',
+            'JP 6. Lets fight together!',
+            '7. The Lords Will and the Lords Will!',
+            'JP 7. The Lords Will and the Lords Will!',
+            '8. Im sorry for the inconvenience!',
+            'JP 8. Im sorry for the inconvenience!',
+            '9. A blessing in disguise!',
+            'JP 9. A blessing in disguise!',
+            '10. Lets celebrate this great day!',
+            'JP 10. Lets celebrate this great day!',
+            '11. OVA Gods Blessing on This Wonderful Choker!',
+            'JP 11. OVA Gods Blessing on This Wonderful Choker!'
+        ],
+    customDownloads: [
+        [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],         [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
         ],
     ]
 },
