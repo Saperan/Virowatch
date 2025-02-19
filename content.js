@@ -1185,6 +1185,19 @@ disillusionedawstws1: {
         ],
     ]
 },
+
+konosubaloc: {
+    video: [
+        'https://rumble.com/embed/v6kj9uu/?pub=4jqwl4'
+    ],
+    episodeTitles: [
+        'Movie'
+    ],
+    customDownloads: [
+        [
+            { url: 'https://buzzheavier.com/lgxiq6ib55an', name: 'Buzzheavier download' },
+        ],],},
+
 konosuba1: {
     video: [
         'https://rumble.com/embed/v6jcnis/?pub=4jqwl4',
@@ -1279,6 +1292,104 @@ konosuba1: {
             { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
         ],            [
             { url: 'https://buzzheavier.com/95a3podogu5r', name: 'Buzzheavier download' },
+        ],
+    ]
+},
+
+konosuba2: {
+    video: [
+        'https://rumble.com/embed/v6k73lr/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k7bol/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k73oo/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k7btl/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k747f/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k7bwx/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k74ar/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k7c0o/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k75c9/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k7ngc/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k75ec/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k7nif/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k75ii/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k7niu/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k75lf/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k7nlc/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k76rx/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k7p1u/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k76wi/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k7p5l/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k76z0/?pub=4jqwl4',
+        'https://rumble.com/embed/v6k7p83/?pub=4jqwl4'
+    ],
+    episodeTitles: [
+            '1. Give Me Deliverance from This Judicial Injustice!',
+            'JP 1. Give Me Deliverance from This Judicial Injustice!',
+            '2. A Friend for This Crimson Demon Girl!',
+            'JP 2. A Friend for This Crimson Demon Girl!',
+            '3. Peace for the Master of This Labyrinth!',
+            'JP 3. Peace for the Master of This Labyrinth!',
+            '4. A Betrothed for This Noble Daughter!',
+            'JP 4. A Betrothed for This Noble Daughter!',
+            '5. Servitude for This Masked Knight!',
+            'JP 5. Servitude for This Masked Knight!',
+            '6. Goodbye to This Irritating Living World!',
+            'JP 6. Goodbye to This Irritating Living World!',
+            '7. An Invitation for This Knucklehead!',
+            'JP 7. An Invitation for This Knucklehead!',
+            '8. Sightseeing in This Pitiful City!',
+            'JP 8. Sightseeing in This Pitiful City!',
+            '9. A Goddess for This Corrupt Hot Springs Town!',
+            'JP 9. A Goddess for This Corrupt Hot Springs Town!',
+            '10. Gods Blessings on This Wonderful Party!',
+            'JP 10. Gods Blessings on This Wonderful Party!',
+            '11. OVA: Gods Blessings on This Wonderful Piece of Art!',
+            'JP 11. OVA: Gods Blessings on This Wonderful Piece of Art!'
+        ],
+    customDownloads: [
+        [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],         [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/b1w8nszibrbt', name: 'Buzzheavier download' },
         ],
     ]
 },
