@@ -705,6 +705,23 @@ invincibles1: {
             '8. Where I Really Come From'
         ],
     customDownloads: [
+        [
+            { url: 'https://buzzheavier.com/t7v78dosfq9u', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/t7v78dosfq9u', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/t7v78dosfq9u', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/t7v78dosfq9u', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/t7v78dosfq9u', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/t7v78dosfq9u', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/t7v78dosfq9u', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/t7v78dosfq9u', name: 'Buzzheavier download' },
+        ],
 ]},
 
 invincibles2: {
