@@ -1313,6 +1313,112 @@ konosuba1: {
     ]
 },
 
+konosubaeotww: {
+    video: [
+        'https://rumble.com/embed/v6lhwp3/?pub=4jqwl4',
+        'https://rumble.com/embed/v6li8l0/?pub=4jqwl4',
+        'https://rumble.com/embed/v6lhwqc/?pub=4jqwl4',
+        'https://rumble.com/embed/v6li950/?pub=4jqwl4',
+        'https://rumble.com/embed/v6lhwsf/?pub=4jqwl4',
+        'https://rumble.com/embed/v6li9bo/?pub=4jqwl4',
+        'https://rumble.com/embed/v6lhwux/?pub=4jqwl4',
+        'https://rumble.com/embed/v6li9ir/?pub=4jqwl4',
+        'https://rumble.com/embed/v6lhzr3/?pub=4jqwl4',
+        'https://rumble.com/embed/v6licm0/?pub=4jqwl4',
+        'https://rumble.com/embed/v6lhztl/?pub=4jqwl4',
+        'https://rumble.com/embed/v6lics9/?pub=4jqwl4',
+        'https://rumble.com/embed/v6lhzuu/?pub=4jqwl4',
+        'https://rumble.com/embed/v6licyi/?pub=4jqwl4',
+        'https://rumble.com/embed/v6lhzxr/?pub=4jqwl4',
+        'https://rumble.com/embed/v6lid4c/?pub=4jqwl4',
+        'https://rumble.com/embed/v6li4pu/?pub=4jqwl4',
+        'https://rumble.com/embed/v6lidkl/?pub=4jqwl4',
+        'https://rumble.com/embed/v6li4sr/?pub=4jqwl4',
+        'https://rumble.com/embed/v6lie0f/?pub=4jqwl4',
+        'https://rumble.com/embed/v6li4xr/?pub=4jqwl4',
+        'https://rumble.com/embed/v6lie6o/?pub=4jqwl4',
+        'https://rumble.com/embed/v6li52c/?pub=4jqwl4',
+        'https://rumble.com/embed/v6lie9l/?pub=4jqwl4'
+    ],
+    episodeTitles: [
+            '1. The Crimson-Eyed Wizards',
+            'JP 1. The Crimson-Eyed Wizards',
+            '2. The Magic Academys Taboo',
+            'JP 2. The Magic Academys Taboo',
+            '3. Guardians of the Crimson Demon Village',
+            'JP 3. Guardians of the Crimson Demon Village',
+            '4. The Crimson-Eyed Lonely Master',
+            'JP 4. The Crimson-Eyed Lonely Master',
+            '5. Prelude to an Explosion of Madness',
+            'JP 5. Prelude to an Explosion of Madness',
+            '6. The Raison Dêtre of an Explosive NEET',
+            'JP 6. The Raison Dêtre of an Explosive NEET',
+            '7. Troublemakers of the City of Water',
+            'JP 7. Troublemakers of the City of Water',
+            '8. Fanatics of the Water City',
+            'JP 8. Fanatics of the Water City',
+            '9. Destroyer from the Crimson Demon Village',
+            'JP 9. Destroyer from the Crimson Demon Village',
+            '10. Outlaws of the Town for Beginners',
+            'JP 10. Outlaws of the Town for Beginners',
+            '11. The Explosion Girl and the Forest Irregularity',
+            'JP 11. The Explosion Girl and the Forest Irregularity',
+            '12. An Explosion on This Wonderful World!',
+            'JP 12. An Explosion on This Wonderful World!'
+        ],
+    customDownloads: [
+        [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],         [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/esybba3dqlsx', name: 'Buzzheavier download' },
+        ],
+    ]
+},
+
 konosuba2: {
     video: [
         'https://rumble.com/embed/v6k73lr/?pub=4jqwl4',
