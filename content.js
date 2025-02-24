@@ -1549,6 +1549,61 @@ konosuba2: {
         ],
     ]
 },
+
+konosuba3: {
+    video: [
+        'https://rumble.com/embed/v6m8ayo/?pub=4jqwl4',
+        'https://rumble.com/embed/v6m8azx/?pub=4jqwl4',
+        'https://rumble.com/embed/v6m8b2u/?pub=4jqwl4',
+        'https://rumble.com/embed/v6m8b4x/?pub=4jqwl4',
+        'https://rumble.com/embed/v6m8d7x/?pub=4jqwl4',
+        'https://rumble.com/embed/v6m8da0/?pub=4jqwl4',
+        'https://rumble.com/embed/v6m8dau/?pub=4jqwl4',
+        'https://rumble.com/embed/v6m8dff/?pub=4jqwl4',
+        'https://rumble.com/embed/v6m8g7f/?pub=4jqwl4',
+        'https://rumble.com/embed/v6m8g9x/?pub=4jqwl4',
+        'https://rumble.com/embed/v6m8gbl/?pub=4jqwl4'
+    ],
+    episodeTitles: [
+            'JP 1. Gods Blessings on This Bright Future!',
+            'JP 2. A Smile for This Dour Girl!',
+            'JP 3. A Re-education for This Bright Little Girl!',
+            'JP 4. Divine Punishment for This Handsome Gentleman Thief!',
+            'JP 5. Nefarious Friends for This Sheltered Princess!',
+            'JP 6. A Farewell to This Lavish Lifestyle!',
+            'JP 7. Rest for This Up-and-Coming Adventurer!',
+            'JP 8. An Eternal Rest for the Master of This Lake!',
+            'JP 9. A Talking-To for This Runaway!',
+            'JP 10. Blessings for This Selfish Bride!',
+            'JP 11. Gods Blessings for These Unchanging Days!'
+        ],
+    customDownloads: [
+        [
+            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+        ],
+    ]
+},
+
 };
 
 let currentMovie = null;
