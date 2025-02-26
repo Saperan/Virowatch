@@ -23,6 +23,35 @@ function handleWheel(event) {
 }
 
 const movies = {
+    kickass: {
+        video: [
+            'https://rumble.com/embed/v6ndl6f/?pub=4jqwl4'
+        ],
+        episodeTitles: [
+            'Movie'
+        ],
+        customDownloads: [
+        [
+            { url: 'https://buzzheavier.com/whopoy87wur1', name: 'Buzzheavier download' },
+],],},
+    aqotwf: {
+        video: [
+            'https://rumble.com/embed/v6nd89f/?pub=4jqwl4',
+            'https://rumble.com/embed/v6nd8ou/?pub=4jqwl4'
+        ],
+        episodeTitles: [
+            'English',
+            'German'
+        ],
+        customDownloads: [
+        [
+            { url: 'https://buzzheavier.com/cvyg0et9k0ar', name: 'ENG Buzzheavier download' },
+        ],
+        [
+            { url: 'https://buzzheavier.com/m64h0ag4nyfl', name: 'GER Buzzheavier download' },
+        ],
+    ],
+},
     taxi: {
         video: [
             'https://rumble.com/embed/v6m57ko/?pub=4jqwl4'
