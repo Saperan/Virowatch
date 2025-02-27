@@ -1633,6 +1633,112 @@ konosuba3: {
     ]
 },
 
+moretamcbnl: {
+    video: [
+        'https://rumble.com/embed/v6nmrie/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nms6m/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmrj0/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nms6w/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmrjg/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nms7g/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmrk2/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nms8s/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmroo/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmsdo/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmrpk/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmse6/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmrq2/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmsek/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmrqk/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmsf6/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmrvu/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmsj8/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmrwk/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmsjk/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmrx2/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmsk8/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmrxg/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nmsks/?pub=4jqwl4'
+    ],
+    episodeTitles: [
+            '1. Living in the Same Place, but Not Living Together',
+            'JP 1. Living in the Same Place, but Not Living Together',
+            '2. Imagined, but Not Real',
+            'JP 2. Imagined, but Not Real',
+            '3. Broken Up, and Not Rekindled',
+            'JP 3. Broken Up, and Not Rekindled',
+            '4. A Hero, but Not the Main Character',
+            'JP 4. A Hero, but Not the Main Character',
+            '5. More Than a Nosebleed, but Less Than a Kiss',
+            'JP 5. More Than a Nosebleed, but Less Than a Kiss',
+            '6. A Male Virgin, but No Female Virgin',
+            'JP 6. A Male Virgin, but No Female Virgin',
+            '7. Fireworks, but No Embrace',
+            'JP 7. Fireworks, but No Embrace',
+            '8. An Entreaty, but No Reassurance.',
+            'JP 8. An Entreaty, but No Reassurance.',
+            '9. More Than a Childhood Friend, but Not True Love.',
+            'JP 9. More Than a Childhood Friend, but Not True Love.',
+            '10. Already Has Passed, but Not Yet.',
+            'JP 10. Already Has Passed, but Not Yet.',
+            '11. More Than a Confession, but Not Yet a Broken Heart.',
+            'JP 11. More Than a Confession, but Not Yet a Broken Heart.',
+            '12. Done, Being Less Than Love.',
+            'JP 12. Done, Being Less Than Love.'
+        ],
+    customDownloads: [
+        [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/3bfc42jgo0zv', name: 'Buzzheavier download' },
+        ],
+    ]
+},
+
 };
 
 let currentMovie = null;
