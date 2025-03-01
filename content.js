@@ -659,6 +659,84 @@ s2tgt: {
 ],
 ]},
 
+s3tgt: {
+    video: [
+        'https://rumble.com/embed/v6npyu6/?pub=4jqwl4',
+        'https://rumble.com/embed/v6npyui/?pub=4jqwl4',
+        'https://rumble.com/embed/v6npyuu/?pub=4jqwl4',
+        'https://rumble.com/embed/v6npyv6/?pub=4jqwl4',
+        'https://rumble.com/embed/v6npzf8/?pub=4jqwl4',
+        'https://rumble.com/embed/v6npzfm/?pub=4jqwl4',
+        'https://rumble.com/embed/v6npzg2/?pub=4jqwl4',
+        'https://rumble.com/embed/v6npzgi/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nq0k8/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nq0kk/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nq0ky/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nq0l8/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nq16w/?pub=4jqwl4',
+        'https://rumble.com/embed/v6nq17a/?pub=4jqwl4'
+    ],
+    episodeTitles: [
+            '1. Motown Funk',
+            '2. Colombia Special (1)',
+            '3. Colombia Special (2)',
+            '4. Pick Up, Put Downs',
+            '5. An Itchy Urus',
+            '6. Chinese Food for Thought',
+            '7. Well Aged Scotch',
+            '8. International Buffoons Vacation',
+            '9. Aston, Astronauts and Angelinas Children',
+            '10. The Youth Vote',
+            '11. Sea to Unsalty Sea',
+            '12. Legends and Luggage',
+            '13. Survival of the Fattest',
+            '14. Funeral for a Ford'
+        ],
+    customDownloads: [
+    [
+{ url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
+],
+[
+{ url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
+],
+[
+{ url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
+],
+[
+{ url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
+],
+[
+{ url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
+],
+[
+{ url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
+],
+[
+{ url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
+],
+[
+{ url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
+],
+[
+{ url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
+],
+[
+{ url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
+],
+[
+{ url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
+],
+[
+{ url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
+],
+[
+{ url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
+],
+[
+{ url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
+],
+]},
+
 sharpe: {
     video: [
         'https://rumble.com/embed/v59hbk3/?pub=3u4il9',
