@@ -28,10 +28,10 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      overflow-x: hidden; /* Prevent global horizontal scrolling */
+      overflow-x: auto; /* Prevent global horizontal scrolling */
   }
   .container {
-      max-width: 90vw;
+      max-width: 90%;
       margin: 20px auto;
       padding: 10px;
   }
@@ -53,11 +53,12 @@ gap: 20px;
 }
 
 .movie-item-banner {
-position: relative; /* Needed for the <p> to position absolutely within this container */
-flex: 0 0 auto; /* Prevent shrinking and keep items scrollable horizontally */
-width: 400px;
-height: 150px;
-transition: transform 0.3s ease;
+    transition: 0.3s;
+  flex: 0 1 auto;          /* Allow the items to shrink if needed */
+  width: 20%;            /* Base width - adjust as needed */
+  height: 20%;
+  text-align: center;
+  cursor: pointer;
 }
 
 .movie-item {
@@ -101,7 +102,6 @@ background: #1a1a1a; /* Scrollbar track background */
   }
 
   .movie-item-banner p {
-      position: absolute; /* Position the <p> relative to .movie-item */
           bottom: 0; /* Align text at the bottom of the movie item */
           left: 0;
           right: 0;
@@ -111,11 +111,11 @@ background: #1a1a1a; /* Scrollbar track background */
           font-family: "Kanit", sans-serif;
           font-weight: 300;
           color: #eaeaea; /* Text color */
-          background: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
           text-align: center; /* Center the text */
           z-index: 2; /* Ensure it appears above other elements */
           border-bottom-left-radius: 10%; /* Optional: Match container's bottom corner rounding */
           border-bottom-right-radius: 10%; /* Optional: Match container's bottom corner rounding */
+          transition: 0.3s;
   }
 
   .movie-item p {
@@ -129,7 +129,7 @@ background: #1a1a1a; /* Scrollbar track background */
           font-family: "Kanit", sans-serif;
           font-weight: 300;
           color: #eaeaea; /* Text color */
-          background: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+          background:  rgba(0, 0, 0, 0.7); /* Semi-transparent black background */;
           text-align: center; /* Center the text */
           z-index: 2; /* Ensure it appears above other elements */
           border-bottom-left-radius: 10%; /* Optional: Match container's bottom corner rounding */
@@ -153,7 +153,7 @@ font-family: "Kanit", sans-serif;
     justify-content: center; /* Horizontally centers the input field */
 align-items: center; /* Vertically centers the input field */
 background-color: #444; /* Lighter color to differentiate from the search box */
-color: white; /* White text color for input */
+color: white;
 padding: 10px 15px; /* Adds padding inside the input field */
 border-radius: 5px; /* Rounds the corners */
 width: 80%; /* Adjusts the input box width to fit neatly */
@@ -196,7 +196,7 @@ font-family: "Kanit", sans-serif;
     border-radius: 3px;
     margin-bottom: 5px;
     transition: 0.3s;
-    width: 100%; /* Ensure each episode item fits within the container */
+    width: 90%; /* Ensure each episode item fits within the container */
     text-align: left; /* Align text to the left */
 }
 
@@ -270,3 +270,13 @@ width: 100%;  /* Ensures the download container spans the full width */
     flex-wrap: wrap;
     justify-content: center;
 }
+#categoryContainer {
+  width: 100%;      /* Set a fixed width */
+  height: 700px;
+  object-fit: cover;
+    display: flex;
+    flex-wrap: nowrap;         /* Keep items in one line */
+    justify-content: center;   /* Center the items horizontally */
+    gap: 20px;                 /* Optional spacing between items */
+  }
+  
