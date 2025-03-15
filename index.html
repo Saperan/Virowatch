@@ -1,258 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Virowatch</title>
-    <link rel="stylesheet" href="virostyle.css">
-    <link rel="icon" href="https://i.ibb.co/8nL4pzdB/Virowatch.png" type="image/png">
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@100;300;400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virowatch</title>
+  <link rel="stylesheet" href="virostyle.css">
+  <link rel="icon" href="https://i.ibb.co/8nL4pzdB/Virowatch.png" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@100;300;400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
-<div class="container">
+  <div class="container">
     <div>
-        <center><h1 class="kanit-light">Virowatch</h1>
-            <h5 class="kanit-light">(Last Updated - 07.03.2024)</h5></center>
+      <center>
+        <h1 class="kanit-light">Virowatch</h1>
+        <h5 class="kanit-light">(Last Updated - 15.03.2024)</h5>
+      </center>
     </div>
     <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Search for content...">
+      <input type="text" id="searchInput" placeholder="Search for content...">
     </div>
 
-    <div class="movie-list-wrapper">
-        <div class="movie-list" id="movieList">
-            <div class="movie-item-banner" data-movie="banner1">
-                <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ffilmlifestyle.com%2Fwp-content%2Fuploads%2F2021%2F06%2FMovie-Genres-List.jpg&f=1&nofb=1&ipt=b73e966922006a5c84d8bda29945d36898fbd6fb2202bc63ce6a6242f71d5564&ipo=images" alt="category: movies">
-                    <p class="kanit-extralight">Category: Movie</p>
-                </div>
-                <div class="movie-item" data-movie="aqotwf">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BOWJiYWMyYTktZThhOS00ZjgxLWE0YTQtZDMyNTQxMjMyYjI2XkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="all quiet on the western front">
-                    <p class="kanit-extralight">All Quiet On The Western Front</p>
-                </div>
-                <div class="movie-item" data-movie="kickass">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BMTMzNzEzMDYxM15BMl5BanBnXkFtZTcwMTc0NTMxMw@@._V1_.jpg&f=1&h=500" alt="Kick ass">
-                    <p class="kanit-extralight">Kick Ass</p>
-                </div>
-                <div class="movie-item" data-movie="taxi">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BZTlkM2EzOTAtMTgzZi00NDEyLWJjOGItYWJiYTE2NmRlODMwXkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="Taxi">
-                    <p class="kanit-extralight">Taxi</p>
-                </div>
-                <div class="movie-item" data-movie="taxi2">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BYzBjNDE0YmUtZTIxZS00YzJkLTlhMzAtNjQ4OTExNDQ4YzhlXkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="Taxi 2">
-                    <p class="kanit-extralight">Taxi 2</p>
-                </div>
-                <div class="movie-item" data-movie="taxi3">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BNzdjODU5ODQtZjkzOC00MTNiLWFhZjQtNDcyZmI1MmM2Yzg2XkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="Taxi 3">
-                    <p class="kanit-extralight">Taxi 3</p>
-                </div>
-                <div class="movie-item" data-movie="flow">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BOTM5ODBlOTAtYjcwZi00YzkzLWIzODEtMTM2MTZlNDFmMWU2XkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="Truman Show">
-                    <p class="kanit-extralight">Flow</p>
-                </div>
-                <div class="movie-item" data-movie="homealone">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BNzNmNmQ2ZDEtMTc1MS00NjNiLThlMGUtZmQxNTg1Nzg5NWMzXkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="home alone">
-                    <p class="kanit-extralight">Home Alone</p>
-                </div>
-                <div class="movie-item" data-movie="homealone2">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BOGEyYzRmNzYtYzJjZi00ZjhlLWJiNDktYzZhNTgxMzc1NThlXkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="home alone 2">
-                    <p class="kanit-extralight">Home Alone 2</p>
-                </div>
-                <div class="movie-item" data-movie="matrix1">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BN2NmN2VhMTQtMDNiOS00NDlhLTliMjgtODE2ZTY0ODQyNDRhXkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="Matrix">
-                    <p class="kanit-extralight">The Matrix</p>
-                </div>
-                <div class="movie-item" data-movie="trumanshow">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BNzA3ZjZlNzYtMTdjMy00NjMzLTk5ZGYtMTkyYzNiOGM1YmM3XkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="Truman Show">
-                    <p class="kanit-extralight">Truman Show</p>
-                </div>
-                <div class="movie-item" data-movie="fightclub">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BOTgyOGQ1NDItNGU3Ny00MjU3LTg2YWEtNmEyYjBiMjI1Y2M5XkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="Fight Club">
-                    <p class="kanit-extralight">Fight Club</p>
-                </div>
-                <div class="movie-item" data-movie="batmantdk">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_.jpg&f=1&h=500" alt="BTDK">
-                    <p class="kanit-extralight">Batman The DK</p>
-                </div>
-                <div class="movie-item" data-movie="batmantdkr">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BMTk4ODQzNDY3Ml5BMl5BanBnXkFtZTcwODA0NTM4Nw@@._V1_.jpg&f=1&h=500" alt="BTDKR">
-                    <p class="kanit-extralight">Batman The DKR</p>
-                </div>
-                <div class="movie-item" data-movie="borat">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BMTk0MTQ3NDQ4Ml5BMl5BanBnXkFtZTcwOTQ3OTQzMw@@._V1_.jpg&f=1&h=500" alt="borat">
-                    <p class="kanit-extralight">Borat</p>
-                </div>
-                <div class="movie-item" data-movie="borat2">
-                    <img src="https://duckduckgo.com/i/37f1e1a9d2ed9d21.jpeg" alt="borat2">
-                    <p class="kanit-extralight">Borat 2</p>
-                </div>
-                <div class="movie-item" data-movie="deadpool">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BNzY3ZWU5NGQtOTViNC00ZWVmLTliNjAtNzViNzlkZWQ4YzQ4XkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="deadpool">
-                    <p class="kanit-extralight">Deadpool</p>
-                </div>
-                <div class="movie-item" data-movie="deadpool2">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BNGY3N2ZhYmMtYTlmYi00ZWIzLWJiZWMtMjgxMjljYTk3MDAwXkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="deadpool2">
-                    <p class="kanit-extralight">Deadpool 2</p>
-                </div>
-                <div class="movie-item" data-movie="deadpool3">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BZTk5ODY0MmQtMzA3Ni00NGY1LThiYzItZThiNjFiNDM4MTM3XkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="deadpool and wolverine">
-                    <p class="kanit-extralight">Deadpool And Wolverine</p>
-                </div>
-                <div class="movie-item" data-movie="taken">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BYTAxNTY2NjMtYjk5Yy00Nzg4LTkyMmItYmMzMDM2OWQ1ZGQ3XkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="taken">
-                    <p class="kanit-extralight">Taken</p>
-                </div>
-                <div class="movie-item" data-movie="taken2">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BMTkwNTQ0ODExOV5BMl5BanBnXkFtZTcwNjU3NDQwOA@@._V1_.jpg&f=1&h=500" alt="taken 2">
-                    <p class="kanit-extralight">Taken 2</p>
-                </div>
-                <div class="movie-item" data-movie="taken3">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BNjM5MDU3NTY0M15BMl5BanBnXkFtZTgwOTk2ODU2MzE@._V1_.jpg&f=1&h=500" alt="taken 3">
-                    <p class="kanit-extralight">Taken 3</p>
-                </div>
-                <div class="movie-item" data-movie="lorax">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BMTU1MTAwMjk1NF5BMl5BanBnXkFtZTcwMDI5NDc4Ng@@._V1_.jpg&f=1&h=500" alt="lorax">
-                    <p class="kanit-extralight">The Lorax</p>
-                </div>
-                <div class="movie-item" data-movie="transformers12007">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BZjM3ZDA2YmItMzhiMi00ZGI3LTg3ZGQtOTk3Nzk0MDY0ZDZhXkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="transformers 2007">
-                    <p class="kanit-extralight">Transformers (2007)</p>
-                </div>
-                <div class="movie-item" data-movie="transformers2rotf">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BNjk4OTczOTk0NF5BMl5BanBnXkFtZTcwNjQ0NzMzMw@@._V1_.jpg&f=1&h=500" alt="transformers 2">
-                    <p class="kanit-extralight">Transformers 2 - ROTF</p>
-                </div>
-                <div class="movie-item" data-movie="whiplash">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BMmNkODhkYjctMDMyOC00ZTNjLTkwZTItM2ExMTAxMGU1ZGQ1XkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="whiplash">
-                    <p class="kanit-extralight">Whiplash</p>
-                </div>
-                <div class="movie-item" data-movie="superheromovie">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BMTc0Njc1MTU5Nl5BMl5BanBnXkFtZTcwMjA4NDE2MQ@@._V1_.jpg&f=1&h=500" alt="superhero movie">
-                    <p class="kanit-extralight">Superhero Movie</p>
-                </div>
-                <div class="movie-item" data-movie="tnes">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BMjVlZTVjYWItOGM3YS00NzQ5LTk3MmQtYTI3ZGU0ZGZhOWJjXkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="the never ending story">
-                    <p class="kanit-extralight">The Never Ending Story</p>
-                </div>
-                <div class="movie-item-banner" data-movie="banner2">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstatic1.colliderimages.com%2Fwordpress%2Fwp-content%2Fuploads%2F2020%2F10%2Fbest-tv-shows-to-binge-watch-social.png&f=1&nofb=1&ipt=c3a2246ec423cb762a27a73de87677c02a2e9a5744a3f629b646783c816126f6&ipo=images" alt="category shows">
-                    <p class="kanit-extralight">Category: Shows</p>
-                </div>
-                <div class="movie-item" data-movie="squidgames1">
-                    <img src="https://duckduckgo.com/i/54cc7633cdddc1b3.png" alt="squid game s1">
-                    <p class="kanit-extralight">S1 Squid Game</p>
-                </div>
-                <div class="movie-item" data-movie="naartgh">
-                    <img src="https://i.ibb.co/pdQnxY4/Screenshot-2024-12-14-003536.png" alt="naked and alone running to get home">
-                    <p class="kanit-extralight">Naked Alone and RTGH</p>
-                </div>
-                <div class="movie-item" data-movie="s1tgt">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BOGQ1M2Y4ZjMtNWRiNS00YTUzLTkxMzEtZjgzYmZjMGVlMzY5XkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="s1 the grand tour">
-                    <p class="kanit-extralight">S1 The Grand Tour</p>
-                </div>
-                <div class="movie-item" data-movie="s2tgt">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fs2.dmcdn.net%2Fu%2F7PIkL1QM6hnC1q_mU%2F120x120&f=1&nofb=1&ipt=1dca7d0c7c06f8bb5e80cf7a47033fbd55fdbd70a227154dc5389acaa28fefff&ipo=images" alt="s2 the grand tour">
-                    <p class="kanit-extralight">S2 The Grand Tour</p>
-                </div>
-                <div class="movie-item" data-movie="s3tgt">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fm.media-amazon.com%2Fimages%2FM%2FMV5BMDE3YTI1OWUtZjBkOS00MGM0LWFiZjgtMmQ1Nzk2Mjk0MzljXkEyXkFqcGdeQXVyNTI4MzE4MDU%40._V1_QL75_UX90_CR0%2C0%2C90%2C133_.jpg&f=1&nofb=1&ipt=65a6c7eeea714f69c30bca535331fb40c11846b511f8b15f7d055c866ca52d2b&ipo=images" alt="s3 the grand tour">
-                    <p class="kanit-extralight">S3 The Grand Tour</p>
-                </div>
-                <div class="movie-item" data-movie="tourdp">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BZDJjZGMxN2YtNDAzZC00NDk4LWI5YzEtNzM1NTIyYjgyYTVhXkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="tour de pharmacy">
-                    <p class="kanit-extralight">Tour De Pharmacy</p>
-                </div>
-                <div class="movie-item" data-movie="sharpe">
-                    <img src="https://duckduckgo.com/i/0246697a9178ba97.jpg" alt="SHARPE">
-                    <p class="kanit-extralight">Sharpe</p>
-                </div>
-                <div class="movie-item" data-movie="invincibles1">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcomicsmedia.ign.com%2Fcomics%2Fimage%2Fobject%2F743%2F743895%2Finvincible-1_cover-art.jpg%3Fwidth%3D114%26auto%3Dwebp&f=1&nofb=1&ipt=a85eacccbdcb2a975cadfa746d5c8a04cdd1f9efdec6a003b6ed478c7b36e200&ipo=images" alt="vinci1">
-                    <p class="kanit-extralight">S1 Invincible</p>
-                </div>
-                <div class="movie-item" data-movie="invincibles2">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fimages-wixmp-ed30a86b8c4ca887773594c2.wixmp.com%2Ff%2Fcf58e44b-e80e-40f3-ab01-8c8650a8aae9%2Fdgc5ucy-7f36bfda-e4fa-465d-8951-db7ffcc637cf.jpg%3Ftoken%3DeyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcL2NmNThlNDRiLWU4MGUtNDBmMy1hYjAxLThjODY1MGE4YWFlOVwvZGdjNXVjeS03ZjM2YmZkYS1lNGZhLTQ2NWQtODk1MS1kYjdmZmNjNjM3Y2YuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.ST9JzpH7_077w3IRdaSNmfLmAosLPWcq22GK5ezeSho&f=1&nofb=1&ipt=9a6e5f3a75da974a8ab16e8ccf0d2cddbcfc19d9099305fe748dcb971d284ad9&ipo=images" alt="vinci2">
-                    <p class="kanit-extralight">S2 Invincible</p>
-                </div>
-                <div class="movie-item" data-movie="invincibles3">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BZjE4ZDU4ZjMtZjliYS00M2ZmLThkNTItN2U3MmJjOGU0NmIxXkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="vinci3">
-                    <p class="kanit-extralight">S3 Invincible</p>
-                </div>
-                <div class="movie-item-banner" data-movie="banner3">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstatic1.colliderimages.com%2Fwordpress%2Fwp-content%2Fuploads%2F2023%2F06%2Fluffy-from-one-piece-goku-from-dragon-ball-z-and-saitama-from-one-punch-man.jpg&f=1&nofb=1&ipt=9884b84f3ade3c545c70a0d6c374c1088e77b275b3509291e452d8d64d97688c&ipo=images" alt="category anime">
-                    <p class="kanit-extralight">Category: Anime</p>
-                </div>
-                <div class="movie-item" data-movie="jpmisskuroitsu, misskuroitsu">
-                    <img src="https://duckduckgo.com/i/6899415a20bff040.jpg" alt="Misskuro">
-                    <p class="kanit-extralight">Miss Kuroitsu From MDD</p>
-                </div>
-                <div class="movie-item" data-movie="jpisekaiquartets1, isekaiquartets1">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BOTUyYjRlYjctOTg4Mi00OTc1LTk4ZWMtZWU4NTU1YTA1MGVmXkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="s1 isekai quartet">
-                    <p class="kanit-extralight">S1 Isekai Quartet</p>
-                </div>
-                <div class="movie-item" data-movie="jpisekaiquartets2, isekaiquartets2">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BOTUyYjRlYjctOTg4Mi00OTc1LTk4ZWMtZWU4NTU1YTA1MGVmXkEyXkFqcGc@._V1_.jpg&f=1&h=500" alt="s2 isekai quartet">
-                    <p class="kanit-extralight">S2 Isekai Quartet</p>
-                </div>
-                <div class="movie-item" data-movie="isekaiquartetanotherworld">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fsomoskudasai.com%2Fwp-content%2Fuploads%2F2021%2F07%2FVisual-LQ-1.jpg&f=1&nofb=1&ipt=34a2ae05c3188079805aee64553164a4fa613b2eaffebceb1e7676432f46c842&ipo=images" alt="isekai quartet movie">
-                    <p class="kanit-extralight">Isekai Quartet - AW</p>
-                </div>
-                <div class="movie-item" data-movie="jpdisillusionedawstws1, disillusionedawstws1">
-                    <img src="https://duckduckgo.com/i/df18ee535e122270.jpg" alt="ningen fushin">
-                    <p class="kanit-extralight">Disillusioned Adventurers Will Save the World</p>
-                </div>
-                <div class="movie-item" data-movie="jpkonosuba1, konosuba1">
-                    <img src="https://duckduckgo.com/i/f84726961205c586.jpg" alt="konosuba s1">
-                    <p class="kanit-extralight">S1 Konosuba</p>
-                </div>
-                <div class="movie-item" data-movie="jpkonosubaeotww, konosubaeotww">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn.agapea.com%2FYEN-PR%2FKonosuba-An-Explosion-on-This-Wonderful-World-Vol-5-Manga--i0n19563709.jpg&f=1&nofb=1&ipt=303563bbf96fdcf6dac97d2fe5a0966b7cc68dff181e6ee1b03a7a70c8dddd7a&ipo=images" alt="konosuba an explosion on this wonderful world">
-                    <p class="kanit-extralight">Konosuba An EOTWW</p>
-                </div>
-                <div class="movie-item" data-movie="jpkonosuba2, konosuba2">
-                    <img src="https://duckduckgo.com/i/00e6f650c2c6d731.jpg" alt="konosuba s2">
-                    <p class="kanit-extralight">S2 Konosuba</p>
-                </div>
-                <div class="movie-item" data-movie="konosubaloc">
-                    <img src="https://duckduckgo.com/i/7d2186dcadb90efc.jpg" alt="konosuba movie">
-                    <p class="kanit-extralight">Konosuba LOC</p>
-                </div>
-                <div class="movie-item" data-movie="konosuba3">
-                    <img src="https://duckduckgo.com/i/e8012f9e51e8ad07.jpg" alt="konosuba s3">
-                    <p class="kanit-extralight">S3 Konosuba</p>
-                </div>
-                <div class="movie-item" data-movie="jpmoretamcbnl, moretamcbnl">
-                    <img src="https://duckduckgo.com/i/b95162c8.jpg" alt="More than a Married Couple, but Not Lovers">
-                    <p class="kanit-extralight">More than a Married Couple, but Not Lovers</p>
-                </div>
-                <div class="movie-item" data-movie="jprezeros1, rezeros1">
-                    <img src="https://upload.wikimedia.org/wikipedia/en/4/46/Re-Zero_Blu-ray_1.jpg" alt="Re:Zero Season 1">
-                    <p class="kanit-extralight">S1 Re Zero</p>
-                </div>
-                <div class="movie-item" data-movie="jprezeros2, rezeros2">
-                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/4a/Re-Zero_season_2_Blu-ray_1.png/220px-Re-Zero_season_2_Blu-ray_1.png" alt="Re:Zero Season 2">
-                    <p class="kanit-extralight">S2 Re Zero</p>
-                </div>
-            <!-- Add more movie items here -->
+    <!-- Category Selection Container -->
+    <div id="categoryContainer">
+      <div class="movie-item-banner" data-movie="banner1">
+        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpaperaccess.com%2Ffull%2F3988284.jpg&f=1&nofb=1&ipt=a25ceb31783c4e0b88a671a96b0c9a21f2fa0c7b0169b92a4e3b8d75028ba0a4&ipo=images" alt="category: movies">
+        <p class="kanit-extralight">Category: Movie</p>
+        <!-- Nested movie item example -->
+      </div>
+      <div class="movie-item-banner" data-movie="banner2">
+        <img src="https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fimages6.fanpop.com%2Fimage%2Fphotos%2F34100000%2FTv-Shows-tv-shows-family-34187485-1024-768.jpg&f=1&nofb=1&ipt=071664207fe39c23592e6d03461c2d2c4562031dfa4047b5f4813c7c88e64ba4&ipo=images" alt="category shows">
+        <p class="kanit-extralight">Category: Shows</p>
+      </div>
+      <div class="movie-item-banner" data-movie="banner3">
+        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fotakus.space%2Fwp-content%2Fuploads%2F2020%2F12%2FPoster-japones-de-anime-Haikyuu-para-decoracion-de-pared-del-hogar-juego-de-8-piezas-292-x-419-cm-300x220.jpg&f=1&nofb=1&ipt=5a2b107e06bec09d5d4f778a9a3f845e8b0dc017f201f641b5515d9cd9e77a35&ipo=images" alt="category anime">
+        <p class="kanit-extralight">Category: Anime</p>
+      </div>
+    </div>
+    <div class="theme-toggle, kanit-extralight" style="text-align: right; margin: 20px 0;">
+      <img id="toggleStylesheetImage" src="theme1.png" alt="Toggle White" style="cursor: pointer; width: 50px; height: 50px;">
+    </div>
+    <!-- Dynamic Movie List Container (initially hidden) -->
+    <div class="movie-list-wrapper" id="movieListWrapper" style="display: none;">
+      <div class="movie-list" id="movieList">
+        <!-- Movie items will be dynamically injected here -->
+      </div>
+    </div>
+
+    <div class="episode-container" id="episodeContainer" style="display: none;">
+      <div class="sidebar" id="episodeSidebar"></div>
+      <div class="player">
+        <iframe id="videoPlayer" src="" allowfullscreen></iframe>
+        <div class="controls">
+          <a href="#" class="button dubbed-toggle">Dubbed</a>
+          <a href="#" class="button" id="prevEpisode">Previous Episode</a>
+          <a href="#" class="button" id="nextEpisode">Next Episode</a>
+          <a href="#" class="button" id="backToCategory">Back to Category List</a>
+          <a href="#" class="button" id="backToMenu">Back to Main Menu</a>
+          <div id="downloadContainer"></div>
         </div>
+      </div>
     </div>
+  </div>
 
-    <div class="episode-container" id="episodeContainer">
-        <div class="sidebar" id="episodeSidebar"></div>
-
-        <div class="player">
-            <iframe id="videoPlayer" src="" allowfullscreen></iframe>
-            <div class="controls">
-                <a href="#" class="button dubbed-toggle">Dubbed</a>
-                <a href="#" class="button" id="prevEpisode">Previous Episode</a>
-                <a href="#" class="button" id="nextEpisode">Next Episode</a>
-                <a href="#" class="button" id="backToMenu">Back to Main Menu</a>
-                <div id="downloadContainer"></div> <!-- This will hold the dynamic download buttons -->
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="content.js"></script>
+  <script src="movies.js"></script>
+  <script src="shows.js"></script>
+  <script src="anime.js"></script>
+  <script src="content.js"></script>
 </body>
 </html>
