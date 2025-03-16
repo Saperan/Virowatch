@@ -188,7 +188,7 @@ font-family: "Kanit", sans-serif;
 
 .sidebar {
     flex: 0 0 15%;                /* Set fixed width for the sidebar */
-    max-height: 800px;              /* Limit the height of the episode list */
+    max-height: 720px;              /* Limit the height of the episode list */
     overflow-y: auto;               /* Allow vertical scrolling */
     background: #9c9c9c;
     padding: 10px;
