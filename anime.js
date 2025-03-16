@@ -1385,6 +1385,57 @@ window.anime = {
           'JP 25. Offbeat Steps Under The Moonlight'
             ],
         customDownloads: [
+            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/fq9ivqwoeb14', name: 'Buzzheavier download' },
+            ],
         ],
         dubbed: [
           'https://rumble.com/embed/v6o0uby/?pub=4jqwl4',
@@ -1441,6 +1492,57 @@ window.anime = {
           '25. Offbeat Steps Under The Moonlight'
         ],
         dubbedcustomdownloads: [
+            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/dcvemj1rf4wq', name: 'Buzzheavier download' },
+            ],
         ]
     },
 
