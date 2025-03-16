@@ -1,5 +1,55 @@
 // shows.js (Non-module)
 window.shows = {
+    barrys1: {
+        title: 'S1 Barry',
+        image: 'https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BYzdlYWZkNjQtMWYwNi00YjNkLTljYjgtZjRhMmQ2YTQ1MWQ0XkEyXkFqcGc@._V1_.jpg&f=1&h=500',
+        video: [
+            'https://rumble.com/embed/v6oj7hm/?pub=4jqwl4',
+            'https://rumble.com/embed/v6oj7i6/?pub=4jqwl4',
+            'https://rumble.com/embed/v6oj7im/?pub=4jqwl4',
+            'https://rumble.com/embed/v6oj7j8/?pub=4jqwl4',
+            'https://rumble.com/embed/v6oj7xg/?pub=4jqwl4',
+            'https://rumble.com/embed/v6oj7y0/?pub=4jqwl4',
+            'https://rumble.com/embed/v6oj7ye/?pub=4jqwl4',
+            'https://rumble.com/embed/v6oj7yq/?pub=4jqwl4'
+        ],
+        episodeTitles: [
+                '1. Chapter One: Make Your Mark',
+                '2. Chapter Two: Use It',
+                '3. Chapter Three: Make the Unsafe Choice',
+                '4. Chapter Four: Commit... to YOU',
+                '5. Chapter Five: Do Your Job',
+                '6. Chapter Six: Listen with Your Ears, React with Your Face',
+                '7. Chapter Seven: Loud, Fast, and Keep Going',
+                '8. Chapter Eight: Know Your Truth'
+            ],
+        customDownloads: [
+        [
+    { url: 'https://buzzheavier.com/vtd6i1r41qpx', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/vtd6i1r41qpx', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/vtd6i1r41qpx', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/vtd6i1r41qpx', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/vtd6i1r41qpx', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/vtd6i1r41qpx', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/vtd6i1r41qpx', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/vtd6i1r41qpx', name: 'Buzzheavier download' },
+    ],
+    ]
+    },
     tourdp: {
         title: 'Tour De Pharmacy',
         image: 'https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BZDJjZGMxN2YtNDAzZC00NDk4LWI5YzEtNzM1NTIyYjgyYTVhXkEyXkFqcGc@._V1_.jpg&f=1&h=500',
