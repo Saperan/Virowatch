@@ -1,5 +1,55 @@
 // shows.js (Non-module)
 window.shows = {
+    barrys2: {
+        title: 'S2 Barry',
+        image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fimages.theposterdb.com%2Fprod%2Fpublic%2Fimages%2Fposters%2Foptimized%2Fshows%2F43066%2Fseason_2%2FU2TGE0iaO7nBiVfZDUB2nlDzenDsGVub6My8e000.jpg&f=1&nofb=1&ipt=104dac4d41181fefc60d58173c1d55a46e2b91d10509edd2b70685af8dacd40b&ipo=images',
+        video: [
+            'https://rumble.com/embed/v6oqjfw/?pub=4jqwl4',
+            'https://rumble.com/embed/v6oqjgc/?pub=4jqwl4',
+            'https://rumble.com/embed/v6oqjhk/?pub=4jqwl4',
+            'https://rumble.com/embed/v6oqjia/?pub=4jqwl4',
+            'https://rumble.com/embed/v6oqjwk/?pub=4jqwl4',
+            'https://rumble.com/embed/v6oqjx0/?pub=4jqwl4',
+            'https://rumble.com/embed/v6oqjxg/?pub=4jqwl4',
+            'https://rumble.com/embed/v6oqjy0/?pub=4jqwl4'
+        ],
+        episodeTitles: [
+                '1. The Show Must Go On, Probably?',
+                '2. The Power of No',
+                '3. Past = Present x Future Over Yesterday',
+                '4. What?!',
+                '5. ronny/lily',
+                '6. The Truth Has a Ring to It',
+                '7. The Audition',
+                '8. berkman > block'
+            ],
+        customDownloads: [
+        [
+    { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
+    ],
+    ]
+    },
     barrys1: {
         title: 'S1 Barry',
         image: 'https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BYzdlYWZkNjQtMWYwNi00YjNkLTljYjgtZjRhMmQ2YTQ1MWQ0XkEyXkFqcGc@._V1_.jpg&f=1&h=500',
