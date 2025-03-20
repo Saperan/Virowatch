@@ -1,5 +1,3 @@
-// content.js (No module imports – using globals from movies.js, shows.js, anime.js)
-
 document.addEventListener("DOMContentLoaded", () => {
   const toggleImage = document.getElementById('toggleStylesheetImage');
   // Select the primary stylesheet link element
@@ -22,6 +20,18 @@ document.addEventListener("DOMContentLoaded", () => {
       toggleImage.setAttribute("src", themeImageA);
     }
   });
+
+  // For changelogs to work and stuff
+  const container = document.getElementById('changelog-container');
+  // Append changelog items – these will be visible initially (start screen)
+  changelogs.forEach(log => {
+    const box = document.createElement('div');
+    box.className = 'changelog-box';
+    box.innerHTML = `<h3>${log.version}</h3><p>${log.description}</p>`;
+    container.appendChild(box);
+  });
+
+  // Define UI containers
   const categoryContainer = document.getElementById('categoryContainer');
   const movieListWrapper = document.getElementById('movieListWrapper');
   const movieList = document.getElementById('movieList');
@@ -36,9 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Updated: using querySelector for the class "dubbed-toggle"
   const dubbedButton = document.querySelector('.dubbed-toggle'); 
   let debounceTimer;
-
   
-
   let currentMovie = null;
   let currentEpisode = 0;
   let currentCategory = null; // "movies", "shows", or "anime"
@@ -113,7 +121,8 @@ document.addEventListener("DOMContentLoaded", () => {
         category = 'anime';
       }
       if (category) {
-        // Hide the category view and show the movie list
+        // When selecting a category, hide the changelog container along with the category view.
+        container.style.display = 'none';
         categoryContainer.style.display = 'none';
         movieListWrapper.style.display = 'block';
         renderMovieList(category);
@@ -143,7 +152,8 @@ document.addEventListener("DOMContentLoaded", () => {
           if (dubbedButton) {
               dubbedButton.classList.remove('active');
           }
-          // Hide the category view and show the movie list
+          // When selecting a category, hide the changelog container.
+          container.style.display = 'none';
           categoryContainer.style.display = 'none';
           movieListWrapper.style.display = 'block';
           if (getCurrentMediaData()) {
@@ -272,13 +282,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 300);
   });
 
-  // Handle back to menu button: return to the category selection view
+  // Handle back to category button: return to the category selection view
   document.getElementById('backToCategory').addEventListener('click', (e) => {
     e.preventDefault();
     movieList.innerHTML = '';
     movieListWrapper.style.display = 'none';
     categoryContainer.style.display = 'flex';
     episodeContainer.style.display = 'none';
+    // Show the changelogs again when returning to the start screen.
+    container.style.display = 'block';
   });
 
   // Toggle dubbed mode if the button exists
@@ -298,10 +310,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // (Optional) Preload one category on page load:
   // renderMovieList('movies');
-  document.getElementById('backToMenu').addEventListener('click', e => {
-    e.preventDefault();
-    window.location.href = 'https://virowatch.tiiny.site'; // Replace 'https://example.com' with your desired URL
-});
 
+  // Back to menu: navigate to the external URL
+ // document.getElementById('backToMenu').addEventListener('click', e => {
+ //   e.preventDefault();
+ //   window.location.href = 'https://virowatch.tiiny.site'; // Replace with your desired URL
+ // });
 
 });
