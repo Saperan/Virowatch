@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virowatch</title>
+  <title>Virowatch v8.2</title>
   <link rel="stylesheet" href="virostyle.css">
   <link rel="icon" href="https://i.ibb.co/8nL4pzdB/Virowatch.png" type="image/png">
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@100;300;400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
@@ -12,8 +12,8 @@
   <div class="container">
     <div>
       <center>
-        <h1 class="kanit-light">Virowatch</h1>
-        <h5 class="kanit-light">(Last Updated - 16.03.2024)</h5>
+        <h1 class="kanit-light"><a href="https://discord.gg/Q47GD7kNfU"><img src="https://i.ibb.co/8nL4pzdB/Virowatch.png" alt="Udiscord" width="50" height="50" style="vertical-align: top;"></a>Virowatch</h1>
+        <h5 class="kanit-light">(Last Updated - 20.03.2024)</h5>
       </center>
     </div>
     <div class="search-box">
@@ -36,9 +36,14 @@
         <p class="kanit-extralight">Category: Anime</p>
       </div>
     </div>
+
+
+
     <div class="theme-toggle, kanit-extralight" style="text-align: right; margin: 20px 0;">
       <img id="toggleStylesheetImage" src="theme1.png" alt="Toggle White" style="cursor: pointer; width: 50px; height: 50px;">
     </div>
+    <h2 class="kanit-light">Changelogs</h2>
+    <div class="changelog-container" id="changelog-container"></div>
     <!-- Dynamic Movie List Container (initially hidden) -->
     <div class="movie-list-wrapper" id="movieListWrapper" style="display: none;">
       <div class="movie-list" id="movieList">
@@ -55,16 +60,15 @@
           <a href="#" class="button" id="prevEpisode">Previous Episode</a>
           <a href="#" class="button" id="nextEpisode">Next Episode</a>
           <a href="#" class="button" id="backToCategory">Back to Category List</a>
-          <a href="#" class="button" id="backToMenu">Back to Main Menu</a>
           <div id="downloadContainer"></div>
         </div>
       </div>
     </div>
   </div>
-
   <script src="movies.js"></script>
   <script src="shows.js"></script>
   <script src="anime.js"></script>
   <script src="content.js"></script>
+  <script src="changelogs.js"></script>
 </body>
 </html>
