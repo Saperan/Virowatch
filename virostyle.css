@@ -279,4 +279,48 @@ width: 100%;  /* Ensures the download container spans the full width */
     justify-content: center;   /* Center the items horizontally */
     gap: 20px;                 /* Optional spacing between items */
   }
+  .changelog-container {
+    width: 50%;
+    height: 225px;
+    overflow-y: scroll;
+    background: #1a1a1a;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    scrollbar-width: 2px; /* Firefox */
+    font-family: "kanit-thin",;
+    }
+    .changelog-container::-webkit-scrollbar {
+    width: 8px;
+    }
+    
+    .changelog-container::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 10px;
+    }
+    
+    
+    .changelog-box {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: rgb(36, 36, 36);
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: "kanit-thin", sans-serif,;
+    }
+    
+    .changelog-box h3 {
+    font-family: "kanit-thin", sans-serif,;
+    margin: 0 0 5px;
+    font-size: 16px;
+    color: #ffffff;
+    }
+    
+    .changelog-box p {
+    margin: 0;
+    font-size: 14px;
+    color: #ffffff;
+    font-family: "kanit-thin", sans-serif,;
+    }
   
