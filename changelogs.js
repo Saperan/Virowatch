@@ -1,4 +1,5 @@
 const changelogs = [
+  { version: "v8.2.1 25.03.2025", description: "Added rest of S3 Invincible Episodes (PURALADE request)" },
   { version: "v8.2 20.03.2025", description: "Added Barry S2 | Removed Main Menu site and added all features from the Main Menu one to this one | More content coming soon." },
   { version: "v8.1 16.03.2025", description: "Added Barry S1 | Added Re:Zero S2 SUBS and DOWNLOAD | More content coming soon." },
   { version: "v8.0 15.03.2025", description: "Added CIAWWL2C | Splitted Content into Categories properly | Content Text System Rework (by yours trully chat gpt) | Added White Theme | More content coming soon." },
