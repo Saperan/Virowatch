@@ -643,13 +643,21 @@ window.shows = {
             'https://rumble.com/embed/v6j7utp/?pub=4jqwl4',
             'https://rumble.com/embed/v6j7uu4/?pub=4jqwl4',
             'https://rumble.com/embed/v6j7uxg/?pub=4jqwl4',
-            'https://rumble.com/embed/v6j7v0s/?pub=4jqwl4'
+            'https://rumble.com/embed/v6j7v0s/?pub=4jqwl4',
+            'https://rumble.com/embed/v6ozm1m/?pub=4jqwl4',
+            'https://rumble.com/embed/v6ozm30/?pub=4jqwl4',
+            'https://rumble.com/embed/v6ozm3a/?pub=4jqwl4',
+            'https://rumble.com/embed/v6ozm3k/?pub=4jqwl4'
         ],
         episodeTitles: [
                 '1. Youre Not Laughing Now',
                 '2. A Deal with the Devil',
                 '3. You Want a Real Costume, Right?',
-                '4. You Were My Hero'
+                '4. You Were My Hero',
+                '5. This Was Supposed to Be Easy',
+                '6. All I Can Say Is Im Sorry',
+                '7. What Have I Done?',
+                '8. I Thought Youd Never Shut Up'
             ],
         customDownloads: [
     ]},
