@@ -1,5 +1,20 @@
 // movies.js (Non-module)
 window.movies = {
+    maskofzorro: {
+        title: 'The Mask of Zorro 1998',
+        image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fm.media-amazon.com%2Fimages%2FM%2FMV5BMzA2MDgyYzMtNjc4OC00YjU0LWEzMWEtOTRhMTViODY0Mjk0XkEyXkFqcGc%40._V1__SX500&f=1&h=500',
+        video: [
+            'https://rumble.com/embed/v6p5qay/?pub=4jqwl4'
+        ],
+        episodeTitles: [
+            'Movie'
+        ],
+        customDownloads: [
+            [
+                { url: 'https://buzzheavier.com/9rnvmad80qm1', name: 'Buzzheavier download' }
+            ]
+        ]
+    },
     kickass: {
         title: 'Kick Ass',
         image: 'https://m.media-amazon.com/images/M/MV5BMTMzNzEzMDYxM15BMl5BanBnXkFtZTcwMTc0NTMxMw@@._V1_.jpg',
