@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virowatch v8.2</title>
+  <title>Virowatch v9.0</title>
   <link rel="stylesheet" href="virostyle.css">
   <link rel="icon" href="https://i.ibb.co/8nL4pzdB/Virowatch.png" type="image/png">
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@100;300;400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@
     <div>
       <center>
         <h1 class="kanit-light"><a href="https://discord.gg/Q47GD7kNfU"><img src="https://i.ibb.co/8nL4pzdB/Virowatch.png" alt="Udiscord" width="50" height="50" style="vertical-align: top;"></a>Virowatch</h1>
-        <h5 class="kanit-light">(Last Updated - 20.03.2024)</h5>
+        <h5 class="kanit-light">(Last Updated - 29.03.2024)</h5>
       </center>
     </div>
     <div class="search-box">
@@ -23,27 +23,25 @@
     <!-- Category Selection Container -->
     <div id="categoryContainer">
       <div class="movie-item-banner" data-movie="banner1">
-        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpaperaccess.com%2Ffull%2F3988284.jpg&f=1&nofb=1&ipt=a25ceb31783c4e0b88a671a96b0c9a21f2fa0c7b0169b92a4e3b8d75028ba0a4&ipo=images" alt="category: movies">
+        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpaperaccess.com%2Ffull%2F3988284.jpg&f=1&nofb=1" alt="category: movies">
         <p class="kanit-extralight">Category: Movie</p>
-        <!-- Nested movie item example -->
       </div>
       <div class="movie-item-banner" data-movie="banner2">
-        <img src="https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fimages6.fanpop.com%2Fimage%2Fphotos%2F34100000%2FTv-Shows-tv-shows-family-34187485-1024-768.jpg&f=1&nofb=1&ipt=071664207fe39c23592e6d03461c2d2c4562031dfa4047b5f4813c7c88e64ba4&ipo=images" alt="category shows">
+        <img src="https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fimages6.fanpop.com%2Fimage%2Fphotos%2F34100000%2FTv-Shows-tv-shows-family-34187485-1024-768.jpg&f=1&nofb=1" alt="category: shows">
         <p class="kanit-extralight">Category: Shows</p>
       </div>
       <div class="movie-item-banner" data-movie="banner3">
-        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fotakus.space%2Fwp-content%2Fuploads%2F2020%2F12%2FPoster-japones-de-anime-Haikyuu-para-decoracion-de-pared-del-hogar-juego-de-8-piezas-292-x-419-cm-300x220.jpg&f=1&nofb=1&ipt=5a2b107e06bec09d5d4f778a9a3f845e8b0dc017f201f641b5515d9cd9e77a35&ipo=images" alt="category anime">
+        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fotakus.space%2Fwp-content%2Fuploads%2F2020%2F12%2FPoster-japones-de-anime-Haikyuu-para-decoracion-de-pared-del-hogar-juego-de-8-piezas-292-x-419-cm-300x220.jpg&f=1&nofb=1" alt="category: anime">
         <p class="kanit-extralight">Category: Anime</p>
       </div>
     </div>
-
-
 
     <div class="theme-toggle, kanit-extralight" style="text-align: right; margin: 20px 0;">
       <img id="toggleStylesheetImage" src="theme1.png" alt="Toggle White" style="cursor: pointer; width: 50px; height: 50px;">
     </div>
     <h2 class="kanit-light">Changelogs</h2>
     <div class="changelog-container" id="changelog-container"></div>
+    
     <!-- Dynamic Movie List Container (initially hidden) -->
     <div class="movie-list-wrapper" id="movieListWrapper" style="display: none;">
       <div class="movie-list" id="movieList">
@@ -51,8 +49,14 @@
       </div>
     </div>
 
+    <!-- Episode Container with Sidebar and Player -->
     <div class="episode-container" id="episodeContainer" style="display: none;">
-      <div class="sidebar" id="episodeSidebar"></div>
+      <div class="sidebar" id="episodeSidebar">
+        <!-- Season Selector will appear here -->
+        <div id="seasonSelectorContainer"></div>
+        <!-- Episode List will appear here -->
+        <div id="episodeListContainer"></div>
+      </div>
       <div class="player">
         <iframe id="videoPlayer" src="" allowfullscreen></iframe>
         <div class="controls">
@@ -65,6 +69,8 @@
       </div>
     </div>
   </div>
+  
+  <!-- Scripts -->
   <script src="movies.js"></script>
   <script src="shows.js"></script>
   <script src="anime.js"></script>
