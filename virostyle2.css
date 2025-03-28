@@ -330,4 +330,17 @@ width: 100%;  /* Ensures the download container spans the full width */
     color: #1a1a1a;
     font-family: "kanit-thin", sans-serif,;
     }
+    #seasonSelector {
+      background: #ddd;             /* Match your button/controls background */
+      color: #1a1a1a;               /* Same text color as the rest of your UI */
+      font-family: "kanit";
+      font-weight: 400;             /* Same font weight as .kanit-light */
+      border: 0px;
+      border-radius: 5px;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+      width: 100%;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
   
