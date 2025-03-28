@@ -1,59 +1,12 @@
 // shows.js (Non-module)
 window.shows = {
-    barrys2: {
-        title: 'S2 Barry',
-        image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fimages.theposterdb.com%2Fprod%2Fpublic%2Fimages%2Fposters%2Foptimized%2Fshows%2F43066%2Fseason_2%2FU2TGE0iaO7nBiVfZDUB2nlDzenDsGVub6My8e000.jpg&f=1&nofb=1&ipt=104dac4d41181fefc60d58173c1d55a46e2b91d10509edd2b70685af8dacd40b&ipo=images',
-        video: [
-            'https://rumble.com/embed/v6oqjfw/?pub=4jqwl4',
-            'https://rumble.com/embed/v6oqjgc/?pub=4jqwl4',
-            'https://rumble.com/embed/v6oqjhk/?pub=4jqwl4',
-            'https://rumble.com/embed/v6oqjia/?pub=4jqwl4',
-            'https://rumble.com/embed/v6oqjwk/?pub=4jqwl4',
-            'https://rumble.com/embed/v6oqjx0/?pub=4jqwl4',
-            'https://rumble.com/embed/v6oqjxg/?pub=4jqwl4',
-            'https://rumble.com/embed/v6oqjy0/?pub=4jqwl4'
-        ],
-        episodeTitles: [
-                '1. The Show Must Go On, Probably?',
-                '2. The Power of No',
-                '3. Past = Present x Future Over Yesterday',
-                '4. What?!',
-                '5. ronny/lily',
-                '6. The Truth Has a Ring to It',
-                '7. The Audition',
-                '8. berkman > block'
-            ],
-        customDownloads: [
-        [
-    { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
-    ],
-    ]
-    },
-    barrys1: {
-        title: 'S1 Barry',
+
+    barry: {
+        title: 'Barry',
         image: 'https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BYzdlYWZkNjQtMWYwNi00YjNkLTljYjgtZjRhMmQ2YTQ1MWQ0XkEyXkFqcGc@._V1_.jpg&f=1&h=500',
-        video: [
+        BARRYS1: {
+          chapter: 'Season 1',
+          video: [
             'https://rumble.com/embed/v6oj7hm/?pub=4jqwl4',
             'https://rumble.com/embed/v6oj7i6/?pub=4jqwl4',
             'https://rumble.com/embed/v6oj7im/?pub=4jqwl4',
@@ -99,7 +52,58 @@ window.shows = {
     { url: 'https://buzzheavier.com/vtd6i1r41qpx', name: 'Buzzheavier download' },
     ],
     ]
-    },
+        },
+        BARRYS2: {
+            chapter: 'Season 2',
+            video: [
+                'https://rumble.com/embed/v6oqjfw/?pub=4jqwl4',
+                'https://rumble.com/embed/v6oqjgc/?pub=4jqwl4',
+                'https://rumble.com/embed/v6oqjhk/?pub=4jqwl4',
+                'https://rumble.com/embed/v6oqjia/?pub=4jqwl4',
+                'https://rumble.com/embed/v6oqjwk/?pub=4jqwl4',
+                'https://rumble.com/embed/v6oqjx0/?pub=4jqwl4',
+                'https://rumble.com/embed/v6oqjxg/?pub=4jqwl4',
+                'https://rumble.com/embed/v6oqjy0/?pub=4jqwl4'
+            ],
+            episodeTitles: [
+                    '1. The Show Must Go On, Probably?',
+                    '2. The Power of No',
+                    '3. Past = Present x Future Over Yesterday',
+                    '4. What?!',
+                    '5. ronny/lily',
+                    '6. The Truth Has a Ring to It',
+                    '7. The Audition',
+                    '8. berkman > block'
+                ],
+            customDownloads: [
+            [
+        { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/4cabuybbc7uc', name: 'Buzzheavier download' },
+        ],
+        ]
+          },
+      },
+
     tourdp: {
         title: 'Tour De Pharmacy',
         image: 'https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BZDJjZGMxN2YtNDAzZC00NDk4LWI5YzEtNzM1NTIyYjgyYTVhXkEyXkFqcGc@._V1_.jpg&f=1&h=500',
@@ -161,11 +165,13 @@ window.shows = {
     ],
     ]
     },
-        
-    squidgames1: {
-        title: 'S1 Squid Game',
+
+    squidgame: {
+        title: 'Squid Game',
         image: 'https://duckduckgo.com/i/54cc7633cdddc1b3.png',
-        video: [
+        squidgames1: {
+          chapter: 'Season 1',
+          video: [
             'https://rumble.com/embed/v69425p/?pub=3u4il9',
             'https://rumble.com/embed/v6944ey/?pub=3u4il9',
             'https://rumble.com/embed/v6949gm/?pub=3u4il9',
@@ -216,11 +222,15 @@ window.shows = {
     { url: 'https://buzzheavier.com/60mhkfgfzupx', name: 'Buzzheavier download' },
     ],
     ]
-    },
+        },
+      },
+
+      tgt: {
+        title: 'The Grand Tour',
+        image: 'https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BOGQ1M2Y4ZjMtNWRiNS00YTUzLTkxMzEtZjgzYmZjMGVlMzY5XkEyXkFqcGc@._V1_.jpg&f=1&h=500',
         s1tgt: {
-            title: 'S1 The Grand Tour',
-            image: 'https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BOGQ1M2Y4ZjMtNWRiNS00YTUzLTkxMzEtZjgzYmZjMGVlMzY5XkEyXkFqcGc@._V1_.jpg&f=1&h=500',
-        video: [
+          chapter: 'Season 1',
+          video: [
             'https://rumble.com/embed/v5wppwb/?pub=3u4il9',
             'https://rumble.com/embed/v5wpicn/?pub=3u4il9',
             'https://rumble.com/embed/v5wppp8/?pub=3u4il9',
@@ -304,164 +314,163 @@ window.shows = {
     { url: 'https://1fichier.com/?99jlxrbu4ptzy0z9qcey', name: '1ficher download' },
     ],
     ]
-    },
+        },
+        s2tgt: {
+            chapter: 'Season 2',
+            video: [
+                'https://rumble.com/embed/v5yyfbq/?pub=3u4il9',
+                'https://rumble.com/embed/v5yyf4n/?pub=3u4il9',
+                'https://rumble.com/embed/v5yyfgb/?pub=3u4il9',
+                'https://rumble.com/embed/v5yyfwk/?pub=3u4il9',
+                'https://rumble.com/embed/v5yywgt/?pub=3u4il9',
+                'https://rumble.com/embed/v5yywnh/?pub=3u4il9',
+                'https://rumble.com/embed/v5yywqt/?pub=3u4il9',
+                'https://rumble.com/embed/v5yywu5/?pub=3u4il9',
+                'https://rumble.com/embed/v5yzcc2/?pub=3u4il9',
+                'https://rumble.com/embed/v5yzcue/?pub=3u4il9',
+                'https://rumble.com/embed/v5yzcpt/?pub=3u4il9'
+            ],
+            episodeTitles: [
+                    '1. Past, Present or Future',
+                    '2. The Fall Guys',
+                    '3. Bah humbug-atti',
+                    '4. Unscripted',
+                    '5. Up, Down and Round the Farm',
+                    '6. Jaaaaaaaags',
+                    '7. Its a gas, gas, gas',
+                    '8. Blasts from the Past',
+                    '9. Breaking, Badly',
+                    '10. Oh, Canada',
+                    '11. Feed the World'
+                ],
+            customDownloads: [
+            [
+        { url: 'https://buzzheavier.com/gb2jr53igpma', name: 'Buzzheavier download' },
+        { url: 'https://1fichier.com/?day0zll1sjkhbr5hmbxh', name: '1ficher download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/gb2jr53igpma', name: 'Buzzheavier download' },
+        { url: 'https://1fichier.com/?day0zll1sjkhbr5hmbxh', name: '1ficher download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/gb2jr53igpma', name: 'Buzzheavier download' },
+        { url: 'https://1fichier.com/?day0zll1sjkhbr5hmbxh', name: '1ficher download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/gb2jr53igpma', name: 'Buzzheavier download' },
+        { url: 'https://1fichier.com/?day0zll1sjkhbr5hmbxh', name: '1ficher download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/gb2jr53igpma', name: 'Buzzheavier download' },
+        { url: 'https://1fichier.com/?day0zll1sjkhbr5hmbxh', name: '1ficher download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/gb2jr53igpma', name: 'Buzzheavier download' },
+        { url: 'https://1fichier.com/?day0zll1sjkhbr5hmbxh', name: '1ficher download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/gb2jr53igpma', name: 'Buzzheavier download' },
+        { url: 'https://1fichier.com/?day0zll1sjkhbr5hmbxh', name: '1ficher download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/u8vw10w1y2w8', name: 'Buzzheavier download' },
+        { url: 'https://1fichier.com/?h1tw6ygvu4rea9meuqtt', name: '1ficher download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/u8vw10w1y2w8', name: 'Buzzheavier download' },
+        { url: 'https://1fichier.com/?h1tw6ygvu4rea9meuqtt', name: '1ficher download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/u8vw10w1y2w8', name: 'Buzzheavier download' },
+        { url: 'https://1fichier.com/?h1tw6ygvu4rea9meuqtt', name: '1ficher download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/u8vw10w1y2w8', name: 'Buzzheavier download' },
+        { url: 'https://1fichier.com/?h1tw6ygvu4rea9meuqtt', name: '1ficher download' },
+        ],
+        ]
+          },
+          s3tgt: {
+            chapter: 'Season 3',
+            video: [
+                'https://rumble.com/embed/v6npyu6/?pub=4jqwl4',
+                'https://rumble.com/embed/v6npyui/?pub=4jqwl4',
+                'https://rumble.com/embed/v6npyuu/?pub=4jqwl4',
+                'https://rumble.com/embed/v6npyv6/?pub=4jqwl4',
+                'https://rumble.com/embed/v6npzf8/?pub=4jqwl4',
+                'https://rumble.com/embed/v6npzfm/?pub=4jqwl4',
+                'https://rumble.com/embed/v6npzg2/?pub=4jqwl4',
+                'https://rumble.com/embed/v6npzgi/?pub=4jqwl4',
+                'https://rumble.com/embed/v6nq0k8/?pub=4jqwl4',
+                'https://rumble.com/embed/v6nq0kk/?pub=4jqwl4',
+                'https://rumble.com/embed/v6nq0ky/?pub=4jqwl4',
+                'https://rumble.com/embed/v6nq0l8/?pub=4jqwl4',
+                'https://rumble.com/embed/v6nq16w/?pub=4jqwl4',
+                'https://rumble.com/embed/v6nq17a/?pub=4jqwl4'
+            ],
+            episodeTitles: [
+                    '1. Motown Funk',
+                    '2. Colombia Special (1)',
+                    '3. Colombia Special (2)',
+                    '4. Pick Up, Put Downs',
+                    '5. An Itchy Urus',
+                    '6. Chinese Food for Thought',
+                    '7. Well Aged Scotch',
+                    '8. International Buffoons Vacation',
+                    '9. Aston, Astronauts and Angelinas Children',
+                    '10. The Youth Vote',
+                    '11. Sea to Unsalty Sea',
+                    '12. Legends and Luggage',
+                    '13. Survival of the Fattest',
+                    '14. Funeral for a Ford'
+                ],
+            customDownloads: [
+            [
+        { url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
+        ],
+        ]
+          },
+      },
 
-    s2tgt: {
-        title: 'S2 The Grand Tour',
-        image: 'https://external-content.duckduckgo.com/iu/?u=https://s2.dmcdn.net/u/7PIkL1QM6hnC1q_mU/120x120&f=1&nofb=1&ipt=1dca7d0c7c06f8bb5e80cf7a47033fbd55fdbd70a227154dc5389acaa28fefff&ipo=images',
-        video: [
-            'https://rumble.com/embed/v5yyfbq/?pub=3u4il9',
-            'https://rumble.com/embed/v5yyf4n/?pub=3u4il9',
-            'https://rumble.com/embed/v5yyfgb/?pub=3u4il9',
-            'https://rumble.com/embed/v5yyfwk/?pub=3u4il9',
-            'https://rumble.com/embed/v5yywgt/?pub=3u4il9',
-            'https://rumble.com/embed/v5yywnh/?pub=3u4il9',
-            'https://rumble.com/embed/v5yywqt/?pub=3u4il9',
-            'https://rumble.com/embed/v5yywu5/?pub=3u4il9',
-            'https://rumble.com/embed/v5yzcc2/?pub=3u4il9',
-            'https://rumble.com/embed/v5yzcue/?pub=3u4il9',
-            'https://rumble.com/embed/v5yzcpt/?pub=3u4il9'
-        ],
-        episodeTitles: [
-                '1. Past, Present or Future',
-                '2. The Fall Guys',
-                '3. Bah humbug-atti',
-                '4. Unscripted',
-                '5. Up, Down and Round the Farm',
-                '6. Jaaaaaaaags',
-                '7. Its a gas, gas, gas',
-                '8. Blasts from the Past',
-                '9. Breaking, Badly',
-                '10. Oh, Canada',
-                '11. Feed the World'
-            ],
-        customDownloads: [
-        [
-    { url: 'https://buzzheavier.com/gb2jr53igpma', name: 'Buzzheavier download' },
-    { url: 'https://1fichier.com/?day0zll1sjkhbr5hmbxh', name: '1ficher download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/gb2jr53igpma', name: 'Buzzheavier download' },
-    { url: 'https://1fichier.com/?day0zll1sjkhbr5hmbxh', name: '1ficher download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/gb2jr53igpma', name: 'Buzzheavier download' },
-    { url: 'https://1fichier.com/?day0zll1sjkhbr5hmbxh', name: '1ficher download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/gb2jr53igpma', name: 'Buzzheavier download' },
-    { url: 'https://1fichier.com/?day0zll1sjkhbr5hmbxh', name: '1ficher download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/gb2jr53igpma', name: 'Buzzheavier download' },
-    { url: 'https://1fichier.com/?day0zll1sjkhbr5hmbxh', name: '1ficher download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/gb2jr53igpma', name: 'Buzzheavier download' },
-    { url: 'https://1fichier.com/?day0zll1sjkhbr5hmbxh', name: '1ficher download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/gb2jr53igpma', name: 'Buzzheavier download' },
-    { url: 'https://1fichier.com/?day0zll1sjkhbr5hmbxh', name: '1ficher download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/u8vw10w1y2w8', name: 'Buzzheavier download' },
-    { url: 'https://1fichier.com/?h1tw6ygvu4rea9meuqtt', name: '1ficher download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/u8vw10w1y2w8', name: 'Buzzheavier download' },
-    { url: 'https://1fichier.com/?h1tw6ygvu4rea9meuqtt', name: '1ficher download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/u8vw10w1y2w8', name: 'Buzzheavier download' },
-    { url: 'https://1fichier.com/?h1tw6ygvu4rea9meuqtt', name: '1ficher download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/u8vw10w1y2w8', name: 'Buzzheavier download' },
-    { url: 'https://1fichier.com/?h1tw6ygvu4rea9meuqtt', name: '1ficher download' },
-    ],
-    ]},
-    
-    s3tgt: {
-        title: 'S3 The Grand Tour',
-        image: 'https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BMDE3YTI1OWUtZjBkOS00MGM0LWFiZjgtMmQ1Nzk2Mjk0MzljXkEyXkFqcGdeQXVyNTI4MzE4MDU@._V1_QL75_UX90_CR0,0,90,133_.jpg&f=1&nofb=1&ipt=65a6c7eeea714f69c30bca535331fb40c11846b511f8b15f7d055c866ca52d2b&ipo=images',
-        video: [
-            'https://rumble.com/embed/v6npyu6/?pub=4jqwl4',
-            'https://rumble.com/embed/v6npyui/?pub=4jqwl4',
-            'https://rumble.com/embed/v6npyuu/?pub=4jqwl4',
-            'https://rumble.com/embed/v6npyv6/?pub=4jqwl4',
-            'https://rumble.com/embed/v6npzf8/?pub=4jqwl4',
-            'https://rumble.com/embed/v6npzfm/?pub=4jqwl4',
-            'https://rumble.com/embed/v6npzg2/?pub=4jqwl4',
-            'https://rumble.com/embed/v6npzgi/?pub=4jqwl4',
-            'https://rumble.com/embed/v6nq0k8/?pub=4jqwl4',
-            'https://rumble.com/embed/v6nq0kk/?pub=4jqwl4',
-            'https://rumble.com/embed/v6nq0ky/?pub=4jqwl4',
-            'https://rumble.com/embed/v6nq0l8/?pub=4jqwl4',
-            'https://rumble.com/embed/v6nq16w/?pub=4jqwl4',
-            'https://rumble.com/embed/v6nq17a/?pub=4jqwl4'
-        ],
-        episodeTitles: [
-                '1. Motown Funk',
-                '2. Colombia Special (1)',
-                '3. Colombia Special (2)',
-                '4. Pick Up, Put Downs',
-                '5. An Itchy Urus',
-                '6. Chinese Food for Thought',
-                '7. Well Aged Scotch',
-                '8. International Buffoons Vacation',
-                '9. Aston, Astronauts and Angelinas Children',
-                '10. The Youth Vote',
-                '11. Sea to Unsalty Sea',
-                '12. Legends and Luggage',
-                '13. Survival of the Fattest',
-                '14. Funeral for a Ford'
-            ],
-        customDownloads: [
-        [
-    { url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/e3xul156yv7j', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
-    ],
-    [
-    { url: 'https://buzzheavier.com/yc5y12cq4uh5', name: 'Buzzheavier download' },
-    ],
-    ]},
-    
     sharpe: {
         title: 'Sharpe',
         image: 'https://duckduckgo.com/i/0246697a9178ba97.jpg',
@@ -549,11 +558,13 @@ window.shows = {
                 { url: 'https://buzzheavier.com/5ygv6xj77uvx', name: 'Buzzheavier download' },
             ],
     ]},
-    
-    invincibles1: {
-        title: 'S1 Invincible',
+
+    invincible: {
+        title: 'Invincible',
         image: 'https://external-content.duckduckgo.com/iu/?u=https://comicsmedia.ign.com/comics/image/object/743/743895/invincible-1_cover-art.jpg%3Fwidth=114&auto=webp&f=1&nofb=1&ipt=a85eacccbdcb2a975cadfa746d5c8a04cdd1f9efdec6a003b6ed478c7b36e200&ipo=images',
-        video: [
+        invincibles1: {
+          chapter: 'Season 1',
+          video: [
             'https://rumble.com/embed/v6j85ty/?pub=4jqwl4',
             'https://rumble.com/embed/v6j85yy/?pub=4jqwl4',
             'https://rumble.com/embed/v6j863j/?pub=4jqwl4',
@@ -591,76 +602,77 @@ window.shows = {
             ],            [
                 { url: 'https://buzzheavier.com/t7v78dosfq9u', name: 'Buzzheavier download' },
             ],
-    ]},
-    
-    invincibles2: {
-        title: 'S2 Invincible',
-        image: 'https://external-content.duckduckgo.com/iu/?u=https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/cf58e44b-e80e-40f3-ab01-8c8650a8aae9/dgc5ucy-7f36bfda-e4fa-465d-8951-db7ffcc637cf.jpg%3Ftoken=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcL2NmNThlNDRiLWU4MGUtNDBmMy1hYjAxLThjODY1MGE4YWFlOVwvZGdjNXVjeS03ZjM2YmZkYS1lNGZhLTQ2NWQtODk1MS1kYjdmZmNjNjM3Y2YuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.ST9JzpH7_077w3IRdaSNmfLmAosLPWcq22GK5ezeSho&f=1&nofb=1&ipt=9a6e5f3a75da974a8ab16e8ccf0d2cddbcfc19d9099305fe748dcb971d284ad9&ipo=images',
-        video: [
-            'https://rumble.com/embed/v6jdhug/?pub=4jqwl4',
-            'https://rumble.com/embed/v6jdi14/?pub=4jqwl4',
-            'https://rumble.com/embed/v6jdi5a/?pub=4jqwl4',
-            'https://rumble.com/embed/v6jdi9v/?pub=4jqwl4',
-            'https://rumble.com/embed/v6jdtrm/?pub=4jqwl4',
-            'https://rumble.com/embed/v6jdtya/?pub=4jqwl4',
-            'https://rumble.com/embed/v6jdufs/?pub=4jqwl4',
-            'https://rumble.com/embed/v6jdujy/?pub=4jqwl4'
-        ],
-        episodeTitles: [
-                '1. A Lesson for Your Next Life',
-                '2. In About Six Hours I Lose My Virginity to a Fish',
-                '3. This Missive, This Machination!',
-                '4. Its Been a While',
-                '5. This Must Come as a Shock',
-                '6. Its Not That Simple',
-                '7. Im Not Going Anywhere',
-                '8. I Thought You Were Stronger'
+    ]
+        },
+        invincibles2: {
+            chapter: 'Season 2',
+            video: [
+                'https://rumble.com/embed/v6jdhug/?pub=4jqwl4',
+                'https://rumble.com/embed/v6jdi14/?pub=4jqwl4',
+                'https://rumble.com/embed/v6jdi5a/?pub=4jqwl4',
+                'https://rumble.com/embed/v6jdi9v/?pub=4jqwl4',
+                'https://rumble.com/embed/v6jdtrm/?pub=4jqwl4',
+                'https://rumble.com/embed/v6jdtya/?pub=4jqwl4',
+                'https://rumble.com/embed/v6jdufs/?pub=4jqwl4',
+                'https://rumble.com/embed/v6jdujy/?pub=4jqwl4'
             ],
-            customDownloads: [
-                [
-                    { url: 'https://buzzheavier.com/4yt7xk39qk0y', name: 'Buzzheavier download' },
-                ],            [
-                    { url: 'https://buzzheavier.com/4yt7xk39qk0y', name: 'Buzzheavier download' },
-                ],            [
-                    { url: 'https://buzzheavier.com/4yt7xk39qk0y', name: 'Buzzheavier download' },
-                ],            [
-                    { url: 'https://buzzheavier.com/4yt7xk39qk0y', name: 'Buzzheavier download' },
-                ],            [
-                    { url: 'https://buzzheavier.com/4yt7xk39qk0y', name: 'Buzzheavier download' },
-                ],            [
-                    { url: 'https://buzzheavier.com/4yt7xk39qk0y', name: 'Buzzheavier download' },
-                ],            [
-                    { url: 'https://buzzheavier.com/4yt7xk39qk0y', name: 'Buzzheavier download' },
-                ],            [
-                    { url: 'https://buzzheavier.com/4yt7xk39qk0y', name: 'Buzzheavier download' },
+            episodeTitles: [
+                    '1. A Lesson for Your Next Life',
+                    '2. In About Six Hours I Lose My Virginity to a Fish',
+                    '3. This Missive, This Machination!',
+                    '4. Its Been a While',
+                    '5. This Must Come as a Shock',
+                    '6. Its Not That Simple',
+                    '7. Im Not Going Anywhere',
+                    '8. I Thought You Were Stronger'
                 ],
-    ]},
-    
-    invincibles3: {
-        title: 'S3 Invincible',
-        image: 'https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BZjE4ZDU4ZjMtZjliYS00M2ZmLThkNTItN2U3MmJjOGU0NmIxXkEyXkFqcGc@._V1_.jpg&f=1&h=500',
-        video: [
-            'https://rumble.com/embed/v6j7utp/?pub=4jqwl4',
-            'https://rumble.com/embed/v6j7uu4/?pub=4jqwl4',
-            'https://rumble.com/embed/v6j7uxg/?pub=4jqwl4',
-            'https://rumble.com/embed/v6j7v0s/?pub=4jqwl4',
-            'https://rumble.com/embed/v6ozm1m/?pub=4jqwl4',
-            'https://rumble.com/embed/v6ozm30/?pub=4jqwl4',
-            'https://rumble.com/embed/v6ozm3a/?pub=4jqwl4',
-            'https://rumble.com/embed/v6ozm3k/?pub=4jqwl4'
-        ],
-        episodeTitles: [
-                '1. Youre Not Laughing Now',
-                '2. A Deal with the Devil',
-                '3. You Want a Real Costume, Right?',
-                '4. You Were My Hero',
-                '5. This Was Supposed to Be Easy',
-                '6. All I Can Say Is Im Sorry',
-                '7. What Have I Done?',
-                '8. I Thought Youd Never Shut Up'
+                customDownloads: [
+                    [
+                        { url: 'https://buzzheavier.com/4yt7xk39qk0y', name: 'Buzzheavier download' },
+                    ],            [
+                        { url: 'https://buzzheavier.com/4yt7xk39qk0y', name: 'Buzzheavier download' },
+                    ],            [
+                        { url: 'https://buzzheavier.com/4yt7xk39qk0y', name: 'Buzzheavier download' },
+                    ],            [
+                        { url: 'https://buzzheavier.com/4yt7xk39qk0y', name: 'Buzzheavier download' },
+                    ],            [
+                        { url: 'https://buzzheavier.com/4yt7xk39qk0y', name: 'Buzzheavier download' },
+                    ],            [
+                        { url: 'https://buzzheavier.com/4yt7xk39qk0y', name: 'Buzzheavier download' },
+                    ],            [
+                        { url: 'https://buzzheavier.com/4yt7xk39qk0y', name: 'Buzzheavier download' },
+                    ],            [
+                        { url: 'https://buzzheavier.com/4yt7xk39qk0y', name: 'Buzzheavier download' },
+                    ],
+        ]
+          },
+          invincibles3: {
+            chapter: 'Season 3',
+            video: [
+                'https://rumble.com/embed/v6j7utp/?pub=4jqwl4',
+                'https://rumble.com/embed/v6j7uu4/?pub=4jqwl4',
+                'https://rumble.com/embed/v6j7uxg/?pub=4jqwl4',
+                'https://rumble.com/embed/v6j7v0s/?pub=4jqwl4',
+                'https://rumble.com/embed/v6ozm1m/?pub=4jqwl4',
+                'https://rumble.com/embed/v6ozm30/?pub=4jqwl4',
+                'https://rumble.com/embed/v6ozm3a/?pub=4jqwl4',
+                'https://rumble.com/embed/v6ozm3k/?pub=4jqwl4'
             ],
-        customDownloads: [
-    ]},
+            episodeTitles: [
+                    '1. Youre Not Laughing Now',
+                    '2. A Deal with the Devil',
+                    '3. You Want a Real Costume, Right?',
+                    '4. You Were My Hero',
+                    '5. This Was Supposed to Be Easy',
+                    '6. All I Can Say Is Im Sorry',
+                    '7. What Have I Done?',
+                    '8. I Thought Youd Never Shut Up'
+                ],
+            customDownloads: [
+        ]
+          },
+      },
+      
 
 
 
