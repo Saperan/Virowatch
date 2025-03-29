@@ -1,6 +1,58 @@
 // shows.js (Non-module)
 window.shows = {
 
+    padomjudzinsi: {
+        title: 'Padomju Džinsi',
+        image: 'https://upload.wikimedia.org/wikipedia/lv/5/5c/Padomju-dzinsi.jpg',
+        padomjudzinsis1: {
+          chapter: 'Season 1',
+          video: [
+            'https://rumble.com/embed/v6p782k/?pub=4jqwl4',
+            'https://rumble.com/embed/v6p783k/?pub=4jqwl4',
+            'https://rumble.com/embed/v6p7846/?pub=4jqwl4',
+            'https://rumble.com/embed/v6p784m/?pub=4jqwl4',
+            'https://rumble.com/embed/v6p784w/?pub=4jqwl4',
+            'https://rumble.com/embed/v6p785e/?pub=4jqwl4',
+            'https://rumble.com/embed/v6p785o/?pub=4jqwl4',
+            'https://rumble.com/embed/v6p7862/?pub=4jqwl4'
+        ],
+        episodeTitles: [
+                '1. Episode #1.1',
+                '2. Episode #1.2',
+                '3. 3. serija',
+                '4. Episode #1.4',
+                '5. Episode #1.5',
+                '6. Episode #1.6',
+                '7. Episode #1.7',
+                '8. Episode #1.8'
+            ],
+        customDownloads: [
+    ],
+    dubbed: [
+        'https://rumble.com/embed/v6p79y8/?pub=4jqwl4',
+        'https://rumble.com/embed/v6p79yk/?pub=4jqwl4',
+        'https://rumble.com/embed/v6p79yy/?pub=4jqwl4',
+        'https://rumble.com/embed/v6p79z4/?pub=4jqwl4',
+        'https://rumble.com/embed/v6p79zm/?pub=4jqwl4',
+        'https://rumble.com/embed/v6p79zy/?pub=4jqwl4',
+        'https://rumble.com/embed/v6p7a06/?pub=4jqwl4',
+        'https://rumble.com/embed/v6p7a0m/?pub=4jqwl4'
+    ],
+    dubbedepisodetitle: [
+        'RU 1. Episode #1.1',
+        'RU 2. Episode #1.2',
+        'RU 3. 3. serija',
+        'RU 4. Episode #1.4',
+        'RU 5. Episode #1.5',
+        'RU 6. Episode #1.6',
+        'RU 7. Episode #1.7',
+        'RU 8. Episode #1.8'
+    ],
+    dubbedcustomdownloads: [
+    ]
+        },
+      },
+
     barry: {
         title: 'Barry',
         image: 'https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BYzdlYWZkNjQtMWYwNi00YjNkLTljYjgtZjRhMmQ2YTQ1MWQ0XkEyXkFqcGc@._V1_.jpg&f=1&h=500',
