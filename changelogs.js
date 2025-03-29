@@ -1,4 +1,5 @@
 const changelogs = [
+  { version: "v9.0.1 30.03.2025", description: "Added Padomju Džinsi early (special request)" },
   { version: "v9.0 29.03.2025", description: "Anime and Shows content now has the content splitted on a drop down Season! | Added ALMOST Rest of the Re:ZERO Content | Added The Mask of Zorro 1998 | Redo Of Healer, One Punch Man, Rest of The Grand Tour coming soon next Friday Update!" },
   { version: "v8.2.1 25.03.2025", description: "Added rest of S3 Invincible Episodes (PURALADE request) | Added Re:Zero S3" },
   { version: "v8.2 20.03.2025", description: "Added Barry S2 | Removed Main Menu site and added all features from the Main Menu one to this one | More content coming soon." },
