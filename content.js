@@ -264,7 +264,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Update the episode list inside the sidebar (episodeListContainer) using the active media data.
+  // Update the episode list inside the sidebar using the active media data.
   function updateEpisodeSidebar() {
     episodeListContainer.innerHTML = '';
     const mediaData = getActiveMediaData();
@@ -322,14 +322,46 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 300);
   });
 
-  document.getElementById('backToCategory').addEventListener('click', (e) => {
-    e.preventDefault();
-    movieList.innerHTML = '';
-    movieListWrapper.style.display = 'none';
-    categoryContainer.style.display = 'flex';
-    episodeContainer.style.display = 'none';
-    container.style.display = 'block';
-  });
+  // Revised backToCategory event handler with extra logging and safety checks.
+  const backToCategoryButton = document.getElementById('backToCategory');
+  if (backToCategoryButton) {
+    backToCategoryButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('Back to Category button pressed.');
+  
+      if (videoPlayer) {
+        // Check if the videoPlayer is an iframe (embedded content)
+        if (videoPlayer.tagName.toLowerCase() === 'iframe') {
+          console.log('Video player is an iframe. Clearing src to stop playback.');
+          videoPlayer.src = '';  // Clear the source to stop the embed
+        } else {
+          try {
+            console.log('Stopping video playback.');
+            videoPlayer.pause();
+            videoPlayer.currentTime = 0; // Reset playback to the beginning
+            videoPlayer.removeAttribute('src'); // Remove the current video source
+            videoPlayer.load(); // Reset the video element
+            console.log('Video has been reset.');
+          } catch (error) {
+            console.error('Error while resetting video:', error);
+          }
+        }
+      } else {
+        console.warn('Video player element not found.');
+      }
+  
+      // Navigate back to category view.
+      movieList.innerHTML = '';
+      movieListWrapper.style.display = 'none';
+      categoryContainer.style.display = 'flex';
+      episodeContainer.style.display = 'none';
+      container.style.display = 'block';
+      console.log('Navigation back to category complete.');
+    });
+  } else {
+    console.error('Back to Category button not found.');
+  }
+  
 
   if (dubbedButton) {
     dubbedButton.addEventListener('click', (e) => {
