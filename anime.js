@@ -3,6 +3,75 @@ window.anime = {
 
 
 
+    OPM: {
+        title: 'One Punch Man',
+        image: 'https://duckduckgo.com/i/3fcbe5415fbc62d2.png',
+        OPMS1: {
+          chapter: 'Season 1',
+              video: [
+                'https://rumble.com/embed/v6q4aol/?pub=4l718n',
+                'https://rumble.com/embed/v6q4aoz/?pub=4l718n',
+                'https://rumble.com/embed/v6q4apb/?pub=4l718n',
+                'https://rumble.com/embed/v6q4apt/?pub=4l718n',
+                'https://rumble.com/embed/v6q4aqb/?pub=4l718n',
+                'https://rumble.com/embed/v6q4aqr/?pub=4l718n',
+                'https://rumble.com/embed/v6q4ar7/?pub=4l718n',
+                'https://rumble.com/embed/v6q4arj/?pub=4l718n',
+                'https://rumble.com/embed/v6q4as7/?pub=4l718n',
+                'https://rumble.com/embed/v6q4ash/?pub=4l718n',
+                'https://rumble.com/embed/v6q4atj/?pub=4l718n',
+                'https://rumble.com/embed/v6q4atx/?pub=4l718n'
+              ],
+              episodeTitles: [
+                'JP 1. The Strongest Man',
+                'JP 2. The Lone Cyborg',
+                'JP 3. The Obsessive Scientist',
+                'JP 4. The Modern Ninja',
+                'JP 5. The Ultimate Mentor',
+                'JP 6. The Terrifying City',
+                'JP 7. The Ultimate Disciple',
+                'JP 8. The Deep Sea King',
+                'JP 9. Unyielding Justice',
+                'JP 10. Unparalleled Peril',
+                'JP 11. The Dominator of the Universe',
+                'JP 12. The Strongest Hero'
+              ],
+              customDownloads: [
+              ],
+              // Dubbed version arrays – add your actual dubbed video links here
+              dubbed: [
+                'https://rumble.com/embed/v6q4br7/?pub=4l718n',
+                'https://rumble.com/embed/v6q4bql/?pub=4l718n',
+                'https://rumble.com/embed/v6q4bpd/?pub=4l718n',
+                'https://rumble.com/embed/v6q4box/?pub=4l718n',
+                'https://rumble.com/embed/v6q4bof/?pub=4l718n',
+                'https://rumble.com/embed/v6q4bo5/?pub=4l718n',
+                'https://rumble.com/embed/v6q4bnx/?pub=4l718n',
+                'https://rumble.com/embed/v6q4bn1/?pub=4l718n',
+                'https://rumble.com/embed/v6q4bmh/?pub=4l718n',
+                'https://rumble.com/embed/v6q4blz/?pub=4l718n',
+                'https://rumble.com/embed/v6q4bkv/?pub=4l718n',
+                'https://rumble.com/embed/v6q4bjv/?pub=4l718n'
+              ],
+              dubbedepisodetitle: [
+                '1. The Strongest Man',
+                '2. The Lone Cyborg',
+                '3. The Obsessive Scientist',
+                '4. The Modern Ninja',
+                '5. The Ultimate Mentor',
+                '6. The Terrifying City',
+                '7. The Ultimate Disciple',
+                '8. The Deep Sea King',
+                '9. Unyielding Justice',
+                '10. Unparalleled Peril',
+                '11. The Dominator of the Universe',
+                '12. The Strongest Hero'
+              ],
+              dubbedcustomdownloads: [
+              ]
+        },
+      },
+
   ChillinIAWWL2CP: {
     title: 'Chillin in Another World with Level 2 Super Cheat Powers',
     image: 'https://m.media-amazon.com/images/M/MV5BOTYyYTM5MDMtMWNkNC00Y2E2LTk0NzYtMzQyZWZhMjBjMGRiXkEyXkFqcGc@._V1_.jpg',
@@ -838,18 +907,18 @@ window.anime = {
     EOTWW: {
       chapter: 'EOTWW',
       video: [
-        'https://rumble.com/embed/v6li8l0/?pub=4jqwl4',
-        'https://rumble.com/embed/v6li950/?pub=4jqwl4',
-        'https://rumble.com/embed/v6li9bo/?pub=4jqwl4',
-        'https://rumble.com/embed/v6li9ir/?pub=4jqwl4',
-        'https://rumble.com/embed/v6licm0/?pub=4jqwl4',
-        'https://rumble.com/embed/v6lics9/?pub=4jqwl4',
-        'https://rumble.com/embed/v6licyi/?pub=4jqwl4',
-        'https://rumble.com/embed/v6lid4c/?pub=4jqwl4',
-        'https://rumble.com/embed/v6lidkl/?pub=4jqwl4',
-        'https://rumble.com/embed/v6lie0f/?pub=4jqwl4',
-        'https://rumble.com/embed/v6lie6o/?pub=4jqwl4',
-        'https://rumble.com/embed/v6lie9l/?pub=4jqwl4'
+        'https://rumble.com/embed/v6q45nx/?pub=4l718n',
+        'https://rumble.com/embed/v6q45oj/?pub=4l718n',
+        'https://rumble.com/embed/v6q45p3/?pub=4l718n',
+        'https://rumble.com/embed/v6q45q5/?pub=4l718n',
+        'https://rumble.com/embed/v6q45ql/?pub=4l718n',
+        'https://rumble.com/embed/v6q45r3/?pub=4l718n',
+        'https://rumble.com/embed/v6q45rj/?pub=4l718n',
+        'https://rumble.com/embed/v6q45s5/?pub=4l718n',
+        'https://rumble.com/embed/v6q45sf/?pub=4l718n',
+        'https://rumble.com/embed/v6q45st/?pub=4l718n',
+        'https://rumble.com/embed/v6q45t3/?pub=4l718n',
+        'https://rumble.com/embed/v6q45tn/?pub=4l718n'
       ],
       episodeTitles: [
         'JP 1. The Crimson-Eyed Wizards',
@@ -893,18 +962,18 @@ window.anime = {
       ],
       ],
       dubbed: [
-        'https://rumble.com/embed/v6lhwp3/?pub=4jqwl4',
-        'https://rumble.com/embed/v6lhwqc/?pub=4jqwl4',
-        'https://rumble.com/embed/v6lhwsf/?pub=4jqwl4',
-        'https://rumble.com/embed/v6lhwux/?pub=4jqwl4',
-        'https://rumble.com/embed/v6lhzr3/?pub=4jqwl4',
-        'https://rumble.com/embed/v6lhztl/?pub=4jqwl4',
-        'https://rumble.com/embed/v6lhzuu/?pub=4jqwl4',
-        'https://rumble.com/embed/v6lhzxr/?pub=4jqwl4',
-        'https://rumble.com/embed/v6li4pu/?pub=4jqwl4',
-        'https://rumble.com/embed/v6li4sr/?pub=4jqwl4',
-        'https://rumble.com/embed/v6li4xr/?pub=4jqwl4',
-        'https://rumble.com/embed/v6li52c/?pub=4jqwl4'
+        'https://rumble.com/embed/v6q48qt/?pub=4l718n',
+        'https://rumble.com/embed/v6q48sj/?pub=4l718n',
+        'https://rumble.com/embed/v6q48t1/?pub=4l718n',
+        'https://rumble.com/embed/v6q48ut/?pub=4l718n',
+        'https://rumble.com/embed/v6q490b/?pub=4l718n',
+        'https://rumble.com/embed/v6q490j/?pub=4l718n',
+        'https://rumble.com/embed/v6q490r/?pub=4l718n',
+        'https://rumble.com/embed/v6q491x/?pub=4l718n',
+        'https://rumble.com/embed/v6q4927/?pub=4l718n',
+        'https://rumble.com/embed/v6q492b/?pub=4l718n',
+        'https://rumble.com/embed/v6q492z/?pub=4l718n',
+        'https://rumble.com/embed/v6q4947/?pub=4l718n'
       ],
       dubbedepisodetitle: [
         '1. The Crimson-Eyed Wizards',
@@ -951,17 +1020,17 @@ window.anime = {
     konosubas2: {
       chapter: 'Season 2',
       video: [
-        'https://rumble.com/embed/v6k7bol/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k7btl/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k7bwx/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k7c0o/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k7ngc/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k7nif/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k7niu/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k7nlc/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k7p1u/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k7p5l/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k7p83/?pub=4jqwl4'
+        'https://rumble.com/embed/v6pf4o7/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf4ol/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf4pb/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf4pn/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf4q9/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf4qr/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf4rb/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf4rr/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf4s3/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf4sr/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf4td/?pub=4l49bz'
       ],
       episodeTitles: [
         'JP 1. Give Me Deliverance from This Judicial Injustice!',
@@ -1002,17 +1071,17 @@ window.anime = {
       ],
       ],
       dubbed: [
-        'https://rumble.com/embed/v6k73lr/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k73oo/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k747f/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k74ar/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k75c9/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k75ec/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k75ii/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k75lf/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k76rx/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k76wi/?pub=4jqwl4',
-        'https://rumble.com/embed/v6k76z0/?pub=4jqwl4'
+        'https://rumble.com/embed/v6pf5ex/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf5fl/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf5gd/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf5gv/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf5hb/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf5ht/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf5hz/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf5il/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf5j1/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf5jx/?pub=4l49bz',
+        'https://rumble.com/embed/v6pf5kj/?pub=4l49bz'
       ],
       dubbedepisodetitle: [
         '1. Give Me Deliverance from This Judicial Injustice!',
@@ -1056,7 +1125,7 @@ window.anime = {
     LOC: {
       chapter: 'LOC',
       video: [
-        'https://rumble.com/embed/v6kj9uu/?pub=4jqwl4'
+        'https://rumble.com/embed/v6q45mj/?pub=4l718n'
     ],
     episodeTitles: [
         'Movie'
@@ -1070,17 +1139,17 @@ window.anime = {
     konosubas3: {
       chapter: 'Season 3',
       video: [
-        'https://rumble.com/embed/v6m8ayo/?pub=4jqwl4',
-        'https://rumble.com/embed/v6m8azx/?pub=4jqwl4',
-        'https://rumble.com/embed/v6m8b2u/?pub=4jqwl4',
-        'https://rumble.com/embed/v6m8b4x/?pub=4jqwl4',
-        'https://rumble.com/embed/v6m8d7x/?pub=4jqwl4',
-        'https://rumble.com/embed/v6m8da0/?pub=4jqwl4',
-        'https://rumble.com/embed/v6m8dau/?pub=4jqwl4',
-        'https://rumble.com/embed/v6m8dff/?pub=4jqwl4',
-        'https://rumble.com/embed/v6m8g7f/?pub=4jqwl4',
-        'https://rumble.com/embed/v6m8g9x/?pub=4jqwl4',
-        'https://rumble.com/embed/v6m8gbl/?pub=4jqwl4'
+        'https://rumble.com/embed/v6pjtmf/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjtmz/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjtnf/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjto3/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjtoj/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjtp3/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjtpn/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjtq5/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjtqj/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjtqx/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjtrr/?pub=4l49bz'
     ],
     episodeTitles: [
             'JP 1. Gods Blessings on This Bright Future!',
@@ -1126,34 +1195,34 @@ window.anime = {
   rezero: {
     title: 'Re Zero',
     image: 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3c/Re-Zero_kara_Hajimeru_Isekai_Seikatsu_light_novel_volume_1_cover.jpg/220px-Re-Zero_kara_Hajimeru_Isekai_Seikatsu_light_novel_volume_1_cover.jpg',
-    konosubas1: {
+    rezero1: {
       chapter: 'Season 1',
       video: [
-        'https://rumble.com/embed/v6nrqt4/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrqtg/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrqts/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrqty/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrqzq/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrr04/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrr06/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrr0g/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrr6s/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrr72/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrr74/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrr7m/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrrda/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrrdq/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrrdw/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrrek/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrri2/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrrie/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrrio/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrriu/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrrmo/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrrmy/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrrn8/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrrng/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nrrnq/?pub=4jqwl4'
+        'https://rumble.com/embed/v6pjzgf/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzgx/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzhr/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzhz/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzij/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzj5/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzjt/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzkb/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzkr/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzl9/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzlr/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzmv/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjznn/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzo9/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzor/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzpn/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzq9/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzqj/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzrf/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzrv/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzsd/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzsv/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjztd/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjztz/?pub=4l49bz',
+        'https://rumble.com/embed/v6pjzw9/?pub=4l49bz'
       ],
       episodeTitles: [
         'JP 1. The End Of The Beginning And The Beginning Of The End',
@@ -1236,31 +1305,31 @@ window.anime = {
       ],
       ],
       dubbed: [
-        'https://rumble.com/embed/v6nqw4c/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqw4o/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqw50/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqw5g/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqwd8/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqwdw/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqwem/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqwf6/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqwkk/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqwnm/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqwpi/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqwpq/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqwus/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqwvu/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqwwa/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqwww/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqx58/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqx6e/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqx76/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqx7e/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqxjc/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqxki/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqxkq/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqxla/?pub=4jqwl4',
-        'https://rumble.com/embed/v6nqxmg/?pub=4jqwl4'
+        'https://rumble.com/embed/v6plahj/?pub=4l49bz',
+        'https://rumble.com/embed/v6plai7/?pub=4l49bz',
+        'https://rumble.com/embed/v6plaip/?pub=4l49bz',
+        'https://rumble.com/embed/v6plajj/?pub=4l49bz',
+        'https://rumble.com/embed/v6plak9/?pub=4l49bz',
+        'https://rumble.com/embed/v6plakz/?pub=4l49bz',
+        'https://rumble.com/embed/v6plal7/?pub=4l49bz',
+        'https://rumble.com/embed/v6plalr/?pub=4l49bz',
+        'https://rumble.com/embed/v6plam9/?pub=4l49bz',
+        'https://rumble.com/embed/v6plamr/?pub=4l49bz',
+        'https://rumble.com/embed/v6pland/?pub=4l49bz',
+        'https://rumble.com/embed/v6plaob/?pub=4l49bz',
+        'https://rumble.com/embed/v6plaop/?pub=4l49bz',
+        'https://rumble.com/embed/v6plap9/?pub=4l49bz',
+        'https://rumble.com/embed/v6plaq5/?pub=4l49bz',
+        'https://rumble.com/embed/v6plarj/?pub=4l49bz',
+        'https://rumble.com/embed/v6plasx/?pub=4l49bz',
+        'https://rumble.com/embed/v6plath/?pub=4l49bz',
+        'https://rumble.com/embed/v6plau3/?pub=4l49bz',
+        'https://rumble.com/embed/v6plb89/?pub=4l49bz',
+        'https://rumble.com/embed/v6plb8h/?pub=4l49bz',
+        'https://rumble.com/embed/v6plb95/?pub=4l49bz',
+        'https://rumble.com/embed/v6plb9l/?pub=4l49bz',
+        'https://rumble.com/embed/v6plba3/?pub=4l49bz',
+        'https://rumble.com/embed/v6plba9/?pub=4l49bz'
       ],
       dubbedepisodetitle: [
         '1. The End Of The Beginning And The Beginning Of The End',
@@ -1346,7 +1415,7 @@ window.anime = {
     memorysnow: {
         chapter: 'OVA - Memory Snow',
         video: [
-          'https://rumble.com/embed/v6p3c9e/?pub=4jqwl4'
+          'https://rumble.com/embed/v6q4h57/?pub=4l718n'
       ],
       episodeTitles: [
           'JP Movie'
@@ -1357,7 +1426,7 @@ window.anime = {
           ],
         ],
         dubbed: [
-          'https://rumble.com/embed/v6p3c9s/?pub=4jqwl4'
+          'https://rumble.com/embed/v6q4h5n/?pub=4l718n'
         ],
         dubbedepisodetitle: [
             'Movie'
@@ -1371,7 +1440,7 @@ window.anime = {
       frozenbonds: {
         chapter: 'OVA - Frozen Bonds',
         video: [
-          'https://rumble.com/embed/v6p3cae/?pub=4jqwl4'
+          'https://rumble.com/embed/v6q4h4f/?pub=4l718n'
       ],
       episodeTitles: [
           'JP Movie'
@@ -1382,7 +1451,7 @@ window.anime = {
           ],
         ],
         dubbed: [
-          'https://rumble.com/embed/v6p3cau/?pub=4jqwl4'
+          'https://rumble.com/embed/v6q4h51/?pub=4l718n'
         ],
         dubbedepisodetitle: [
             'Movie'
@@ -1396,31 +1465,31 @@ window.anime = {
     rezero2: {
       chapter: 'Season 2',
       video: [
-        'https://rumble.com/embed/v6o0wk8/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0wke/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0wkk/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0wl4/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0wli/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0wre/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0wrs/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0wse/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0wso/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0wt2/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0wxy/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0wyc/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0wzm/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0x02/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0x0g/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0x7y/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0x86/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0x8k/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0x90/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0x98/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0xgy/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0xhe/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0xho/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0xi0/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0xie/?pub=4jqwl4'
+        'https://rumble.com/embed/v6poulz/?pub=4l718n',
+        'https://rumble.com/embed/v6poumn/?pub=4l718n',
+        'https://rumble.com/embed/v6poumz/?pub=4l718n',
+        'https://rumble.com/embed/v6pounb/?pub=4l718n',
+        'https://rumble.com/embed/v6pouo5/?pub=4l718n',
+        'https://rumble.com/embed/v6pouoj/?pub=4l718n',
+        'https://rumble.com/embed/v6poup1/?pub=4l718n',
+        'https://rumble.com/embed/v6poupn/?pub=4l718n',
+        'https://rumble.com/embed/v6pouqh/?pub=4l718n',
+        'https://rumble.com/embed/v6pouqz/?pub=4l718n',
+        'https://rumble.com/embed/v6pourh/?pub=4l718n',
+        'https://rumble.com/embed/v6pourz/?pub=4l718n',
+        'https://rumble.com/embed/v6poush/?pub=4l718n',
+        'https://rumble.com/embed/v6pousn/?pub=4l718n',
+        'https://rumble.com/embed/v6poutl/?pub=4l718n',
+        'https://rumble.com/embed/v6pouu9/?pub=4l718n',
+        'https://rumble.com/embed/v6pouux/?pub=4l718n',
+        'https://rumble.com/embed/v6pouvd/?pub=4l718n',
+        'https://rumble.com/embed/v6pouvt/?pub=4l718n',
+        'https://rumble.com/embed/v6pouwd/?pub=4l718n',
+        'https://rumble.com/embed/v6pouwt/?pub=4l718n',
+        'https://rumble.com/embed/v6pouxh/?pub=4l718n',
+        'https://rumble.com/embed/v6pouy7/?pub=4l718n',
+        'https://rumble.com/embed/v6pouyt/?pub=4l718n',
+        'https://rumble.com/embed/v6pouzr/?pub=4l718n'
       ],
       episodeTitles: [
         'JP 1. Each Ones Promise',
@@ -1503,31 +1572,31 @@ window.anime = {
           ],
       ],
       dubbed: [
-        'https://rumble.com/embed/v6o0uby/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0udi/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0udw/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0uf6/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0um6/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0umi/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0un0/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0un8/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0utc/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0uty/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0uum/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0uvs/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0v0i/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0v16/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0v2i/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0v38/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0vre/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0vrs/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0vs2/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0vsq/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0w96/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0w9m/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0w9s/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0wae/?pub=4jqwl4',
-        'https://rumble.com/embed/v6o0wak/?pub=4jqwl4'
+        'https://rumble.com/embed/v6possn/?pub=4l718n',
+        'https://rumble.com/embed/v6post9/?pub=4l718n',
+        'https://rumble.com/embed/v6posu5/?pub=4l718n',
+        'https://rumble.com/embed/v6posux/?pub=4l718n',
+        'https://rumble.com/embed/v6posvn/?pub=4l718n',
+        'https://rumble.com/embed/v6posw7/?pub=4l718n',
+        'https://rumble.com/embed/v6poswr/?pub=4l718n',
+        'https://rumble.com/embed/v6posxf/?pub=4l718n',
+        'https://rumble.com/embed/v6posyb/?pub=4l718n',
+        'https://rumble.com/embed/v6posyx/?pub=4l718n',
+        'https://rumble.com/embed/v6poszl/?pub=4l718n',
+        'https://rumble.com/embed/v6pot0f/?pub=4l718n',
+        'https://rumble.com/embed/v6pot1f/?pub=4l718n',
+        'https://rumble.com/embed/v6pot1v/?pub=4l718n',
+        'https://rumble.com/embed/v6pot2f/?pub=4l718n',
+        'https://rumble.com/embed/v6pot2t/?pub=4l718n',
+        'https://rumble.com/embed/v6pot3p/?pub=4l718n',
+        'https://rumble.com/embed/v6pot3x/?pub=4l718n',
+        'https://rumble.com/embed/v6pot4n/?pub=4l718n',
+        'https://rumble.com/embed/v6pot5n/?pub=4l718n',
+        'https://rumble.com/embed/v6pot67/?pub=4l718n',
+        'https://rumble.com/embed/v6pot6p/?pub=4l718n',
+        'https://rumble.com/embed/v6pot75/?pub=4l718n',
+        'https://rumble.com/embed/v6pot7t/?pub=4l718n',
+        'https://rumble.com/embed/v6pot8j/?pub=4l718n'
       ],
       dubbedepisodetitle: [
         '1. Each Ones Promise',
@@ -1613,22 +1682,22 @@ window.anime = {
     rezero3: {
       chapter: 'Season 3',
       video: [
-        'https://rumble.com/embed/v6p0mao/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p11iy/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p11jo/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p11ke/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p11kw/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p11lu/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p11mc/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p11nc/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p11o4/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p11oo/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p11p8/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p127a/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p127q/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p12hm/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p12hw/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p12ia/?pub=4jqwl4'
+        'https://rumble.com/embed/v6pow0b/?pub=4l718n',
+        'https://rumble.com/embed/v6pow0z/?pub=4l718n',
+        'https://rumble.com/embed/v6pow1l/?pub=4l718n',
+        'https://rumble.com/embed/v6pow25/?pub=4l718n',
+        'https://rumble.com/embed/v6pow2j/?pub=4l718n',
+        'https://rumble.com/embed/v6pow31/?pub=4l718n',
+        'https://rumble.com/embed/v6pow3x/?pub=4l718n',
+        'https://rumble.com/embed/v6pow49/?pub=4l718n',
+        'https://rumble.com/embed/v6pow4n/?pub=4l718n',
+        'https://rumble.com/embed/v6pow4z/?pub=4l718n',
+        'https://rumble.com/embed/v6pow5h/?pub=4l718n',
+        'https://rumble.com/embed/v6pow6f/?pub=4l718n',
+        'https://rumble.com/embed/v6pow7b/?pub=4l718n',
+        'https://rumble.com/embed/v6pow7n/?pub=4l718n',
+        'https://rumble.com/embed/v6pow8h/?pub=4l718n',
+        'https://rumble.com/embed/v6pow93/?pub=4l718n'
       ],
       episodeTitles: [
         'JP 1. Theatrical Malice',
@@ -1646,16 +1715,7 @@ window.anime = {
         'JP 13. The Warriors Commendation',
         'JP 14. Theresia van Astrea',
         'JP 15. A Hideous Dinner Party',
-        'JP 16. The Results for the Battle of Priestella',
-        'JP 17. ',
-        'JP 18. ',
-        'JP 19. ',
-        'JP 20. ',
-        'JP 21. ',
-        'JP 22. ',
-        'JP 23. ',
-        'JP 24. ',
-        'JP 25. '
+        'JP 16. The Results for the Battle of Priestella'
           ],
       customDownloads: [
       ],
@@ -1688,18 +1748,9 @@ window.anime = {
         '11. Liliana Masquerade',
         '12. Regulus Corneas',
         '13. The Warriors Commendation',
-        '14. ',
-        '15. ',
-        '16. ',
-        '17. ',
-        '18. ',
-        '19. ',
-        '20. ',
-        '21. ',
-        '22. ',
-        '23. ',
-        '24. ',
-        '25. '
+        '14. Theresia van Astrea',
+        '15. A Hideous Dinner Party',
+        '16. The Results for the Battle of Priestella'
       ],
       dubbedcustomdownloads: [
       ]
