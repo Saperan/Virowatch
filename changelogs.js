@@ -1,4 +1,5 @@
 const changelogs = [
+  { version: "v9.0.6 20.04.2025", description: "Added back almost all of the anime back, Added OPM for Easter Update! Happy Easter!" },
   { version: "v9.0.4 15.04.2025", description: "Added back half of the anime back, other half coming soon | Fixed bug with when you watch and press back to category list it now deloads the video and doesnt play it in the background." },
   { version: "v9.0.1 30.03.2025", description: "Added Padomju Džinsi early (special request)" },
   { version: "v9.0 29.03.2025", description: "Anime and Shows content now has the content splitted on a drop down Season! | Added ALMOST Rest of the Re:ZERO Content | Added The Mask of Zorro 1998 | Redo Of Healer, One Punch Man, Rest of The Grand Tour coming soon next Friday Update!" },
