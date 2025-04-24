@@ -1166,29 +1166,80 @@ window.anime = {
         ],
     customDownloads: [
         [
-            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
         ],            [
-            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
         ],            [
-            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
         ],            [
-            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
         ],            [
-            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
         ],            [
-            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
         ],            [
-            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
         ],            [
-            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
         ],            [
-            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
         ],            [
-            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
         ],            [
-            { url: 'https://buzzheavier.com/9ps3cat1r7a9', name: 'Buzzheavier download' },
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
         ],
-    ]
+    ],
+    dubbed: [
+        'https://rumble.com/embed/v6qc2iv/?pub=4l718n',
+        'https://rumble.com/embed/v6qc2j1/?pub=4l718n',
+        'https://rumble.com/embed/v6qc2jn/?pub=4l718n',
+        'https://rumble.com/embed/v6qc2jv/?pub=4l718n',
+        'https://rumble.com/embed/v6qc2kb/?pub=4l718n',
+        'https://rumble.com/embed/v6qc2kp/?pub=4l718n',
+        'https://rumble.com/embed/v6qc2l5/?pub=4l718n',
+        'https://rumble.com/embed/v6qc2lx/?pub=4l718n',
+        'https://rumble.com/embed/v6qc2mb/?pub=4l718n',
+        'https://rumble.com/embed/v6qc2mv/?pub=4l718n',
+        'https://rumble.com/embed/v6qc2n5/?pub=4l718n'
+      ],
+      dubbedepisodetitle: [
+        '1. Gods Blessings on This Bright Future!',
+        '2. A Smile for This Dour Girl!',
+        '3. A Re-education for This Bright Little Girl!',
+        '4. Divine Punishment for This Handsome Gentleman Thief!',
+        '5. Nefarious Friends for This Sheltered Princess!',
+        '6. A Farewell to This Lavish Lifestyle!',
+        '7. Rest for This Up-and-Coming Adventurer!',
+        '8. An Eternal Rest for the Master of This Lake!',
+        '9. A Talking-To for This Runaway!',
+        '10. Blessings for This Selfish Bride!',
+        '11. Gods Blessings for These Unchanging Days!'
+      ],
+      dubbedcustomdownloads: [
+        [
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/was7jyvkjb9u', name: 'Buzzheavier download' },
+        ],
+      ]
     },
   },
 
