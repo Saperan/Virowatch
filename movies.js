@@ -4,7 +4,7 @@ window.movies = {
         title: 'The Mask of Zorro 1998',
         image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fm.media-amazon.com%2Fimages%2FM%2FMV5BMzA2MDgyYzMtNjc4OC00YjU0LWEzMWEtOTRhMTViODY0Mjk0XkEyXkFqcGc%40._V1__SX500&f=1&h=500',
         video: [
-            'https://rumble.com/embed/v6p5qay/?pub=4jqwl4'
+            'https://rumble.com/embed/v6qmxk5/?pub=3u4il9'
         ],
         episodeTitles: [
             'Movie'
@@ -18,18 +18,7 @@ window.movies = {
     kickass: {
         title: 'Kick Ass',
         image: 'https://m.media-amazon.com/images/M/MV5BMTMzNzEzMDYxM15BMl5BanBnXkFtZTcwMTc0NTMxMw@@._V1_.jpg',
-        video: ['https://rumble.com/embed/v6ndl6f/?pub=4jqwl4'],
-        episodeTitles: ['Movie'],
-        customDownloads: [
-            [
-                { url: 'https://buzzheavier.com/whopoy87wur1', name: 'Buzzheavier download' }
-            ]
-        ]
-    },
-    kickass: {
-        title: 'Kick Ass',
-        image: 'https://m.media-amazon.com/images/M/MV5BMTMzNzEzMDYxM15BMl5BanBnXkFtZTcwMTc0NTMxMw@@._V1_.jpg',
-        video: ['https://rumble.com/embed/v6ndl6f/?pub=4jqwl4'],
+        video: ['https://rumble.com/embed/v6qmwwz/?pub=3u4il9'],
         episodeTitles: ['Movie'],
         customDownloads: [
             [
@@ -41,11 +30,9 @@ window.movies = {
         title: 'All Quiet On The Western Front',
         image: 'https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BOWJiYWMyYTktZThhOS00ZjgxLWE0YTQtZDMyNTQxMjMyYjI2XkEyXkFqcGc@._V1_.jpg&f=1&h=500',
         video: [
-            'https://rumble.com/embed/v6nd89f/?pub=4jqwl4',
-            'https://rumble.com/embed/v6nd8ou/?pub=4jqwl4'
+            'https://rumble.com/embed/v6qmwwb/?pub=3u4il9'
         ],
         episodeTitles: [
-            'English',
             'German'
         ],
         customDownloads: [
@@ -61,7 +48,7 @@ taxi: {
     title: 'Taxi',
     image: 'https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BZTlkM2EzOTAtMTgzZi00NDEyLWJjOGItYWJiYTE2NmRlODMwXkEyXkFqcGc@._V1_.jpg&f=1&h=500',
     video: [
-        'https://rumble.com/embed/v6m57ko/?pub=4jqwl4'
+        'https://rumble.com/embed/v6qmwxv/?pub=3u4il9'
     ],
     episodeTitles: [
         'Movie'
@@ -74,7 +61,7 @@ taxi2: {
     title: 'Taxi 2',
     image: 'https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BYzBjNDE0YmUtZTIxZS00YzJkLTlhMzAtNjQ4OTExNDQ4YzhlXkEyXkFqcGc@._V1_.jpg&f=1&h=500',
     video: [
-        'https://rumble.com/embed/v6m57po/?pub=4jqwl4'
+        'https://rumble.com/embed/v6qmwyp/?pub=3u4il9'
         ],
     episodeTitles: [
         'Movie'
@@ -87,7 +74,7 @@ taxi3: {
     title: 'Taxi 3',
     image: 'https://external-content.duckduckgo.com/iu/?u=https://m.media-amazon.com/images/M/MV5BNzdjODU5ODQtZjkzOC00MTNiLWFhZjQtNDcyZmI1MmM2Yzg2XkEyXkFqcGc@._V1_.jpg&f=1&h=500',
      video: [
-        'https://rumble.com/embed/v6m57y0/?pub=4jqwl4'
+        'https://rumble.com/embed/v6qmxkr/?pub=3u4il9'
     ],
             episodeTitles: [
                  'Movie'
