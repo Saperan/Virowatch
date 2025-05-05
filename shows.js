@@ -7,26 +7,43 @@ window.shows = {
         padomjudzinsis1: {
           chapter: 'Season 1',
           video: [
-            'https://rumble.com/embed/v6p782k/?pub=4jqwl4',
-            'https://rumble.com/embed/v6p783k/?pub=4jqwl4',
-            'https://rumble.com/embed/v6p7846/?pub=4jqwl4',
-            'https://rumble.com/embed/v6p784m/?pub=4jqwl4',
-            'https://rumble.com/embed/v6p784w/?pub=4jqwl4',
-            'https://rumble.com/embed/v6p785e/?pub=4jqwl4',
-            'https://rumble.com/embed/v6p785o/?pub=4jqwl4',
-            'https://rumble.com/embed/v6p7862/?pub=4jqwl4'
+            'https://rumble.com/embed/v6qrs6v/?pub=4ljicf',
+            'https://rumble.com/embed/v6qrs7t/?pub=4ljicf',
+            'https://rumble.com/embed/v6qrs8l/?pub=4ljicf',
+            'https://rumble.com/embed/v6qrs93/?pub=4ljicf',
+            'https://rumble.com/embed/v6qrs9h/?pub=4ljicf',
+            'https://rumble.com/embed/v6qrsa1/?pub=4ljicf',
+            'https://rumble.com/embed/v6qrsav/?pub=4ljicf',
+            'https://rumble.com/embed/v6qrsbl/?pub=4ljicf'
         ],
         episodeTitles: [
-                '1. Episode #1.1',
-                '2. Episode #1.2',
+                '1. 1. serija',
+                '2. 2. serija',
                 '3. 3. serija',
-                '4. Episode #1.4',
-                '5. Episode #1.5',
-                '6. Episode #1.6',
-                '7. Episode #1.7',
-                '8. Episode #1.8'
+                '4. 4. serija',
+                '5. 5. serija',
+                '6. 6. serija',
+                '7. 7. serija',
+                '8. 8. serija'
             ],
         customDownloads: [
+            [
+                { url: 'https://buzzheavier.com/poy0s8pdhj8h', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/poy0s8pdhj8h', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/poy0s8pdhj8h', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/poy0s8pdhj8h', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/poy0s8pdhj8h', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/poy0s8pdhj8h', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/poy0s8pdhj8h', name: 'Buzzheavier download' },
+            ],            [
+                { url: 'https://buzzheavier.com/poy0s8pdhj8h', name: 'Buzzheavier download' },
+            ],
     ],
     dubbed: [
         'https://rumble.com/embed/v6p79y8/?pub=4jqwl4',
@@ -49,6 +66,23 @@ window.shows = {
         'RU 8. Episode #1.8'
     ],
     dubbedcustomdownloads: [
+        [
+            { url: 'https://buzzheavier.com/t83c5sonf3r5', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/t83c5sonf3r5', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/t83c5sonf3r5', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/t83c5sonf3r5', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/obl3koge70jx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/obl3koge70jx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/obl3koge70jx', name: 'Buzzheavier download' },
+        ],            [
+            { url: 'https://buzzheavier.com/obl3koge70jx', name: 'Buzzheavier download' },
+        ],
     ]
         },
       },
@@ -59,14 +93,14 @@ window.shows = {
         BARRYS1: {
           chapter: 'Season 1',
           video: [
-            'https://rumble.com/embed/v6oj7hm/?pub=4jqwl4',
-            'https://rumble.com/embed/v6oj7i6/?pub=4jqwl4',
-            'https://rumble.com/embed/v6oj7im/?pub=4jqwl4',
-            'https://rumble.com/embed/v6oj7j8/?pub=4jqwl4',
-            'https://rumble.com/embed/v6oj7xg/?pub=4jqwl4',
-            'https://rumble.com/embed/v6oj7y0/?pub=4jqwl4',
-            'https://rumble.com/embed/v6oj7ye/?pub=4jqwl4',
-            'https://rumble.com/embed/v6oj7yq/?pub=4jqwl4'
+            'https://rumble.com/embed/v6qn1cl/?pub=3u4il9',
+            'https://rumble.com/embed/v6qn1ex/?pub=3u4il9',
+            'https://rumble.com/embed/v6qn1e3/?pub=3u4il9',
+            'https://rumble.com/embed/v6qn1h9/?pub=3u4il9',
+            'https://rumble.com/embed/v6qn1hr/?pub=3u4il9',
+            'https://rumble.com/embed/v6qn1ih/?pub=3u4il9',
+            'https://rumble.com/embed/v6qn1nb/?pub=3u4il9',
+            'https://rumble.com/embed/v6qn1nn/?pub=3u4il9'
         ],
         episodeTitles: [
                 '1. Chapter One: Make Your Mark',
@@ -108,14 +142,14 @@ window.shows = {
         BARRYS2: {
             chapter: 'Season 2',
             video: [
-                'https://rumble.com/embed/v6oqjfw/?pub=4jqwl4',
-                'https://rumble.com/embed/v6oqjgc/?pub=4jqwl4',
-                'https://rumble.com/embed/v6oqjhk/?pub=4jqwl4',
-                'https://rumble.com/embed/v6oqjia/?pub=4jqwl4',
-                'https://rumble.com/embed/v6oqjwk/?pub=4jqwl4',
-                'https://rumble.com/embed/v6oqjx0/?pub=4jqwl4',
-                'https://rumble.com/embed/v6oqjxg/?pub=4jqwl4',
-                'https://rumble.com/embed/v6oqjy0/?pub=4jqwl4'
+                'https://rumble.com/embed/v6qn26x/?pub=3u4il9',
+                'https://rumble.com/embed/v6qn27b/?pub=3u4il9',
+                'https://rumble.com/embed/v6qn2cf/?pub=3u4il9',
+                'https://rumble.com/embed/v6qn2cr/?pub=3u4il9',
+                'https://rumble.com/embed/v6qn2xh/?pub=3u4il9',
+                'https://rumble.com/embed/v6qn2xr/?pub=3u4il9',
+                'https://rumble.com/embed/v6qn2yt/?pub=3u4il9',
+                'https://rumble.com/embed/v6qn2z5/?pub=3u4il9'
             ],
             episodeTitles: [
                     '1. The Show Must Go On, Probably?',
@@ -521,6 +555,49 @@ window.shows = {
         ],
         ]
           },
+          s4tgt: {
+            chapter: 'Season 4',
+            video: [
+                'https://rumble.com/embed/v6p8q5m/?pub=4jqwl4',
+                'https://rumble.com/embed/v6p8q6k/?pub=4jqwl4',
+                'https://rumble.com/embed/v6p8q76/?pub=4jqwl4',
+                'https://rumble.com/embed/v6p8q7y/?pub=4jqwl4',
+            ],
+            episodeTitles: [
+                    '1. he Grand Tour presents... Seamen',
+                    '2. A Massive Hunt',
+                    '3. Lochdown',
+                    '4. Carnage a Trois'
+                ],
+            customDownloads: [
+        ]
+          },
+          s5tgt: {
+            chapter: 'Season 5',
+            video: [
+                'https://rumble.com/embed/v6p8q8o/?pub=4jqwl4',
+                'https://rumble.com/embed/v6p8q9u/?pub=4jqwl4',
+                'https://rumble.com/embed/v6p8qb0/?pub=4jqwl4',
+            ],
+            episodeTitles: [
+                    '1. A Scandi Flick',
+                    '2. Eurocrash',
+                    '3. Sand Job'
+                ],
+            customDownloads: [
+        ]
+          },
+          s6tgt: {
+            chapter: 'Season 6',
+            video: [
+                'https://rumble.com/embed/v6p8qie/?pub=4jqwl4'
+            ],
+            episodeTitles: [
+                    '1. One For The Road'
+                ],
+            customDownloads: [
+        ]
+          },
       },
 
     sharpe: {
@@ -617,14 +694,14 @@ window.shows = {
         invincibles1: {
           chapter: 'Season 1',
           video: [
-            'https://rumble.com/embed/v6j85ty/?pub=4jqwl4',
-            'https://rumble.com/embed/v6j85yy/?pub=4jqwl4',
-            'https://rumble.com/embed/v6j863j/?pub=4jqwl4',
-            'https://rumble.com/embed/v6j867p/?pub=4jqwl4',
-            'https://rumble.com/embed/v6jcftp/?pub=4jqwl4',
-            'https://rumble.com/embed/v6jcfya/?pub=4jqwl4',
-            'https://rumble.com/embed/v6jcg2v/?pub=4jqwl4',
-            'https://rumble.com/embed/v6jcg5d/?pub=4jqwl4'
+            'https://rumble.com/embed/v6ql7pj/?pub=4l49h9',
+            'https://rumble.com/embed/v6ql7q5/?pub=4l49h9',
+            'https://rumble.com/embed/v6ql7qf/?pub=4l49h9',
+            'https://rumble.com/embed/v6ql7qv/?pub=4l49h9',
+            'https://rumble.com/embed/v6ql7rl/?pub=4l49h9',
+            'https://rumble.com/embed/v6ql7sb/?pub=4l49h9',
+            'https://rumble.com/embed/v6ql7t1/?pub=4l49h9',
+            'https://rumble.com/embed/v6ql7tn/?pub=4l49h9'
         ],
         episodeTitles: [
                 '1. Its About Time',
@@ -659,14 +736,14 @@ window.shows = {
         invincibles2: {
             chapter: 'Season 2',
             video: [
-                'https://rumble.com/embed/v6jdhug/?pub=4jqwl4',
-                'https://rumble.com/embed/v6jdi14/?pub=4jqwl4',
-                'https://rumble.com/embed/v6jdi5a/?pub=4jqwl4',
-                'https://rumble.com/embed/v6jdi9v/?pub=4jqwl4',
-                'https://rumble.com/embed/v6jdtrm/?pub=4jqwl4',
-                'https://rumble.com/embed/v6jdtya/?pub=4jqwl4',
-                'https://rumble.com/embed/v6jdufs/?pub=4jqwl4',
-                'https://rumble.com/embed/v6jdujy/?pub=4jqwl4'
+                'https://rumble.com/embed/v6ql8lv/?pub=4l49h9',
+                'https://rumble.com/embed/v6ql8mf/?pub=4l49h9',
+                'https://rumble.com/embed/v6ql8nb/?pub=4l49h9',
+                'https://rumble.com/embed/v6ql8of/?pub=4l49h9',
+                'https://rumble.com/embed/v6ql8p9/?pub=4l49h9',
+                'https://rumble.com/embed/v6ql8q7/?pub=4l49h9',
+                'https://rumble.com/embed/v6ql8rr/?pub=4l49h9',
+                'https://rumble.com/embed/v6ql8s7/?pub=4l49h9'
             ],
             episodeTitles: [
                     '1. A Lesson for Your Next Life',
@@ -701,14 +778,14 @@ window.shows = {
           invincibles3: {
             chapter: 'Season 3',
             video: [
-                'https://rumble.com/embed/v6j7utp/?pub=4jqwl4',
-                'https://rumble.com/embed/v6j7uu4/?pub=4jqwl4',
-                'https://rumble.com/embed/v6j7uxg/?pub=4jqwl4',
-                'https://rumble.com/embed/v6j7v0s/?pub=4jqwl4',
-                'https://rumble.com/embed/v6ozm1m/?pub=4jqwl4',
-                'https://rumble.com/embed/v6ozm30/?pub=4jqwl4',
-                'https://rumble.com/embed/v6ozm3a/?pub=4jqwl4',
-                'https://rumble.com/embed/v6ozm3k/?pub=4jqwl4'
+                'https://rumble.com/embed/v6ql9kr/?pub=4l49h9',
+                'https://rumble.com/embed/v6ql9lv/?pub=4l49h9',
+                'https://rumble.com/embed/v6ql9m7/?pub=4l49h9',
+                'https://rumble.com/embed/v6ql9mp/?pub=4l49h9',
+                'https://rumble.com/embed/v6ql9n7/?pub=4l49h9',
+                'https://rumble.com/embed/v6ql9nz/?pub=4l49h9',
+                'https://rumble.com/embed/v6ql9ol/?pub=4l49h9',
+                'https://rumble.com/embed/v6ql9ov/?pub=4l49h9'
             ],
             episodeTitles: [
                     '1. Youre Not Laughing Now',
@@ -721,6 +798,23 @@ window.shows = {
                     '8. I Thought Youd Never Shut Up'
                 ],
             customDownloads: [
+                [
+                    { url: 'https://buzzheavier.com/nwrnxq3du4h5', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/nwrnxq3du4h5', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/nwrnxq3du4h5', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/nwrnxq3du4h5', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/nwrnxq3du4h5', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/nwrnxq3du4h5', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/nwrnxq3du4h5', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/nwrnxq3du4h5', name: 'Buzzheavier download' },
+                ],
         ]
           },
       },
