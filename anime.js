@@ -37,6 +37,31 @@ window.anime = {
                 'JP 12. The Strongest Hero'
               ],
               customDownloads: [
+                [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],
               ],
               // Dubbed version arrays – add your actual dubbed video links here
               dubbed: [
@@ -68,6 +93,31 @@ window.anime = {
                 '12. The Strongest Hero'
               ],
               dubbedcustomdownloads: [
+                [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/vvcqujddi481', name: 'Buzzheavier download' },
+                ],
               ]
         },
       },
