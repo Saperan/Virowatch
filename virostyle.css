@@ -22,8 +22,13 @@
     font-style: normal;
   }
   body {
+    background-image: url('https://i.ibb.co/1fLkCsSy/Shiny-Overlay.png');
+    background-repeat: repeat;
+    background-position: center center;
+    background-attachment: fixed;      /* Keeps it fixed on scroll */ 
+    background-size: cover;            /* Ensures it fills the viewport */
+    
       font-family: Arial, sans-serif;
-      background: #1a1a1a;
       color: #eaeaea;
       margin: 0;
       padding: 0;
