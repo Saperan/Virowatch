@@ -120,6 +120,120 @@ window.anime = {
                 ],
               ]
         },
+                OPMS2: {
+          chapter: 'Season 2',
+              video: [
+                'https://rumble.com/embed/v6qxytr/?pub=4le6k9',
+                'https://rumble.com/embed/v6qxyub/?pub=4le6k9',
+                'https://rumble.com/embed/v6qxyur/?pub=4le6k9',
+                'https://rumble.com/embed/v6qxyvd/?pub=4le6k9',
+                'https://rumble.com/embed/v6qxywd/?pub=4le6k9',
+                'https://rumble.com/embed/v6qxywz/?pub=4le6k9',
+                'https://rumble.com/embed/v6qxyxh/?pub=4le6k9',
+                'https://rumble.com/embed/v6qxyy7/?pub=4le6k9',
+                'https://rumble.com/embed/v6qxyyr/?pub=4le6k9',
+                'https://rumble.com/embed/v6qxyzv/?pub=4le6k9',
+                'https://rumble.com/embed/v6qxz03/?pub=4le6k9',
+                'https://rumble.com/embed/v6qxz0f/?pub=4le6k9'
+              ],
+              episodeTitles: [
+                'JP 1. Return of the Hero',
+                'JP 2. Human Monster',
+                'JP 3. The Hunt Begins',
+                'JP 4. Metal Bat',
+                'JP 5. The Martial Arts Tournament',
+                'JP 6. The Uprising of the Monsters',
+                'JP 7. Class S Heroes',
+                'JP 8. The Resistance of the Strong',
+                'JP 9. The Troubles of the Strongest',
+                'JP 10. The Encircling Net of Justice',
+                'JP 11. Everyones Dignity',
+                'JP 12. Cleaning Up the Disciples Mess'
+              ],
+              customDownloads: [
+                [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],
+              ],
+              // Dubbed version arrays – add your actual dubbed video links here
+              dubbed: [
+                'https://rumble.com/embed/v6qy1jb/?pub=4le6k9',
+                'https://rumble.com/embed/v6qy1jr/?pub=4le6k9',
+                'https://rumble.com/embed/v6qy1k7/?pub=4le6k9',
+                'https://rumble.com/embed/v6qy1kp/?pub=4le6k9',
+                'https://rumble.com/embed/v6qy1l5/?pub=4le6k9',
+                'https://rumble.com/embed/v6qy1lh/?pub=4le6k9',
+                'https://rumble.com/embed/v6qy1m5/?pub=4le6k9',
+                'https://rumble.com/embed/v6qy1md/?pub=4le6k9',
+                'https://rumble.com/embed/v6qy1mp/?pub=4le6k9',
+                'https://rumble.com/embed/v6qy1mt/?pub=4le6k9',
+                'https://rumble.com/embed/v6qy1nb/?pub=4le6k9',
+                'https://rumble.com/embed/v6qy1nn/?pub=4le6k9'
+              ],
+              dubbedepisodetitle: [
+                '1. Return of the Hero',
+                '2. Human Monster',
+                '3. The Hunt Begins',
+                '4. Metal Bat',
+                '5. The Martial Arts Tournament',
+                '6. The Uprising of the Monsters',
+                '7. Class S Heroes',
+                '8. The Resistance of the Strong',
+                '9. The Troubles of the Strongest',
+                '10. The Encircling Net of Justice',
+                '11. Everyones Dignity',
+                '12. Cleaning Up the Disciples Mess'
+              ],
+              dubbedcustomdownloads: [
+                [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/5tw792y2oa9t', name: 'Buzzheavier download' },
+                ],
+              ]
+        },
       },
 
   ChillinIAWWL2CP: {
