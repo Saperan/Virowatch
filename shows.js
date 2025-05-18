@@ -1,6 +1,215 @@
 // shows.js (Non-module)
 window.shows = {
 
+        theboys: {
+        title: 'The Boys',
+        image: 'https://upload.wikimedia.org/wikipedia/en/1/14/The_Boys_Season_2.jpg',
+        BOYS1: {
+          chapter: 'Season 1',
+          video: [
+            'https://rumble.com/embed/v6r3cvn/?pub=4ljicf',
+            'https://rumble.com/embed/v6r3cx1/?pub=4ljicf',
+            'https://rumble.com/embed/v6r3cxv/?pub=4ljicf',
+            'https://rumble.com/embed/v6r3d0l/?pub=4ljicf',
+            'https://rumble.com/embed/v6r3d1t/?pub=4ljicf',
+            'https://rumble.com/embed/v6r3d2z/?pub=4ljicf',
+            'https://rumble.com/embed/v6r3d4j/?pub=4ljicf',
+            'https://rumble.com/embed/v6r3d5n/?pub=4ljicf'
+        ],
+        episodeTitles: [
+                '1. The Name of the Game',
+                '2. Cherry',
+                '3. Get Some',
+                '4. The Female of the Species',
+                '5. Good for the Soul',
+                '6. The Innocents',
+                '7. The Self-Preservation Society',
+                '8. You Found Me'
+            ],
+        customDownloads: [
+        [
+    { url: 'https://buzzheavier.com/2an5u4fn783e', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/2an5u4fn783e', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/2an5u4fn783e', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/2an5u4fn783e', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/2an5u4fn783e', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/2an5u4fn783e', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/2an5u4fn783e', name: 'Buzzheavier download' },
+    ],
+    [
+    { url: 'https://buzzheavier.com/2an5u4fn783e', name: 'Buzzheavier download' },
+    ],
+    ]
+        },
+        BOYS2: {
+            chapter: 'Season 2',
+            video: [
+                'https://rumble.com/embed/v6r3fzv/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3g0t/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3g1f/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3g2b/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3g3f/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3g45/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3g4n/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3g5f/?pub=4ljicf'
+            ],
+            episodeTitles: [
+                    '1. The Big Ride',
+                    '2. Proper Preparation and Planning',
+                    '3. Over the Hill with the Swords of a Thousand Men',
+                    '4. Nothing Like It in the World',
+                    '5. We Gotta Go Now',
+                    '6. The Bloody Doors Off',
+                    '7. Butcher, Baker, Candlestick Maker',
+                    '8. What I Know'
+                ],
+            customDownloads: [
+            [
+        { url: 'https://buzzheavier.com/aeqwhbmo6nmj', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/aeqwhbmo6nmj', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/aeqwhbmo6nmj', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/aeqwhbmo6nmj', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/aeqwhbmo6nmj', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/aeqwhbmo6nmj', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/aeqwhbmo6nmj', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/aeqwhbmo6nmj', name: 'Buzzheavier download' },
+        ],
+        ]
+          },
+                  BOYS3: {
+            chapter: 'Season 3',
+            video: [
+                'https://rumble.com/embed/v6r3ieh/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3if7/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3ig5/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3igf/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3ih1/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3ihv/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3iid/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3ij1/?pub=4ljicf'
+            ],
+            episodeTitles: [
+                    '1. Payback',
+                    '2. The Only Man in the Sky',
+                    '3. Barbary Coast',
+                    '4. Glorious Five Year Plan',
+                    '5. The Last Time to Look on This World of Lies',
+                    '6. Herogasm',
+                    '7. Here Comes a Candle to Light You to Bed',
+                    '8. The Instant White-Hot Wild'
+                ],
+            customDownloads: [
+            [
+        { url: 'https://buzzheavier.com/87hxwq29gmr9', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/87hxwq29gmr9', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/87hxwq29gmr9', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/87hxwq29gmr9', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/87hxwq29gmr9', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/87hxwq29gmr9', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/87hxwq29gmr9', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/87hxwq29gmr9', name: 'Buzzheavier download' },
+        ],
+        ]
+          },
+                  BOYS4: {
+            chapter: 'Season 4',
+            video: [
+                'https://rumble.com/embed/v6r3kc7/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3kd1/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3ke1/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3kel/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3kf9/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3kg3/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3kgn/?pub=4ljicf',
+                'https://rumble.com/embed/v6r3khf/?pub=4ljicf'
+            ],
+            episodeTitles: [
+                    '1. Department of Dirty Tricks',
+                    '2. Life Among the Septics',
+                    '3. Well Keep the Red Flag Flying Here',
+                    '4. Wisdom of the Ages',
+                    '5. Beware the Jabberwock, My Son',
+                    '6. Dirty Business',
+                    '7. The Insider',
+                    '8. Season Four Finale'
+                ],
+            customDownloads: [
+            [
+        { url: 'https://buzzheavier.com/eky8bx0o7afi', name: 'Buzzheavier download P1' },
+                { url: 'https://buzzheavier.com/f2x4qajo8xs9', name: 'Buzzheavier download P2' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/eky8bx0o7afi', name: 'Buzzheavier download P1' },
+                { url: 'https://buzzheavier.com/f2x4qajo8xs9', name: 'Buzzheavier download P2' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/eky8bx0o7afi', name: 'Buzzheavier download P1' },
+                { url: 'https://buzzheavier.com/f2x4qajo8xs9', name: 'Buzzheavier download P2' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/eky8bx0o7afi', name: 'Buzzheavier download P1' },
+                { url: 'https://buzzheavier.com/f2x4qajo8xs9', name: 'Buzzheavier download P2' },
+        ],
+        [
+                    { url: 'https://buzzheavier.com/eky8bx0o7afi', name: 'Buzzheavier download P1' },
+        { url: 'https://buzzheavier.com/f2x4qajo8xs9', name: 'Buzzheavier download P2' },
+        ],
+        [
+                    { url: 'https://buzzheavier.com/eky8bx0o7afi', name: 'Buzzheavier download P1' },
+        { url: 'https://buzzheavier.com/f2x4qajo8xs9', name: 'Buzzheavier download P2' },
+        ],
+        [
+                    { url: 'https://buzzheavier.com/eky8bx0o7afi', name: 'Buzzheavier download P1' },
+        { url: 'https://buzzheavier.com/f2x4qajo8xs9', name: 'Buzzheavier download P2' },
+        ],
+        [
+                    { url: 'https://buzzheavier.com/eky8bx0o7afi', name: 'Buzzheavier download P1' },
+        { url: 'https://buzzheavier.com/f2x4qajo8xs9', name: 'Buzzheavier download P2' },
+        ],
+        ]
+          },
+      },
+
     padomjudzinsi: {
         title: 'Padomju Džinsi',
         image: 'https://upload.wikimedia.org/wikipedia/lv/5/5c/Padomju-dzinsi.jpg',
