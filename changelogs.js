@@ -1,5 +1,6 @@
 const changelogs = [
-  { version: "v9.2.0 20.04.2025", description: "Added OPM S2, Added The Boys S1 - S4" },
+  { version: "v9.3.0 31.05.2025", description: "Added Films: Nobody, Lord Of War | Added Anime: Saga Of Tanya The Evil | Added Show: Barry S3 | Finished Adding ReZero S3 Dub and Download." },
+  { version: "v9.2.0 18.05.2025", description: "Added OPM S2, Added The Boys S1 - S4" },
   { version: "v9.1.0 20.04.2025", description: "Added OPM Subs and Download, Added back Invincible S1-3, Added back Barry S1-2, Added back Padomju Dzinsi, Most Movies added back By Kris from Lunora! Movies are now done by the Lunora team" },
   { version: "v9.0.6 20.04.2025", description: "Added back almost all of the anime back, Added OPM for Easter Update! Happy Easter!" },
   { version: "v9.0.4 15.04.2025", description: "Added back half of the anime back, other half coming soon | Fixed bug with when you watch and press back to category list it now deloads the video and doesnt play it in the background." },
