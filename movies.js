@@ -1,5 +1,35 @@
 // movies.js (Non-module)
 window.movies = {
+            Nobody21: {
+        title: 'Nobody 2021',
+        image: 'https://pics.filmaffinity.com/Nobody-390795243-mmed.jpg',
+        video: [
+            'https://rumble.com/embed/v6rgbr7/?pub=4lty6f'
+        ],
+        episodeTitles: [
+            'Movie'
+        ],
+        customDownloads: [
+            [
+                { url: 'https://buzzheavier.com/9rnvmad80qm1', name: 'Buzzheavier download' }
+            ]
+        ]
+    },
+        lordofwar2005: {
+        title: 'Lord Of War 2005',
+        image: 'https://i.scdn.co/image/ab67616d0000b273ea743e7b57ba2b991d89dd7d',
+        video: [
+            'https://rumble.com/embed/v6rg49r/?pub=4lty6f'
+        ],
+        episodeTitles: [
+            'Movie'
+        ],
+        customDownloads: [
+            [
+                { url: 'https://buzzheavier.com/9rnvmad80qm1', name: 'Buzzheavier download' }
+            ]
+        ]
+    },
     maskofzorro: {
         title: 'The Mask of Zorro 1998',
         image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fm.media-amazon.com%2Fimages%2FM%2FMV5BMzA2MDgyYzMtNjc4OC00YjU0LWEzMWEtOTRhMTViODY0Mjk0XkEyXkFqcGc%40._V1__SX500&f=1&h=500',
