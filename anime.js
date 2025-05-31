@@ -3,8 +3,156 @@ window.anime = {
 
 
 
+        SOTTE: {
+    title: 'Saga Of Tanya The Evil',
+        image: 'https://static.wikia.nocookie.net/dubbing9585/images/7/71/Saga_of_Tanya_the_Evil_%28Youjo_Senki%29.jpg/revision/latest/thumbnail/width/360/height/450?cb=20181110051856',
+                SOTTES1: {
+          chapter: 'Season 1',
+              video: [
+                'https://rumble.com/embed/v6rjnoz/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjnpd/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjnpz/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjnqf/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjnqt/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjodt/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjoej/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjoez/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjoff/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjogb/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjoh5/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjohf/?pub=4le6k9'
+              ],
+              episodeTitles: [
+                'JP 1. The Devil of the Rhine',
+                'JP 2. Prologue',
+                'JP 3. Deus Vult',
+                'JP 4. Campus Life',
+                'JP 5. My First Battalion',
+                'JP 6. Beginning of Madness',
+                'JP 7. The Battle of the Fjord',
+                'JP 8. Trial by Fire',
+                'JP 9. Preparations for Advance',
+                'JP 10. The Path to Victory',
+                'JP 11. Resistance',
+                'JP 12. How to Use a Victory'
+              ],
+              customDownloads: [
+                [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],
+              ],
+              // Dubbed version arrays – add your actual dubbed video links here
+              dubbed: [
+                'https://rumble.com/embed/v6rjo9v/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjoal/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjobp/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjoch/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjod9/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjodt/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjoej/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjoez/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjoff/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjogb/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjoh5/?pub=4le6k9',
+                'https://rumble.com/embed/v6rjohf/?pub=4le6k9'
+              ],
+              dubbedepisodetitle: [
+                '1. The Devil of the Rhine',
+                '2. Prologue',
+                '3. Deus Vult',
+                '4. Campus Life',
+                '5. My First Battalion',
+                '6. Beginning of Madness',
+                '7. The Battle of the Fjord',
+                '8. Trial by Fire',
+                '9. Preparations for Advance',
+                '10. The Path to Victory',
+                '11. Resistance',
+                '12. How to Use a Victory'
+              ],
+              dubbedcustomdownloads: [
+                [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ],
+              ]
+        },
+        SOTTEMOVIE1: {
+          chapter: 'Movie 1',
+          video: [
+            'https://rumble.com/embed/v6rp27b/?pub=4le6k9'
+          ],
+          episodeTitles: [
+            'Movie'
+          ],
+          customDownloads: [
+                            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ], 
+          ],
+        },
+                SOTTEOVA1: {
+          chapter: 'OVA - Desert Pasta',
+          video: [
+            'https://rumble.com/embed/v6rp1p5/?pub=4le6k9'
+          ],
+          episodeTitles: [
+            'Movie'
+          ],
+          customDownloads: [
+                            [
+                    { url: 'https://buzzheavier.com/wqin3fivymwr', name: 'Buzzheavier download' },
+                ], 
+          ],
+        },
+        },
+
+
     OPM: {
-        title: 'One Punch Man',
+                title: 'One Punch Man',
         image: 'https://duckduckgo.com/i/3fcbe5415fbc62d2.png',
         OPMS1: {
           chapter: 'Season 1',
@@ -1933,21 +2081,58 @@ window.anime = {
         'JP 16. The Results for the Battle of Priestella'
           ],
       customDownloads: [
+                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ]
       ],
       dubbed: [
-        'https://rumble.com/embed/v6p0m9u/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p0wok/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p0wp8/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p0wps/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p0wq6/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p0wr4/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p0wrm/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p0ws8/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p0wsq/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p0xtq/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p0xue/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p0xuu/?pub=4jqwl4',
-        'https://rumble.com/embed/v6p0xvq/?pub=4jqwl4'
+        'https://rumble.com/embed/v6rw60z/?pub=4le6k9',
+        'https://rumble.com/embed/v6rw61n/?pub=4le6k9',
+        'https://rumble.com/embed/v6rw625/?pub=4le6k9',
+        'https://rumble.com/embed/v6rw62f/?pub=4le6k9',
+        'https://rumble.com/embed/v6rw62x/?pub=4le6k9',
+        'https://rumble.com/embed/v6rw63d/?pub=4le6k9',
+        'https://rumble.com/embed/v6rw63r/?pub=4le6k9',
+        'https://rumble.com/embed/v6rw647/?pub=4le6k9',
+        'https://rumble.com/embed/v6rw64l/?pub=4le6k9',
+        'https://rumble.com/embed/v6rw65b/?pub=4le6k9',
+        'https://rumble.com/embed/v6rw65r/?pub=4le6k9',
+        'https://rumble.com/embed/v6rw669/?pub=4le6k9',
+        'https://rumble.com/embed/v6rw66l/?pub=4le6k9',
+        'https://rumble.com/embed/v6rw675/?pub=4le6k9',
+        'https://rumble.com/embed/v6rw67l/?pub=4le6k9',
+        'https://rumble.com/embed/v6rw67z/?pub=4le6k9'
+
       ],
       dubbedepisodetitle: [
         '1. Theatrical Malice',
@@ -1968,6 +2153,39 @@ window.anime = {
         '16. The Results for the Battle of Priestella'
       ],
       dubbedcustomdownloads: [
+                          [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ],                  [
+              { url: 'https://buzzheavier.com/052sl81crix8', name: 'Buzzheavier download' },
+          ]
       ]
     },
   },
