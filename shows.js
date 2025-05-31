@@ -397,6 +397,55 @@ window.shows = {
         ],
         ]
           },
+                  BARRYS3: {
+            chapter: 'Season 3',
+            video: [
+                'https://rumble.com/embed/v6rp3ef/?pub=4ljicf',
+                'https://rumble.com/embed/v6rp3ex/?pub=4ljicf',
+                'https://rumble.com/embed/v6rp3f9/?pub=4ljicf',
+                'https://rumble.com/embed/v6rp3fr/?pub=4ljicf',
+                'https://rumble.com/embed/v6rp3g3/?pub=4ljicf',
+                'https://rumble.com/embed/v6rp3g7/?pub=4ljicf',
+                'https://rumble.com/embed/v6rp3gj/?pub=4ljicf',
+                'https://rumble.com/embed/v6rp3gt/?pub=4ljicf'
+            ],
+            episodeTitles: [
+                    '1. Forgiving Jeff',
+                    '2. Limonada',
+                    '3. Ben Mendelsohn',
+                    '4. All The Sauces',
+                    '5. Crazytimesh*tshow',
+                    '6. 710N',
+                    '7. Candy Asses',
+                    '8. Starting Now'
+                ],
+            customDownloads: [
+            [
+        { url: 'https://buzzheavier.com/nulm1yksb5fq', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/nulm1yksb5fq', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/nulm1yksb5fq', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/nulm1yksb5fq', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/nulm1yksb5fq', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/nulm1yksb5fq', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/nulm1yksb5fq', name: 'Buzzheavier download' },
+        ],
+        [
+        { url: 'https://buzzheavier.com/nulm1yksb5fq', name: 'Buzzheavier download' },
+        ],
+        ]
+          },
       },
 
     tourdp: {
