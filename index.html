@@ -3,78 +3,152 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virowatch v9.3.0</title>
+  <title>Virowatch v10.0</title>
   <link rel="stylesheet" href="virostyle.css">
   <link rel="icon" href="https://i.ibb.co/gLmgjRsC/virowatch-new-icon-tihngy.png" type="image/png">
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@100;300;400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* Hero banner styling */
+/* Hero Section (Anix-style) */
+
+  </style>
 </head>
 <body>
   <div class="container">
-    <div>
+    <!-- Header + Search -->
+    <header>
       <center>
         <h1 class="kanit-light"><a href="https://discord.gg/Q47GD7kNfU"><img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.holocraft.net%2Fmain%2Fimg%2Fdiscord.png&f=1&nofb=1&ipt=9816c528e8b1b3cd56d3cc87980a6a70106f14f16e5943fa7757caab78326f8c" alt="Udiscord" width="50" height="50" style="vertical-align: top;"></a>Virowatch</h1>
-        <h5 class="kanit-light">(Last Updated - 31.05.2025)</h5>
       </center>
-    </div>
-    <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Search for content...">
-    </div>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search for content...">
+      </div>
+    </header>
 
-    <!-- Category Selection Container -->
-    <div id="categoryContainer">
+    <!-- *** New Hero Banner *** -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-text">
+      <p class="spotlight">Newest Content Added.</p>
+        <hr>
+      <h2>My Teen Romantic Comedy</h2>
+      <h2>The Rising Of The Shield Hero</h2>
+      <div class="meta">
+        <span>📺 Anime</span>
+        <span class="badge">SUB / DUB</span>
+      </div>
+      <p class="desc">
+      </p>
+      <br>
+          <!-- ***       <div class="buttons"><button class="watch">▶ Watch Now</button> *** -->
+            <hr>
+      </div>
+    </div>
+    <div>          <!--<div class="hero-poster">-->
+      <img src="https://upload.wikimedia.org/wikipedia/en/c/ca/My_Teen_Romantic_Comedy_SNAFU_cover.jpg" alt="Poster">
+      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/6/65/The_Rising_of_the_Shield_Hero_light_novel_vol_1.jpg/250px-The_Rising_of_the_Shield_Hero_light_novel_vol_1.jpg" alt="Poster">
+    </div>
+  </div>
+</section>
+
+    <!-- Category Banners -->
+    <section id="categoryContainer">
       <div class="movie-item-banner" data-movie="banner1">
-        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpaperaccess.com%2Ffull%2F3988284.jpg&f=1&nofb=1" alt="category: movies">
+        <img src="https://wallpaperaccess.com/full/3988284.jpg" alt="Movies" loading="lazy">
         <p class="kanit-extralight">Movies</p>
       </div>
       <div class="movie-item-banner" data-movie="banner2">
-        <img src="https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fimages6.fanpop.com%2Fimage%2Fphotos%2F34100000%2FTv-Shows-tv-shows-family-34187485-1024-768.jpg&f=1&nofb=1" alt="category: shows">
-        <p class="kanit-extralight">Shows</p>
+        <img src="http://images6.fanpop.com/image/photos/34100000/Tv-Shows-tv-shows-family-34187485-1024-768.jpg" alt="Shows" loading="lazy">
+        <p class="kanit-extralight">TV Shows</p>
       </div>
       <div class="movie-item-banner" data-movie="banner3">
-        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fotakus.space%2Fwp-content%2Fuploads%2F2020%2F12%2FPoster-japones-de-anime-Haikyuu-para-decoracion-de-pared-del-hogar-juego-de-8-piezas-292-x-419-cm-300x220.jpg&f=1&nofb=1" alt="category: anime">
+        <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fotakus.space%2Fwp-content%2Fuploads%2F2020%2F12%2FPoster-japones-de-anime-Haikyuu-para-decoracion-de-pared-del-hogar-juego-de-8-piezas-292-x-419-cm-300x220.jpg&f=1&nofb=1" alt="Anime" loading="lazy">
         <p class="kanit-extralight">Anime</p>
       </div>
+    </section>
+
+    <!-- Theme Toggle -->
+    <div style="text-align: right; margin: 20px 0;">
+      <img id="toggleStylesheetImage" src="theme1.png" alt="Toggle Theme" style="cursor:pointer;width:50px;height:50px;">
     </div>
 
-    <div class="theme-toggle, kanit-extralight" style="text-align: right; margin: 20px 0;">
-      <img id="toggleStylesheetImage" src="theme1.png" alt="Toggle White" style="cursor: pointer; width: 50px; height: 50px;">
-    </div>
-    <h2 class="kanit-light">Changelogs</h2>
-    <div class="changelog-container" id="changelog-container"></div>
-    
-    <!-- Dynamic Movie List Container (initially hidden) -->
-    <div class="movie-list-wrapper" id="movieListWrapper" style="display: none;">
-      <div class="movie-list" id="movieList">
-        <!-- Movie items will be dynamically injected here -->
-      </div>
+    <!-- Movie List (hidden initially) -->
+    <div class="movie-list-wrapper" id="movieListWrapper" style="display:none;">
+      <div class="movie-list" id="movieList"></div>
     </div>
 
-    <!-- Episode Container with Sidebar and Player -->
-    <div class="episode-container" id="episodeContainer" style="display: none;">
+    <!-- Episode Container (hidden initially) -->
+    <div class="episode-container" id="episodeContainer" style="display:none;">
       <div class="sidebar" id="episodeSidebar">
-        <!-- Season Selector will appear here -->
         <div id="seasonSelectorContainer"></div>
-        <!-- Episode List will appear here -->
         <div id="episodeListContainer"></div>
       </div>
       <div class="player">
-        <iframe id="videoPlayer" src="" allowfullscreen></iframe>
+        <div id="videoSpinner" class="spinner"></div>
+        <iframe id="videoPlayer" src="" allowfullscreen class="fade-out"></iframe>
         <div class="controls">
           <a href="#" class="button dubbed-toggle">Dubbed</a>
           <a href="#" class="button" id="prevEpisode">Previous Episode</a>
           <a href="#" class="button" id="nextEpisode">Next Episode</a>
-          <a href="#" class="button" id="backToCategory">Back to Category List</a>
+          <a href="#" class="button" id="backToCategory">Back to Categories</a>
           <div id="downloadContainer"></div>
         </div>
       </div>
     </div>
+
+    <!-- Changelogs (bottom) -->
+    <h2 class="kanit-light">Changelogs</h2>
+    <div class="changelog-container" id="changelog-container"></div>
   </div>
-  
-  <!-- Scripts -->
+
+  <!-- Data Files -->
+   <script>
+  const watchNowButton = document.querySelector('.watch');
+  const heroSection = document.getElementById('hero');
+  const categoryBanners = document.querySelectorAll('.movie-item-banner');
+  const backToCategoryButton = document.getElementById('backToCategory');
+  const changelogContainer = document.getElementById('changelog-container');
+  const movieListWrapper = document.getElementById('movieListWrapper');
+
+  // Handle "Watch Now" click
+  watchNowButton.addEventListener('click', () => {
+    heroSection.style.display = 'none';
+    movieListWrapper.style.display = 'block';
+  });
+
+  // Handle category clicks
+  categoryBanners.forEach(banner => {
+    banner.addEventListener('click', () => {
+      heroSection.style.display = 'none';
+    });
+  });
+
+  // Handle "Back to Categories" click
+  if (backToCategoryButton) {
+    backToCategoryButton.addEventListener('click', () => {
+      heroSection.style.display = 'flex';
+    });
+  }
+
+  // Optional: When viewing changelogs, bring back hero
+  // Triggered if you have a menu or interaction to go back to "home"
+  const observeChangelog = new MutationObserver(() => {
+    if (changelogContainer && changelogContainer.offsetHeight > 0) {
+      heroSection.style.display = 'flex';
+    }
+  });
+
+  observeChangelog.observe(changelogContainer, {
+    childList: true,
+    subtree: true
+  });
+</script>
   <script src="movies.js"></script>
   <script src="shows.js"></script>
   <script src="anime.js"></script>
-  <script src="content.js"></script>
   <script src="changelogs.js"></script>
+  <!-- Core Logic -->
+  <script src="content.js"></script>
 </body>
 </html>
