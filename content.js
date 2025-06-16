@@ -1,376 +1,175 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const toggleImage = document.getElementById('toggleStylesheetImage');
-  const stylesheetLink = document.querySelector('link[rel="stylesheet"]');
-  const stylesheetA = "virostyle.css";
-  const stylesheetB = "virostyle2.css";
-  const themeImageA = "theme1.png";
-  const themeImageB = "theme2.png";
+// content.js (updated)
+(() => {
+  const RESERVED_KEYS = ['title','image','video','episodeTitles','customDownloads','dubbed','dubbedepisodetitle','dubbedcustomdownloads'];
+  window.mediaData = { movies: window.movies||{}, shows: window.shows||{}, anime: window.anime||{} };
 
-  toggleImage.addEventListener("click", () => {
-    if (stylesheetLink.getAttribute("href") === stylesheetA) {
-      stylesheetLink.setAttribute("href", stylesheetB);
-      toggleImage.setAttribute("src", themeImageB);
-    } else {
-      stylesheetLink.setAttribute("href", stylesheetA);
-      toggleImage.setAttribute("src", themeImageA);
-    }
+  const toggleImg = document.getElementById('toggleStylesheetImage');
+  const linkEl = document.querySelector('link[rel="stylesheet"]');
+  const themes = { A:{href:'virostyle.css',img:'theme1.png'}, B:{href:'virostyle2.css',img:'theme2.png'} };
+  const spinner = document.getElementById('videoSpinner');
+
+  let cat=null, mov=null, season=null, ep=0, dubbed=false, timer;
+
+  // Theme Persistence
+  const saved = localStorage.getItem('theme')||'A'; applyTheme(saved);
+  function applyTheme(key){ linkEl.href=themes[key].href; toggleImg.src=themes[key].img; localStorage.setItem('theme', key); }
+  toggleImg.addEventListener('click', () => applyTheme(localStorage.getItem('theme')==='A'?'B':'A'));
+
+  // Helpers
+  const getCategoryFromBanner = banner => ({banner1:'movies',banner2:'shows',banner3:'anime'})[banner.dataset.movie];
+  const currentData = () => (cat && mediaData[cat] ? mediaData[cat][mov] : null);
+  function activeData(){
+    const data = currentData();
+    if (!data) return null;
+    if (season && data[season]) return data[season];
+    const seasons = Object.keys(data).filter(k => !RESERVED_KEYS.includes(k) && typeof data[k]==='object');
+    if (seasons.length){ season = seasons[0]; return data[season]; }
+    return data;
+  }
+
+  // Elements
+  const movieListWrapper = document.getElementById('movieListWrapper');
+  const movieList = document.getElementById('movieList');
+  const categoryContainer = document.getElementById('categoryContainer');
+  const episodeContainer = document.getElementById('episodeContainer');
+  const seasonSelectorContainer = document.getElementById('seasonSelectorContainer');
+// Render movie list
+function renderList(category){
+  cat = category;
+  movieList.innerHTML = '';
+  Object.entries(mediaData[category]||{}).forEach(([key,info]) => {
+    const div = document.createElement('div');
+    div.className = 'movie-item';
+    div.dataset.movie = key;
+    div.innerHTML = `<img src="${info.image||'https://via.placeholder.com/150'}" loading="lazy"/><p class="kanit-extralight">${info.title||key}</p>`;
+    const clean = div.cloneNode(true);
+    clean.addEventListener('click', () => selectMovie(key));
+    movieList.appendChild(clean);
   });
 
-  // Changelogs (ensure changelogs is defined)
-  const container = document.getElementById('changelog-container');
-  if (typeof changelogs !== "undefined" && Array.isArray(changelogs)) {
-    changelogs.forEach(log => {
+  // ✅ Hide the hero section when a category is selected
+  document.getElementById('hero').style.display = 'none';
+
+  categoryContainer.style.display = 'none';
+  movieListWrapper.style.display = 'block';
+
+  // Hide changelogs below content
+  document.getElementById('changelog-container').style.marginTop = '20px';
+}
+
+
+  // Select movie
+  function selectMovie(key){
+    mov = key; ep = 0; season = null; dubbed = false;
+    document.querySelector('.dubbed-toggle')?.classList.remove('active');
+    updateSeasonSelector(); updateEpisodeList(); updateVideo(0); updateDownloads();
+    episodeContainer.style.display = 'flex';
+  }
+
+  // Update season dropdown
+  function updateSeasonSelector(){
+    seasonSelectorContainer.innerHTML = '';
+    const data = currentData(); if (!data) return;
+    const seasons = Object.keys(data).filter(k => !RESERVED_KEYS.includes(k) && typeof data[k]==='object');
+    if (!seasons.length) return;
+    const select = document.createElement('select');
+    select.id = 'seasonSelector';
+    seasons.forEach((s,i) => {
+      const opt = document.createElement('option');
+      opt.value = s; opt.textContent = data[s].chapter||s;
+      if (i===0) season = s;
+      select.appendChild(opt);
+    });
+    select.addEventListener('change', e => { season = e.target.value; ep = 0; updateEpisodeList(); updateVideo(0); updateDownloads(); });
+    seasonSelectorContainer.appendChild(select);
+  }
+
+  // Update episode list
+  function updateEpisodeList(){
+    const container = document.getElementById('episodeListContainer');
+    container.innerHTML = '';
+    const data = activeData(); if (!data) return;
+    const titles = (dubbed && data.dubbedepisodetitle?.length)? data.dubbedepisodetitle : data.episodeTitles || [];
+    (data.video||[]).forEach((_,i) => {
+      const div = document.createElement('div');
+      div.className = 'episode'; div.textContent = titles[i] || `Episode ${i+1}`;
+      div.dataset.episodeIndex = i;
+      div.addEventListener('click', () => updateVideo(i));
+      container.appendChild(div);
+    });
+  }
+
+  // Update video player
+  function updateVideo(index){
+    const data = activeData(); if (!data) return;
+    const vids = (dubbed && data.dubbed?.length)? data.dubbed : data.video || [];
+    if (!vids[index]) return;
+    spinner.style.display = 'block';
+    const iframe = document.getElementById('videoPlayer');
+    iframe.classList.add('fade-out');
+    iframe.onload = () => setTimeout(() => { spinner.style.display = 'none'; iframe.classList.remove('fade-out'); }, 200);
+    iframe.src = vids[index];
+    ep = index; highlightEpisode(index);
+  }
+
+  // Highlight active episode
+  function highlightEpisode(i){
+    document.querySelectorAll('.episode').forEach(el => el.classList.remove('active'));
+    document.querySelector(`.episode[data-episode-index="${i}"]`)?.classList.add('active');
+  }
+
+  // Update download links
+  function updateDownloads(){
+    const dc = document.getElementById('downloadContainer'); dc.innerHTML = '';
+    const data = activeData(); if (!data) return;
+    const downs = (dubbed && data.dubbedcustomdownloads?.[ep]?.length)? data.dubbedcustomdownloads[ep] : data.customDownloads?.[ep] || [];
+    if (downs.length) downs.forEach(d => { const a = document.createElement('a'); a.href = d.url; a.textContent = d.name; a.className = 'button'; dc.appendChild(a); });
+    else dc.innerHTML = '<p>No downloads available</p>';
+  }
+
+  // Search
+  document.getElementById('searchInput').addEventListener('input', e => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      const q = e.target.value.trim().toLowerCase();
+      document.querySelectorAll('.movie-item').forEach(item => item.style.display = item.textContent.toLowerCase().includes(q)? '':'none');
+      document.querySelectorAll('.movie-item-banner').forEach(b => b.style.display = q? 'none':'block');
+    }, 300);
+  });
+
+  // Banner clicks
+  document.querySelectorAll('.movie-item-banner').forEach(b => b.addEventListener('click', () => {
+    const c = getCategoryFromBanner(b);
+    if (c) renderList(c);
+  }));
+
+  // Dubbed toggle
+  document.querySelector('.dubbed-toggle').addEventListener('click', e => { e.preventDefault(); dubbed = !dubbed; e.target.classList.toggle('active', dubbed); updateEpisodeList(); updateVideo(ep); updateDownloads(); });
+
+  // Prev/Next
+  document.getElementById('prevEpisode').addEventListener('click', e => { e.preventDefault(); updateVideo(ep-1); updateDownloads(); });
+  document.getElementById('nextEpisode').addEventListener('click', e => { e.preventDefault(); updateVideo(ep+1); updateDownloads(); });
+
+  // Back to categories
+  document.getElementById('backToCategory').addEventListener('click', e => { e.preventDefault(); resetView(); });
+function resetView() {
+  episodeContainer.style.display = 'none';
+  movieListWrapper.style.display = 'none';
+  categoryContainer.style.display = 'flex';
+  document.getElementById('hero').style.display = 'flex'; // ✅ Show hero again
+}
+
+
+
+  // Initial changelog render (runs once)
+  (function renderChangelogs(){
+    if (!Array.isArray(window.changelogs)) return;
+    const container = document.getElementById('changelog-container');
+    window.changelogs.forEach(log => {
       const box = document.createElement('div');
       box.className = 'changelog-box';
       box.innerHTML = `<h3>${log.version}</h3><p>${log.description}</p>`;
       container.appendChild(box);
     });
-  }
-
-  const categoryContainer = document.getElementById('categoryContainer');
-  const movieListWrapper = document.getElementById('movieListWrapper');
-  const movieList = document.getElementById('movieList');
-  const videoPlayer = document.getElementById('videoPlayer');
-  const searchInput = document.getElementById('searchInput');
-  const episodeContainer = document.getElementById('episodeContainer');
-  // Sidebar now contains two containers: one for the season dropdown and one for episodes.
-  const seasonSelectorContainer = document.getElementById('seasonSelectorContainer');
-  const episodeListContainer = document.getElementById('episodeListContainer');
-  const nextEpisodeButton = document.getElementById('nextEpisode');
-  const prevEpisodeButton = document.getElementById('prevEpisode');
-  const downloadContainer = document.getElementById('downloadContainer');
-  const banners = document.querySelectorAll('.movie-item-banner');
-  const dubbedButton = document.querySelector('.dubbed-toggle'); 
-  let debounceTimer;
-  
-  let currentMovie = null;
-  let currentEpisode = 0;
-  let currentCategory = null; // "movies", "shows", or "anime"
-  let currentDubbed = false; 
-  let currentSeason = null; // holds the key for the selected season
-
-  // Helper: Get the base movie data from the current category.
-  function getCurrentMovieData() {
-    if (!currentCategory) return null;
-    return window[currentCategory][currentMovie] || null;
-  }
-
-  // Returns the active media data (season-specific if available)
-  function getActiveMediaData() {
-    const movieData = getCurrentMovieData();
-    if (!movieData) return null;
-    // If a season is selected and exists in the movieData, return that season’s data.
-    if (currentSeason && movieData[currentSeason]) {
-      return movieData[currentSeason];
-    }
-    // Otherwise, if season keys exist, default to the first season.
-    const seasonKeys = Object.keys(movieData).filter(key =>
-      !['title', 'image', 'video', 'episodeTitles', 'customDownloads', 'dubbed', 'dubbedepisodetitle', 'dubbedcustomdownloads'].includes(key)
-    );
-    if (seasonKeys.length > 0) {
-      currentSeason = seasonKeys[0];
-      return movieData[currentSeason];
-    }
-    // Else assume the movieData itself is the media data.
-    return movieData;
-  }
-
-  // Build/update the season dropdown in the sidebar.
-  function updateSeasonSelector() {
-    if (!seasonSelectorContainer) return;
-    seasonSelectorContainer.innerHTML = '';
-    const movieData = getCurrentMovieData();
-    if (!movieData) return;
-
-    // Filter keys that are season objects.
-    const seasonKeys = Object.keys(movieData).filter(key =>
-      !['title', 'image', 'video', 'episodeTitles', 'customDownloads', 'dubbed', 'dubbedepisodetitle', 'dubbedcustomdownloads'].includes(key)
-      && typeof movieData[key] === "object"
-    );
-
-    if (seasonKeys.length > 0) {
-      const select = document.createElement('select');
-      select.id = 'seasonSelector';
-
-      // Create an option for each season.
-      seasonKeys.forEach((key, index) => {
-        const option = document.createElement('option');
-        option.value = key;
-        option.textContent = movieData[key].chapter || key;
-        // Automatically select the first season.
-        if (index === 0) {
-          option.selected = true;
-          currentSeason = key;
-        }
-        select.appendChild(option);
-      });
-
-      select.addEventListener('change', (e) => {
-        currentSeason = e.target.value;
-        currentEpisode = 0;
-        updateEpisodeSidebar();
-        updateVideoPlayer(0);
-        updateDownloadButton();
-      });
-
-      seasonSelectorContainer.appendChild(select);
-    }
-  }
-
-  // Render the movie list based on the selected category.
-  function renderMovieList(category) {
-    currentCategory = category;
-    movieList.innerHTML = ''; 
-    const data = window[category]; 
-    for (const key in data) {
-      if (data.hasOwnProperty(key)) {
-        const movieItem = document.createElement('div');
-        movieItem.classList.add('movie-item');
-        movieItem.dataset.movie = key;
-    
-        const img = document.createElement('img');
-        img.src = data[key].image || 'https://via.placeholder.com/150?text=' + key;
-        img.alt = data[key].title || key;
-        movieItem.appendChild(img);
-    
-        const p = document.createElement('p');
-        p.classList.add('kanit-extralight');
-        p.textContent = data[key].title || key;
-        movieItem.appendChild(p);
-    
-        movieItem.addEventListener('click', () => {
-          currentMovie = key;
-          currentEpisode = 0;
-          currentSeason = null; // reset season on new movie selection
-          currentDubbed = false;
-          if (dubbedButton) {
-              dubbedButton.classList.remove('active');
-          }
-          // Update season selector if multiple seasons exist.
-          updateSeasonSelector();
-          // Update episodes and video using the active media data.
-          updateEpisodeSidebar();
-          updateVideoPlayer(0);
-          updateDownloadButton();
-          episodeContainer.style.display = 'flex';
-        });
-    
-        movieList.appendChild(movieItem);
-      }
-    }
-  }
-
-  // Category banner event listeners.
-  banners.forEach(banner => {
-    banner.addEventListener('click', (e) => {
-      if (e.target.closest('.movie-item') && banner.contains(e.target.closest('.movie-item'))) {
-        return;
-      }
-      let category;
-      if (banner.dataset.movie === 'banner1') {
-        category = 'movies';
-      } else if (banner.dataset.movie === 'banner2') {
-        category = 'shows';
-      } else if (banner.dataset.movie === 'banner3') {
-        category = 'anime';
-      }
-      if (category) {
-        container.style.display = 'none';
-        categoryContainer.style.display = 'none';
-        movieListWrapper.style.display = 'block';
-        renderMovieList(category);
-      }
-    });
-
-    const nestedItems = banner.querySelectorAll('.movie-item');
-    nestedItems.forEach(item => {
-      item.addEventListener('click', (e) => {
-        e.stopPropagation();
-        let category;
-        if (banner.dataset.movie === 'banner1') {
-          category = 'movies';
-        } else if (banner.dataset.movie === 'banner2') {
-          category = 'shows';
-        } else if (banner.dataset.movie === 'banner3') {
-          category = 'anime';
-        }
-        if (category) {
-          currentCategory = category;
-          currentMovie = item.dataset.movie;
-          currentEpisode = 0;
-          currentSeason = null;
-          currentDubbed = false;
-          if (dubbedButton) {
-              dubbedButton.classList.remove('active');
-          }
-          container.style.display = 'none';
-          categoryContainer.style.display = 'none';
-          movieListWrapper.style.display = 'block';
-          updateSeasonSelector();
-          updateEpisodeSidebar();
-          updateVideoPlayer(0);
-          updateDownloadButton();
-          episodeContainer.style.display = 'flex';
-        }
-      });
-    });
-  });
-
-  // Update the video player to the given episode index using the active media data.
-  function updateVideoPlayer(index) {
-    const mediaData = getActiveMediaData();
-    if (mediaData) {
-      let videoArray = mediaData.video;
-      if (currentDubbed && mediaData.dubbed && mediaData.dubbed.length > 0) {
-        videoArray = mediaData.dubbed;
-      }
-      if (videoArray && videoArray[index]) {
-        videoPlayer.src = videoArray[index];
-        currentEpisode = index;
-        updateActiveEpisodeUI(index);
-      }
-    }
-  }
-
-  // Update which episode is active in the episode list container.
-  function updateActiveEpisodeUI(index) {
-    document.querySelectorAll('.episode').forEach(ep => ep.classList.remove('active'));
-    const episodes = document.querySelectorAll('.episode');
-    if (episodes[index]) episodes[index].classList.add('active');
-  }
-
-  // Update the download links for the current episode.
-  function updateDownloadButton() {
-    downloadContainer.innerHTML = '';
-    const mediaData = getActiveMediaData();
-    if (!mediaData) return;
-    let downloadsArray = mediaData.customDownloads;
-    if (currentDubbed && mediaData.dubbedcustomdownloads && mediaData.dubbedcustomdownloads.length > 0) {
-      downloadsArray = mediaData.dubbedcustomdownloads;
-    }
-    const episodeDownloads = downloadsArray[currentEpisode] || [];
-    if (episodeDownloads.length > 0) {
-      episodeDownloads.forEach(download => {
-        const downloadButton = document.createElement('a');
-        downloadButton.href = download.url;
-        downloadButton.textContent = download.name;
-        downloadButton.classList.add('button');
-        downloadContainer.appendChild(downloadButton);
-      });
-    } else {
-      const noDownloadsMessage = document.createElement('p');
-      noDownloadsMessage.textContent = 'No downloads available for this episode';
-      downloadContainer.appendChild(noDownloadsMessage);
-    }
-  }
-
-  // Update the episode list inside the sidebar using the active media data.
-  function updateEpisodeSidebar() {
-    episodeListContainer.innerHTML = '';
-    const mediaData = getActiveMediaData();
-    if (!mediaData) return;
-    let episodeTitles = mediaData.episodeTitles;
-    if (currentDubbed && mediaData.dubbedepisodetitle && mediaData.dubbedepisodetitle.length > 0) {
-      episodeTitles = mediaData.dubbedepisodetitle;
-    }
-    let videoArray = mediaData.video;
-    if (currentDubbed && mediaData.dubbed && mediaData.dubbed.length > 0) {
-      videoArray = mediaData.dubbed;
-    }
-    videoArray.forEach((videoUrl, index) => {
-      const episodeDiv = document.createElement('div');
-      episodeDiv.textContent = episodeTitles[index] || `Episode ${index + 1}`;
-      episodeDiv.classList.add('episode');
-      episodeDiv.dataset.episodeIndex = index;
-      episodeDiv.addEventListener('click', () => updateVideoPlayer(index));
-      episodeListContainer.appendChild(episodeDiv);
-    });
-  }
-
-  nextEpisodeButton.addEventListener('click', () => {
-    const mediaData = getActiveMediaData();
-    if (mediaData) {
-      let videoArray = mediaData.video;
-      if (currentDubbed && mediaData.dubbed && mediaData.dubbed.length > 0) {
-        videoArray = mediaData.dubbed;
-      }
-      if (currentEpisode < videoArray.length - 1) {
-        updateVideoPlayer(currentEpisode + 1);
-        updateDownloadButton();
-      }
-    }
-  });
-
-  prevEpisodeButton.addEventListener('click', () => {
-    if (currentEpisode > 0) {
-      updateVideoPlayer(currentEpisode - 1);
-      updateDownloadButton();
-    }
-  });
-
-  searchInput.addEventListener('input', () => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      const query = searchInput.value.toLowerCase();
-      document.querySelectorAll('.movie-item').forEach(item => {
-        const title = item.querySelector('p').textContent.toLowerCase();
-        item.style.display = title.includes(query) ? '' : 'none';
-      });
-      banners.forEach(banner => {
-        banner.style.display = query ? 'none' : 'block';
-      });
-    }, 300);
-  });
-
-  // Revised backToCategory event handler with extra logging and safety checks.
-  const backToCategoryButton = document.getElementById('backToCategory');
-  if (backToCategoryButton) {
-    backToCategoryButton.addEventListener('click', (e) => {
-      e.preventDefault();
-      console.log('Back to Category button pressed.');
-  
-      if (videoPlayer) {
-        // Check if the videoPlayer is an iframe (embedded content)
-        if (videoPlayer.tagName.toLowerCase() === 'iframe') {
-          console.log('Video player is an iframe. Clearing src to stop playback.');
-          videoPlayer.src = '';  // Clear the source to stop the embed
-        } else {
-          try {
-            console.log('Stopping video playback.');
-            videoPlayer.pause();
-            videoPlayer.currentTime = 0; // Reset playback to the beginning
-            videoPlayer.removeAttribute('src'); // Remove the current video source
-            videoPlayer.load(); // Reset the video element
-            console.log('Video has been reset.');
-          } catch (error) {
-            console.error('Error while resetting video:', error);
-          }
-        }
-      } else {
-        console.warn('Video player element not found.');
-      }
-  
-      // Navigate back to category view.
-      movieList.innerHTML = '';
-      movieListWrapper.style.display = 'none';
-      categoryContainer.style.display = 'flex';
-      episodeContainer.style.display = 'none';
-      container.style.display = 'block';
-      console.log('Navigation back to category complete.');
-    });
-  } else {
-    console.error('Back to Category button not found.');
-  }
-  
-
-  if (dubbedButton) {
-    dubbedButton.addEventListener('click', (e) => {
-      e.preventDefault();
-      currentDubbed = !currentDubbed;
-      dubbedButton.classList.toggle('active', currentDubbed);
-      updateEpisodeSidebar();
-      updateVideoPlayer(currentEpisode);
-      updateDownloadButton();
-    });
-  }
-});
+  })();
+})();
