@@ -1,4 +1,8 @@
-const changelogs = [
+// changelogs.js
+
+// 1. Your changelog data
+window.changelogs = [
+  { version: "v10.0 16.06.2025", description: "Added Anime: My Teen Romantic Comedy & The Rising Of The Shield Hero | Added Show: Barry S4 | Updated Site to look better and the Whole fucking code and site is a lot more polished and smoother." },
   { version: "v9.3.0 31.05.2025", description: "Added Films: Nobody, Lord Of War | Added Anime: Saga Of Tanya The Evil | Added Show: Barry S3 | Finished Adding ReZero S3 Dub and Download." },
   { version: "v9.2.0 18.05.2025", description: "Added OPM S2, Added The Boys S1 - S4" },
   { version: "v9.1.0 20.04.2025", description: "Added OPM Subs and Download, Added back Invincible S1-3, Added back Barry S1-2, Added back Padomju Dzinsi, Most Movies added back By Kris from Lunora! Movies are now done by the Lunora team" },
@@ -38,5 +42,38 @@ const changelogs = [
   { version: "v3.0 11.12.2024", description: "Virowatch beta 3 | more content, last thing left is to add all the shows" },
   { version: "v2.0 10.12.2024", description: "Virowatch beta 2 | added more content, not everything is added yet" },
   { version: "v1.0 09.12.2024", description: "Virowatch officially Uploaded" },
-  // Add more changelogs here
+  // ... rest of your entries ...
 ];
+
+// 2. When the DOM is ready:
+document.addEventListener('DOMContentLoaded', () => {
+  const container = document.getElementById('changelog-container');
+  if (!container) return;
+
+  // Render each entry
+  container.innerHTML = ''; 
+  window.changelogs.forEach(log => {
+    const box = document.createElement('div');
+    box.className = 'changelog-box';
+    box.innerHTML = `<h3>${log.version}</h3><p>${log.description}</p>`;
+    container.appendChild(box);
+  });
+
+  // 3. Auto‑hide on category clicks
+  document.querySelectorAll('.movie-item-banner').forEach(b => {
+    b.addEventListener('click', () => {
+      container.style.display = 'none';
+    });
+  });
+
+  // 4. Auto‑show on back button
+  const backBtn = document.getElementById('backToCategory');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      // give your content.js a moment to reset views
+      setTimeout(() => {
+        container.style.display = 'block';
+      }, 100);
+    });
+  }
+});
