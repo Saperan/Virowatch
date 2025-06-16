@@ -1,3 +1,54 @@
+/* Global text wrap */
+p, span, label, button, input, textarea, div, h1, h2, h3, h4, h5, h6 {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+/* For your custom text containers */
+.movie-item p,
+.movie-item-banner p,
+.episode,
+.button,
+.search-box input[type="text"],
+.changelog-box p,
+.changelog-box h3,
+.hero-text h2,
+.hero-text .desc,
+.hero-text .meta,
+.hero-text .spotlight,
+.hero-text .badge {
+    font-size: clamp(0.5rem, 1vw + 0.5rem, 1rem); /* Shrinks to half size */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+/* Also ensure text in flex containers wraps */
+.movie-list-wrapper,
+.movie-list,
+.episode-list-container,
+.controls,
+#downloadContainer,
+#categoryContainer,
+.changelog-container,
+.episode-container {
+    font-size: clamp(0.5rem, 1vw + 0.5rem, 1rem); /* Shrinks to half size */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+p, .movie-item p, .movie-item-banner p, .episode, .button {
+  font-size: clamp(0.5rem, 1vw + 0.5rem, 1rem); /* Shrinks to half size */
+  max-width: 100%; /* Keep inside container */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+
+
 .kanit-thin {
     font-family: "Kanit", sans-serif;
     font-weight: 100;
