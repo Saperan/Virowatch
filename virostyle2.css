@@ -22,6 +22,10 @@
     font-style: normal;
   }
   body {
+    background-repeat: repeat;
+    background-position: center center;
+    background-attachment: fixed;      /* Keeps it fixed on scroll */ 
+    background-size: cover;            /* Ensures it fills the viewport */
       font-family: Arial, sans-serif;
       background: #cccccc;
       color: #000000;
@@ -344,3 +348,141 @@ width: 100%;  /* Ensures the download container spans the full width */
       box-sizing: border-box;
     }
   
+
+    
+/* New 10.0 update */
+
+        .fade-out { opacity: 0; transition: opacity 0.2s ease; }
+    .spinner {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 40px; height: 40px; border: 4px solid #ccc; border-top-color: #444;
+      border-radius: 50%; animation: spin 1s linear infinite; display: none; z-index: 10;
+    }
+    @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+    .player { position: relative; }
+
+    #hero {
+  position: relative;
+  width: 100%;
+  height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #000000;
+  font-family: 'Kanit', sans-serif;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: url('/mnt/data/53ae216f-470c-445c-ba6e-d7c76e97958a.png') center/cover no-repeat;
+  filter: blur(8px) brightness(0.6);
+  z-index: 0;
+}
+
+.hero-content {
+    color: #000000;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 90%;
+  max-width: 1400px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.hero-text {
+    color: #000000;
+  max-width: 55%;
+}
+
+.hero-text .spotlight {
+  color: #ffffff;
+  font-weight: 400;
+  margin-bottom: 8px;
+    color: #000000;
+}
+
+.hero-text h2 {
+    color: #000000;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+    color: #000000;
+}
+
+.hero-text .meta {
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+}
+.hero-text .meta span {
+  margin-right: 10px;
+  opacity: 0.85;
+}
+.hero-text .badge {
+  background: #666;
+  color: #000000;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.hero-text .desc {
+  font-weight: 300;
+  font-size: 1rem;
+  margin-bottom: 16px;
+  opacity: 0.9;
+}
+
+.hero-text .buttons button {
+  margin-right: 10px;
+  padding: 10px 18px;
+  border-radius: 20px;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.hero-poster {
+  max-width: 40%;
+  transform: skewX(-5deg);
+
+}
+.hero-poster img {
+  width: 100%;
+  border-radius: 12px;
+  transform: skewX(5deg);
+  display: block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  .hero-text, .hero-poster {
+    max-width: 100%;
+  }
+  .hero-poster {
+    margin-top: 20px;
+    transform: none;
+  }
+  .hero-poster img {
+    transform: none;
+  }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  max-width: 650px;
+  align-items: center;
+  justify-content: flex-start; /* or center, depending on your preference */
+  gap: 10px; /* adjust this value to control how close the poster is */
+  padding: 10px;
+}
