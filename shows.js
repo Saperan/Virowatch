@@ -446,6 +446,31 @@ window.shows = {
         ],
         ]
           },
+                            BARRYS4: {
+            chapter: 'Season 4',
+            video: [
+                'https://rumble.com/embed/v6soazp/?pub=4ljicf',
+                'https://rumble.com/embed/v6sob0d/?pub=4ljicf',
+                'https://rumble.com/embed/v6sob0z/?pub=4ljicf',
+                'https://rumble.com/embed/v6sob1v/?pub=4ljicf',
+                'https://rumble.com/embed/v6sob2b/?pub=4ljicf',
+                'https://rumble.com/embed/v6sob2r/?pub=4ljicf',
+                'https://rumble.com/embed/v6sob3h/?pub=4ljicf',
+                'https://rumble.com/embed/v6sob4b/?pub=4ljicf'
+            ],
+            episodeTitles: [
+                    '1. Yikes',
+                    '2. Bestest place on the earth',
+                    '3. Youre charming',
+                    '4. It takes a psycho',
+                    '5. Tricky legacies',
+                    '6. The wizard',
+                    '7. A nice meal',
+                    '8. Wow'
+                ],
+            customDownloads: [
+        ]
+          },
       },
 
     tourdp: {
