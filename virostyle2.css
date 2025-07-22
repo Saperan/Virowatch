@@ -1,4 +1,22 @@
+
+/* 10.1 update */
+
+/* Lazy light mode by inverting colors */
+body {
+  filter: invert(1) hue-rotate(180deg);
+  background-color: #eaeaea !important; /* Override dark bg */
+  color: #1a1a1a !important;            /* Override text color */
+}
+img, video, iframe, svg {
+  filter: invert(1) hue-rotate(180deg);
+}
+
 /* Global text wrap */
+
+h1 {
+  color: white;
+}
+
 p, span, label, button, input, textarea, div, h1, h2, h3, h4, h5, h6 {
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -48,7 +66,6 @@ p, .movie-item p, .movie-item-banner p, .episode, .button {
 }
 
 
-
 .kanit-thin {
     font-family: "Kanit", sans-serif;
     font-weight: 100;
@@ -73,22 +90,23 @@ p, .movie-item p, .movie-item-banner p, .episode, .button {
     font-style: normal;
   }
   body {
+background-color: #1a1a1a;
     background-repeat: repeat;
     background-position: center center;
     background-attachment: fixed;      /* Keeps it fixed on scroll */ 
     background-size: cover;            /* Ensures it fills the viewport */
+    
       font-family: Arial, sans-serif;
-      background: #cccccc;
-      color: #000000;
+      color: #eaeaea;
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       overflow-x: auto; /* Prevent global horizontal scrolling */
   }
   .container {
-      max-width: 90%;
+      max-width: 95%;
       margin: 20px auto;
-      padding: 10px;
+      padding: 2px;
   }
   .movie-list-wrapper {
     overflow-x: auto; /* Horizontal scrolling */
@@ -124,21 +142,38 @@ height: 150px;
 transition: transform 0.3s ease;
 }
 
+/* Global scrollbar styling for WebKit-based browsers (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: #eaeaea;  /* Black scrollbar thumb */
+    border-radius: 4px;
+}
+
+*::-webkit-scrollbar-track {
+    background-color: #1a1a1a;  /* Dark track */
+}
+
+/* Firefox scrollbar styling */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #eaeaea #1a1a1a;  /* thumb color, track color */
+}
+
 .movie-list-wrapper::-webkit-scrollbar {
-    background: #ffffff; /* Track background */
-    background: #cccccc; /* Scrollbar track background */
 height: 8px; /* Horizontal scrollbar height */
 }
 
 .movie-list-wrapper::-webkit-scrollbar-thumb {
-    background: #cccccc; /* Track background */
-    background: #1a1a1a; /* Scrollbar track background */
 border-radius: 4px;
 }
 
 .movie-list-wrapper::-webkit-scrollbar-track {
-    background: #cccccc; /* Track background */
-background: #cccccc; /* Scrollbar track background */
+    background: #2b2b2b; /* Track background */
+background: #1a1a1a; /* Scrollbar track background */
 }
   .movie-item:hover {
       transform: scale(1.1);
@@ -169,8 +204,7 @@ background: #cccccc; /* Scrollbar track background */
           font-size: auto;
           font-family: "Kanit", sans-serif;
           font-weight: 300;
-          color: #000000; /* Text color */
-          background: #cccccc;
+          color: #eaeaea; /* Text color */
           text-align: center; /* Center the text */
           z-index: 2; /* Ensure it appears above other elements */
           border-bottom-left-radius: 10%; /* Optional: Match container's bottom corner rounding */
@@ -188,8 +222,8 @@ background: #cccccc; /* Scrollbar track background */
           font-size: auto;
           font-family: "Kanit", sans-serif;
           font-weight: 300;
-          color: #000000; /* Text color */
-          background: #cccccc;
+          color: #eaeaea; /* Text color */
+          background:  rgba(0, 0, 0, 0.7); /* Semi-transparent black background */;
           text-align: center; /* Center the text */
           z-index: 2; /* Ensure it appears above other elements */
           border-bottom-left-radius: 10%; /* Optional: Match container's bottom corner rounding */
@@ -212,8 +246,8 @@ font-family: "Kanit", sans-serif;
     display: flex; /* Enables Flexbox for alignment */
     justify-content: center; /* Horizontally centers the input field */
 align-items: center; /* Vertically centers the input field */
-background-color: #9c9c9c; /* Lighter color to differentiate from the search box */
-color: #ffffff;
+background-color: #444; /* Lighter color to differentiate from the search box */
+color: white;
 padding: 10px 15px; /* Adds padding inside the input field */
 border-radius: 5px; /* Rounds the corners */
 width: 80%; /* Adjusts the input box width to fit neatly */
@@ -238,6 +272,8 @@ font-family: "Kanit", sans-serif;
     justify-content: flex-start;    /* Align to the left */
     margin-top: 20px;                /* Optional: Add space above */
     font-family: "Kanit", sans-serif;
+  padding: 0 30px;  /*  Adds space on left and right edges of page */
+  box-sizing: border-box;
 }
 
 
@@ -245,10 +281,11 @@ font-family: "Kanit", sans-serif;
     flex: 0 0 15%;                /* Set fixed width for the sidebar */
     max-height: 720px;              /* Limit the height of the episode list */
     overflow-y: auto;               /* Allow vertical scrolling */
-    background: #9c9c9c;
+    background: #2b2b2b;
     padding: 10px;
     border-radius: 10px;
-    color: #ffffff;
+        color: white;
+    
 }
 
   .episode {
@@ -262,17 +299,17 @@ font-family: "Kanit", sans-serif;
 }
 
   .episode:hover, .episode.active {
-      background: #777777;
+      background: #444;
   }
 
   .player {
       flex: 1;
-      background: #9c9c9c;
+      background: #000;
       border-radius: 5px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 10px;
+  margin: 0 auto;     /* Centers it horizontally */
   }
 
   iframe {
@@ -295,8 +332,8 @@ font-family: "Kanit", sans-serif;
       display: inline-block;
       padding: 8px 15px;
       border-radius: 5px;
-      background: #ffffff;
-      color: #000000;
+      background: #444;
+      color: #eaeaea;
       text-decoration: none;
       text-align: center;
       transition: 0.3s;
@@ -322,7 +359,7 @@ width: 100%;  /* Ensures the download container spans the full width */
     display: flex;
     flex-direction: column;
     gap: 10px;
-    background: #ffffff;
+    
 }
 
 .controls {
@@ -345,10 +382,10 @@ width: 100%;  /* Ensures the download container spans the full width */
     width: 50%;
     height: 225px;
     overflow-y: scroll;
-    background: #ddd;
-    border: 1px solid #1a1a1a;
+    background: #1a1a1a;
+    border: 1px solid #ddd;
     border-radius: 10px;
-    box-shadow: 0 4px 6px #ddd;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     padding: 10px;
     scrollbar-width: 2px; /* Firefox */
     font-family: "kanit-thin",;
@@ -358,7 +395,7 @@ width: 100%;  /* Ensures the download container spans the full width */
     }
     
     .changelog-container::-webkit-scrollbar-thumb {
-    background-color: #1a1a1a;
+    background-color: #ccc;
     border-radius: 10px;
     }
     
@@ -366,8 +403,8 @@ width: 100%;  /* Ensures the download container spans the full width */
     .changelog-box {
     margin-bottom: 15px;
     padding: 10px;
-    background: #ddd;
-    border: 1px solid #1a1a1a;
+    background: rgb(36, 36, 36);
+    border: 1px solid #ccc;
     border-radius: 8px;
     font-family: "kanit-thin", sans-serif,;
     }
@@ -376,18 +413,18 @@ width: 100%;  /* Ensures the download container spans the full width */
     font-family: "kanit-thin", sans-serif,;
     margin: 0 0 5px;
     font-size: 16px;
-    color: #1a1a1a;
+    color: #ffffff;
     }
     
     .changelog-box p {
     margin: 0;
     font-size: 14px;
-    color: #1a1a1a;
+    color: #ffffff;
     font-family: "kanit-thin", sans-serif,;
     }
     #seasonSelector {
-      background: #ddd;             /* Match your button/controls background */
-      color: #1a1a1a;               /* Same text color as the rest of your UI */
+      background: #444;             /* Match your button/controls background */
+      color: #eaeaea;               /* Same text color as the rest of your UI */
       font-family: "kanit";
       font-weight: 400;             /* Same font weight as .kanit-light */
       border: 0px;
@@ -398,9 +435,7 @@ width: 100%;  /* Ensures the download container spans the full width */
       font-size: 16px;
       box-sizing: border-box;
     }
-  
 
-    
 /* New 10.0 update */
 
         .fade-out { opacity: 0; transition: opacity 0.2s ease; }
@@ -420,7 +455,7 @@ width: 100%;  /* Ensures the download container spans the full width */
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  color: #000000;
+  color: #fff;
   font-family: 'Kanit', sans-serif;
 }
 
@@ -433,7 +468,6 @@ width: 100%;  /* Ensures the download container spans the full width */
 }
 
 .hero-content {
-    color: #000000;
   position: relative;
   z-index: 1;
   display: flex;
@@ -445,23 +479,19 @@ width: 100%;  /* Ensures the download container spans the full width */
 }
 
 .hero-text {
-    color: #000000;
   max-width: 55%;
 }
 
 .hero-text .spotlight {
-  color: #ffffff;
+  color: #666;
   font-weight: 400;
   margin-bottom: 8px;
-    color: #000000;
 }
 
 .hero-text h2 {
-    color: #000000;
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 12px;
-    color: #000000;
 }
 
 .hero-text .meta {
@@ -474,7 +504,7 @@ width: 100%;  /* Ensures the download container spans the full width */
 }
 .hero-text .badge {
   background: #666;
-  color: #000000;
+  color: #fff;
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -496,19 +526,23 @@ width: 100%;  /* Ensures the download container spans the full width */
   cursor: pointer;
   transition: background 0.3s;
 }
-.hero-poster {
-  max-width: 40%;
-  transform: skewX(-5deg);
+/* ... your entire CSS as before ... */
 
+/* Smaller hero poster image */
+.hero-poster {
+  max-width: 25%;  /* Reduced from 40% to 25% */
+  transform: skewX(-5deg);
 }
+
 .hero-poster img {
   width: 100%;
+  max-width: 180px; /* Limit max image width */
   border-radius: 12px;
   transform: skewX(5deg);
   display: block;
 }
 
-/* Responsive */
+/* Responsive for smaller screens */
 @media (max-width: 768px) {
   .hero-content {
     flex-direction: column;
@@ -519,9 +553,12 @@ width: 100%;  /* Ensures the download container spans the full width */
   }
   .hero-poster {
     margin-top: 20px;
+    max-width: 100%;
     transform: none;
   }
   .hero-poster img {
+    width: 100%;
+    max-width: none;
     transform: none;
   }
 }
@@ -532,8 +569,27 @@ width: 100%;  /* Ensures the download container spans the full width */
   display: flex;
   width: 100%;
   max-width: 650px;
-  align-items: center;
-  justify-content: flex-start; /* or center, depending on your preference */
-  gap: 10px; /* adjust this value to control how close the poster is */
+  align-items: center;       /* Vertical alignment */
+  justify-content: flex-start;
+  gap: 10px;
   padding: 10px;
+}
+
+.hero-poster {
+  max-width: 40%;
+  /* Remove transform skew here to avoid messing with alignment */
+  transform: none;
+  display: flex;             /* Make it a flex container */
+  flex-direction: column;    /* Stack images vertically */
+  gap: 10px;
+  justify-content: center;   /* Center images vertically inside .hero-poster */
+}
+
+.hero-poster img {
+  width: 100%;
+  border-radius: 12px;
+  /* Remove skew on images too */
+  transform: none;
+  display: block;
+  height: auto;              /* Maintain aspect ratio */
 }
