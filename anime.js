@@ -117,6 +117,73 @@ window.anime = {
               ],
             dubbedcustomDownloads: [
               ],
+            },
+        SHS2: {
+            chapter: 'Season 2',
+            video: [
+                'https://rumble.com/embed/v6tbs5n/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbs5x/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbs6d/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbs6r/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbs71/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbs7d/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbs7n/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbs7v/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbs83/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbs8t/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbs9h/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbs9n/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbs9z/?pub=4m0xoz'
+            ],
+            episodeTitles: [
+                'JP 1. A New Roar',
+                'JP 2. Footprints of the Spirit Tortoise',
+                'JP 3. Shaking Land',
+                'JP 4. Ruins in the Fog',
+                'JP 5. Ost Hourai',
+                'JP 6. Racing to Catch Up',
+                'JP 7. Infinite Labyrinth',
+                'JP 8. A Parting in the Snow',
+                'JP 9. Humming Fairy',
+                'JP 10. Katana Hero',
+                'JP 11. Kizuna',
+                'JP 12. Reason to Fight',
+                'JP 13. Flowers Offered in Recollection'
+              ],
+            customDownloads: [
+              ],
+            dubbed: [
+                'https://rumble.com/embed/v6tbskl/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbskt/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbsmr/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbsnd/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbsnp/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbsnz/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbso3/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbso9/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbsof/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbsp1/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbspx/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbsq9/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbsqf/?pub=4m0xoz'
+            ],
+            dubbedepisodetitle: [
+                '1. A New Roar',
+                '2. Footprints of the Spirit Tortoise',
+                '3. Shaking Land',
+                '4. Ruins in the Fog',
+                '5. Ost Hourai',
+                '6. Racing to Catch Up',
+                '7. Infinite Labyrinth',
+                '8. A Parting in the Snow',
+                '9. Humming Fairy',
+                '10. Katana Hero',
+                '11. Kizuna',
+                '12. Reason to Fight',
+                '13. Flowers Offered in Recollection'
+              ],
+            dubbedcustomDownloads: [
+              ],
         },
     },
     MTRC: {
@@ -189,10 +256,78 @@ window.anime = {
             dubbedcustomdownloads: [
               ],
         },
+                MTRCS2: {
+            chapter: 'Season 2',
+            video: [
+                'https://rumble.com/embed/v6tbrjt/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrk9/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrkf/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrkv/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrld/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrlp/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrlz/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrm5/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrmb/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrmn/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrmx/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrnb/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrnt/?pub=4m0xoz'
+            ],
+                          episodeTitles: [
+                'JP 1. Nobody Knows Why They Came to the Service Club',
+                'JP 2. His and Her Confessions Will Reach No One',
+                'JP 3. Quietly, Yukinoshita Yukino Makes a Decision',
+                'JP 4. And Then, Yuigahama Yui Makes a Declaration',
+                'JP 5. The Scent of Tea Doesnt Fill That Room Anymore',
+                'JP 6. Without Incident, the Congress Dances, But Does Not Progress',
+                'JP 7. Yet, That Room Continues to Play Out the Endless Days',
+                'JP 8. But Still, Hikigaya Hachiman Is...',
+                'JP 9. And, Yukinoshita Yukino Is...',
+                'JP 10. The Thing That the Light in Each of Their Hands Shines On',
+                'JP 11. Hayama Hayato Always Responds to Everyones Expectations',
+                'JP 12. Still, the Thing He Seeks Is Out of Reach, and He Continues to Mistake Whats Real',
+                'JP 13. Spring, Bound Beneath the Thick Snow, Begins to Sprout'
+              ],
+                            customDownloads: [
+              ],
+            dubbed: [
+                'https://rumble.com/embed/v6tbrtv/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbru1/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbruh/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbruv/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrv1/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrvb/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrvj/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrvp/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrvr/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrvz/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrw7/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrwl/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbrwv/?pub=4m0xoz'
+                ],
+            dubbedepisodetitle: [
+                '1. The first thing that happened was that the',
+                '2. Im sure everyone has their own worries.',
+                '3. Tamani rabu kome no kami-sama wa ikoto o suru',
+                '4. In other words, he doesnt have many friends.',
+                '5. Once again, he turned back the way he came.',
+                '6. The first thing that happened to me was that I was able to make a living.',
+                '7. Tomoare, even if you are not a member of the family,',
+                '8. Eventually they will know the truth.',
+                '9. Three times, he turns back the way he came.',
+                '10. In the morning, the river flows and the pine trees grow,',
+                '11. However, there are still many people who are not familiar with the festival, and I will be celebrating with you at the festival.',
+                '12. The story begins with a friend and friend, and the two of them share a common goal.',
+                '13. So their festival never ends.'
+              ],
+            dubbedcustomdownloads: [
+              ],
+        },
         MTRCSPECIALS: {
             chapter: 'Specials',
             video: [
                 'https://rumble.com/embed/v6shngn/?pub=4m0xoz',
+                'https://rumble.com/embed/v6tbro3/?pub=4m0xoz',
             ],
                                       episodeTitles: [
                 'JP OVA: Kochira toshite mo karera kanojora no yukusue ni sachiôkaran koto o negawazaru o enai',
