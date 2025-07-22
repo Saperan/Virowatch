@@ -1,6 +1,523 @@
 // shows.js (Non-module)
 window.shows = {
 
+    topgear: {
+        title: 'Top Gear',
+        image: 'https://sm.ign.com/t/ign_ap/cover/t/top-gear-2/top-gear-2002_7bad.600.jpg',
+        topgears1: {
+            chapter: 'Season 1',
+            video: [
+                'https://rumble.com/embed/v6tc1y1/?pub=4m95bd',
+                'https://rumble.com/embed/v6tc1yp/?pub=4m95bd',
+                'https://rumble.com/embed/v6tc1z5/?pub=4m95bd',
+                'https://rumble.com/embed/v6tc1zf/?pub=4m95bd',
+                'https://rumble.com/embed/v6tc20p/?pub=4m95bd',
+                'https://rumble.com/embed/v6tc219/?pub=4m95bd',
+                'https://rumble.com/embed/v6tc21h/?pub=4m95bd',
+                'https://rumble.com/embed/v6tc21v/?pub=4m95bd',
+                'https://rumble.com/embed/v6tc22n/?pub=4m95bd',
+                'https://rumble.com/embed/v6tc233/?pub=4m95bd'
+            ],
+            episodeTitles: [
+                '1. The Legacy Begins',
+                '2. Bus Jumps Over Motorbikes',
+                '3. Grannies Doing Doughnuts',
+                '4. Clarkson Drives the Aston Martin Vanquish',
+                '5. Budget Bond Car',
+                '6. Grannies Attempt Hand Brake Parking',
+                '7. Britains Fastest Faith Race',
+                '8. Britains Fastest White-Van Driver',
+                '9. Can The Stig Be Beat?',
+                '10. Britains Fastest Faith Race 2'
+            ],
+        },
+        topgears2: {
+            chapter: 'Season 2',
+            video: [
+                'https://rumble.com/embed/v6tc37d/?pub=4m95bd',
+                'https://rumble.com/embed/v6tc3d9/?pub=4m95bd',
+                'https://rumble.com/embed/v6tc3dj/?pub=4m95bd',
+                'https://rumble.com/embed/v6tc3dz/?pub=4m95bd',
+                'https://rumble.com/embed/v6tc3e9/?pub=4m95bd',
+                'https://rumble.com/embed/v6tc4b9/?pub=4m95bd',
+                'https://rumble.com/embed/v6tc4bp/?pub=4m95bd',
+                'https://rumble.com/embed/v6tc4cl/?pub=4m95bd',
+                'https://rumble.com/embed/v6tc4d7/?pub=4m95bd',
+                'https://rumble.com/embed/v6tc4dr/?pub=4m95bd'
+            ],
+            episodeTitles: [
+                '1. Nissan Sunny vs. Jet Engine',
+                '2. Election Rally Car Showdown',
+                '3. Which Country Has the Fastest Supercar?',
+                '4. Lots of Jaguars and Boris Johnson',
+                '5. Clarkson and the Porsche 911',
+                '6. Mitsubishi Evo VIII vs. Subaru Impreza STI',
+                '7. Crash Testing a Renault Megane',
+                '8. Topless Showdown',
+                '9. Clarkson Backseat Drives a Vauxhall',
+                '10. Land Rover Reliability Challenge'
+            ],
+        },
+        topgears3: {
+            chapter: 'Season 3',
+            video: [
+                'https://rumble.com/embed/v6tdu7b/?pub=4m95bd',
+                'https://rumble.com/embed/v6tdu7x/?pub=4m95bd',
+                'https://rumble.com/embed/v6tdu89/?pub=4m95bd',
+                'https://rumble.com/embed/v6tdu8t/?pub=4m95bd',
+                'https://rumble.com/embed/v6tdu99/?pub=4m95bd',
+                'https://rumble.com/embed/v6tduaj/?pub=4m95bd',
+                'https://rumble.com/embed/v6tdubf/?pub=4m95bd',
+                'https://rumble.com/embed/v6tduch/?pub=4m95bd',
+                'https://rumble.com/embed/v6tdugl/?pub=4m95bd'
+            ],
+            episodeTitles: [
+                '1. Celebrating 40 Years of the Porsche 911',
+                '2. Can a Volvo Estate Jump Four Caravans?',
+                '3. How to Escape a Sinking Car',
+                '4. Lamborghini 40th Anniversary Celebration',
+                '5. Is the Toyota Hilux Really Indestructible?',
+                '6. Is the Toyota Hilux Really indestructible? Part 2',
+                '7. The Best British Car of All Time',
+                '8. Generation Battle - Mercedes SL vs. Mercedes SL',
+                '9. Clarkson vs. the Chrysler Crossfire'
+            ],
+        },
+        topgears4: {
+            chapter: 'Season 4',
+            video: [
+                'https://rumble.com/embed/v6tdwtr/?pub=4m95bd',
+                'https://rumble.com/embed/v6tdwu9/?pub=4m95bd',
+                'https://rumble.com/embed/v6tdwv1/?pub=4m95bd',
+                'https://rumble.com/embed/v6tdww1/?pub=4m95bd',
+                'https://rumble.com/embed/v6tdwwn/?pub=4m95bd',
+                'https://rumble.com/embed/v6tdx4b/?pub=4m95bd',
+                'https://rumble.com/embed/v6tdx4p/?pub=4m95bd',
+                'https://rumble.com/embed/v6tdx51/?pub=4m95bd',
+                'https://rumble.com/embed/v6tdx5f/?pub=4m95bd',
+                'https://rumble.com/embed/v6tdx5x/?pub=4m95bd'
+
+            ],
+            episodeTitles: [
+                '1. Race to Monte Carlo - Aston Martin DB9 vs. Public Transport',
+                '2. Hammond Tests the Cadillac Escalade and Puts a Nun in a Monster Truck',
+                '3. £100 Car Challenge',
+                '4. Bullseye! The Boys Play Car Darts',
+                '5. Sport Coupes Shootout - 911 vs. 6 Series vs. XKR',
+                '6. Can You Run a Car on Poo?',
+                '7. Hammond and May Try Mini-Cabbing',
+                '8. Clarkson Drives His Dream Car - the Ford GT',
+                '9. Can You Parachute Into a Moving Car?',
+                '10. Clarkson Gets Wet in the X3'
+            ],
+        },
+        topgears5: {
+            chapter: 'Season 5',
+            video: [
+                'https://rumble.com/embed/v6tp8le/?pub=4m95bd',
+                'https://rumble.com/embed/v6tp8lu/?pub=4m95bd',
+                'https://rumble.com/embed/v6tp8mc/?pub=4m95bd',
+                'https://rumble.com/embed/v6tp8n4/?pub=4m95bd',
+                'https://rumble.com/embed/v6tp8nk/?pub=4m95bd',
+                'https://rumble.com/embed/v6tp8ny/?pub=4m95bd',
+                'https://rumble.com/embed/v6tp8om/?pub=4m95bd',
+                'https://rumble.com/embed/v6tp8p4/?pub=4m95bd',
+                'https://rumble.com/embed/v6tp8pw/?pub=4m95bd',
+
+            ],
+            episodeTitles: [
+                '1. Beach Battle - Jaguar vs. Chrysler vs. Vauxhall',
+                '2. Mountainboarder vs. Rally Car',
+                '3. Clarkson Climbs a Scottish Mountain',
+                '4. 24 Hours in a Smart Car',
+                '5. Hammond Invents People Carrier Racing',
+                '6. Can You Buy a Decent Porsche for £1,500?',
+                '7. Evo vs. Lamborghini',
+                '8. Ferrari 612 Scaglietti vs. Jet Plane',
+                '9. Clarkson Gets a Facelift in an Ariel Atom'
+            ],
+        },
+        topgears6: {
+            chapter: 'Season 6',
+            video: [
+                'https://rumble.com/embed/v6tpa6o/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpa7q/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpa8c/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpa8o/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpa92/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpaa6/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpaag/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpab2/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpabo/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpaca/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpad8/?pub=4m95bd'
+            ],
+            episodeTitles: [
+                '1. Car Soccer in Toyota Aygos',
+                '2. £1,500 Two-Door Coupe Challenge',
+                '3. Clarkson Opens a Public Pool With a Rolls-Royce',
+                '4. The Boys Mothers Review Cars',
+                '5. Clarkson Compares the Boxster S and SLK 55 Under Sniper Fire',
+                '6. Mercedes McLaren SLR vs. Boat',
+                '7. Fiat Panda vs. Marathon Runner',
+                '8. Testing Convertibles in Iceland',
+                '9. Hammond and May Play Road Test Russian Roulette',
+                '10. Can a Jeep Drive Across a Lake?',
+                '11. Hammond Runs With the Bulls'
+            ],
+        },
+        topgears7: {
+            chapter: 'Season 7',
+            video: [
+                'https://rumble.com/embed/v6tpb8y/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpb9m/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpba4/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpbaq/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpbbq/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpbcc/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpbcs/?pub=4m95bd'
+            ],
+            episodeTitles: [
+                '1. Isle of Man Shootout - V8 Vantage vs. M6 vs. Carrera S',
+                '2. Hammond and May Race Life-Sized RC Cars',
+                '3. Supercar Road Trip - Ford GT vs. Ferrari F430 vs. Pagani Zonda',
+                '4. Mid-Engine Italian Supercars for Under £10,000',
+                '5. Bugatti Veyron vs. Cessna 182 Airplane',
+                '6. Mazda MX-5 vs. Greyhound',
+                '7. Winter Olympics'
+            ],
+        },
+        topgears8: {
+            chapter: 'Season 8',
+            video: [
+                'https://rumble.com/embed/v6tpc4s/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpc5o/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpc6a/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpc74/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpc7e/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpc7y/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpc8a/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpc8q/?pub=4m95bd'
+            ],
+            episodeTitles: [
+                '1. Clarkson Drives the Koenigsegg CCX',
+                '2. Hammond Races a Jet-Powered Kayak',
+                '3. Amphibious Car Challenge',
+                '4. Porsche Cayenne Turbo S vs. Parachute Team',
+                '5. Playing Car-Soccer in Toyota Aygos - Round 2',
+                '6. Top Gear Sets a World Record with an F1 Car',
+                '7. The Boys Build a Caterham',
+                '8. Being Van Roadies for The Who'
+            ],
+        },
+        topgears9: {
+            chapter: 'Season 9',
+            video: [
+                'https://rumble.com/embed/v6tpd08/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpd0o/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpd1c/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpd24/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpd32/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpd3k/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpd4e/?pub=4m95bd',
+            ],
+            episodeTitles: [
+                '1. Roadworks In 24 Hours',
+                '2. Captain Slow Meets the Bugatti Veyron',
+                '3. U. S. Special',
+                '4. Reliant Robin Space Shuttle Challenge',
+                '5. Tractors',
+                '6. The Everyday Stretch Limo Challenge',
+                '7. Polar Special'
+            ],
+        },
+        topgears10: {
+            chapter: 'Season 10',
+            video: [
+                'https://rumble.com/embed/v6tpdzq/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpe0o/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpe16/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpe2u/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpe3i/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpe44/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpe4s/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpe50/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpe5w/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpe6e/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpe6s/?pub=4m95bd'
+            ],
+            episodeTitles: [
+                '1. The Search for the Greatest Driving Road in the World',
+                '2. Amphibious Car Challenge II',
+                '3. Bugatti Veyron vs. Typhoon Jet Fighter',
+                '4. Botswana Special',
+                '5. London Race',
+                '6. MotorHome Racing - Alfa Romeo 159 vs Tall Man Across The Humber Estuary',
+                '7. £1,200 British Leyland Cheap-Car Challenge',
+                '8. Renault R25 Formula One Car - Automobile History Investigation - GPS Satellite Self-Controlled BMW 330i',
+                '9. Britcar 24 Hour Endurance Race - Fiat 500 vs. BMX Riders Through Budapest Race',
+                '10. German Performance Saloon Cars - Top Gear Awards 2007',
+                '11. Top Ground Gear Force'
+            ],
+        },
+        topgears11: {
+            chapter: 'Season 11',
+            video: [
+                'https://rumble.com/embed/v6tpfva/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpfvs/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpfwa/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpfwu/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpfy0/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpfya/?pub=4m95bd'
+            ],
+            episodeTitles: [
+                '1. Police Car Challenge',
+                '2. Audi RS6 vs French Skiers Race',
+                '3. Cheap Car Challenge: Alfa Romeos for £1,000',
+                '4. Nissan GT-R vs Japanese Bullet Train Epic Race',
+                '5. Classic Luxury Limousines - Daihatsu Terios Fox Hunting Challenge',
+                '6. The British (Top Gear) vs. The Germans (D Motor) Showdown'
+            ],
+        },
+        topgears12: {
+            chapter: 'Season 12',
+            video: [
+                'https://rumble.com/embed/v6tpgqy/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpgrm/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpgs6/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpgsu/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpgti/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpguc/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpgv0/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpgvy/?pub=4m95bd'
+            ],
+            episodeTitles: [
+                '1. £5,000 Lorry Challenge',
+                '2. Muscle Car Challenge',
+                '3. Tuning Challenge - Finnish Folk Racing - Corvette V-8 Engine Blender-Made Smoothie',
+                '4. Economy Race From Basel To Blackpool Illuminations',
+                '5. Portofino To Saint-Tropez Race - Powerboat Vs. Ferrari Daytona - Best Bus For British City Streets',
+                '6. Did The Communists Make A Good Car?',
+                '7. 50 Years Of British Touring Car Racing',
+                '8. Vietnam Special'
+            ],
+        },
+        topgears13: {
+            chapter: 'Season 13',
+            video: [
+                'https://rumble.com/embed/v6tphly/?pub=4m95bd',
+                'https://rumble.com/embed/v6tphmc/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpho6/?pub=4m95bd',
+                'https://rumble.com/embed/v6tphom/?pub=4m95bd',
+                'https://rumble.com/embed/v6tphow/?pub=4m95bd',
+                'https://rumble.com/embed/v6tphpa/?pub=4m95bd',
+                'https://rumble.com/embed/v6tphpq/?pub=4m95bd'
+            ],
+            episodeTitles: [
+                '1. Race To The North - Ferrari FXX Lap Time - The Stig Revealed',
+                '2. Perfect £2,500 Car For 17 Year Olds',
+                '3. Cheap And Cheerful Car I - Cheap And Cheerful Car II - Gymkhana Rallying On The Airfield',
+                '4. Porsche Panamera Vs. The Royal Mail Service Race - Playing British Bulldogs With Live Fire Against The British Army In A Mitsubishi',
+                '5. Proof Of Three £1,500 Rear Wheel Drive Coupés Better Than Front Wheel Drive - Clarksons Inspired Greenhouse Trailer Design To Save The World',
+                '6. Pre-1982 £3,000 Classic Cars For A TSD Rally In Mallorca',
+                '7. Producing Volkswagen Scirocco Adverts'
+            ],
+        },
+        topgears14: {
+            chapter: 'Season 14',
+            video: [
+                'https://rumble.com/embed/v6tpkf0/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpkfo/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpkg0/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpkgo/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpkgy/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpkhm/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpki0/?pub=4m95bd'
+            ],
+            episodeTitles: [
+                '1. Romanian GT Road Trip To Find The Transfagarasan Highway',
+                '2. Build An Electric Car Better Than A G-Wiz',
+                '3. Fly An Airship Caravan With A Lamborghini Gallardo LP550-2 Valentino Balboni - Why Lancia Has Made The Greatest Number Of Great Cars',
+                '4. Airport Vehicle Motorsport',
+                '5. Make An Automotive Art Gallery To Prove Cars Are More Popular Than Traditional Art',
+                '6. Bolivia Special',
+                '7. Low-Budget Worldwide Review Of The BMW X6 - James May And Margaret Calvert Reflect On The Evolution Of UK Road Signs - Top Gear Awards 2009'
+            ],
+        },
+        topgears15: {
+            chapter: 'Season 15',
+            video: [
+                'https://rumble.com/embed/v6tplmc/?pub=4m95bd',
+                'https://rumble.com/embed/v6tplne/?pub=4m95bd',
+                'https://rumble.com/embed/v6tplnq/?pub=4m95bd',
+                'https://rumble.com/embed/v6tplog/?pub=4m95bd',
+                'https://rumble.com/embed/v6tplp2/?pub=4m95bd',
+                'https://rumble.com/embed/v6tplpg/?pub=4m95bd',
+                'https://rumble.com/embed/v6u7dog/?pub=4m95bd'
+
+            ],
+            episodeTitles: [
+                '1. Toyota Hilux Invincible Up An Icelandic Volcano - Farewell To The Former Reasonably Priced Car, The Chevrolet Lacetti',
+                '2. Find A £5,000 Everyday Second-Hand Sports Saloon For Track Days',
+                '3. Find The Greatest Four-Door Supercar By Driving Wedding Guests',
+                '4. Building Motor Homes',
+                '5. Volkswagen Touareg Vs Swedish Snowmobilers - Reach 258mph (415 km/h) In The Bugatti Veyron Super Sport',
+                '6. Old British Roadsters For £5,000',
+                '7. East Coast Road Trip'
+            ],
+        },
+        topgears16: {
+            chapter: 'Season 16',
+            video: [
+                'https://rumble.com/embed/v6u7eyu/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpmii/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpmjc/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpmjs/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpmke/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpmku/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpml8/?pub=4m95bd'
+            ],
+            episodeTitles: [
+                '1. Middle East Special',
+                '2. Yeti Road Test',
+                '3. Top Gear Ashes - British Hosts Vs Top Gear Australia Hosts',
+                '4. Albania Road Trip',
+                '5. Second-Hand Four Seater Convertibles For £2,000',
+                '6. Convert A Combine Harvester Into A Snow Plough',
+                '7. Sunset to sunrise race in a Jaguar XJ 5.0 V8 Supersport across England - NASAs latest Space Exploration'
+            ],
+        },
+        topgears17: {
+            chapter: 'Season 17',
+            video: [
+                'https://rumble.com/embed/v6tpny4/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpnys/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpnz2/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpnzy/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpo0i/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpo12/?pub=4m95bd'
+            ],
+            episodeTitles: [
+                '1. Jaguar E-Type 50th Birthday - Mini John Cooper Works WRC And Amy Williams Race',
+                '2. High Performance Hatchbacks In Lucca And Around The Monaco Grand Prix Track',
+                '3. Second-Hand Bargains For The Price Of The Nissan Pixo - Examine Toughness Of The Range Rover Evoque In Las',
+                '4. Making a Train Out of a Specially Modified Car and Caravans as Carriages',
+                '5. Demolish A House With Second-Hand Military Equipment Vs Demolition Experts',
+                '6. Extraordinary Rally Team Of Amputee Military Veterans - Electric Cars To The British Seaside'
+            ],
+        },
+        topgears18: {
+            chapter: 'Season 18',
+            video: [
+                'https://rumble.com/embed/v6u7g2e/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpp1u/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpp2k/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpp38/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpp3s/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpp4c/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpp50/?pub=4m95bd',
+                'https://rumble.com/embed/v6tpp5u/?pub=4m95bd'
+
+            ],
+            episodeTitles: [
+                '1. India Special',
+                '2. Super Cars Across Italy',
+                '3. Hammond Learns About NASCAR Racing In Texas - Clarkson And May Examine Chinas Car Industry In Beijing',
+                '4. Creating The Climactic Car Chase For "The Sweeney"',
+                '5. Build And Test Off-Road Mobility Scooters In The Countryside',
+                '6. Tribute To Swedish Car Maker Saab - Rally-Spec Skoda Vs Jet-Powered Flying Man',
+                '7. Test Of Three Stripped Track Cars',
+                '8. Motor Racing Cheaper Than Playing Golf? - Mays Childhood Dream Car: The Ferrari 250 GT California.'
+            ],
+        },
+        topgears19: {
+            chapter: 'Season 19',
+            video: [
+                'https://rumble.com/embed/v6tr1bi/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr1cm/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr1dk/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr1ec/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr1f2/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr1fy/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr1gg/?pub=4m95bd'
+            ],
+            episodeTitles: [
+                '1. Taking The Bentley Continental GT Speed To A Welsh Rally Stage - Building A Car Smaller Than A Peel P50: Clarksons P45',
+                '2. Super Car Road Trip From Las Vegas, Nevada To Calexico, California',
+                '3. Shelby Mustang GT500 Vs The Pan-European Rail Network Epic Race From Wembley To The San Siro Stadium In Milan',
+                '4. Rugby Match With Kia Ceeds At Twickenham',
+                '5. Range Rover Vs An Autonomous Military Machine - Designing A Vehicle For The Elderly: Rover James',
+                '6. Africa Special, Part 1',
+                '7. Africa Special, Part 2'
+            ],
+        },
+        topgears20: {
+            chapter: 'Season 20',
+            video: [
+                'https://rumble.com/embed/v6tr2xi/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr2y4/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr2ys/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr2zc/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr2zs/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr30g/?pub=4m95bd'
+            ],
+            episodeTitles: [
+                '1. AC45 Racing Yacht Vs Toyota Auris - Introduction Of The New Reasonably Priced Car: Vauxhall Astra',
+                '2. Search For The Worlds Best Taxi - Tribute To BBC Television Centre',
+                '3. Spanish Road Trip In Budget Convertibles',
+                '4. Building The Ford Transit Hovervan',
+                '5. Best Crossovers For Caravanners',
+                '6. Tribute To British Automobile Manufacturing'
+            ],
+        },
+        topgears21: {
+            chapter: 'Season 21',
+            video: [
+                'https://rumble.com/embed/v6tr3zc/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr404/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr40s/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr41c/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr41y/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr42m/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr438/?pub=4m95bd'
+            ],
+            episodeTitles: [
+                '1. Jeremy, James And Richard Prove That The Hot Hatchbacks Of Their Youth Were Better Than The Modern Equivalents',
+                '2. Alfa Romeo 4C Vs Gibbs Quadski - James Visits Camp Bastion In Afghanistan',
+                '3. Trip Through Ukraine In Compact Hatchbacks',
+                '4. Clarkson Attempts To Prove That Cars Are Better Than Motorbikes',
+                '5. Making A Commercial For Reducing Cycle-Related Accidents',
+                '6. Burma Special, Part 1',
+                '7. Burma Special, Part 2'
+            ],
+        },
+        topgears22: {
+            chapter: 'Season 22',
+            video: [
+                'https://rumble.com/embed/v6tr4w0/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr4wq/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr4xk/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr4ym/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr51a/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr51y/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr52y/?pub=4m95bd',
+                'https://rumble.com/embed/v6tr53i/?pub=4m95bd'
+
+            ],
+            episodeTitles: [
+                'Race Across The Urban Landscape Of St Petersburg',
+                'Australian Northern Territory Road Trip In GT Cars',
+                'Homemade Ambulance Challenge',
+                'Tribute To The Land Rover Defender',
+                'May And Clarkson Look At The Weird And Wonderful History Of Peugeot',
+                'Hammond Is Dropped Into British Columbia, Canada To Test A Watch With A Built-In Emergency Beacon',
+                'May Competes In A World Rallycross Race Alongside Tanner Foust',
+                'Episode #22.8'
+            ],
+        },
+
+    },
+
         theboys: {
         title: 'The Boys',
         image: 'https://upload.wikimedia.org/wikipedia/en/1/14/The_Boys_Season_2.jpg',
@@ -762,20 +1279,20 @@ window.shows = {
           s3tgt: {
             chapter: 'Season 3',
             video: [
-                'https://rumble.com/embed/v6npyu6/?pub=4jqwl4',
-                'https://rumble.com/embed/v6npyui/?pub=4jqwl4',
-                'https://rumble.com/embed/v6npyuu/?pub=4jqwl4',
-                'https://rumble.com/embed/v6npyv6/?pub=4jqwl4',
-                'https://rumble.com/embed/v6npzf8/?pub=4jqwl4',
-                'https://rumble.com/embed/v6npzfm/?pub=4jqwl4',
-                'https://rumble.com/embed/v6npzg2/?pub=4jqwl4',
-                'https://rumble.com/embed/v6npzgi/?pub=4jqwl4',
-                'https://rumble.com/embed/v6nq0k8/?pub=4jqwl4',
-                'https://rumble.com/embed/v6nq0kk/?pub=4jqwl4',
-                'https://rumble.com/embed/v6nq0ky/?pub=4jqwl4',
-                'https://rumble.com/embed/v6nq0l8/?pub=4jqwl4',
-                'https://rumble.com/embed/v6nq16w/?pub=4jqwl4',
-                'https://rumble.com/embed/v6nq17a/?pub=4jqwl4'
+                'https://rumble.com/embed/v6stl9p/?pub=4ljicf',
+                'https://rumble.com/embed/v6stla5/?pub=4ljicf',
+                'https://rumble.com/embed/v6stlah/?pub=4ljicf',
+                'https://rumble.com/embed/v6stlb3/?pub=4ljicf',
+                'https://rumble.com/embed/v6stlbh/?pub=4ljicf',
+                'https://rumble.com/embed/v6stlc1/?pub=4ljicf',
+                'https://rumble.com/embed/v6stlcp/?pub=4ljicf',
+                'https://rumble.com/embed/v6stldb/?pub=4ljicf',
+                'https://rumble.com/embed/v6stldt/?pub=4ljicf',
+                'https://rumble.com/embed/v6stleb/?pub=4ljicf',
+                'https://rumble.com/embed/v6stlel/?pub=4ljicf',
+                'https://rumble.com/embed/v6stlf5/?pub=4ljicf',
+                'https://rumble.com/embed/v6stlfl/?pub=4ljicf',
+                'https://rumble.com/embed/v6stlg5/?pub=4ljicf'
             ],
             episodeTitles: [
                     '1. Motown Funk',
@@ -841,10 +1358,10 @@ window.shows = {
           s4tgt: {
             chapter: 'Season 4',
             video: [
-                'https://rumble.com/embed/v6p8q5m/?pub=4jqwl4',
-                'https://rumble.com/embed/v6p8q6k/?pub=4jqwl4',
-                'https://rumble.com/embed/v6p8q76/?pub=4jqwl4',
-                'https://rumble.com/embed/v6p8q7y/?pub=4jqwl4',
+                'https://rumble.com/embed/v6stug3/?pub=4ljicf',
+                'https://rumble.com/embed/v6stugx/?pub=4ljicf',
+                'https://rumble.com/embed/v6stui9/?pub=4ljicf',
+                'https://rumble.com/embed/v6stuiz/?pub=4ljicf',
             ],
             episodeTitles: [
                     '1. he Grand Tour presents... Seamen',
@@ -858,9 +1375,9 @@ window.shows = {
           s5tgt: {
             chapter: 'Season 5',
             video: [
-                'https://rumble.com/embed/v6p8q8o/?pub=4jqwl4',
-                'https://rumble.com/embed/v6p8q9u/?pub=4jqwl4',
-                'https://rumble.com/embed/v6p8qb0/?pub=4jqwl4',
+                'https://rumble.com/embed/v6stujz/?pub=4ljicf',
+                'https://rumble.com/embed/v6stulx/?pub=4ljicf',
+                'https://rumble.com/embed/v6stumn/?pub=4ljicf',
             ],
             episodeTitles: [
                     '1. A Scandi Flick',
@@ -873,7 +1390,7 @@ window.shows = {
           s6tgt: {
             chapter: 'Season 6',
             video: [
-                'https://rumble.com/embed/v6p8qie/?pub=4jqwl4'
+                'https://rumble.com/embed/v6stut7/?pub=4ljicf'
             ],
             episodeTitles: [
                     '1. One For The Road'
