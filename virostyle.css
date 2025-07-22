@@ -1,4 +1,11 @@
+/* 10.1 update */
+
 /* Global text wrap */
+
+h1 {
+  color: white;
+}
+
 p, span, label, button, input, textarea, div, h1, h2, h3, h4, h5, h6 {
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -86,9 +93,9 @@ background-color: #1a1a1a;
       overflow-x: auto; /* Prevent global horizontal scrolling */
   }
   .container {
-      max-width: 90%;
+      max-width: 95%;
       margin: 20px auto;
-      padding: 10px;
+      padding: 2px;
   }
   .movie-list-wrapper {
     overflow-x: auto; /* Horizontal scrolling */
@@ -266,6 +273,8 @@ font-family: "Kanit", sans-serif;
     background: #2b2b2b;
     padding: 10px;
     border-radius: 10px;
+        color: white;
+    
 }
 
   .episode {
@@ -506,19 +515,23 @@ width: 100%;  /* Ensures the download container spans the full width */
   cursor: pointer;
   transition: background 0.3s;
 }
-.hero-poster {
-  max-width: 40%;
-  transform: skewX(-5deg);
+/* ... your entire CSS as before ... */
 
+/* Smaller hero poster image */
+.hero-poster {
+  max-width: 25%;  /* Reduced from 40% to 25% */
+  transform: skewX(-5deg);
 }
+
 .hero-poster img {
   width: 100%;
+  max-width: 180px; /* Limit max image width */
   border-radius: 12px;
   transform: skewX(5deg);
   display: block;
 }
 
-/* Responsive */
+/* Responsive for smaller screens */
 @media (max-width: 768px) {
   .hero-content {
     flex-direction: column;
@@ -529,9 +542,12 @@ width: 100%;  /* Ensures the download container spans the full width */
   }
   .hero-poster {
     margin-top: 20px;
+    max-width: 100%;
     transform: none;
   }
   .hero-poster img {
+    width: 100%;
+    max-width: none;
     transform: none;
   }
 }
@@ -542,8 +558,27 @@ width: 100%;  /* Ensures the download container spans the full width */
   display: flex;
   width: 100%;
   max-width: 650px;
-  align-items: center;
-  justify-content: flex-start; /* or center, depending on your preference */
-  gap: 10px; /* adjust this value to control how close the poster is */
+  align-items: center;       /* Vertical alignment */
+  justify-content: flex-start;
+  gap: 10px;
   padding: 10px;
+}
+
+.hero-poster {
+  max-width: 40%;
+  /* Remove transform skew here to avoid messing with alignment */
+  transform: none;
+  display: flex;             /* Make it a flex container */
+  flex-direction: column;    /* Stack images vertically */
+  gap: 10px;
+  justify-content: center;   /* Center images vertically inside .hero-poster */
+}
+
+.hero-poster img {
+  width: 100%;
+  border-radius: 12px;
+  /* Remove skew on images too */
+  transform: none;
+  display: block;
+  height: auto;              /* Maintain aspect ratio */
 }
