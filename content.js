@@ -1,5 +1,4 @@
-// content.js (updated with state persistence)
-(() => {
+document.addEventListener('DOMContentLoaded', () => {
   const RESERVED_KEYS = ['title','image','video','episodeTitles','customDownloads','dubbed','dubbedepisodetitle','dubbedcustomdownloads'];
   window.mediaData = { movies: window.movies||{}, shows: window.shows||{}, anime: window.anime||{} };
 
@@ -11,8 +10,13 @@
   let cat=null, mov=null, season=null, ep=0, dubbed=false, timer;
 
   // Theme Persistence
-  const saved = localStorage.getItem('theme')||'A'; applyTheme(saved);
-  function applyTheme(key){ linkEl.href=themes[key].href; toggleImg.src=themes[key].img; localStorage.setItem('theme', key); }
+  const saved = localStorage.getItem('theme')||'A'; 
+  applyTheme(saved);
+  function applyTheme(key){ 
+    linkEl.href=themes[key].href; 
+    toggleImg.src=themes[key].img; 
+    localStorage.setItem('theme', key); 
+  }
   toggleImg.addEventListener('click', () => applyTheme(localStorage.getItem('theme')==='A'?'B':'A'));
 
   // Save and Load State
@@ -53,8 +57,6 @@
       clean.addEventListener('click', () => selectMovie(key));
       movieList.appendChild(clean);
     });
-
-    document.getElementById('hero').style.display = 'none';
     categoryContainer.style.display = 'none';
     movieListWrapper.style.display = 'block';
     document.getElementById('changelog-container').style.marginTop = '20px';
@@ -158,7 +160,6 @@
     episodeContainer.style.display = 'none';
     movieListWrapper.style.display = 'none';
     categoryContainer.style.display = 'flex';
-    document.getElementById('hero').style.display = 'flex';
     localStorage.removeItem('lastState');
   }
 
@@ -188,4 +189,34 @@
     updateDownloads();
     episodeContainer.style.display = 'flex';
   }
-})();
+
+  // Sidebar Hamburger Menu Codeconst sidebarToggle = document.getElementById('sidebarToggle');
+const sidebarMenu = document.getElementById('sidebarMenu');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
+const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+
+function openSidebar() {
+  sidebarMenu.classList.add('active');
+  sidebarOverlay.classList.add('active');
+  sidebarMenu.setAttribute('aria-hidden', 'false');
+}
+
+function closeSidebar() {
+  sidebarMenu.classList.remove('active');
+  sidebarOverlay.classList.remove('active');
+  sidebarMenu.setAttribute('aria-hidden', 'true');
+}
+
+sidebarToggle.addEventListener('click', openSidebar);
+sidebarCloseBtn.addEventListener('click', closeSidebar);
+sidebarOverlay.addEventListener('click', closeSidebar);
+
+// Optional: close sidebar on pressing Escape key
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && sidebarMenu.classList.contains('active')) {
+    closeSidebar();
+  }
+});
+
+
+});
