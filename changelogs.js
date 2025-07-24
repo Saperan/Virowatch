@@ -2,7 +2,8 @@
 
 // 1. Your changelog data
 window.changelogs = [
-  { version: "v11.0 16.06.2025", description: "Added Anime: My Teen Romantic Comedy S2 & The Rising Of The Shield Hero S2 | Added Top Gear S1 - S22 | Updated Site to be more polished and smoother." },
+  { version: "v11.1 24.07.2025", description: "Updated Site to be more polished and smoother." },
+  { version: "v11.0 23.07.2025", description: "Added Anime: My Teen Romantic Comedy S2 & The Rising Of The Shield Hero S2 | Added Top Gear S1 - S22 | Updated Site to be more polished and smoother." },
   { version: "v10.0 16.06.2025", description: "Added Anime: My Teen Romantic Comedy & The Rising Of The Shield Hero | Added Show: Barry S4 | Updated Site to look better and the Whole fucking code and site is a lot more polished and smoother." },
   { version: "v9.3.0 31.05.2025", description: "Added Films: Nobody, Lord Of War | Added Anime: Saga Of Tanya The Evil | Added Show: Barry S3 | Finished Adding ReZero S3 Dub and Download." },
   { version: "v9.2.0 18.05.2025", description: "Added OPM S2, Added The Boys S1 - S4" },
