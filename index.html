@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virowatch v11.1</title>
+  <title>Virowatch v0.12.5</title>
   <link rel="stylesheet" href="virostyle.css">
   <link rel="icon" href="https://i.ibb.co/gLmgjRsC/virowatch-new-icon-tihngy.png" type="image/png">
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@100;300;400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
@@ -14,6 +14,7 @@
   </style>
 </head>
 <body>
+  
   <div class="container">
     <!-- Header + Search -->
     <header>
@@ -24,7 +25,10 @@
         <input type="text" id="searchInput" placeholder="Search for content...">
       </div>
     </header>
-
+    <!-- Theme Toggle -->
+    <div style="text-align: right; margin: 5px 0;">
+      <img id="toggleStylesheetImage" src="theme1.png" alt="Toggle Theme">
+    </div>
     <!-- *** New Hero Banner *** -->
 
 
@@ -45,10 +49,7 @@
       </div>
     </section>
 
-    <!-- Theme Toggle -->
-    <div style="text-align: right; margin: 20px 0;">
-      <img id="toggleStylesheetImage" src="theme1.png" alt="Toggle Theme" style="cursor:pointer;width:50px;height:50px;">
-    </div>
+
 
     <!-- Movie List (hidden initially) -->
     <div class="movie-list-wrapper" id="movieListWrapper" style="display:none;">
