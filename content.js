@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const toggleImg = document.getElementById('toggleStylesheetImage');
   const linkEl = document.querySelector('link[rel="stylesheet"]');
-  const themes = { A:{href:'virostyle.css',img:'https://i.ibb.co/8DpKtZWR/white-mode.png'}, B:{href:'virostyle2.css',img:'https://i.ibb.co/HfgxXX6v/black-mode.png'} };
+  const themes = { A:{href:'virostyle.css',img:'https://i.ibb.co/5gbKJT79/pc.png'}, B:{href:'virostyle2.css',img:'https://i.ibb.co/5Wskk3Cj/phone.png'} };
   const spinner = document.getElementById('videoSpinner');
 
   let cat=null, mov=null, season=null, ep=0, dubbed=false, timer;
