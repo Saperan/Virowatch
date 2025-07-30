@@ -2,6 +2,8 @@
 
 // 1. Your changelog data
 window.changelogs = [
+  { version: "v0.12.5 30.07.2025", description: "Finished Updating Site to be more polished and smoother including replacing White Mode to Phone Mode (Mode specially made to make using the site on mobile better) | Added Akame Ga Kill! & Eminence In Shadow S1 | Next Update will add Dexter & M.D House" },
+  { version: "v11.0 23.07.2025", description: "Added Anime: My Teen Romantic Comedy S2 & The Rising Of The Shield Hero S2 | Added Top Gear S1 - S22 | Updated Site to be more polished and smoother." },
   { version: "v11.1 24.07.2025", description: "Updated Site to be more polished and smoother." },
   { version: "v11.0 23.07.2025", description: "Added Anime: My Teen Romantic Comedy S2 & The Rising Of The Shield Hero S2 | Added Top Gear S1 - S22 | Updated Site to be more polished and smoother." },
   { version: "v10.0 16.06.2025", description: "Added Anime: My Teen Romantic Comedy & The Rising Of The Shield Hero | Added Show: Barry S4 | Updated Site to look better and the Whole fucking code and site is a lot more polished and smoother." },
