@@ -1,5 +1,6 @@
 <h1>Virowatch</h1>
-Watch Content for free on <a href="https://saperan.github.io/Virowatch/">Virowatch</a>!
-ps. fuck ads
+Watch Anime and TV Shows for free on <a href="https://saperan.github.io/Virowatch/">Virowatch</a>!
 
-also check out <a href="https://github.com/saperan/uDiscord">Udiscord</a>!
+Virowatch is a free Anime and TV Show watching site on which after joining the discord server you can request content to be added to in high quality without any Ad's!
+
+also check out <a href="http://lunora.ddns.net/">Lunora</a> for Movies!
