@@ -1,6 +1,74 @@
 // anime.js (Non-module)
 window.anime = {
 
+    OVERLORD: {
+        title: 'Overlord',
+        image: 'https://upload.wikimedia.org/wikipedia/en/thumb/1/18/Overlord_novel.jpg/250px-Overlord_novel.jpg',
+        OVERLORDS1: {
+            chapter: 'Season 1',
+            video: [
+                'https://rumble.com/embed/v6w05vm/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w05w0/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w05w8/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w05wi/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w05x4/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w05xc/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w05xm/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w05y6/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w05yo/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w05zc/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w05zu/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w0602/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w060c/?pub=4mq7mu'
+            ],
+            episodeTitles: [
+                'JP 1. End and Beginning',
+                'JP 2. The Floor Guardians',
+                'JP 3. Battle of Carne Village',
+                'JP 4. Ruler of Death',
+                'JP 5. Two Adventurers',
+                'JP 6. Journey',
+                'JP 7. Wise King of the Forest',
+                'JP 8. Twin Swords of Slashing Death',
+                'JP 9. The Dark Warrior',
+                'JP 10. True Vampire',
+                'JP 11. Confusion and Understanding',
+                'JP 12. The Bloody Valkyrie',
+                'JP 13. Player vs Non Player Character'
+            ],
+            dubbed: [
+                'https://rumble.com/embed/v6w07hg/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w07i0/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w07ii/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w07iw/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w07jc/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w07ki/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w07ks/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w07lc/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w07lq/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w07mc/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w07mi/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w07n4/?pub=4mq7mu',
+                'https://rumble.com/embed/v6w07nm/?pub=4mq7mu'
+            ],
+            dubbedepisodetitle: [
+                '1. End and Beginning',
+                '2. The Floor Guardians',
+                '3. Battle of Carne Village',
+                '4. Ruler of Death',
+                '5. Two Adventurers',
+                '6. Journey',
+                '7. Wise King of the Forest',
+                '8. Twin Swords of Slashing Death',
+                '9. The Dark Warrior',
+                '10. True Vampire',
+                '11. Confusion and Understanding',
+                '12. The Bloody Valkyrie',
+                '13. Player vs Non Player Character'
+            ],
+        },
+    },
+
     TUUA: {
         title: 'The Unwanted Undead Adventurer',
         image: 'https://upload.wikimedia.org/wikipedia/en/thumb/7/79/The_Unwanted_Undead_Adventurer_vol._1_cover.jpg/250px-The_Unwanted_Undead_Adventurer_vol._1_cover.jpg',
