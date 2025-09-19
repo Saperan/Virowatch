@@ -1,6 +1,146 @@
 // shows.js (Non-module)
 window.shows = {
 
+    You: {
+        title: 'You',
+        image: 'https://m.media-amazon.com/images/M/MV5BODA0NDA1MzgtYmIyYS00NmYwLTlhZDYtMjczMTU1M2ZkYzdkXkEyXkFqcGc@._V1_.jpg',
+        YOUS1: {
+            chapter: 'Season 1',
+            video: [
+                'https://rumble.com/embed/v6wp2lw/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wp2m8/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wp2mq/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wp2mw/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wp2n4/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wp2ng/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wp2no/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wp2o2/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wp2oc/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wp2oo/?pub=4n0aq2'
+            ],
+            episodeTitles: [
+                '1. Pilot',
+                '2. The Last Nice Guy in New York',
+                '3. Maybe',
+                '4. The Captain',
+                '5. Living with the Enemy',
+                '6. Amour Fou',
+                '7. Everythingship',
+                '8. You Got Me, Babe',
+                '9. Candace',
+                '10. Bluebeards Castle'
+            ],
+        },
+        YOUS2: {
+            chapter: 'Season 2',
+            video: [
+                'https://rumble.com/embed/v6wp34c/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wp35w/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wp36c/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wp37k/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wp38s/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wp39q/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wp3a8/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wp3bs/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wp3cu/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wp3dq/?pub=4n0aq2'
+            ],
+            episodeTitles: [
+                '1. A Fresh Start',
+                '2. Just the Tip',
+                '3. What Are Friends For?',
+                '4. The Good, the Bad, & the Hendy',
+                '5. Have a Good Wellkend, Joe!',
+                '6. Farewell, My Bunny',
+                '7. Ex-istential Crisis',
+                '8. Fear and Loathing in Beverly Hills',
+                '9. P.I. Joe',
+                '10. Love, Actually'
+            ],
+        },
+                YOUS3: {
+            chapter: 'Season 3',
+            video: [
+                'https://rumble.com/embed/v6wr1yk/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr1yw/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr1ze/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr1zu/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr20g/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr216/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr21o/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr224/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr22o/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr234/?pub=4n0aq2'
+            ],
+            episodeTitles: [
+                '1. And They Lived Happily Ever After',
+                '2. So I Married an Axe Murderer',
+                '3. Missing White Woman Syndrome',
+                '4. Hands Across Madre Linda',
+                '5. Into the Woods',
+                '6. W.O.M.B.',
+                '7. Were All Mad Here',
+                '8. Swing and a Miss',
+                '9. Red Flag',
+                '10. What Is Love?'
+            ],
+        },
+                YOUS4: {
+            chapter: 'Season 4',
+            video: [
+                'https://rumble.com/embed/v6wr2m2/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr2mg/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr2mw/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr2nm/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr2o2/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr2oo/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr2oy/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr2pg/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr2pw/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr2qk/?pub=4n0aq2'
+            ],
+            episodeTitles: [
+                '1. Joe Takes a Holiday',
+                '2. Portrait of the Artist',
+                '3. Eat the Rich',
+                '4. Hampsie',
+                '5. The Fox and the Hound',
+                '6. Best of Friends',
+                '7. Good Man, Cruel World',
+                '8. Where Are You Going, Where Have You Been?',
+                '9. Shes Not There',
+                '10. The Death of Jonathan Moore'
+            ],
+        },
+                YOUS5: {
+            chapter: 'Season 5',
+            video: [
+                'https://rumble.com/embed/v6wr3jy/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr3km/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr3la/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr3lo/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr3m6/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr3mk/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr3n2/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr3ns/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr3o6/?pub=4n0aq2',
+                'https://rumble.com/embed/v6wr3og/?pub=4n0aq2'
+            ],
+            episodeTitles: [
+                '1. The Luckiest Guy in NY',
+                '2. Blood Will Have Blood',
+                '3. Impostor Syndrome',
+                '4. My Fair Maddie',
+                '5. Last Dance',
+                '6. The Dark Face of Love',
+                '7. #JoeGoldberg',
+                '8. Folie a Deux',
+                '9. Trial of the Furies',
+                '10. Finale'
+            ],
+        },
+    },
+
     bettercallsaul: {
         title: 'Better Call Saul',
         image: 'https://cachedimages.podchaser.com/256x256/aHR0cDovL21vdmlldG91Y2guc29ueS5jb20uZWRnZXN1aXRlLm5ldC9wb2RjYXN0cy9iZXR0ZXJfY2FsbF9zYXVsX3YxL0JDU19TNl9Qb2RjYXN0X0tleV9BcnQuanBn/aHR0cHM6Ly93d3cucG9kY2hhc2VyLmNvbS9pbWFnZXMvbWlzc2luZy1pbWFnZS5wbmc%3D',
