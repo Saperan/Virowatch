@@ -2,7 +2,8 @@
 
 // 1. Your changelog data
 window.changelogs = [
-  { version: "v0.15.0 28.08.2025", description: "CONTENT UPDATE | Added Mob Psycho S1-S3, Added DANDADAN S1-S2 | Added You S1-S5" },
+  { version: "v0.15.1 20.09.2025", description: "CONTENT UPDATE | Added The Banished Former Hero Lives as He Pleases S1, Added Possibly the Greatest Alchemist of All Time S1" },
+  { version: "v0.15.0 19.09.2025", description: "CONTENT UPDATE | Added Mob Psycho S1-S3, Added DANDADAN S1-S2 | Added You S1-S5" },
   { version: "v0.14.1 28.08.2025", description: "CONTENT UPDATE | Added Overlord S1" },
   { version: "v0.14.0 26.08.2025", description: "CONTENT UPDATE | Added Mission Yozakura Family S1, Added The Helpful Fox Senko-san S1, Added The Unwanted Undead Adventurer S1" },
   { version: "v0.13.0 08.08.2025", description: "MEGA CONTENT UPDATE | Added Death Note (rushed), Added Eminence in Shadow S2, Added Shield Hero S3, Added Strongest Magician in Demon Lords Army S1, | Added Dexter S1-S8, Added M.D House S1-S8, Added Breaking Bad S1-S5, Added Better Call Saul S1-S6" },
