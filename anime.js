@@ -1,6 +1,106 @@
 // anime.js (Non-module)
 window.anime = {
 
+    TBFHLAHP: {
+        title: 'The Banished Former Hero Lives as He Pleases',
+        image: 'https://upload.wikimedia.org/wikipedia/en/thumb/c/c4/Dekisokonai_to_Yobareta_Moto_Eiy%C5%AB_wa%2C_Jikka_Kara_Tsuih%C5%8Dsareta_node_Suki_Katte_ni_Ikiru_Koto_ni_Shita_LN_vol._1_cover.jpg/250px-Dekisokonai_to_Yobareta_Moto_Eiy%C5%AB_wa%2C_Jikka_Kara_Tsuih%C5%8Dsareta_node_Suki_Katte_ni_Ikiru_Koto_ni_Shita_LN_vol._1_cover.jpg',
+        TBFHLAHPS1: {
+            chapter: 'Season 1',
+            video: [
+                'https://rumble.com/embed/v6x112u/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x1134/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x113g/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x1140/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x1148/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x114k/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x1154/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x115i/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x115m/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x115u/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x1166/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x116k/?pub=4mq7mu'
+            ],
+            episodeTitles: [
+                'JP 1. Cast Out',
+                'JP 2. The Master Blacksmith of the Sacred Sword',
+                'JP 3. Stubbornness and Determination',
+                'JP 4. Returning Spirits Festival',
+                'JP 5. The Beginning of Madness',
+                'JP 6. The Utmost Limit of Hate',
+                'JP 7. The Imperial Marquis"s Daughter',
+                'JP 8. The Fairy Sovereign',
+                'JP 9. The Mark of a Demon',
+                'JP 10. A Cry for Help',
+                'JP 11. The Heros Challenge',
+                'JP 12. The Conclusion and the Start of a New Journey'
+            ],
+        }
+    },
+
+    PTGAOAT: {
+        title: 'Possibly the Greatest Alchemist of All Time',
+        image: 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3d/Possibly_the_Greatest_Alchemist_of_All_Time_light_novel_volume_1_cover.jpg/250px-Possibly_the_Greatest_Alchemist_of_All_Time_light_novel_volume_1_cover.jpg',
+        PTGAOATS1: {
+            chapter: 'Season 1',
+            video: [
+                'https://rumble.com/embed/v6x10jk/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x10ke/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x10ku/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x10le/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x10m4/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x10mm/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x10n8/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x10ni/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x10oa/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x10oo/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x10pc/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x10pu/?pub=4mq7mu'
+            ],
+            episodeTitles: [
+                'JP 1. I Was Summoned By Accident',
+                'JP 2. To a New Land',
+                'JP 3. Contracts and Oaths',
+                'JP 4. Takumis Partys First Battle!',
+                'JP 5. Shadow of Sidonia',
+                'JP 6. A Drake Horse Appears',
+                'JP 7. The Fox-Eared Girl of the Royal Capital',
+                'JP 8. Lets Choose a Party Name!',
+                'JP 9. Resolve',
+                'JP 10. Takumi Takes On Pioneering!',
+                'JP 11. Signs of Turmoil',
+                'JP 12. When Bonds Are Tested'
+            ],
+            dubbed: [
+                'https://rumble.com/embed/v6x0zv2/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x0zve/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x0zvi/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x0zvu/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x0zz2/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x0zzi/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x0zzo/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x1004/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x100g/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x100o/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x1018/?pub=4mq7mu',
+                'https://rumble.com/embed/v6x101i/?pub=4mq7mu'
+            ],
+            dubbedepisodetitle: [
+                '1. I Was Summoned By Accident',
+                '2. To a New Land',
+                '3. Contracts and Oaths',
+                '4. Takumis Partys First Battle!',
+                '5. Shadow of Sidonia',
+                '6. A Drake Horse Appears',
+                '7. The Fox-Eared Girl of the Royal Capital',
+                '8. Lets Choose a Party Name!',
+                '9. Resolve',
+                '10. Takumi Takes On Pioneering!',
+                '11. Signs of Turmoil',
+                '12. When Bonds Are Tested'
+            ],
+        },
+    },
+
     DANDADAN: {
         title: 'DAN DA DAN',
         image: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/Dandadan_vol._1_cover.jpg/250px-Dandadan_vol._1_cover.jpg',
