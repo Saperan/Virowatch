@@ -1,6 +1,68 @@
 // shows.js (Non-module)
 window.shows = {
 
+    SMILINGFRIENDS: {
+        title: 'Smiling Friends',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/SmilingFriendsTitleCard.png/250px-SmilingFriendsTitleCard.png',
+        SFS1: {
+            chapter: 'Season 1',
+            video: [
+                'https://rumble.com/embed/v6zv932/?pub=4nst58',
+                'https://rumble.com/embed/v6zv93k/?pub=4nst58',
+                'https://rumble.com/embed/v6zv93u/?pub=4nst58',
+                'https://rumble.com/embed/v6zv948/?pub=4nst58',
+                'https://rumble.com/embed/v6zv95q/?pub=4nst58',
+                'https://rumble.com/embed/v6zv966/?pub=4nst58',
+                'https://rumble.com/embed/v6zv96m/?pub=4nst58',
+                'https://rumble.com/embed/v6zv96u/?pub=4nst58'
+            ],
+            episodeTitles: [
+                '1. Desmonds Big Day Out',
+                '2. Mr. Frog',
+                '3. Shrimps Odyssey',
+                '4. A Silly Halloween Special',
+                '5. Who Violently Murdered Simon S. Salty?',
+                '6. Enchanted Forest',
+                '7. Frowning Friends',
+                '8. Charlie Dies and Doesnt Come Back',
+            ],
+        },
+        SFS2: {
+            chapter: 'Season 2',
+            video: [
+                'https://rumble.com/embed/v6zva84/?pub=4nst58',
+                'https://rumble.com/embed/v6zva8s/?pub=4nst58',
+                'https://rumble.com/embed/v6zva96/?pub=4nst58',
+                'https://rumble.com/embed/v6zva9o/?pub=4nst58',
+                'https://rumble.com/embed/v6zva9y/?pub=4nst58',
+                'https://rumble.com/embed/v6zvaai/?pub=4nst58',
+                'https://rumble.com/embed/v6zvaay/?pub=4nst58',
+                'https://rumble.com/embed/v6zvabe/?pub=4nst58'
+            ],
+            episodeTitles: [
+                '1. Gwimbly: Definitive Remastered Enhanced Extended Edition DX 4k (Anniversary Directors Cut)',
+                '2. Mr. President',
+                '3. A Allan Adventure',
+                '4. Erm, the Boss Finds Love?',
+                '5. Brothers Egg',
+                '6. Charlie, Pim, and Bill vs. The Alien',
+                '7. The Magical Red Jewel AKA Tyler Gets Fired',
+                '8. Pim Finally Turns Green'
+            ],
+        },
+        SFS3: {
+            chapter: 'Season 3',
+            video: [
+                'https://rumble.com/embed/v6zvaqs/?pub=4nst58',
+                'https://rumble.com/embed/v6zvara/?pub=4nst58',
+                'https://rumble.com/embed/v6zvari/?pub=4nst58',
+                'https://rumble.com/embed/v6zvas2/?pub=4nst58',
+                'https://rumble.com/embed/v6zvaso/?pub=4nst58',
+                'https://rumble.com/embed/v6zvate/?pub=4nst58'
+            ],
+        },
+    },
+
     You: {
         title: 'You',
         image: 'https://m.media-amazon.com/images/M/MV5BODA0NDA1MzgtYmIyYS00NmYwLTlhZDYtMjczMTU1M2ZkYzdkXkEyXkFqcGc@._V1_.jpg',
@@ -316,7 +378,7 @@ window.shows = {
 
     breakingbad: {
         title: 'Breaking Bad',
-        image: 'https://mediatheque.saint-quentin.fr/Ils/digitalCollection/DigitalCollectionThumbnailHandler.ashx?documentId=787263&size=MEDIUM&fallback=https%3A%2F%2Fmediatheque.saint-quentin.fr%2Fui%2Fskins%2Fdefault%2Fportal%2Ffront%2Fimages%2FGeneral%2FDocType%2FAUVI_MEDIUM.png',
+        image: 'https://medias.boutique.lab.arte.tv/prod/9400_vod_thumb_85853.jpg',
         breakingbads1: {
             chapter: 'Season 1',
             video: [
