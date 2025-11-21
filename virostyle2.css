@@ -1,3 +1,10 @@
+/* === Virowatch Non Changelog now 0.16 === */
+    .bottom-text {
+      margin-bottom: 20px;
+      text-align: center;
+      opacity: 0.7;
+      font-size: 14px;
+    }
 /* === Reset & Base === */
 * {
   margin: 0;
@@ -74,34 +81,59 @@ header img {
 }
 
 
-/* === Category Banners === */
+/* === Category Banners (Stylish Card Version) === */
 #categoryContainer {
   display: flex;
+  flex-wrap: wrap; /* Allows items to wrap on mobile */
   justify-content: center;
+  gap: 25px; /* Modern way to add space between items */
+  margin-bottom: 40px; /* Kept your original bottom margin */
+}
 
-  margin-bottom: 40px;
-}
 .movie-item-banner {
-  transition: 0.3s;
-  flex: 0 1 auto;
-  width: 20%;
-  height: 20%;
-  text-align: center;
+  /* Sizing: Tries to be 280px wide, but can grow/shrink. */
+  flex: 1 1 80px; 
+  max-width: 100px; /* Prevents cards from getting too wide */
+  
+  position: relative; /* Allows us to position text inside it */
+  border-radius: 10px; /* Matches the radius you had on your images */
+  overflow: hidden; /* Clips the image to the rounded corners */
   cursor: pointer;
-  margin: 5px;
+  
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease; 
 }
+
 .movie-item-banner:hover {
-  transform: scale(1.05);
+  transform: scale(1.05); /* Kept your original scale effect */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5); /* Stronger shadow on hover */
 }
+
 .movie-item-banner img {
   width: 100%;
-  border-radius: 10px;
-
+  height: 100px; /* Gives all cards a consistent, uniform height */
+  object-fit: cover; /* Prevents stretching or squishing */
+  display: block; 
 }
+
 .movie-item-banner p {
-  margin-top: 10px;
-  font-size: 1rem;
-  font-weight: 300;
+  /* This creates the text overlay */
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  
+  margin: 0; /* Resets your 'margin-top: 10px' */
+  padding: 20px 15px;
+  box-sizing: border-box; 
+  
+  /* Faded background so text is always readable */
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0) 100%);
+  
+  color: #ffffff;
+  font-size: 1.1rem; 
+  font-weight: 500; /* Bolder for better readability */
+  text-align: left;
 }
 
 /* === Movie List === */
