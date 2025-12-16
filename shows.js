@@ -58,7 +58,19 @@ window.shows = {
                 'https://rumble.com/embed/v6zvari/?pub=4nst58',
                 'https://rumble.com/embed/v6zvas2/?pub=4nst58',
                 'https://rumble.com/embed/v6zvaso/?pub=4nst58',
-                'https://rumble.com/embed/v6zvate/?pub=4nst58'
+                'https://rumble.com/embed/v6zvate/?pub=4nst58',
+                'https://rumble.com/embed/v70noxs/?pub=4nst58',
+                'https://rumble.com/embed/v70noy6/?pub=4nst58'
+            ],
+            episodeTitles: [
+                '1. Silly Samuel',
+                '2. Le Voyage Incroyable De Monsieur Grenouille',
+                '3. Mole Man',
+                '4. Curse of the Green Halloween Witch',
+                '5. Pim and Charlie Save Mother Nature',
+                '6. Squim Returns',
+                '7. Shmaloogles',
+                '8. The Glep Ep'
             ],
         },
     },
