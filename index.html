@@ -9,34 +9,31 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@100;300;400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
     /* Hero banner styling */
-/* Hero Section (Anix-style) */
-
+    /* Hero Section (Anix-style) */
   </style>
 </head>
 <body>
   
   <div class="container">
-    <!-- Header + Search -->
     <header>
       <center>
-        <h1 class="kanit-light"><a href="https://discord.gg/jdKvsPWNme"><img src="https://i.ibb.co/FkdMbG4N/virowatch-new-icon-tihngy-cropped.png" alt="Join Virowatch Discord!" width="60" height="60" style="vertical-align: bottom;"></a>Virowatch</h1>
+        <h1 class="kanit-light" id="siteTitle" style="cursor: pointer;">
+            <a href="https://discord.gg/jdKvsPWNme">
+                <img src="https://i.ibb.co/FkdMbG4N/virowatch-new-icon-tihngy-cropped.png" alt="Join Virowatch Discord!" width="60" height="60" style="vertical-align: bottom;"></a>
+            Virowatch
+        </h1>
       </center>
       <div class="search-box">
         <input type="text" id="searchInput" placeholder="Search for content...">
       </div>
     </header>
-    <!-- Theme Toggle -->
     <div style="text-align: right; margin: 5px 0;">
       <img id="toggleStylesheetImage" src="theme1.png" alt="Toggle Theme">
     </div>
-    <!-- *** New Hero Banner *** -->
-
-
-    <!-- Category Banners -->
-<section id="categoryContainer">
+    <section id="categoryContainer">
       <div class="movie-item-banner" data-category="movies">
         <a href="https://lunoramovies.github.io/lunora/index.html">
-        <img src="https://i.ibb.co/f15zJkV/Umovies.png" alt="Movies" loading="lazy">
+        <img src="https://i.ibb.co/f15zJkV/Umovies.png" alt="Movies">
         </a>
         <p class="kanit-extralight">Lunora Movies</p>
       </div>
@@ -52,12 +49,10 @@
 
 
 
-    <!-- Movie List (hidden initially) -->
     <div class="movie-list-wrapper" id="movieListWrapper" style="display:none;">
       <div class="movie-list" id="movieList"></div>
     </div>
 
-    <!-- Episode Container (hidden initially) -->
     <div class="episode-container" id="episodeContainer" style="display:none;">
       <div class="sidebar" id="episodeSidebar">
         <div id="seasonSelectorContainer"></div>
@@ -76,26 +71,27 @@
       </div>
     </div>
 
-    <!-- Changelogs (bottom now replaced with text) -->
-       <div class="bottom-text">
-Virowatch — All Rights Reserved to Original content Authors<br>Last updated: 16.12.2025
+    <div class="bottom-text">
+Virowatch — All Rights Reserved to Original content Authors<br>Last updated: 10.01.2025
   </div>
   </div>
 
-  <!-- Data Files -->
-   <script>
+  <script>
   const watchNowButton = document.querySelector('.watch');
   const heroSection = document.getElementById('hero');
   const categoryBanners = document.querySelectorAll('.movie-item-banner');
   const backToCategoryButton = document.getElementById('backToCategory');
   const changelogContainer = document.getElementById('changelog-container');
   const movieListWrapper = document.getElementById('movieListWrapper');
+  const siteTitle = document.getElementById('siteTitle');
 
   // Handle "Watch Now" click
-  watchNowButton.addEventListener('click', () => {
-    heroSection.style.display = 'none';
-    movieListWrapper.style.display = 'block';
-  });
+  if (watchNowButton) {
+      watchNowButton.addEventListener('click', () => {
+        heroSection.style.display = 'none';
+        movieListWrapper.style.display = 'block';
+      });
+  }
 
   // Handle category clicks
   categoryBanners.forEach(banner => {
@@ -111,24 +107,36 @@ Virowatch — All Rights Reserved to Original content Authors<br>Last updated: 1
     });
   }
 
+  // *** NEW LOGIC: Make Title Trigger the Back Button ***
+  if (siteTitle && backToCategoryButton) {
+    siteTitle.addEventListener('click', (e) => {
+        // If clicking the Discord Image/Link, do nothing (let it open Discord)
+        if (e.target.closest('a')) return;
+        
+        // Otherwise, physically click the 'Back to Categories' button
+        backToCategoryButton.click();
+    });
+  }
+
   // Optional: When viewing changelogs, bring back hero
   // Triggered if you have a menu or interaction to go back to "home"
-  const observeChangelog = new MutationObserver(() => {
-    if (changelogContainer && changelogContainer.offsetHeight > 0) {
-      heroSection.style.display = 'flex';
-    }
-  });
+  if (changelogContainer) {
+      const observeChangelog = new MutationObserver(() => {
+        if (changelogContainer && changelogContainer.offsetHeight > 0) {
+          heroSection.style.display = 'flex';
+        }
+      });
 
-  observeChangelog.observe(changelogContainer, {
-    childList: true,
-    subtree: true
-  });
+      observeChangelog.observe(changelogContainer, {
+        childList: true,
+        subtree: true
+      });
+  }
 </script>
   <script src="movies.js"></script>
   <script src="shows.js"></script>
   <script src="anime.js"></script>
   <script src="changelogs.js"></script>
-  <!-- Core Logic -->
   <script src="content.js"></script>
 </body>
 </html>
