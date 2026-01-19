@@ -468,3 +468,6 @@ p, span, label, button, input, textarea, div, h1, h2, h3, h4, h5, h6 {
   outline: none;
   transform: scale(1.02);
 }
+.player, .sidebar, .movie-item, .movie-item-banner, .button, .episode, #seasonSelector { opacity: 0; animation: simpleAppear 0.8s ease-out forwards; transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1); }
+
+@keyframes simpleAppear { from { opacity: 0; } to { opacity: 1; } }
