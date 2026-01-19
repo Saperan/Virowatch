@@ -1,6 +1,70 @@
 // anime.js (Non-module)
 window.anime = {
 
+    WISTORIA: {
+        title: 'Wistoria: Wand and Sword',
+        image: 'https://upload.wikimedia.org/wikipedia/en/thumb/2/25/Wistoria%2C_Wand_and_Sword_volume_1_cover.jpg/250px-Wistoria%2C_Wand_and_Sword_volume_1_cover.jpg',
+        WISTORIAS1: {
+            chapter: 'Season 1',
+            video: [
+                'https://rumble.com/embed/v71zoru/?pub=4odl6c',
+                'https://rumble.com/embed/v71zots/?pub=4odl6c',
+                'https://rumble.com/embed/v71zouo/?pub=4odl6c',
+                'https://rumble.com/embed/v71zouu/?pub=4odl6c',
+                'https://rumble.com/embed/v71zox6/?pub=4odl6c',
+                'https://rumble.com/embed/v71zoxo/?pub=4odl6c',
+                'https://rumble.com/embed/v71zoye/?pub=4odl6c',
+                'https://rumble.com/embed/v71zoz2/?pub=4odl6c',
+                'https://rumble.com/embed/v71zozs/?pub=4odl6c',
+                'https://rumble.com/embed/v71zp0c/?pub=4odl6c',
+                'https://rumble.com/embed/v71zp0w/?pub=4odl6c',
+                'https://rumble.com/embed/v71zp14/?pub=4odl6c'
+            ],
+            episodeTitles: [
+                'JP 1. Like a Lone Sword',
+                'JP 2. As Though Undaunted',
+                'JP 3. Order & Watcher',
+                'JP 4. The Eve of the Grand Festival',
+                'JP 5. Raise the Starting Pistol',
+                'JP 6. Between Pride and Passion',
+                'JP 7. Twelve Secret Ice Magics, El Glace Frosse',
+                'JP 8. Shall we date?',
+                'JP 9. Praxis Begins',
+                'JP 10. Our Dream',
+                'JP 11. The True Name of Cowards',
+                'JP 12. Wand and Sword'
+            ],
+            dubbed: [
+                'https://rumble.com/embed/v71zo1e/?pub=4odl6c',
+                'https://rumble.com/embed/v71zo1m/?pub=4odl6c',
+                'https://rumble.com/embed/v71zo24/?pub=4odl6c',
+                'https://rumble.com/embed/v71zo2e/?pub=4odl6c',
+                'https://rumble.com/embed/v71zo2y/?pub=4odl6c',
+                'https://rumble.com/embed/v71zo36/?pub=4odl6c',
+                'https://rumble.com/embed/v71zo3c/?pub=4odl6c',
+                'https://rumble.com/embed/v71zo3i/?pub=4odl6c',
+                'https://rumble.com/embed/v71zo3s/?pub=4odl6c',
+                'https://rumble.com/embed/v71zo42/?pub=4odl6c',
+                'https://rumble.com/embed/v71zo4a/?pub=4odl6c',
+                'https://rumble.com/embed/v71zo4c/?pub=4odl6c'
+            ],
+            dubbedepisodetitle: [
+                '1. Like a Lone Sword',
+                '2. As Though Undaunted',
+                '3. Order & Watcher',
+                '4. The Eve of the Grand Festival',
+                '5. Raise the Starting Pistol',
+                '6. Between Pride and Passion',
+                '7. Twelve Secret Ice Magics, El Glace Frosse',
+                '8. Shall we date?',
+                '9. Praxis Begins',
+                '10. Our Dream',
+                '11. The True Name of Cowards',
+                '12. Wand and Sword'
+            ],
+        },
+    },
+
     COTN: {
         title: 'Call Of The Night',
         image: 'https://upload.wikimedia.org/wikipedia/en/thumb/0/06/YofukashiNoUta.jpg/250px-YofukashiNoUta.jpg',
