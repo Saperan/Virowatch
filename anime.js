@@ -1,5 +1,212 @@
 // anime.js (Non-module)
 window.anime = {
+    
+    UMAMUSUME: {
+        title: 'Uma Musume',
+        image: 'https://upload.wikimedia.org/wikipedia/en/thumb/3/31/Umamusume_Pretty_Derby_game_cover.jpg/250px-Umamusume_Pretty_Derby_game_cover.jpg',
+        UMAMUSUMES1: {
+            chapter: 'Season 1',
+            video: [
+                'https://rumble.com/embed/v72os86/?pub=4odl6c',
+                'https://rumble.com/embed/v72os8m/?pub=4odl6c',
+                'https://rumble.com/embed/v72os92/?pub=4odl6c',
+                'https://rumble.com/embed/v72os9g/?pub=4odl6c',
+                'https://rumble.com/embed/v72osa4/?pub=4odl6c',
+                'https://rumble.com/embed/v72osaq/?pub=4odl6c',
+                'https://rumble.com/embed/v72osbe/?pub=4odl6c',
+                'https://rumble.com/embed/v72osbw/?pub=4odl6c',
+                'https://rumble.com/embed/v72oscq/?pub=4odl6c',
+                'https://rumble.com/embed/v72osda/?pub=4odl6c',
+                'https://rumble.com/embed/v72osdw/?pub=4odl6c',
+                'https://rumble.com/embed/v72osem/?pub=4odl6c',
+                'https://rumble.com/embed/v72osf6/?pub=4odl6c',
+            ],
+            episodeTitles: [
+                'JP 1. Gate of Dreams!',
+                'JP 2. The Debut Race out of Nowhere',
+                'JP 3. First Big Win',
+                'JP 4. Special Training!',
+                'JP 5. The Derby With Rivals',
+                'JP 6. Autumn Skies and Horse Girls',
+                'JP 7. Promise',
+                'JP 8. For You',
+                'JP 9. Dreams of Spica',
+                'JP 10. No Matter How Many Times I Lose',
+                'JP 11. Welcome Back!',
+                'JP 12. Stage of Dreams',
+                'JP 13. Echo, Fanfare!'
+            ],
+        },
+        UMAMUSUMES2: {
+            chapter: 'Season 2',
+            video: [
+                'https://rumble.com/embed/v72osr2/?pub=4odl6c',
+                'https://rumble.com/embed/v72ossg/?pub=4odl6c',
+                'https://rumble.com/embed/v72ost2/?pub=4odl6c',
+                'https://rumble.com/embed/v72osu0/?pub=4odl6c',
+                'https://rumble.com/embed/v72osuu/?pub=4odl6c',
+                'https://rumble.com/embed/v72osvs/?pub=4odl6c',
+                'https://rumble.com/embed/v72osw6/?pub=4odl6c',
+                'https://rumble.com/embed/v72oswk/?pub=4odl6c',
+                'https://rumble.com/embed/v72osxe/?pub=4odl6c',
+                'https://rumble.com/embed/v72osy6/?pub=4odl6c',
+                'https://rumble.com/embed/v72osys/?pub=4odl6c',
+                'https://rumble.com/embed/v72osz8/?pub=4odl6c',
+                'https://rumble.com/embed/v72oszs/?pub=4odl6c'
+            ],
+            episodeTitles: [
+                'JP 1. Tokai Teio',
+                'JP 2. Never Gonna Give It Up!',
+                'JP 3. Meetings',
+                'JP 4. TM Showdown!',
+                'JP 5. Unbeaten Champion',
+                'JP 6. Searching for a Reason',
+                'JP 7. A Blessed Name',
+                'JP 8. A Small Wish',
+                'JP 9. Stopwatch',
+                'JP 10. One Day Without a Doubt',
+                'JP 11. What I Feel',
+                'JP 12. Together',
+                'JP 13. Galloping After Our Dreams'
+            ],
+        },
+        UMAMUSUMES3: {
+            chapter: 'Season 3',
+            video: [
+                'https://rumble.com/embed/v72ot9o/?pub=4odl6c',
+                'https://rumble.com/embed/v72ota6/?pub=4odl6c',
+                'https://rumble.com/embed/v72otay/?pub=4odl6c',
+                'https://rumble.com/embed/v72otbm/?pub=4odl6c',
+                'https://rumble.com/embed/v72otdi/?pub=4odl6c',
+                'https://rumble.com/embed/v72otfg/?pub=4odl6c',
+                'https://rumble.com/embed/v72otg4/?pub=4odl6c',
+                'https://rumble.com/embed/v72otgq/?pub=4odl6c',
+                'https://rumble.com/embed/v72oth6/?pub=4odl6c',
+                'https://rumble.com/embed/v72othy/?pub=4odl6c',
+                'https://rumble.com/embed/v72otik/?pub=4odl6c',
+                'https://rumble.com/embed/v72otjc/?pub=4odl6c',
+                'https://rumble.com/embed/v72otk2/?pub=4odl6c'
+            ],
+            episodeTitles: [
+                'JP 1. The Stage Long Dreamed Of',
+                'JP 2. The Start Line',
+                'JP 3. The Dream Never Ends',
+                'JP 4. My Own Shine',
+                'JP 5. Proving Oneself',
+                'JP 6. Diamond',
+                'JP 7. Our Arima Kinen',
+                'JP 8. Whats Always Been There',
+                'JP 9. Pushed by the Approaching Heat',
+                'JP 10. Festival',
+                'JP 11. Decision',
+                'JP 12. Kitasan Black',
+                'JP 13. And Yours...'
+            ],
+        },
+        UMAMUSUMESPECIAL: {
+            chapter: 'Ova (Specials)',
+            video: [
+                'https://rumble.com/embed/v72oto4/?pub=4odl6c',
+                'https://rumble.com/embed/v72otp2/?pub=4odl6c',
+                'https://rumble.com/embed/v72otpk/?pub=4odl6c'
+            ],
+            episodeTitles: [],
+        },
+    },
+
+    Violet: {
+        title: 'Violet Evergarden',
+        image: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/be/Violet_Evergarden_light_novel_volume_1_cover.jpg/250px-Violet_Evergarden_light_novel_volume_1_cover.jpg',
+        VIOLETS1: {
+            chapter: 'Season 1',
+            video: [
+                'https://rumble.com/embed/v72i5l8/?pub=4odl6c',
+                'https://rumble.com/embed/v72i5ls/?pub=4odl6c',
+                'https://rumble.com/embed/v72i5mu/?pub=4odl6c',
+                'https://rumble.com/embed/v72i5na/?pub=4odl6c',
+                'https://rumble.com/embed/v72i5nw/?pub=4odl6c',
+                'https://rumble.com/embed/v72i5oa/?pub=4odl6c',
+                'https://rumble.com/embed/v72i5oo/?pub=4odl6c',
+                'https://rumble.com/embed/v72i5p0/?pub=4odl6c',
+                'https://rumble.com/embed/v72i5pg/?pub=4odl6c',
+                'https://rumble.com/embed/v72i5po/?pub=4odl6c',
+                'https://rumble.com/embed/v72i5q6/?pub=4odl6c',
+                'https://rumble.com/embed/v72i5qk/?pub=4odl6c',
+                'https://rumble.com/embed/v72i5ra/?pub=4odl6c',
+                'https://rumble.com/embed/v72i5re/?pub=4odl6c'
+            ],
+            episodeTitles: [
+                '1. I Love You and Auto Memory Dolls',
+                '2. Never Coming Back',
+                '3. May You Be an Exemplary Auto Memory Doll',
+                '4. You Wont Be a Tool, But a Person Worthy of That Name',
+                '5. You Write Letters That Bring People Together?',
+                '6. Somewhere, Under a Starry Sky',
+                '7. Episode #1.7',
+                '8. Episode #1.8',
+                '9. Violet Evergarden',
+                '10. Loved Ones Will Always Watch Over You',
+                '11. I Dont Want Anybody Else to Die',
+                '12. Episode #1.12',
+                '13. Auto Memoir Doll and "I Love You"'
+            ],
+        },
+        VIOLETMOVIE: {
+            chapter: 'Movies',
+            video: [
+                'https://rumble.com/embed/v72ntq8/?pub=4odl6c',
+                'https://rumble.com/embed/v72ntr2/?pub=4odl6c'
+            ],
+            episodeTitles: [
+                'JP Violet Evergarden 2019',
+                'JP Violet Evergarden Movie',
+            ],
+            dubbed: [
+                'https://rumble.com/embed/v72i672/?pub=4odl6c',
+                'https://rumble.com/embed/v72i67u/?pub=4odl6c'
+            ],
+            dubbedepisodetitle: [
+                'Violet Evergarden 2019',
+                'Violet Evergarden Movie',
+            ],
+        },
+    },
+
+    TMNTRTWGC: {
+        title: 'The Most Notorious "Talker" Runs the Worlds Greatest Clan',
+        image: 'https://upload.wikimedia.org/wikipedia/en/thumb/7/75/The_Most_Notorious_%22Talker%22_Runs_the_World%27s_Greatest_Clan_LN_vol_1.jpg/250px-The_Most_Notorious_%22Talker%22_Runs_the_World%27s_Greatest_Clan_LN_vol_1.jpg',
+    TMNTRTWGCS1: {
+        chapter: 'Season 1',
+        video: [
+            'https://rumble.com/embed/v72g7d8/?pub=4odl6c',
+            'https://rumble.com/embed/v72g7h0/?pub=4odl6c',
+            'https://rumble.com/embed/v72g7hw/?pub=4odl6c',
+            'https://rumble.com/embed/v72g7i8/?pub=4odl6c',
+            'https://rumble.com/embed/v72g7ig/?pub=4odl6c',
+            'https://rumble.com/embed/v72g7iu/?pub=4odl6c',
+            'https://rumble.com/embed/v72g7jg/?pub=4odl6c',
+            'https://rumble.com/embed/v72g7jo/?pub=4odl6c',
+            'https://rumble.com/embed/v72g7kg/?pub=4odl6c',
+            'https://rumble.com/embed/v72g7ks/?pub=4odl6c',
+            'https://rumble.com/embed/v72g7l4/?pub=4odl6c',
+            'https://rumble.com/embed/v72g7li/?pub=4odl6c'
+        ],
+        episodeTitles: [
+            'JP 1. Why the Weakest Aim to be the Strongest',
+            'JP 2. This Talker Is Ruthless',
+            'JP 3. The Real Deal',
+            'JP 4. An Apology Wont Cut It',
+            'JP 5. The Swordsman from the Far East',
+            'JP 6. The Price of Honor',
+            'JP 7. World Without Honor or Humanity',
+            'JP 8. The Makings of a Champion',
+            'JP 9. The Snake Sharpens Its Fangs',
+            'JP 10. The Haves and the Have-Nots',
+            'JP 11. The Price of Being Right',
+            'JP 12. The Snake Has Wings'
+        ],
+    },
+    },
 
     WISTORIA: {
         title: 'Wistoria: Wand and Sword',
