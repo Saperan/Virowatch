@@ -11,8 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Global State
   let cat=null, mov=null, season=null, ep=0, dubbed=false, timer;
 
-  // Theme Persistence
-  const saved = localStorage.getItem('theme')||'A'; 
+  // Theme Persistence (auto-detect mobile/desktop when no preference saved)
+  const saved = localStorage.getItem('theme') || (window.matchMedia('(max-width: 768px)').matches ? 'B' : 'A');
   applyTheme(saved);
   function applyTheme(key){ 
     linkEl.href=themes[key].href; 
@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
       clean.addEventListener('click', () => selectMovie(key));
       movieList.appendChild(clean);
     });
+    if(heroSection) heroSection.style.display = 'none';
     if(categoryContainer) categoryContainer.style.display = 'none';
     if(movieListWrapper) movieListWrapper.style.display = 'block';
     
@@ -141,6 +142,26 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================
   //  UPDATED SEARCH LOGIC (Mixes all content)
   // ==========================================
+  // Subsequence match: query letters appear in title in order (not necessarily consecutive)
+  function matchesSubsequence(title, query) {
+    if (!query.length) return true;
+    let j = 0;
+    for (let i = 0; i < title.length && j < query.length; i++) {
+      if (title[i] === query[j]) j++;
+    }
+    return j === query.length;
+  }
+
+  // How many query letters appear in title in order (0..query.length). Used to rank "closest" matches.
+  function subsequenceMatchCount(title, query) {
+    if (!query.length) return 0;
+    let j = 0;
+    for (let i = 0; i < title.length && j < query.length; i++) {
+      if (title[i] === query[j]) j++;
+    }
+    return j;
+  }
+
   document.getElementById('searchInput').addEventListener('input', e => {
     clearTimeout(timer);
     timer = setTimeout(() => {
@@ -160,48 +181,78 @@ document.addEventListener('DOMContentLoaded', () => {
       if (categoryContainer) categoryContainer.style.display = 'none';
       if (movieListWrapper) movieListWrapper.style.display = 'block';
       
-      // 3. Clear List and Search ALL Data (Movies + Shows + Anime)
+      // 3. Score all items: how many query letters match in order (+ bonus for exact substring)
       movieList.innerHTML = '';
-      let foundAny = false;
       const categoriesToCheck = ['movies', 'shows', 'anime'];
+      const scored = [];
 
       categoriesToCheck.forEach(catKey => {
           const catData = mediaData[catKey];
-          if(!catData) return;
-
+          if (!catData) return;
           Object.entries(catData).forEach(([key, info]) => {
               const title = (info.title || key).toLowerCase();
-              if (title.includes(q)) {
-                  foundAny = true;
-                  const div = document.createElement('div');
-                  div.className = 'movie-item';
-                  div.innerHTML = `
-                    <img src="${info.image||'https://via.placeholder.com/150'}" loading="lazy"/>
-                    <p class="kanit-extralight">${info.title||key}</p>
-                  `;
-                  
-                  // CRITICAL: Set the category context on click
-                  div.addEventListener('click', () => {
-                      cat = catKey; // Set global 'cat' so player knows where to look
-                      selectMovie(key);
-                  });
-                  movieList.appendChild(div);
-              }
+              const count = subsequenceMatchCount(title, q);
+              if (count === 0) return;
+              const exactBonus = title.includes(q) ? 0.5 : 0;
+              scored.push({ catKey, key, info, score: count + exactBonus });
           });
       });
 
-      if (!foundAny) {
+      // Sort by score descending (best matches first)
+      scored.sort((a, b) => b.score - a.score);
+
+      if (scored.length === 0) {
           movieList.innerHTML = '<p style="text-align:center; width:100%; margin-top:20px;">No results found.</p>';
+          return;
       }
 
+      scored.forEach(({ catKey, key, info }) => {
+          const div = document.createElement('div');
+          div.className = 'movie-item';
+          div.innerHTML = `
+            <img src="${info.image||'https://via.placeholder.com/150'}" loading="lazy"/>
+            <p class="kanit-extralight">${info.title||key}</p>
+          `;
+          div.addEventListener('click', () => {
+              cat = catKey;
+              selectMovie(key);
+          });
+          movieList.appendChild(div);
+      });
     }, 300);
   });
 
-  // Category Banners Click
-  document.querySelectorAll('.movie-item-banner').forEach(b => b.addEventListener('click', () => {
-    const c = b.dataset.category; 
-    if (c) renderList(c);
-  }));
+  // Newest added: first 2 anime + first 2 shows from data
+  function renderNewestAdded() {
+    const listEl = document.getElementById('newestAddedList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    const animeFirst2 = Object.entries(mediaData.anime || {}).slice(0, 2);
+    const showsFirst2 = Object.entries(mediaData.shows || {}).slice(0, 2);
+    [...animeFirst2.map(([k,v]) => ({ catKey: 'anime', key: k, info: v })), ...showsFirst2.map(([k,v]) => ({ catKey: 'shows', key: k, info: v }))].forEach(({ catKey, key, info }) => {
+      const div = document.createElement('div');
+      div.className = 'newest-added-item';
+      div.innerHTML = `<img src="${info.image || 'https://via.placeholder.com/150'}" loading="lazy" alt=""><span>${info.title || key}</span>`;
+      div.addEventListener('click', () => {
+        if (heroSection) heroSection.style.display = 'none';
+        if (categoryContainer) categoryContainer.style.display = 'none';
+        if (movieListWrapper) movieListWrapper.style.display = 'none';
+        cat = catKey;
+        selectMovie(key);
+      });
+      listEl.appendChild(div);
+    });
+  }
+  renderNewestAdded();
+
+  // Category Banners Click (only the category cards, not the link inside Movies)
+  document.querySelectorAll('.movie-item-banner').forEach(b => {
+    b.addEventListener('click', (e) => {
+      if (e.target.closest('a.category-card-link')) return;
+      const c = b.dataset.category;
+      if (c) renderList(c);
+    });
+  });
 
   // Dubbed Toggle
   const dubToggle = document.querySelector('.dubbed-toggle');
@@ -225,7 +276,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function resetView() {
     if(episodeContainer) episodeContainer.style.display = 'none';
     if(movieListWrapper) movieListWrapper.style.display = 'none';
-    if(categoryContainer) categoryContainer.style.display = 'flex';
+    if(heroSection) heroSection.style.display = 'flex';
+    if(categoryContainer) categoryContainer.style.display = 'block';
     localStorage.removeItem('lastState');
     // Clear search on back
     const sInput = document.getElementById('searchInput');
