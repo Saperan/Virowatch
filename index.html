@@ -4,7 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Virowatch</title>
-  <link rel="stylesheet" href="virostyle.css">
+  <link id="themeStylesheet" rel="stylesheet" href="virostyle.css">
+  <script>
+    (function() {
+      var saved = localStorage.getItem('theme');
+      if (!saved) {
+        saved = window.matchMedia('(max-width: 768px)').matches ? 'B' : 'A';
+        localStorage.setItem('theme', saved);
+        var link = document.getElementById('themeStylesheet');
+        if (link) link.href = saved === 'B' ? 'virostyle2.css' : 'virostyle.css';
+      }
+    })();
+  </script>
   <link rel="icon" href="https://i.ibb.co/FkdMbG4N/virowatch-new-icon-tihngy-cropped.png" type="image/png">
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@100;300;400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
@@ -26,26 +37,35 @@
       <div class="search-box">
         <input type="text" id="searchInput" placeholder="Search for content...">
       </div>
-    </header>
-    <div style="text-align: right; margin: 5px 0;">
-      <img id="toggleStylesheetImage" src="theme1.png" alt="Toggle Theme">
+
+      <div style="text-align: right; margin: 5px 0;">
+        <img id="toggleStylesheetImage" src="theme1.png" alt="Toggle Theme">
+      </div>
+    <div id="hero">
+      <section class="newest-added">
+        <h2 class="newest-added-title">Newest added</h2>
+        <div id="newestAddedList" class="newest-added-grid"></div>
+      </section>
+      <section id="categoryContainer" class="categories-section">
+        <div class="category-cards">
+          <div class="movie-item-banner category-card" data-category="movies">
+            <img src="https://i.ibb.co/f15zJkV/Umovies.png" alt="Movies">
+            <a href="https://lunoramovies.github.io/lunora/index.html" class="category-card-link category-card-link--full" target="_blank" rel="noopener">
+              <span class="category-card-label">Lunora Movies</span>
+            </a>
+          </div>
+          <div class="movie-item-banner category-card" data-category="shows">
+            <img src="https://variety.com/wp-content/uploads/2024/01/100-Greatest-TV-Shows-V1-2.jpg?w=1024" alt="Shows" loading="lazy">
+            <span class="category-card-label">TV Shows</span>
+          </div>
+          <div class="movie-item-banner category-card" data-category="anime">
+            <img src="https://static.crunchyroll.com/cr-acquisition/assets/img/start/hero/us-global/background-desktop.jpg" alt="Anime" loading="lazy">
+            <span class="category-card-label">Anime</span>
+          </div>
+        </div>
+      </section>
     </div>
-    <section id="categoryContainer">
-      <div class="movie-item-banner" data-category="movies">
-        <a href="https://lunoramovies.github.io/lunora/index.html">
-        <img src="https://i.ibb.co/f15zJkV/Umovies.png" alt="Movies">
-        </a>
-        <p class="kanit-extralight">Lunora Movies</p>
-      </div>
-      <div class="movie-item-banner" data-category="shows">
-        <img src="https://variety.com/wp-content/uploads/2024/01/100-Greatest-TV-Shows-V1-2.jpg?w=1024" alt="Shows" loading="lazy">
-        <p class="kanit-extralight">TV Shows</p>
-      </div>
-      <div class="movie-item-banner" data-category="anime">
-        <img src="https://static.crunchyroll.com/cr-acquisition/assets/img/start/hero/us-global/background-desktop.jpg" alt="Anime" loading="lazy">
-        <p class="kanit-extralight">Anime</p>
-      </div>
-    </section>
+    
 
 
 
@@ -72,7 +92,7 @@
     </div>
 
     <div class="bottom-text">
-Virowatch — All Rights Reserved to Original content Authors<br>Last updated: 30.01.2026
+Virowatch — All Rights Reserved to Original content Authors<br>Last updated: 15.02.2026
   </div>
   </div>
 
