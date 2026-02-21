@@ -1,4 +1,4 @@
-<h1><img src="https://i.ibb.co/FkdMbG4N/virowatch-new-icon-tihngy-cropped.png" alt="Join Virowatch Discord!" width="60" height="60" style="vertical-align: bottom;">Virowatch</h1>
+<h1><img src="https://i.ibb.co/FkdMbG4N/virowatch-new-icon-tihngy-cropped.png" alt="Join Virowatch Discord!" width="60" height="60" style="vertical-align: middle;">Virowatch</h1>
 <a href="https://saperan.github.io/Virowatch/">Virowatch</a> is a simple web project that lets people browse entertainment content without all the clutter. On the main page you’ll find sections for TV Shows, and Anime, making it easy to jump straight into whatever you’re in the mood for, if there is something your looking for and it isnt here be sure to suggest it by joining the discord server on the website. (or maybe the suggestions menu in the future?)
 <h2>Who It’s For?</h2>
 Anyone who likes to browse entertainment options without wading through ads or confusing layouts. If you just want to see what’s new and pick something to watch, Virowatch tries to make that easy.
