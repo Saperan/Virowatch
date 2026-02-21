@@ -1,6 +1,6 @@
-<h1>Virowatch</h1>
-Watch Anime and TV Shows for free on <a href="https://saperan.github.io/Virowatch/">Virowatch</a>!
-
-Virowatch is a free Anime and TV Show watching site on which after joining the discord server you can request content to be added to in high quality without any Ad's!
-
-also check out <a href="http://lunora.ddns.net/">Lunora</a> for Movies!
+<h1><img src="https://i.ibb.co/FkdMbG4N/virowatch-new-icon-tihngy-cropped.png" alt="Join Virowatch Discord!" width="60" height="60" style="vertical-align: bottom;">Virowatch</h1>
+<a href="https://saperan.github.io/Virowatch/">Virowatch</a> is a simple web project that lets people browse entertainment content without all the clutter. On the main page you’ll find sections for TV Shows, and Anime, making it easy to jump straight into whatever you’re in the mood for, if there is something your looking for and it isnt here be sure to suggest it by joining the discord server on the website. (or maybe the suggestions menu in the future?)
+<h2>Who It’s For?</h2>
+Anyone who likes to browse entertainment options without wading through ads or confusing layouts. If you just want to see what’s new and pick something to watch, Virowatch tries to make that easy.
+<h2>Why?</h2>
+There are tons of massive streaming sites out there, but not all of them are so simple. Virowatch is a lightweight alternative useful for people who want straightforward browsing without the noise.
