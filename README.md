@@ -3,4 +3,4 @@
 <h2>Who It’s For?</h2>
 Anyone who likes to browse entertainment options without wading through ads or confusing layouts. If you just want to see what’s new and pick something to watch, Virowatch tries to make that easy.
 <h2>Why?</h2>
-There are tons of massive streaming sites out there, but not all of them are so simple. Virowatch is a lightweight alternative (tough unoptimized) truthfully nothing really stops you from using any other sites but Virowatch is meant to be hopefully the user's first choice as Virowatch is meant to be quick to use on any device without the need of getting any ad blocker's or having it blocked in your region.
+There are tons of massive streaming sites out there, but not all of them are so simple. Virowatch is a lightweight alternative (tough possibly unoptimized) truthfully nothing really stops you from using any other sites but Virowatch is meant to be hopefully the user's first choice as Virowatch is meant to be quick to use on any device without the need of getting any ad blocker's or having it blocked in your region.
