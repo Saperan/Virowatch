@@ -1,26 +1,140 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const RESERVED_KEYS = ['title','image','video','episodeTitles','customDownloads','dubbed','dubbedepisodetitle','dubbedcustomdownloads'];
   // Load all data into one object
-  window.mediaData = { movies: window.movies||{}, shows: window.shows||{}, anime: window.anime||{} };
+  window.mediaData = { movies: window.movies||{}, shows: window.shows||{}, anime: window.anime||{}, lunora: {} };
 
-  const toggleImg = document.getElementById('toggleStylesheetImage');
-  const linkEl = document.querySelector('link[rel="stylesheet"]');
-  const themes = { A:{href:'virostyle.css',img:'https://i.ibb.co/5gbKJT79/pc.png'}, B:{href:'virostyle2.css',img:'https://i.ibb.co/5Wskk3Cj/phone.png'} };
+  const linkEl = document.getElementById('themeStylesheet');
+  const THEME_HREF = {
+    'auto': null,
+    'desktop-dark': 'virostyle.css',
+    'desktop-light': 'virostyle-light.css',
+    'mobile-dark': 'virostyle2.css',
+    'mobile-light': 'virostyle2-light.css'
+  };
   const spinner = document.getElementById('videoSpinner');
 
   // Global State
   let cat=null, mov=null, season=null, ep=0, dubbed=false, timer;
 
-  // Theme Persistence (auto-detect mobile/desktop when no preference saved)
-  const saved = localStorage.getItem('theme') || (window.matchMedia('(max-width: 768px)').matches ? 'B' : 'A');
-  applyTheme(saved);
-  function applyTheme(key){ 
-    linkEl.href=themes[key].href; 
-    toggleImg.src=themes[key].img; 
-    localStorage.setItem('theme', key); 
+  function isMobileViewport() {
+    const w = window.innerWidth, h = window.innerHeight;
+    return w <= 768 || (w / h) <= (9 / 16);
   }
-  if(toggleImg) {
-      toggleImg.addEventListener('click', () => applyTheme(localStorage.getItem('theme')==='A'?'B':'A'));
+  function resolveThemeHref(key) {
+    if (key === 'auto') return isMobileViewport() ? 'virostyle2.css' : 'virostyle.css';
+    return THEME_HREF[key] || 'virostyle.css';
+  }
+
+  const themeSelect = document.getElementById('app-sidebar-theme-select');
+
+  // Theme: apply by key (auto = detect layout; others = fixed layout + dark/light)
+  function applyTheme(key) {
+    if (!THEME_HREF.hasOwnProperty(key)) key = 'auto';
+    if (linkEl) linkEl.href = resolveThemeHref(key);
+    localStorage.setItem('theme', key);
+    if (themeSelect) themeSelect.value = key;
+  }
+
+  const saved = localStorage.getItem('theme');
+  applyTheme(saved && THEME_HREF.hasOwnProperty(saved) ? saved : 'auto');
+
+  if (themeSelect) {
+    themeSelect.addEventListener('change', () => applyTheme(themeSelect.value));
+  }
+
+  // When theme is Auto, re-apply on resize so layout follows viewport
+  window.addEventListener('resize', () => {
+    if (localStorage.getItem('theme') === 'auto' && linkEl) linkEl.href = resolveThemeHref('auto');
+  });
+
+  // --- Custom CSS (saved locally, inject into page, removable) ---
+  const CUSTOM_CSS_KEY = 'virowatch_custom_css';
+  const customListEl = document.getElementById('app-custom-css-list');
+  const customFileInput = document.getElementById('app-custom-css-file');
+  const importCssBtn = document.getElementById('app-import-css-btn');
+
+  function getCustomCssList() {
+    try {
+      return JSON.parse(localStorage.getItem(CUSTOM_CSS_KEY) || '[]');
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function saveCustomCssList(list) {
+    localStorage.setItem(CUSTOM_CSS_KEY, JSON.stringify(list));
+  }
+
+  function applyCustomCss(list) {
+    list.forEach(item => {
+      const existing = document.getElementById('custom-css-' + item.id);
+      if (existing) existing.remove();
+    });
+    list.forEach(item => {
+      if (item.type === 'inline') {
+        const style = document.createElement('style');
+        style.id = 'custom-css-' + item.id;
+        style.textContent = item.value;
+        document.head.appendChild(style);
+      } else if (item.type === 'url' && item.value) {
+        const link = document.createElement('link');
+        link.id = 'custom-css-' + item.id;
+        link.rel = 'stylesheet';
+        link.href = item.value;
+        document.head.appendChild(link);
+      }
+    });
+  }
+
+  function renderCustomCssList() {
+    if (!customListEl) return;
+    const list = getCustomCssList();
+    customListEl.innerHTML = '';
+    list.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'app-sidebar-custom-item';
+      const name = document.createElement('span');
+      name.title = item.name;
+      name.textContent = item.name;
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'app-sidebar-custom-remove';
+      removeBtn.setAttribute('aria-label', 'Remove');
+      removeBtn.dataset.id = item.id;
+      removeBtn.addEventListener('click', () => {
+        const arr = getCustomCssList().filter(i => i.id !== item.id);
+        saveCustomCssList(arr);
+        applyCustomCss(arr);
+        const el = document.getElementById('custom-css-' + item.id);
+        if (el) el.remove();
+        renderCustomCssList();
+      });
+      row.appendChild(name);
+      row.appendChild(removeBtn);
+      customListEl.appendChild(row);
+    });
+  }
+
+  applyCustomCss(getCustomCssList());
+  renderCustomCssList();
+
+  if (importCssBtn && customFileInput) {
+    importCssBtn.addEventListener('click', () => customFileInput.click());
+    customFileInput.addEventListener('change', () => {
+      const file = customFileInput.files && customFileInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const list = getCustomCssList();
+        const id = 'custom-' + Date.now();
+        list.push({ id, name: file.name || 'Custom CSS', type: 'inline', value: reader.result || '' });
+        saveCustomCssList(list);
+        applyCustomCss(list);
+        renderCustomCssList();
+      };
+      reader.readAsText(file);
+      customFileInput.value = '';
+    });
   }
 
   // Save and Load State
@@ -169,8 +283,8 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // 1. If empty, go back to Categories
       if (!q) {
-         if (heroSection) heroSection.style.display = 'flex';
-         if (categoryContainer) categoryContainer.style.display = 'flex';
+         if (heroSection) heroSection.style.display = '';
+         if (categoryContainer) categoryContainer.style.display = '';
          if (movieListWrapper) movieListWrapper.style.display = 'none';
          movieList.innerHTML = '';
          return;
@@ -183,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // 3. Score all items: how many query letters match in order (+ bonus for exact substring)
       movieList.innerHTML = '';
-      const categoriesToCheck = ['movies', 'shows', 'anime'];
+      const categoriesToCheck = ['movies', 'shows', 'anime', 'lunora'];
       const scored = [];
 
       categoriesToCheck.forEach(catKey => {
@@ -247,10 +361,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Category Banners Click (only the category cards, not the link inside Movies)
   document.querySelectorAll('.movie-item-banner').forEach(b => {
-    b.addEventListener('click', (e) => {
+    b.addEventListener('click', async (e) => {
       if (e.target.closest('a.category-card-link')) return;
       const c = b.dataset.category;
-      if (c) renderList(c);
+      if (!c) return;
+      if (c === 'lunora') {
+        const loader = window.lunoraLoader;
+        if (!loader) { console.warn('Lunora loader not available'); return; }
+        if (!loader.isLoaded()) {
+          if(heroSection) heroSection.style.display = 'none';
+          if(categoryContainer) categoryContainer.style.display = 'none';
+          if(movieListWrapper) { movieListWrapper.style.display = 'block'; movieListWrapper.style.opacity = '0.6'; }
+          movieList.innerHTML = '<div class="movie-item" style="flex:1 1 100%;text-align:center;padding:40px;min-width:100%;">Loading Lunora content...</div>';
+          try {
+            const data = await loader.load();
+            mediaData.lunora = data;
+          } catch (err) {
+            movieList.innerHTML = '<div class="movie-item" style="flex:1 1 100%;text-align:center;padding:40px;color:#e74c3c;min-width:100%;">Failed to load Lunora. Check network.</div>';
+            return;
+          }
+          if(movieListWrapper) movieListWrapper.style.opacity = '';
+        }
+      }
+      renderList(c);
     });
   });
 
@@ -276,8 +409,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function resetView() {
     if(episodeContainer) episodeContainer.style.display = 'none';
     if(movieListWrapper) movieListWrapper.style.display = 'none';
-    if(heroSection) heroSection.style.display = 'flex';
-    if(categoryContainer) categoryContainer.style.display = 'block';
+    if(heroSection) heroSection.style.display = '';
+    if(categoryContainer) categoryContainer.style.display = '';
     localStorage.removeItem('lastState');
     // Clear search on back
     const sInput = document.getElementById('searchInput');
@@ -299,8 +432,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   })();
 
-  // Restore State
-  const last = JSON.parse(localStorage.getItem('lastState') || 'null');
+  // Ensure hero/category use explicit flex on initial load (matches wider layout when returning via title)
+  let last = JSON.parse(localStorage.getItem('lastState') || 'null');
+  if (!last?.cat) {
+    if(heroSection) heroSection.style.display = 'flex';
+    if(categoryContainer) categoryContainer.style.display = 'flex';
+  }
+  if (last?.cat === 'lunora' && window.lunoraLoader && !window.lunoraLoader.isLoaded()) {
+    try {
+      const data = await window.lunoraLoader.load();
+      mediaData.lunora = data;
+    } catch (_) { last = null; }
+  }
   if (last?.cat && mediaData[last.cat]?.[last.mov]) {
     renderList(last.cat);
     if(movieListWrapper) movieListWrapper.style.display = 'block';
