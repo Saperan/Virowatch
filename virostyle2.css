@@ -20,12 +20,6 @@ body {
   line-height: 1.6;
 }
 
-#toggleStylesheetImage {
-  cursor:pointer;
-  width:30px;
-  height:30px;
-}
-
 /* === Scrollbar Styling === */
 ::-webkit-scrollbar {
   width: 8px;
