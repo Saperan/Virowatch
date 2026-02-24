@@ -1,0 +1,276 @@
+/* Transparent app sidebar - toggle button, overlay, panel */
+
+/* Toggle icon - bottom left */
+.app-sidebar-toggle {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  transition: background 0.2s, transform 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-sidebar-toggle:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.app-sidebar-toggle:active {
+  transform: scale(0.95);
+}
+
+/* Hamburger icon */
+.app-sidebar-toggle span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: #fff;
+  border-radius: 1px;
+  position: relative;
+  transition: transform 0.3s;
+}
+
+.app-sidebar-toggle span::before,
+.app-sidebar-toggle span::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 22px;
+  height: 2px;
+  background: #fff;
+  border-radius: 1px;
+  transition: transform 0.3s;
+}
+
+.app-sidebar-toggle span::before {
+  top: -7px;
+}
+
+.app-sidebar-toggle span::after {
+  top: 7px;
+}
+
+/* Icon animation when open */
+body.app-sidebar-open .app-sidebar-toggle span {
+  background: transparent;
+}
+
+body.app-sidebar-open .app-sidebar-toggle span::before {
+  top: 0;
+  transform: rotate(45deg);
+}
+
+body.app-sidebar-open .app-sidebar-toggle span::after {
+  top: 0;
+  transform: rotate(-45deg);
+}
+
+/* Transparent sidebar panel */
+.app-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  max-width: 85vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: 99;
+  padding: 24px 0;
+}
+
+body.app-sidebar-open .app-sidebar {
+  transform: translateX(0);
+}
+
+.app-sidebar nav {
+  padding: 32px 16px 24px 20px;
+}
+
+/* Style / theme section */
+.app-sidebar-theme-section {
+  margin-bottom: 16px;
+}
+
+.app-sidebar-theme-label {
+  display: block;
+  padding: 0 0 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.app-sidebar-theme-select {
+  width: 100%;
+  padding: 10px 32px 10px 12px;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(255,255,255,0.8)' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-sidebar-theme-select:hover,
+.app-sidebar-theme-select:focus {
+  background-color: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.3);
+  outline: none;
+}
+
+.app-sidebar-theme-select option {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+/* Custom CSS section */
+.app-sidebar-custom-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.app-sidebar-import-btn {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-sidebar-import-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.app-sidebar-custom-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.app-sidebar-custom-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.app-sidebar-custom-item span {
+  flex: 1;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-sidebar-custom-remove {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: rgba(255, 100, 100, 0.4);
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-sidebar-custom-remove:hover {
+  background: rgba(255, 100, 100, 0.7);
+}
+
+.app-sidebar-custom-remove::after {
+  content: '×';
+  display: block;
+}
+
+.app-sidebar-link-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.app-sidebar-link-section .app-sidebar-import-btn {
+  text-align: center;
+  text-decoration: none;
+}
+
+/* Content Request: image behind text, sized with text */
+.app-sidebar-content-request {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+}
+
+.app-sidebar-content-request .app-sidebar-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  z-index: 0;
+}
+
+.app-sidebar-content-request .app-sidebar-btn-icon img {
+  height: 1.2em;
+  width: auto;
+  vertical-align: middle;
+  display: block;
+}
+
+.app-sidebar-content-request .app-sidebar-btn-text {
+  position: relative;
+  z-index: 1;
+}
+
+/* Overlay when sidebar is open */
+.app-sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+  z-index: 98;
+}
+
+body.app-sidebar-open .app-sidebar-overlay {
+  opacity: 1;
+  visibility: visible;
+}
