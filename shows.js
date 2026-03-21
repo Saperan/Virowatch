@@ -1,6 +1,55 @@
 // shows.js (Non-module)
 window.shows = {
 
+    TED: {
+        title: 'Ted',
+        image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmedia.themoviedb.org%2Ft%2Fp%2Fw130_and_h195_face%2FcPn71YFDENH0JkWUezlsLyWmLfN.jpg&f=1&nofb=1&ipt=c7da2e378081f95d7907c7a087cc3723a1362713d8fd7282e872188d258b176a',
+        TEDS1: {
+            chapter: 'Season 1',
+            video: [
+                'https://rumble.com/embed/v75932q/?pub=4lty6f',
+                'https://rumble.com/embed/v75937g/?pub=4lty6f',
+                'https://rumble.com/embed/v759392/?pub=4lty6f',
+                'https://rumble.com/embed/v7593ba/?pub=4lty6f',
+                'https://rumble.com/embed/v7593c0/?pub=4lty6f',
+                'https://rumble.com/embed/v7593cm/?pub=4lty6f',
+                'https://rumble.com/embed/v7593de/?pub=4lty6f'
+            ],
+            episodeTitles: [
+                '1. Just Say Yes',
+                '2. My Two Dads',
+                '3. Ejectile Dysfunction',
+                '4. Subways, Bicycles and Automobiles',
+                '5. Desperately Seeking Susan',
+                '6. Loud Night',
+                '7. Hes Gotta Have It'
+            ],
+        },
+        TEDS2: {
+            chapter: 'Season 2',
+            video: [
+                'https://rumble.com/embed/v758zxq/?pub=4lty6f',
+                'https://rumble.com/embed/v758zyc/?pub=4lty6f',
+                'https://rumble.com/embed/v758zym/?pub=4lty6f',
+                'https://rumble.com/embed/v758zz2/?pub=4lty6f',
+                'https://rumble.com/embed/v758zzo/?pub=4lty6f',
+                'https://rumble.com/embed/v75900e/?pub=4lty6f',
+                'https://rumble.com/embed/v759010/?pub=4lty6f',
+                'https://rumble.com/embed/v75901i/?pub=4lty6f'
+            ],
+            episodeTitles: [
+                '1. Talk Dirty to Me',
+                '2. Mrs. Robichek',
+                '3. Dungeons & Dealers',
+                '4. The Moms Bombed Rom-Com',
+                '5. The Sword in the Stoned',
+                '6. Roe v. Weed',
+                '7. Susan Is the New Black',
+                '8. Fraudcast News'
+            ],
+        },
+    },
+
     LMK: {
         title: 'Lego Monkie Kid',
         image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.stonewars.de%2Fwp-content%2Fuploads%2F2021%2F09%2Flego-monkie-kid-serie.jpg&f=1&nofb=1&ipt=29f25e4508655580794ebf175d2bb8cf9a53637c847e3a05ece4405c8d414758',
