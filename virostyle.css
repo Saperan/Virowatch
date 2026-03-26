@@ -585,3 +585,27 @@ p, span, label, button, input, textarea, div, h1, h2, h3, h4, h5, h6 {
 .player, .sidebar, .movie-item, .movie-item-banner, .button, .episode, #seasonSelector { opacity: 0; animation: simpleAppear 0.8s ease-out forwards; transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1); }
 
 @keyframes simpleAppear { from { opacity: 0; } to { opacity: 1; } }
+
+/* =====================================================
+   VIROWATCH CSS PATCH — add to ALL theme CSS files
+   These replace the inline styles removed from the HTML
+   ===================================================== */
+
+/* .site-title replaces style="cursor: pointer;" on <h1> */
+.site-title {
+  cursor: pointer;
+  text-align: center;
+}
+
+/* .site-title-icon-link replaces bare <a> wrapper */
+.site-title-icon-link {
+  display: inline;
+  text-decoration: none;
+}
+
+/* .site-title-icon replaces width="60" height="60" style="vertical-align: bottom;" on <img> */
+.site-title-icon {
+  width: 60px;
+  height: 60px;
+  vertical-align: bottom;
+}
