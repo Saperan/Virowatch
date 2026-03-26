@@ -37,10 +37,6 @@
   <link rel="icon" href="https://i.ibb.co/FkdMbG4N/virowatch-new-icon-tihngy-cropped.png" type="image/png">
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@100;300;400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="sidebar.css">
-  <style>
-    /* Hero banner styling */
-    /* Hero Section (Anix-style) */
-  </style>
 </head>
 <body>
 
@@ -76,24 +72,25 @@
       </div>
       <div class="app-sidebar-custom-section">
         <button onclick="refreshPage()" type="button" class="app-sidebar-import-btn">Hard Refresh</button>
-                <div class="bottom-text">Press if New Content doesnt show up</div> <script> function refreshPage() {window.location.reload(true);} </script>
+        <div class="bottom-text">Press if New Content doesnt show up</div>
+        <script> function refreshPage() { window.location.reload(true); } </script>
       </div>
     </nav>
   </aside>
 
   <div class="container">
     <header>
-      <center>
-        <h1 class="kanit-light" id="siteTitle" style="cursor: pointer;">
-            <a href="https://discord.gg/jdKvsPWNme">
-                <img src="https://i.ibb.co/FkdMbG4N/virowatch-new-icon-tihngy-cropped.png" alt="Join Virowatch Discord!" width="60" height="60" style="vertical-align: bottom;"></a>
-            Virowatch
-        </h1>
-      </center>
+      <h1 class="kanit-light site-title" id="siteTitle">
+        <a href="https://discord.gg/jdKvsPWNme" class="site-title-icon-link">
+          <img src="https://i.ibb.co/FkdMbG4N/virowatch-new-icon-tihngy-cropped.png" alt="Join Virowatch Discord!" class="site-title-icon"></a>
+        Virowatch
+      </h1>
       <div class="search-box">
         <input type="text" id="searchInput" placeholder="Search for content...">
       </div>
-<br>
+      <br>
+    </header>
+
     <div id="hero">
       <section class="newest-added">
         <h2 class="newest-added-title">Newest added</h2>
@@ -116,9 +113,6 @@
         </div>
       </section>
     </div>
-    
-
-
 
     <div class="movie-list-wrapper" id="movieListWrapper" style="display:none;">
       <div class="movie-list" id="movieList"></div>
@@ -143,8 +137,8 @@
     </div>
 
     <div class="bottom-text">
-Virowatch — All Rights Reserved to Original content Authors<br>Last updated: 21.03.2026
-  </div>
+      Virowatch — All Rights Reserved to Original content Authors<br>Last updated: 21.03.2026
+    </div>
   </div>
 
   <script>
@@ -156,54 +150,42 @@ Virowatch — All Rights Reserved to Original content Authors<br>Last updated: 2
   const movieListWrapper = document.getElementById('movieListWrapper');
   const siteTitle = document.getElementById('siteTitle');
 
-  // Handle "Watch Now" click
   if (watchNowButton) {
-      watchNowButton.addEventListener('click', () => {
-        heroSection.style.display = 'none';
-        movieListWrapper.style.display = 'block';
-      });
+    watchNowButton.addEventListener('click', () => {
+      heroSection.style.display = 'none';
+      movieListWrapper.style.display = 'block';
+    });
   }
 
-  // Handle category clicks
   categoryBanners.forEach(banner => {
     banner.addEventListener('click', () => {
       heroSection.style.display = 'none';
     });
   });
 
-  // Handle "Back to Categories" click
   if (backToCategoryButton) {
     backToCategoryButton.addEventListener('click', () => {
       heroSection.style.display = 'flex';
     });
   }
 
-  // *** NEW LOGIC: Make Title Trigger the Back Button ***
   if (siteTitle && backToCategoryButton) {
     siteTitle.addEventListener('click', (e) => {
-        // If clicking the Discord Image/Link, do nothing (let it open Discord)
-        if (e.target.closest('a')) return;
-        
-        // Otherwise, physically click the 'Back to Categories' button
-        backToCategoryButton.click();
+      if (e.target.closest('a')) return;
+      backToCategoryButton.click();
     });
   }
 
-  // Optional: When viewing changelogs, bring back hero
-  // Triggered if you have a menu or interaction to go back to "home"
   if (changelogContainer) {
-      const observeChangelog = new MutationObserver(() => {
-        if (changelogContainer && changelogContainer.offsetHeight > 0) {
-          heroSection.style.display = 'flex';
-        }
-      });
-
-      observeChangelog.observe(changelogContainer, {
-        childList: true,
-        subtree: true
-      });
+    const observeChangelog = new MutationObserver(() => {
+      if (changelogContainer && changelogContainer.offsetHeight > 0) {
+        heroSection.style.display = 'flex';
+      }
+    });
+    observeChangelog.observe(changelogContainer, { childList: true, subtree: true });
   }
-</script>
+  </script>
+
   <script src="movies.js"></script>
   <script src="shows.js"></script>
   <script src="anime.js"></script>
