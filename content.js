@@ -488,4 +488,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       });
   }
+
+  // Expose for watchlist (and any external module) to load content directly
+  window.viroPlay = async function(catKey, key) {
+    if (catKey === 'lunora' && window.lunoraLoader && !window.lunoraLoader.isLoaded()) {
+      try {
+        const data = await window.lunoraLoader.load();
+        mediaData.lunora = data;
+      } catch (_) { return false; }
+    }
+    if (!mediaData[catKey] || !mediaData[catKey][key]) return false;
+    cat = catKey;
+    renderList(catKey);
+    selectMovie(key);
+    return true;
+  };
 });
