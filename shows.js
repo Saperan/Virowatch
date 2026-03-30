@@ -3077,6 +3077,25 @@ window.shows = {
                 ],
         ]
           },
+          invincibles4: {
+            chapter: 'Season 4',
+            video: [
+                'https://rumble.com/embed/v75nmss/?pub=4nst58',
+                'https://rumble.com/embed/v75nmtg/?pub=4nst58',
+                'https://rumble.com/embed/v75nncw/?pub=4nst58',
+                'https://rumble.com/embed/v75nndy/?pub=4nst58'
+            ],
+            episodeTitles: [
+                '1. Making the World a Better Place',
+                '2. Ill Give You the Grand Tour',
+                '3. I Gotta Get Some Air',
+                '4. Hurm',
+                '5. Give Us a Moment',
+                '6. You Look Horrible',
+                '7. Dont Do Anything Rash',
+                '8. Dont Leave Me Hanging Here'
+            ],
+          },
       },
       
 
