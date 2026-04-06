@@ -3083,7 +3083,8 @@ window.shows = {
                 'https://rumble.com/embed/v75nmss/?pub=4nst58',
                 'https://rumble.com/embed/v75nmtg/?pub=4nst58',
                 'https://rumble.com/embed/v75nncw/?pub=4nst58',
-                'https://rumble.com/embed/v75nndy/?pub=4nst58'
+                'https://rumble.com/embed/v75nndy/?pub=4nst58',
+                'https://rumble.com/embed/v75ykai/?pub=4nst58'
             ],
             episodeTitles: [
                 '1. Making the World a Better Place',
