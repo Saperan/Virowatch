@@ -5884,6 +5884,17 @@ window.anime = {
           ]
       ]
     },
+    rezero4: {
+        chapter: 'Season 4',
+        video: [
+            'https://rumble.com/embed/v761vas/?pub=4p3ufg'
+        ],
+        episodeTitles: [],
+        dubbed: [
+            'https://rumble.com/embed/v761vgo/?pub=4p3ufg'
+        ],
+        dubbedepisodetitle: [],
+    },
   },
 
 
