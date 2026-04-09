@@ -2185,6 +2185,23 @@ window.shows = {
         ],
         ]
           },
+          TheboysS5: {
+            chapter: 'Season 5',
+            video: [
+                'https://rumble.com/embed/v7632ba/?pub=4nst58',
+                'https://rumble.com/embed/v7632c0/?pub=4nst58'
+            ],
+            episodeTitles: [
+                '1. Fifteen Inches of Sheer Dynamite',
+                '2. Teenage Kix',
+                '3. Every One of You Sons of Bitches',
+                '4. Though the Heavens Fall',
+                '5. One-Shots',
+                '6. King of Hell',
+                '7. The Frenchman, the Female, and the Man Called Mothers Milk',
+                '8. Blood and Bone'
+            ],
+          },
       },
 
     padomjudzinsi: {
