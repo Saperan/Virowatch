@@ -2189,7 +2189,8 @@ window.shows = {
             chapter: 'Season 5',
             video: [
                 'https://rumble.com/embed/v7632ba/?pub=4nst58',
-                'https://rumble.com/embed/v7632c0/?pub=4nst58'
+                'https://rumble.com/embed/v7632c0/?pub=4nst58',
+                'https://rumble.com/embed/v76cheg/?pub=4nst58'
             ],
             episodeTitles: [
                 '1. Fifteen Inches of Sheer Dynamite',
@@ -3102,7 +3103,8 @@ window.shows = {
                 'https://rumble.com/embed/v75nncw/?pub=4nst58',
                 'https://rumble.com/embed/v75nndy/?pub=4nst58',
                 'https://rumble.com/embed/v75ykai/?pub=4nst58',
-                'https://rumble.com/embed/v761d1a/?pub=4nst58'
+                'https://rumble.com/embed/v761d1a/?pub=4nst58',
+                'https://rumble.com/embed/v76chf2/?pub=4nst58'
             ],
             episodeTitles: [
                 '1. Making the World a Better Place',
