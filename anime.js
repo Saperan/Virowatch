@@ -2764,8 +2764,8 @@ window.anime = {
         MYFS2: {
             chapter: 'Season 2',
             video: [
-                  'https://rumble.com/embed/v76q1rq/?pub=4p3ufg',
-                  'https://rumble.com/embed/v76perk/?pub=4p3ufg'
+                  'https://rumble.com/embed/v76q32g/?pub=4p3ufg',
+                  'https://rumble.com/embed/v76q1rq/?pub=4p3ufg'
             ],
             episodeTitles: [
                 'JP 1. Ai Comes to the Yozakura Family / Mini Kyoichiro',
