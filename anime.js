@@ -5888,12 +5888,14 @@ window.anime = {
         chapter: 'Season 4',
         video: [
             'https://rumble.com/embed/v761vas/?pub=4p3ufg',
-            'https://rumble.com/embed/v76d12w/?pub=4p3ufg'
+            'https://rumble.com/embed/v76d12w/?pub=4p3ufg',
+            'https://rumble.com/embed/v76pera/?pub=4p3ufg'
         ],
         episodeTitles: [],
         dubbed: [
             'https://rumble.com/embed/v761vgo/?pub=4p3ufg',
-            'https://rumble.com/embed/v76d13c/?pub=4p3ufg'
+            'https://rumble.com/embed/v76d13c/?pub=4p3ufg',
+            'https://rumble.com/embed/v76perk/?pub=4p3ufg'
         ],
         dubbedepisodetitle: [],
     },
