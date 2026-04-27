@@ -7,16 +7,16 @@ window.anime = {
     CPS1: {
         chapter: 'Season 1',
         video: [
-              'https://rumble.com/embed/v76uruq/?pub=4pbwfc',
-  'https://rumble.com/embed/v76us2q/?pub=4pbwfc',
-  'https://rumble.com/embed/v76usc8/?pub=4pbwfc',
-  'https://rumble.com/embed/v76usk4/?pub=4pbwfc',
-  'https://rumble.com/embed/v76usug/?pub=4pbwfc',
-  'https://rumble.com/embed/v76ut5q/?pub=4pbwfc',
-  'https://rumble.com/embed/v76uth0/?pub=4pbwfc',
-  'https://rumble.com/embed/v76utpo/?pub=4pbwfc',
-  'https://rumble.com/embed/v76uu3i/?pub=4pbwfc',
-  'https://rumble.com/embed/v76uufs/?pub=4pbwfc'
+  'https://rumble.com/embed/v76vrtm/?pub=4pbwfc',
+  'https://rumble.com/embed/v76vrz0/?pub=4pbwfc',
+  'https://rumble.com/embed/v76vs50/?pub=4pbwfc',
+  'https://rumble.com/embed/v76vsau/?pub=4pbwfc',
+  'https://rumble.com/embed/v76vsha/?pub=4pbwfc',
+  'https://rumble.com/embed/v76vsrm/?pub=4pbwfc',
+  'https://rumble.com/embed/v76vsxw/?pub=4pbwfc',
+  'https://rumble.com/embed/v76vt32/?pub=4pbwfc',
+  'https://rumble.com/embed/v76vtd0/?pub=4pbwfc',
+  'https://rumble.com/embed/v76vtn2/?pub=4pbwfc'
         ],
         episodeTitles: [],
         dubbed: [
