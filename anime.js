@@ -1,6 +1,40 @@
 // anime.js (Non-module)
 window.anime = {
 
+    CP: {
+    title: 'Cyberpunk Edgerunners',
+    image: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a1/Cyberpunk_Edgerunners_poster.jpg/250px-Cyberpunk_Edgerunners_poster.jpg',
+    CPS1: {
+        chapter: 'Season 1',
+        video: [
+              'https://rumble.com/embed/v76uruq/?pub=4pbwfc',
+  'https://rumble.com/embed/v76us2q/?pub=4pbwfc',
+  'https://rumble.com/embed/v76usc8/?pub=4pbwfc',
+  'https://rumble.com/embed/v76usk4/?pub=4pbwfc',
+  'https://rumble.com/embed/v76usug/?pub=4pbwfc',
+  'https://rumble.com/embed/v76ut5q/?pub=4pbwfc',
+  'https://rumble.com/embed/v76uth0/?pub=4pbwfc',
+  'https://rumble.com/embed/v76utpo/?pub=4pbwfc',
+  'https://rumble.com/embed/v76uu3i/?pub=4pbwfc',
+  'https://rumble.com/embed/v76uufs/?pub=4pbwfc'
+        ],
+        episodeTitles: [],
+        dubbed: [
+              'https://rumble.com/embed/v76uruq/?pub=4pbwfc',
+  'https://rumble.com/embed/v76us2q/?pub=4pbwfc',
+  'https://rumble.com/embed/v76usc8/?pub=4pbwfc',
+  'https://rumble.com/embed/v76usk4/?pub=4pbwfc',
+  'https://rumble.com/embed/v76usug/?pub=4pbwfc',
+  'https://rumble.com/embed/v76ut5q/?pub=4pbwfc',
+  'https://rumble.com/embed/v76uth0/?pub=4pbwfc',
+  'https://rumble.com/embed/v76utpo/?pub=4pbwfc',
+  'https://rumble.com/embed/v76uu3i/?pub=4pbwfc',
+  'https://rumble.com/embed/v76uufs/?pub=4pbwfc'
+        ],
+        dubbedepisodetitle: [],
+    },
+},
+
     DIDDYTENSEI: {
         title: 'Mushoku Tensei',
         image: 'https://imgs.search.brave.com/hpuUlP67KdEMWb9a7gIDJAdxlNe4Ct292QLk-V0tHVo/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/amtkZXNhLmNvbS9h/c3NldHMvaW1hZ2Vz/L2FuaW1lcy9pbWFn/ZS9tdXNob2t1LXRl/bnNlaS1pc2VrYWkt/aXR0YXJhLWhvbmtp/LWRhc3UuanBn',
