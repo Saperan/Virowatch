@@ -1,6 +1,38 @@
 // anime.js (Non-module)
 window.anime = {
 
+    EVANGELION: {
+        title: 'Evangelion',
+        image: 'https://upload.wikimedia.org/wikipedia/en/thumb/7/72/Evangelion_retouched.png/250px-Evangelion_retouched.png',
+        EM: {
+            chapter: 'Movies',
+            video: [
+'https://rumble.com/embed/v76xc36/?pub=4pbwfc',
+'https://rumble.com/embed/v76xc90/?pub=4pbwfc',
+'https://rumble.com/embed/v76xcgg/?pub=4pbwfc',
+'https://rumble.com/embed/v76xcqy/?pub=4pbwfc'
+            ],
+            episodeTitles: [
+                'JP Evangelion 1.11 - You Are (not) Alone',
+                'JP Evangelion 2.22 - You Can (not) Advance',
+                'JP Evangelion 3.33 - You Can (not) Redo',
+                'JP Evangelion 3.0 + 1.0 Thrice upon a time'
+            ],
+            dubbed: [
+                'https://rumble.com/embed/v76xdjy/?pub=4pbwfc',
+                'https://rumble.com/embed/v76xe5g/?pub=4pbwfc',
+                'https://rumble.com/embed/v76xekw/?pub=4pbwfc',
+                'https://rumble.com/embed/v76xfi0/?pub=4pbwfc'
+            ],
+            dubbedepisodetitle: [
+                'Evangelion 1.11 - You Are (not) Alone',
+                'Evangelion 2.22 - You Can (not) Advance',
+                'Evangelion 3.33 - You Can (not) Redo',
+                'Evangelion 3.0 + 1.0 Thrice upon a time'
+            ],
+        },
+    },
+
     CP: {
     title: 'Cyberpunk Edgerunners',
     image: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a1/Cyberpunk_Edgerunners_poster.jpg/250px-Cyberpunk_Edgerunners_poster.jpg',
@@ -20,16 +52,16 @@ window.anime = {
         ],
         episodeTitles: [],
         dubbed: [
-              'https://rumble.com/embed/v76uruq/?pub=4pbwfc',
-  'https://rumble.com/embed/v76us2q/?pub=4pbwfc',
-  'https://rumble.com/embed/v76usc8/?pub=4pbwfc',
-  'https://rumble.com/embed/v76usk4/?pub=4pbwfc',
-  'https://rumble.com/embed/v76usug/?pub=4pbwfc',
-  'https://rumble.com/embed/v76ut5q/?pub=4pbwfc',
-  'https://rumble.com/embed/v76uth0/?pub=4pbwfc',
-  'https://rumble.com/embed/v76utpo/?pub=4pbwfc',
-  'https://rumble.com/embed/v76uu3i/?pub=4pbwfc',
-  'https://rumble.com/embed/v76uufs/?pub=4pbwfc'
+  'https://rumble.com/embed/v76xqdc/?pub=4pbwfc',
+  'https://rumble.com/embed/v76xqis/?pub=4pbwfc',
+  'https://rumble.com/embed/v76xqpg/?pub=4pbwfc',
+  'https://rumble.com/embed/v76xqvy/?pub=4pbwfc',
+  'https://rumble.com/embed/v76xr2y/?pub=4pbwfc',
+  'https://rumble.com/embed/v76xrb8/?pub=4pbwfc',
+  'https://rumble.com/embed/v76xri6/?pub=4pbwfc',
+  'https://rumble.com/embed/v76xrpa/?pub=4pbwfc',
+  'https://rumble.com/embed/v76xs2e/?pub=4pbwfc',
+  'https://rumble.com/embed/v76xsc4/?pub=4pbwfc'
         ],
         dubbedepisodetitle: [],
     },
