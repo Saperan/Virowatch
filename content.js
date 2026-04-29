@@ -20,23 +20,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     const w = window.innerWidth, h = window.innerHeight;
     return w <= 768 || (w / h) <= (9 / 16);
   }
-  function resolveThemeHref(key) {
+function resolveThemeHref(key) {
     if (key === 'auto') return isMobileViewport() ? 'virostyle2.css' : 'virostyle.css';
-    return THEME_HREF[key] || 'virostyle.css';
+    
+    // If it's a built-in key (e.g. 'desktop-dark'), use the map.
+    // Otherwise, if it's a path like 'extra_css/style.css', use it directly.
+    if (THEME_HREF[key]) return THEME_HREF[key];
+    return key; 
   }
 
-  const themeSelect = document.getElementById('app-sidebar-theme-select');
+const themeSelect = document.getElementById('app-sidebar-theme-select');
 
-  // Theme: apply by key (auto = detect layout; others = fixed layout + dark/light)
-  function applyTheme(key) {
-    if (!THEME_HREF.hasOwnProperty(key)) key = 'auto';
-    if (linkEl) linkEl.href = resolveThemeHref(key);
-    localStorage.setItem('theme', key);
-    if (themeSelect) themeSelect.value = key;
+  // Theme: apply by key or custom file path
+function applyTheme(key) {
+  if (linkEl) linkEl.href = resolveThemeHref(key);
+  localStorage.setItem('theme', key);
+  
+  if (themeSelect) {
+    // Check if the option already exists in the dropdown
+    let exists = Array.from(themeSelect.options).some(opt => opt.value === key);
+    
+    // If it's a custom style and NOT in the dropdown yet, add it so it shows up
+    if (!exists && key !== 'auto' && !THEME_HREF[key]) {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = key.split('/').pop().replace('.css', '') + ' (Custom)';
+      themeSelect.appendChild(opt);
+    }
+    themeSelect.value = key;
   }
+}
 
   const saved = localStorage.getItem('theme');
-  applyTheme(saved && THEME_HREF.hasOwnProperty(saved) ? saved : 'auto');
+  applyTheme(saved ? saved : 'auto');
 
   if (themeSelect) {
     themeSelect.addEventListener('change', () => applyTheme(themeSelect.value));
