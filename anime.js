@@ -7,26 +7,26 @@ window.anime = {
         EM: {
             chapter: 'Movies',
             video: [
-'https://rumble.com/embed/v76xc36/?pub=4pbwfc',
-'https://rumble.com/embed/v76xc90/?pub=4pbwfc',
+'https://rumble.com/embed/v76yy8y/?pub=4pbwfc',
+'https://rumble.com/embed/v76zfq4/?pub=4pbwfc',
 'https://rumble.com/embed/v76xcgg/?pub=4pbwfc',
 'https://rumble.com/embed/v76xcqy/?pub=4pbwfc'
             ],
             episodeTitles: [
-                'JP Evangelion 1.11 - You Are (not) Alone',
-                'JP Evangelion 2.22 - You Can (not) Advance',
+                'JP Evangelion 1.0 - You Are (not) Alone',
+                'JP Evangelion 2.0 - You Can (not) Advance',
                 'JP Evangelion 3.33 - You Can (not) Redo',
                 'JP Evangelion 3.0 + 1.0 Thrice upon a time'
             ],
             dubbed: [
-                'https://rumble.com/embed/v76xdjy/?pub=4pbwfc',
-                'https://rumble.com/embed/v76xe5g/?pub=4pbwfc',
+                'https://rumble.com/embed/v76yy8y/?pub=4pbwfc',
+                'https://rumble.com/embed/v76zfq4/?pub=4pbwfc',
                 'https://rumble.com/embed/v76xekw/?pub=4pbwfc',
                 'https://rumble.com/embed/v76xfi0/?pub=4pbwfc'
             ],
             dubbedepisodetitle: [
-                'Evangelion 1.11 - You Are (not) Alone',
-                'Evangelion 2.22 - You Can (not) Advance',
+                'JP Evangelion 1.0 - You Are (not) Alone',
+                'JP Evangelion 2.0 - You Can (not) Advance',
                 'Evangelion 3.33 - You Can (not) Redo',
                 'Evangelion 3.0 + 1.0 Thrice upon a time'
             ],
