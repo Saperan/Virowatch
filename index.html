@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Virowatch</title>
   <link id="themeStylesheet" rel="stylesheet" href="virostyle.css">
-  <script>
+  <link rel="stylesheet" href="stylegui.css">
+<script>
     (function() {
       var link = document.getElementById('themeStylesheet');
       if (!link) return;
@@ -24,10 +25,11 @@
         if (key === 'auto') {
           return isMobileViewport() ? 'virostyle2.css' : 'virostyle.css';
         }
-        return THEME_HREF[key] || 'virostyle.css';
+        // If it's a built-in key, map it to the file. Otherwise, treat it as a custom file path from the Style GUI.
+        return THEME_HREF[key] !== undefined ? THEME_HREF[key] : key;
       }
       var saved = localStorage.getItem('theme');
-      if (!saved || !THEME_HREF[saved]) {
+      if (!saved) { // Removed the strict check so custom GUI paths are allowed
         saved = 'auto';
         localStorage.setItem('theme', saved);
       }
@@ -39,6 +41,31 @@
   <link rel="stylesheet" href="sidebar.css">
 </head>
 <body>
+  
+<div id="styleGuiOverlay" class="style-gui-overlay">
+  <div class="sg-modal>
+    <div class="app-sidebar-style-header">
+      <button id="closeStyleGuiBtn" type="button" class="app-sidebar-style-close-btn">×</button>
+    </div>
+    <div id="styleListContainer" class="app-sidebar-style-list"></div>
+  </div>
+</div>
+<div id="app-sidebar-style-preview-overlay" class="app-sidebar-style-preview-overlay"></div>
+<div id="app-sidebar-style-preview-panel" class="app-sidebar-style-preview-panel" style="display:none;">
+  <div class="app-sidebar-style-preview-header">
+    <span class="app-sidebar-style-preview-title">Style Preview</span>
+    <button id="app-sidebar-style-preview-close-btn" class="app-sidebar-style-preview-close-btn">×</button>
+  </div>
+  <div class="app-sidebar-style-preview-content">
+    <p class="app-sidebar-style-preview-name"></p>
+    <p class="app-sidebar-style-preview-desc"></p>
+    <pre id="app-sidebar-style-preview-css" class="app-sidebar-style-preview-css"></pre>
+    <div class="app-sidebar-style-preview-actions">
+      <button id="app-sidebar-style-apply-now-btn" class="app-sidebar-style-apply-now-btn">Apply Now</button>
+      <button id="app-sidebar-style-copy-btn" class="app-sidebar-style-copy-btn">Copy CSS</button>
+    </div>
+  </div>
+</div>
 
   <button class="app-sidebar-toggle" type="button" aria-label="Toggle sidebar">
     <span></span>
@@ -62,6 +89,26 @@
         <button type="button" id="app-import-css-btn" class="app-sidebar-import-btn">Import CSS file</button>
         <div id="app-custom-css-list" class="app-sidebar-custom-list"></div>
       </div>
+      
+<div class="app-sidebar-style-section">
+  <button id="openStyleGuiBtn" type="button" class="app-sidebar-import-btn app-sidebar-style-toggle-btn">
+    <span class="app-sidebar-style-icon">🎨</span>
+    <span class="app-sidebar-style-text">Open Style GUI</span>
+  </button>
+</div>
+
+
+<!-- Style Preview Panel (Modal) -->
+<div id="app-sidebar-style-preview-panel" class="app-sidebar-style-preview-panel" style="display:none;">
+  <div class="app-sidebar-style-preview-content">
+    <p class="app-sidebar-style-preview-name"></p>
+    <pre id="app-sidebar-style-preview-css" class="app-sidebar-style-preview-css"></pre>
+    <div class="app-sidebar-style-preview-actions">
+      <button id="app-sidebar-style-apply-now-btn" class="app-sidebar-style-apply-now-btn">Apply Now</button>
+    </div>
+  </div>
+</div>
+
       <div class="app-sidebar-link-section">
         <a href="https://discord.gg/jdKvsPWNme" target="_blank" rel="noopener" class="app-sidebar-import-btn app-sidebar-content-request">
           <span class="app-sidebar-btn-icon" aria-hidden="true">
@@ -137,7 +184,7 @@
     </div>
 
     <div class="bottom-text">
-      Virowatch — All Rights Reserved to Original content Authors
+      Virowatch — All Rights Reserved to Original content Authors<br>Last updated: 06.04.2026
     </div>
   </div>
 
@@ -186,6 +233,7 @@
   }
   </script>
 
+<script src="stylegui.js"></script>
   <script src="movies.js"></script>
   <script src="shows.js"></script>
   <script src="anime.js"></script>
