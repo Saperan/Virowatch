@@ -1,0 +1,725 @@
+/* ================================================================
+   Virowatch — Frutiger Aero Theme
+   Inspired by 2006–2013 UI: aqua glass, sky gradients, lush greens,
+   glossy buttons, soft glows, and optimistic translucency.
+   ================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Trebuchet+MS&family=Segoe+UI:wght@300;400;600;700&display=swap');
+
+/* ── CSS Variables ─────────────────────────────────────────────── */
+:root {
+  --aero-sky-top:       #b8e0f7;
+  --aero-sky-mid:       #d4eefa;
+  --aero-sky-bottom:    #eaf6ff;
+  --aero-glass-bg:      rgba(255, 255, 255, 0.35);
+  --aero-glass-border:  rgba(255, 255, 255, 0.65);
+  --aero-glass-shadow:  rgba(100, 180, 255, 0.25);
+  --aero-green:         #5dba3a;
+  --aero-green-dark:    #3e8a25;
+  --aero-green-glow:    rgba(93, 186, 58, 0.45);
+  --aero-blue:          #1e7ec8;
+  --aero-blue-light:    #5bb8f5;
+  --aero-blue-glow:     rgba(30, 126, 200, 0.4);
+  --aero-teal:          #28b5c0;
+  --aero-text:          #1a3a4a;
+  --aero-text-muted:    #4a7088;
+  --aero-text-light:    #2d5a72;
+  --aero-active-bg:     rgba(30, 126, 200, 0.25);
+  --aero-active-border: rgba(30, 126, 200, 0.6);
+  --aero-scrollbar:     rgba(91, 184, 245, 0.7);
+  --aero-font:          "Segoe UI", "Trebuchet MS", Tahoma, sans-serif;
+}
+
+/* ── Reset & Base ──────────────────────────────────────────────── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--aero-font);
+}
+
+body {
+  /* Sky gradient — the signature Aero backdrop */
+  background:
+    radial-gradient(ellipse at 60% 0%, rgba(180, 230, 255, 0.7) 0%, transparent 60%),
+    radial-gradient(ellipse at 10% 80%, rgba(160, 220, 140, 0.35) 0%, transparent 50%),
+    linear-gradient(180deg, var(--aero-sky-top) 0%, var(--aero-sky-mid) 40%, var(--aero-sky-bottom) 100%);
+  background-attachment: fixed;
+  color: var(--aero-text);
+  overflow-x: hidden;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb {
+  background: var(--aero-scrollbar);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+::-webkit-scrollbar-track {
+  background: rgba(200, 235, 255, 0.5);
+}
+.movie-list-wrapper::-webkit-scrollbar { height: 8px; }
+.movie-list-wrapper::-webkit-scrollbar-thumb {
+  background: var(--aero-scrollbar);
+  border-radius: 4px;
+}
+.movie-list-wrapper::-webkit-scrollbar-track {
+  background: rgba(200, 235, 255, 0.5);
+}
+
+/* ── Aero glass mixin (reused via shared rules) ────────────────── */
+/* Any element using glass gets this base */
+.aero-glass {
+  background: var(--aero-glass-bg);
+  backdrop-filter: blur(14px) saturate(1.6);
+  -webkit-backdrop-filter: blur(14px) saturate(1.6);
+  border: 1px solid var(--aero-glass-border);
+  box-shadow:
+    0 4px 24px var(--aero-glass-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(100, 180, 255, 0.15);
+}
+
+/* ── Container ─────────────────────────────────────────────────── */
+.container, .episode-container { overflow: visible; }
+.container {
+  max-width: auto;
+  margin: auto;
+  padding: 20px;
+}
+
+/* ── Header ────────────────────────────────────────────────────── */
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+header h1, .site-title {
+  font-size: 2.6rem;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  /* Aero-style text: glossy deep blue with subtle shadow */
+  color: var(--aero-blue);
+  text-shadow:
+    0 1px 0 rgba(255,255,255,0.9),
+    0 2px 6px rgba(30, 126, 200, 0.25);
+  cursor: pointer;
+}
+.site-title-icon {
+  width: 60px;
+  height: 60px;
+  vertical-align: bottom;
+  filter: drop-shadow(0 2px 6px rgba(30, 126, 200, 0.4));
+}
+.site-title-icon-link {
+  display: inline;
+  text-decoration: none;
+}
+header img { vertical-align: middle; }
+
+/* ── Search ────────────────────────────────────────────────────── */
+.search-box {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+.search-box input {
+  /* Aqua glass input */
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px);
+  color: var(--aero-text);
+  border: 1px solid rgba(91, 184, 245, 0.6);
+  padding: 12px 20px;
+  border-radius: 20px;
+  width: 80%;
+  max-width: 500px;
+  font-size: 1rem;
+  box-shadow:
+    inset 0 2px 6px rgba(100, 180, 255, 0.2),
+    0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-box input::placeholder { color: var(--aero-text-muted); }
+.search-box input:focus {
+  outline: none;
+  border-color: var(--aero-blue-light);
+  box-shadow:
+    inset 0 2px 6px rgba(100, 180, 255, 0.3),
+    0 0 10px rgba(91, 184, 245, 0.4);
+}
+
+/* ── Hero ──────────────────────────────────────────────────────── */
+#hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+  width: 100%;
+}
+
+/* ── Newest Added ──────────────────────────────────────────────── */
+.newest-added {
+  margin-bottom: 28px;
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.newest-added-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--aero-blue);
+  margin-bottom: 10px;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+}
+.newest-added-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+.newest-added-item {
+  flex: 0 0 100px;
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  aspect-ratio: 2/3;
+  max-height: 150px;
+  /* Glass card */
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 2px 12px rgba(100, 180, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.newest-added-item:hover {
+  transform: scale(1.06) translateY(-2px);
+  box-shadow:
+    0 6px 20px rgba(30, 126, 200, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.newest-added-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.newest-added-item span {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 12px 6px 6px;
+  background: linear-gradient(to top, rgba(10, 60, 100, 0.85) 0%, transparent 100%);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+
+/* ── Categories ────────────────────────────────────────────────── */
+.categories-section {
+  margin-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: stretch;
+  width: 100%;
+}
+.categories-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--aero-blue);
+  margin-bottom: 24px;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+}
+.category-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 25px;
+  align-self: stretch;
+  width: 100%;
+}
+.movie-item-banner.category-card {
+  flex: 1 1 280px;
+  max-width: 350px;
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  /* Aero glass card */
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background:
+    linear-gradient(160deg, rgba(255,255,255,0.55) 0%, rgba(200,235,255,0.3) 100%);
+  backdrop-filter: blur(12px) saturate(1.5);
+  -webkit-backdrop-filter: blur(12px) saturate(1.5);
+  box-shadow:
+    0 6px 24px rgba(30, 126, 200, 0.18),
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 -1px 0 rgba(100, 180, 255, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.movie-item-banner.category-card:hover {
+  transform: translateY(-5px) scale(1.01);
+  box-shadow:
+    0 16px 40px rgba(30, 126, 200, 0.28),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+}
+.movie-item-banner.category-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+.movie-item-banner.category-card .category-card-link { display: block; }
+.movie-item-banner.category-card .category-card-link:focus { outline: none; }
+.movie-item-banner.category-card[data-category="lunora"] .category-card-link--full,
+.movie-item-banner.category-card[data-category="movies"] .category-card-link--full {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.movie-item-banner .category-card-label,
+.movie-item-banner p {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%;
+  margin: 0;
+  padding: 20px 16px;
+  box-sizing: border-box;
+  background: linear-gradient(to top, rgba(5, 40, 80, 0.88) 0%, rgba(5, 40, 80, 0.4) 60%, transparent 100%);
+  color: #e8f4ff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: left;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+/* ── Movie List ────────────────────────────────────────────────── */
+.movie-list-wrapper {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 10px 0;
+  margin-bottom: 10px;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  z-index: 2;
+}
+.movie-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 14px;
+  padding: 5px 10px;
+}
+.movie-item {
+  flex: 0 0 auto;
+  width: 130px;
+  height: 190px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(8px);
+  box-shadow:
+    0 4px 14px rgba(30, 126, 200, 0.15),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.25s ease, box-shadow 0.3s ease;
+  scroll-snap-align: start;
+}
+.movie-item:hover {
+  transform: scale(1.07) translateY(-2px);
+  box-shadow:
+    0 10px 28px rgba(30, 126, 200, 0.3),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+}
+.movie-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
+  transition: opacity 0.3s ease;
+}
+.movie-item p {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(6px);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--aero-text);
+  text-align: center;
+  padding: 6px 4px;
+  border-radius: 0 0 14px 14px;
+  border-top: 1px solid rgba(255,255,255,0.7);
+}
+
+/* ── Seasons Dropdown ──────────────────────────────────────────── */
+.seasons-dropdown {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  max-width: 100%;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+}
+.seasons-dropdown button {
+  flex: 0 0 auto;
+  padding: 7px 14px;
+  border: 1px solid rgba(91, 184, 245, 0.5);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--aero-blue);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+.seasons-dropdown button.active {
+  background: linear-gradient(180deg, rgba(91, 184, 245, 0.7) 0%, rgba(30, 126, 200, 0.6) 100%);
+  color: #fff;
+  border-color: rgba(30, 126, 200, 0.7);
+  box-shadow: 0 0 10px rgba(30, 126, 200, 0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+.seasons-dropdown button:hover {
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 2px 8px rgba(91, 184, 245, 0.3);
+}
+
+/* ── Episode Container ─────────────────────────────────────────── */
+.episode-container {
+  display: flex;
+  gap: 8px;
+  margin-top: 45px;
+  align-items: stretch;
+  max-height: 600px;
+}
+.sidebar {
+  flex: 0 0 250px;
+  overflow-y: auto;
+  /* Glass sidebar */
+  background: rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(14px) saturate(1.5);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 4px 20px rgba(30, 126, 200, 0.1),
+    inset 0 1px 0 rgba(255,255,255,0.85);
+  padding: 10px;
+  border-radius: 14px;
+  max-height: 600px;
+}
+.episode {
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  color: var(--aero-text);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+}
+.episode:hover {
+  transform: scale(1.02);
+  background: rgba(255, 255, 255, 0.65);
+  box-shadow:
+    0 4px 14px rgba(30, 126, 200, 0.2),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+}
+.episode.active {
+  background: linear-gradient(160deg, rgba(91, 184, 245, 0.55) 0%, rgba(30, 126, 200, 0.4) 100%);
+  border-color: rgba(30, 126, 200, 0.55);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,50,100,0.4);
+  box-shadow:
+    0 0 14px rgba(30, 126, 200, 0.35),
+    inset 0 1px 0 rgba(255,255,255,0.5);
+}
+
+/* ── Player ────────────────────────────────────────────────────── */
+.player {
+  flex: 1;
+  background: rgba(0, 20, 40, 0.88);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 15px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+  border: 1px solid rgba(91, 184, 245, 0.3);
+  z-index: 1;
+  max-height: 600px;
+}
+iframe#videoPlayer {
+  width: 100%;
+  height: 65vh;
+  max-height: 540px;
+  border: none;
+  border-radius: 12px;
+  background-color: #000;
+  transition: opacity 0.3s ease;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+}
+
+/* ── Spinner ───────────────────────────────────────────────────── */
+.spinner {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  border: 5px solid rgba(200, 230, 255, 0.25);
+  border-top-color: var(--aero-blue-light);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: none;
+  z-index: 10;
+}
+
+/* ── Controls ──────────────────────────────────────────────────── */
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 16px;
+  z-index: 1;
+}
+
+/* ── Buttons — Aero glossy ─────────────────────────────────────── */
+.button {
+  padding: 9px 20px;
+  border-radius: 20px;
+  /* Glossy Aero button — green accent */
+  background:
+    linear-gradient(
+      180deg,
+      rgba(120, 210, 80, 0.95) 0%,
+      rgba(75, 175, 40, 0.95) 48%,
+      rgba(50, 145, 20, 0.95) 50%,
+      rgba(80, 185, 45, 0.95) 100%
+    );
+  color: #fff;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid rgba(30, 110, 10, 0.6);
+  cursor: pointer;
+  text-shadow: 0 -1px 1px rgba(0, 80, 0, 0.5);
+  box-shadow:
+    0 2px 8px rgba(50, 150, 20, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+/* Gloss sheen pseudo-element */
+.button::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, transparent 100%);
+  border-radius: 20px 20px 0 0;
+  pointer-events: none;
+}
+.button:hover {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(140, 225, 100, 0.98) 0%,
+      rgba(90, 190, 55, 0.98) 48%,
+      rgba(60, 160, 30, 0.98) 50%,
+      rgba(95, 200, 60, 0.98) 100%
+    );
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 16px rgba(50, 150, 20, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.button:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 4px rgba(50, 150, 20, 0.4);
+}
+
+/* Dubbed toggle active — blue Aero variant */
+.button.dubbed-toggle.active {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(91, 184, 245, 0.95) 0%,
+      rgba(30, 126, 200, 0.95) 48%,
+      rgba(15, 95, 165, 0.95) 50%,
+      rgba(40, 140, 210, 0.95) 100%
+    );
+  border-color: rgba(10, 70, 130, 0.6);
+  text-shadow: 0 -1px 1px rgba(0, 40, 90, 0.5);
+  box-shadow:
+    0 2px 12px rgba(30, 126, 200, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+/* ── Season Selector ───────────────────────────────────────────── */
+#seasonSelector {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(8px);
+  color: var(--aero-text);
+  font-weight: 500;
+  border: 1px solid rgba(91, 184, 245, 0.55);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  width: 100%;
+  font-size: 1rem;
+  box-sizing: border-box;
+  cursor: pointer;
+  box-shadow:
+    inset 0 2px 4px rgba(100, 180, 255, 0.15),
+    0 1px 0 rgba(255,255,255,0.8);
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+#seasonSelector:hover,
+#seasonSelector:focus {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: var(--aero-blue-light);
+  outline: none;
+  transform: scale(1.01);
+  box-shadow:
+    inset 0 2px 4px rgba(100, 180, 255, 0.2),
+    0 0 10px rgba(91, 184, 245, 0.35);
+}
+
+/* ── Download Container ────────────────────────────────────────── */
+#downloadContainer {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+  width: 100%;
+}
+
+/* ── Changelog ─────────────────────────────────────────────────── */
+.changelog-container {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 14px;
+  padding: 15px;
+  max-height: 250px;
+  overflow-y: auto;
+  width: 100%;
+  margin-top: 40px;
+  box-shadow: 0 4px 16px rgba(30, 126, 200, 0.1), inset 0 1px 0 rgba(255,255,255,0.85);
+}
+.changelog-box {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+}
+.changelog-box h3 { color: var(--aero-text); font-weight: 600; margin-bottom: 5px; }
+.changelog-box p { color: var(--aero-text-muted); font-size: 0.9rem; }
+
+/* ── Bottom text ───────────────────────────────────────────────── */
+.bottom-text {
+  margin-bottom: 20px;
+  text-align: center;
+  opacity: 0.65;
+  font-size: 14px;
+  color: var(--aero-text-muted);
+}
+
+/* ── Fades & Transitions ───────────────────────────────────────── */
+.fade-out { opacity: 0; transition: opacity 0.3s ease; }
+.fade-transition { opacity: 0; transition: opacity 0.3s ease; }
+.fade-transition.show { opacity: 1; }
+
+/* ── Animations ────────────────────────────────────────────────── */
+@keyframes spin {
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.section-animate {
+  animation: fadeInUp 0.5s ease forwards;
+}
+@keyframes simpleAppear {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.player, .sidebar, .movie-item, .movie-item-banner, .button, .episode, #seasonSelector {
+  opacity: 0;
+  animation: simpleAppear 0.6s ease-out forwards;
+  transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* ── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .episode-container {
+    flex-direction: column;
+    max-height: none;
+  }
+  .sidebar {
+    width: 100%;
+    flex: unset;
+    max-height: 200px;
+  }
+  .player {
+    padding: 10px;
+    max-height: none;
+  }
+  iframe#videoPlayer {
+    height: 50vh;
+  }
+  .controls {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* ── Misc ──────────────────────────────────────────────────────── */
+html { scroll-behavior: smooth; }
+p, span, label, button, input, textarea, div, h1, h2, h3, h4, h5, h6 {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}

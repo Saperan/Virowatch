@@ -1,0 +1,596 @@
+/* ============================================================
+   VIROWATCH — FVUI Dark  (v2.0)
+   "Blur is the new black"
+   Direct port from FeoreV/FVUI real source (preload.css)
+   No background image · Custom cursor · Full opacity ladder
+   ============================================================ */
+
+/* ── Fonts (exact from FVUI source) ─────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.cdnfonts.com/css/anurati');
+
+/* ── FVUI token system (exact from preload.css) ─────────────── */
+:root {
+  /* Raw RGB triples — edit these to retheme everything */
+  --color1: 30,  40,  50;   /* Additional BG  */
+  --color2: 9,   18,  24;   /* Background     */
+  --color3: 35,  120, 200;  /* Blue accent    */
+  --color4: 63,  43,  150;  /* Gradient color */
+  --text1:  174, 174, 174;  /* Accent text    */
+  --text2:  107, 107, 107;  /* Muted text     */
+
+  /* Opacity multipliers (from FVUI source) */
+  --ColorOpacity:   1;
+  --DisableOpacity: 0;
+
+  /* Solid refs */
+  --color01: rgb(var(--color1));
+  --color02: rgb(var(--color2));
+  --color03: rgb(var(--color3));
+  --color04: rgb(var(--color4));
+
+  /* text */
+  --text01: rgb(var(--text1));
+  --text02: rgb(var(--text2));
+
+  /* Full opacity ladder — exact formulas from FVUI preload.css */
+  --opacity01:   rgba(var(--color1), calc(var(--ColorOpacity)*0.9*(1 - var(--DisableOpacity)) + var(--DisableOpacity)));
+  --opacity02:   rgba(var(--color2), calc(var(--ColorOpacity)*0.9*(1 - var(--DisableOpacity)) + var(--DisableOpacity)));
+  --opacity020a: rgba(var(--color2), calc(var(--ColorOpacity)*0.8*(1 - var(--DisableOpacity)) + var(--DisableOpacity)));
+  --opacity01a:  rgba(var(--color1), calc(var(--ColorOpacity)*0.6*(1 - var(--DisableOpacity)) + var(--DisableOpacity)));
+  --opacity02a:  rgba(var(--color2), calc(var(--ColorOpacity)*0.6*(1 - var(--DisableOpacity)) + var(--DisableOpacity)));
+  --opacity01b:  rgba(var(--color1), calc(var(--ColorOpacity)*0.4*(1 - var(--DisableOpacity)) + var(--DisableOpacity)));
+  --opacity02b:  rgba(var(--color2), calc(var(--ColorOpacity)*0.4*(1 - var(--DisableOpacity)) + var(--DisableOpacity)));
+  --opacity01c:  rgba(var(--color1), calc(var(--ColorOpacity)*0.2*(1 - var(--DisableOpacity)) + var(--DisableOpacity)));
+  --opacity02c:  rgba(var(--color1), calc(var(--ColorOpacity)*0.2*(1 - var(--DisableOpacity)) + var(--DisableOpacity)));
+  --opacity03:   rgba(var(--color3), calc(var(--ColorOpacity)*0.5*(1 - var(--DisableOpacity)) + var(--DisableOpacity)));
+  --opacity03a:  rgba(var(--color3), calc(var(--ColorOpacity)*0.2*(1 - var(--DisableOpacity)) + var(--DisableOpacity)));
+
+  /* FVUI cursor */
+  --cursor: url('https://feorev.github.io/Themes/Discord/FVUI/assets/Cursor.cur'), auto;
+
+  /* FVUI font */
+  --font: 'Comfortaa', cursive;
+
+  /* Glow shortcuts */
+  --glow03:      0 0 10px rgba(var(--color3), 0.7),  0 0 22px rgba(var(--color3), 0.4);
+  --glow03-soft: 0 0 8px  rgba(var(--color3), 0.35), 0 0 18px rgba(var(--color4), 0.2);
+
+  /* Gradient (color3 → color4) */
+  --gradient:      linear-gradient(135deg, rgb(var(--color3))           0%, rgb(var(--color4))           100%);
+  --gradient-soft: linear-gradient(135deg, rgba(var(--color3), 0.65)    0%, rgba(var(--color4), 0.65)    100%);
+
+  /* FVUI-style blur */
+  --blur:       blur(20px);
+  --blur-heavy: blur(28px);
+  --blur-soft:  blur(10px);
+
+  /* Borders */
+  --border-glass:  1px solid rgba(var(--color3), 0.18);
+
+  /* Radii */
+  --radius:     16px;
+  --radius-sm:  10px;
+  --radius-pill:999px;
+}
+
+/* ── FVUI loading animations (from preload.css) ──────────────── */
+@keyframes fvui-loading-bg {
+  0%   { box-shadow: 0 0 100px 30px inset rgb(var(--color3)); }
+  50%  { box-shadow: 0 0 100px 50px inset rgb(var(--color3)); filter: blur(100px); }
+  70%  { box-shadow: 0 0 30px  50px inset rgb(var(--color3)); }
+  100% { box-shadow: none; }
+}
+@keyframes fvui-loading-effects {
+  0%   { filter: blur(4px);  transform: scale(1);    }
+  50%  { filter: blur(25px); transform: scale(1.02); }
+  100% { filter: blur(0);    transform: scale(1);    }
+}
+@keyframes fvui-unblur-title {
+  0%   { filter: blur(12px); text-shadow: 0 0 500px rgb(var(--color3)); }
+  50%  { filter: blur(0);    text-shadow: 0 0 10px currentcolor, 0 0 20px currentcolor; }
+  100% { filter: blur(0);    text-shadow: 0 0 10px currentcolor, 0 0 20px currentcolor; }
+}
+@keyframes fvui-fade-out {
+  0%   { opacity: 1; pointer-events: all; }
+  75%  { opacity: 1; }
+  100% { opacity: 0; pointer-events: none; display: none; }
+}
+@keyframes fvui-appear {
+  from { opacity: 0; transform: translateY(10px); filter: blur(4px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0);   }
+}
+@keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── FVUI loading overlay ────────────────────────────────────── */
+#fvui-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color02);
+  pointer-events: none;
+  animation: fvui-fade-out 3s ease-in-out forwards;
+}
+#fvui-loader::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  animation: fvui-loading-bg 3s alternate ease-in-out;
+}
+#fvui-loader-title {
+  font-family: 'Anurati', var(--font);
+  font-size: clamp(48px, 10vw, 140px);
+  color: rgb(var(--color3));
+  text-shadow: 0 0 10px currentcolor, 0 0 20px currentcolor;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  animation: fvui-unblur-title 2.5s forwards;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ── Reset & Base ────────────────────────────────────────────── */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--font);
+  cursor: var(--cursor);
+}
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--color02);       /* solid — no wallpaper */
+  color: var(--text01);
+  overflow-x: hidden;
+  line-height: 1.6;
+  font-weight: 300;
+  animation: fvui-loading-effects 3s ease-in-out;
+}
+
+/* Soft ambient glow instead of a bg image */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 55% at 15%  10%, rgba(var(--color3), 0.055) 0%, transparent 60%),
+    radial-gradient(ellipse 65% 50% at 85%  90%, rgba(var(--color4), 0.055) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────── */
+::-webkit-scrollbar         { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb   { background: var(--gradient); border-radius: var(--radius-pill); }
+::-webkit-scrollbar-track   { background: transparent; }
+
+/* ── Typography helpers ──────────────────────────────────────── */
+p, span, label, button, input, textarea, div,
+h1, h2, h3, h4, h5, h6 {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+/* ── Container ───────────────────────────────────────────────── */
+.container, .episode-container { overflow: visible; }
+.container { max-width: 100%; margin: auto; padding: 24px; position: relative; z-index: 1; }
+
+/* ── Bottom text ─────────────────────────────────────────────── */
+.bottom-text {
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text02);
+  opacity: 0.8;
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+header { text-align: center; margin-bottom: 32px; position: relative; z-index: 1; }
+header h1 {
+  font-family: var(--font);
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 18px rgba(var(--color3), 0.55));
+  letter-spacing: 0.04em;
+}
+header img { vertical-align: middle; }
+
+.site-title           { cursor: var(--cursor); text-align: center; }
+.site-title-icon-link { display: inline; text-decoration: none; }
+.site-title-icon      { width: 60px; height: 60px; vertical-align: bottom; }
+
+/* ── Search ──────────────────────────────────────────────────── */
+.search-box { display: flex; justify-content: center; margin-top: 15px; }
+.search-box input {
+  background: var(--opacity01b);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  color: var(--text01);
+  border: var(--border-glass);
+  padding: 11px 22px;
+  border-radius: var(--radius-pill);
+  width: 80%;
+  max-width: 520px;
+  font-size: 0.95rem;
+  font-family: var(--font);
+  font-weight: 300;
+  outline: none;
+  cursor: text;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.search-box input::placeholder { color: var(--text02); }
+.search-box input:focus {
+  border-color: rgba(var(--color3), 0.6);
+  box-shadow: var(--glow03-soft);
+}
+
+/* ── Hero ────────────────────────────────────────────────────── */
+#hero {
+  display: flex; flex-direction: column; align-items: center;
+  margin-bottom: 40px; width: 100%; position: relative; z-index: 1;
+}
+
+/* ── Newest Added ────────────────────────────────────────────── */
+.newest-added {
+  margin-bottom: 32px; width: 100%; max-width: 680px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.newest-added-title {
+  font-family: var(--font);
+  font-size: 0.7rem; font-weight: 600;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  background: var(--gradient);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 14px;
+}
+.newest-added-grid {
+  display: flex; flex-wrap: nowrap; justify-content: center;
+  gap: 10px; width: 100%;
+}
+.newest-added-item {
+  flex: 0 0 100px; position: relative;
+  border-radius: var(--radius-sm); overflow: hidden;
+  cursor: var(--cursor); aspect-ratio: 2/3; max-height: 150px;
+  border: var(--border-glass);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+}
+.newest-added-item:hover {
+  transform: translateY(-5px);
+  border-color: rgba(var(--color3), 0.65);
+  box-shadow: var(--glow03-soft), 0 8px 28px rgba(0,0,0,0.55);
+}
+.newest-added-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s; }
+.newest-added-item:hover img { transform: scale(1.06); }
+.newest-added-item span {
+  font-family: var(--font);
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 14px 6px 7px;
+  background: linear-gradient(to top, rgba(var(--color2), 0.97) 0%, transparent 100%);
+  color: var(--text01);
+  font-size: 0.67rem; font-weight: 400; line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ── Categories ──────────────────────────────────────────────── */
+.categories-section {
+  margin-bottom: 44px; display: flex; flex-direction: column;
+  align-items: center; align-self: stretch; width: 100%;
+}
+.categories-title {
+  font-family: var(--font);
+  font-size: 0.7rem; font-weight: 600;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  background: var(--gradient);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 26px;
+}
+.category-cards {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: 20px; align-self: stretch; width: 100%;
+}
+.movie-item-banner.category-card {
+  flex: 1 1 280px; max-width: 360px;
+  position: relative; border-radius: var(--radius); overflow: hidden;
+  cursor: var(--cursor);
+  border: 2px solid rgba(var(--color3), 0.35);
+  background: var(--opacity01a);
+  backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+  box-shadow: var(--glow03-soft), 0 8px 32px rgba(0,0,0,0.5);
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+}
+.movie-item-banner.category-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(var(--color3), 0.8);
+  box-shadow: var(--glow03), 0 14px 42px rgba(0,0,0,0.65);
+}
+.movie-item-banner.category-card img {
+  width: 100%; height: 200px; object-fit: cover; display: block; transition: transform 0.35s;
+}
+.movie-item-banner.category-card:hover img { transform: scale(1.04); }
+.movie-item-banner.category-card .category-card-link { display: block; }
+.movie-item-banner.category-card .category-card-link:focus { outline: none; }
+
+.movie-item-banner.category-card[data-category="movies"] .category-card-link--full {
+  position: absolute; inset: 0; z-index: 1;
+}
+.movie-item-banner.category-card[data-category="movies"] .category-card-link--full .category-card-label,
+.movie-item-banner .category-card-label,
+.movie-item-banner p {
+  position: absolute; bottom: 0; left: 0; width: 100%;
+  margin: 0; padding: 24px 18px; box-sizing: border-box;
+  background: linear-gradient(to top,
+    rgba(var(--color2), 0.97) 0%,
+    rgba(var(--color2), 0.55) 55%,
+    transparent 100%);
+  color: var(--text01);
+  font-family: var(--font); font-size: 1rem; font-weight: 500; text-align: left;
+}
+
+/* ── Movie List ──────────────────────────────────────────────── */
+.movie-list-wrapper {
+  overflow-x: auto; overflow-y: hidden;
+  padding: 10px 0; margin-bottom: 10px;
+  scroll-behavior: smooth; scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch; position: relative; z-index: 2;
+}
+.movie-list-wrapper::-webkit-scrollbar        { height: 5px; }
+.movie-list-wrapper::-webkit-scrollbar-thumb  { background: var(--gradient); border-radius: var(--radius-pill); }
+.movie-list-wrapper::-webkit-scrollbar-track  { background: transparent; }
+
+.movie-list { display: flex; flex-direction: row; flex-wrap: nowrap; gap: 12px; padding: 5px 10px; }
+
+.movie-item {
+  flex: 0 0 auto; width: 130px; height: 190px;
+  background: var(--opacity01b);
+  backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+  border-radius: var(--radius-sm); border: var(--border-glass);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+  overflow: hidden; cursor: var(--cursor); position: relative;
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+  scroll-snap-align: start;
+}
+.movie-item:hover {
+  transform: translateY(-4px) scale(1.04);
+  border-color: rgba(var(--color3), 0.6);
+  box-shadow: var(--glow03-soft), 0 10px 28px rgba(0,0,0,0.55);
+}
+.movie-item img {
+  width: 100%; height: 100%; object-fit: cover;
+  border-radius: var(--radius-sm); transition: transform 0.3s, opacity 0.3s;
+}
+.movie-item:hover img { transform: scale(1.06); }
+.movie-item p {
+  position: absolute; bottom: 0; width: 100%;
+  background: var(--opacity02);
+  backdrop-filter: var(--blur-soft); -webkit-backdrop-filter: var(--blur-soft);
+  font-family: var(--font); font-size: 0.76rem; font-weight: 400;
+  color: var(--text01); text-align: center;
+  padding: 7px 5px; border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+/* ── Seasons Dropdown ────────────────────────────────────────── */
+.seasons-dropdown {
+  display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden;
+  white-space: nowrap; padding: 10px 14px;
+  background: var(--opacity01a);
+  backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+  border-radius: var(--radius-sm);
+  border: 2px solid rgba(var(--color3), 0.35);
+  box-shadow: var(--glow03-soft), 0 4px 20px rgba(0,0,0,0.4);
+  max-width: 100%; scrollbar-width: thin;
+}
+.seasons-dropdown button {
+  flex: 0 0 auto; padding: 7px 16px;
+  border: var(--border-glass); border-radius: var(--radius-pill);
+  background: var(--opacity01c);
+  color: var(--text01); font-family: var(--font); font-size: 0.82rem; font-weight: 300;
+  cursor: var(--cursor); transition: all 0.25s;
+}
+.seasons-dropdown button.active {
+  background: var(--gradient-soft);
+  border-color: rgba(var(--color3), 0.6);
+  color: #fff; box-shadow: var(--glow03-soft);
+}
+.seasons-dropdown button:hover {
+  background: var(--opacity01b);
+  border-color: rgba(var(--color3), 0.45); color: #fff;
+}
+
+/* ── Episode Container ───────────────────────────────────────── */
+.episode-container {
+  display: flex; gap: 10px; margin-top: 45px;
+  align-items: stretch; max-height: 600px;
+  position: relative; z-index: 1;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+.sidebar {
+  flex: 0 0 250px; overflow-y: auto;
+  background: var(--opacity01a);
+  backdrop-filter: var(--blur-heavy); -webkit-backdrop-filter: var(--blur-heavy);
+  padding: 12px; border-radius: var(--radius);
+  border: 2px solid rgba(var(--color3), 0.35);
+  box-shadow: var(--glow03-soft), 0 8px 32px rgba(0,0,0,0.5);
+  max-height: 600px;
+}
+.episode {
+  padding: 10px 13px; border-radius: var(--radius-sm);
+  border: 1px solid transparent; margin-bottom: 6px;
+  background: var(--opacity01c);
+  cursor: var(--cursor); font-family: var(--font);
+  font-size: 0.82rem; font-weight: 300; color: var(--text01);
+  transition: all 0.22s;
+}
+.episode:hover {
+  background: var(--opacity01b);
+  border-color: rgba(var(--color3), 0.35);
+  transform: translateX(4px); box-shadow: var(--glow03-soft);
+}
+.episode.active {
+  background: var(--gradient-soft);
+  border-color: rgba(var(--color3), 0.6);
+  color: #fff; box-shadow: var(--glow03-soft);
+}
+
+/* ── Player ──────────────────────────────────────────────────── */
+.player {
+  flex: 1; background: var(--opacity02);
+  backdrop-filter: var(--blur-heavy); -webkit-backdrop-filter: var(--blur-heavy);
+  border-radius: var(--radius);
+  border: 2px solid rgba(var(--color3), 0.35);
+  padding: 16px; position: relative;
+  display: flex; flex-direction: column; align-items: center;
+  box-shadow: var(--glow03-soft), 0 8px 32px rgba(0,0,0,0.55);
+  z-index: 1; max-height: 600px;
+}
+
+/* ── Video Frame ─────────────────────────────────────────────── */
+iframe#videoPlayer {
+  width: 100%; height: 65vh; max-height: 600px;
+  border: var(--border-glass); border-radius: var(--radius-sm);
+  background-color: #000; transition: opacity 0.3s;
+  box-shadow: 0 0 60px 10px rgba(var(--color3), 0.07), 0 4px 28px rgba(0,0,0,0.7);
+}
+
+/* ── Spinner — dual-color ring from FVUI glow palette ────────── */
+.spinner {
+  position: absolute; top: 40%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 54px; height: 54px;
+  border: 3px solid rgba(var(--color4), 0.2);
+  border-top-color:   rgb(var(--color3));
+  border-right-color: rgb(var(--color4));
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  display: none; z-index: 10;
+  box-shadow: var(--glow03-soft);
+}
+
+/* ── Controls ────────────────────────────────────────────────── */
+.controls {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  justify-content: center; margin-top: 16px; z-index: 1;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.button {
+  padding: 9px 22px; border-radius: var(--radius-pill);
+  background: var(--opacity01b);
+  backdrop-filter: var(--blur-soft); -webkit-backdrop-filter: var(--blur-soft);
+  color: var(--text01); font-family: var(--font);
+  font-size: 0.88rem; font-weight: 400;
+  text-decoration: none; border: var(--border-glass);
+  transition: all 0.25s; cursor: var(--cursor);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+.button:hover {
+  background: var(--gradient-soft);
+  border-color: rgba(var(--color3), 0.6);
+  color: #fff; transform: translateY(-2px); box-shadow: var(--glow03);
+}
+.button.dubbed-toggle.active {
+  background: var(--gradient-soft);
+  border-color: rgba(var(--color3), 0.7);
+  color: #fff; font-weight: 500; box-shadow: var(--glow03);
+}
+
+/* ── Download Container ──────────────────────────────────────── */
+#downloadContainer {
+  display: flex; justify-content: center; gap: 10px;
+  flex-wrap: wrap; margin-top: 14px; width: 100%;
+}
+
+/* ── Changelog ───────────────────────────────────────────────── */
+.changelog-container {
+  background: var(--opacity01a);
+  backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+  border: 2px solid rgba(var(--color3), 0.35);
+  border-radius: var(--radius); padding: 18px;
+  max-height: 260px; overflow-y: auto;
+  width: 100%; margin-top: 40px;
+  box-shadow: var(--glow03-soft), 0 8px 32px rgba(0,0,0,0.5);
+  position: relative; z-index: 1;
+}
+.changelog-box {
+  background: var(--opacity01c);
+  border: 1px solid rgba(var(--color3), 0.15);
+  padding: 12px; border-radius: var(--radius-sm); margin-bottom: 8px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.changelog-box:hover {
+  border-color: rgba(var(--color3), 0.5); box-shadow: var(--glow03-soft);
+}
+.changelog-box h3 {
+  background: var(--gradient);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-family: var(--font); font-weight: 600; font-size: 0.88rem; margin-bottom: 5px;
+}
+.changelog-box p { color: var(--text02); font-family: var(--font); font-size: 0.82rem; font-weight: 300; }
+
+/* ── Season Selector ─────────────────────────────────────────── */
+#seasonSelector {
+  background: var(--opacity01b);
+  backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+  color: var(--text01); font-family: var(--font); font-weight: 300; font-size: 0.9rem;
+  border: var(--border-glass); border-radius: var(--radius-sm);
+  padding: 10px 16px; margin-bottom: 10px; width: 100%;
+  box-sizing: border-box; cursor: var(--cursor); outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%232378c8'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+}
+#seasonSelector:hover, #seasonSelector:focus {
+  border-color: rgba(var(--color3), 0.6); box-shadow: var(--glow03-soft);
+}
+
+/* ── Fade ────────────────────────────────────────────────────── */
+.fade-out              { opacity: 0; transition: opacity 0.3s; }
+.fade-transition       { opacity: 0; transition: opacity 0.3s; }
+.fade-transition.show  { opacity: 1; }
+
+/* ── Appear animations ───────────────────────────────────────── */
+.section-animate { animation: fadeInUp 0.5s ease forwards; }
+.player, .sidebar, .movie-item, .movie-item-banner,
+.button, .episode, #seasonSelector {
+  opacity: 0;
+  animation: fvui-appear 0.65s ease-out forwards;
+  transition: all 0.22s;
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .episode-container { flex-direction: column; max-height: none; }
+  .sidebar            { width: 100%; flex: unset; max-height: none; }
+  .player             { padding: 12px; max-height: none; }
+  iframe#videoPlayer  { height: 50vh; }
+  .controls           { flex-direction: column; gap: 8px; }
+  .button             { width: 100%; text-align: center; }
+}
+
+/* ── FVUI variable reference (same pattern as source) ───────────
+   Edit in :root to retheme:
+
+   --color1: 30, 40, 50;      panel tint
+   --color2: 9, 18, 24;       deep background
+   --color3: 35, 120, 200;    blue accent / glow
+   --color4: 63, 43, 150;     purple gradient end
+   --ColorOpacity: 1;          global opacity multiplier
+   --DisableOpacity: 0;        set 1 = force all panels solid
+   ──────────────────────────────────────────────────────────── */
