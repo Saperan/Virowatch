@@ -1,6 +1,42 @@
 // anime.js (Non-module)
 window.anime = {
 
+    ARBO: {
+        title: 'Akashic Records of Bastard Magic Instructor',
+        image: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/51/Roku_de_Nashi_Majutsu_K%C5%8Dshi_to_Akashic_Records_light_novel_volume_1_cover.jpg/250px-Roku_de_Nashi_Majutsu_K%C5%8Dshi_to_Akashic_Records_light_novel_volume_1_cover.jpg',
+        ARS1: {
+            chapter: 'Season 1',
+            video: [
+  'https://rumble.com/embed/v771b8a/?pub=4pbwfc',
+  'https://rumble.com/embed/v771bc2/?pub=4pbwfc',
+  'https://rumble.com/embed/v771bh0/?pub=4pbwfc',
+  'https://rumble.com/embed/v771bmg/?pub=4pbwfc',
+  'https://rumble.com/embed/v771br4/?pub=4pbwfc',
+  'https://rumble.com/embed/v771bx4/?pub=4pbwfc',
+  'https://rumble.com/embed/v771c2u/?pub=4pbwfc',
+  'https://rumble.com/embed/v771c6i/?pub=4pbwfc',
+  'https://rumble.com/embed/v771cao/?pub=4pbwfc',
+  'https://rumble.com/embed/v771cdk/?pub=4pbwfc',
+  'https://rumble.com/embed/v771chg/?pub=4pbwfc',
+  'https://rumble.com/embed/v771clk/?pub=4pbwfc'
+            ],
+            dubbed: [
+  'https://rumble.com/embed/v7717ti/?pub=4pbwfc',
+  'https://rumble.com/embed/v77181g/?pub=4pbwfc',
+  'https://rumble.com/embed/v77186m/?pub=4pbwfc',
+  'https://rumble.com/embed/v7718bc/?pub=4pbwfc',
+  'https://rumble.com/embed/v7718fw/?pub=4pbwfc',
+  'https://rumble.com/embed/v7718k8/?pub=4pbwfc',
+  'https://rumble.com/embed/v7718oe/?pub=4pbwfc',
+  'https://rumble.com/embed/v7718t8/?pub=4pbwfc',
+  'https://rumble.com/embed/v7718xk/?pub=4pbwfc',
+  'https://rumble.com/embed/v77191s/?pub=4pbwfc',
+  'https://rumble.com/embed/v77195s/?pub=4pbwfc',
+  'https://rumble.com/embed/v77199k/?pub=4pbwfc',
+            ],
+        },
+    },
+
     PKAGUYA: {
         title: 'Cosmic Princess Kaguya!',
         image: 'https://upload.wikimedia.org/wikipedia/en/thumb/1/1c/Cosmic_Princess_Kaguya%21_poster.jpg/250px-Cosmic_Princess_Kaguya%21_poster.jpg',
