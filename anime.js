@@ -1,6 +1,20 @@
 // anime.js (Non-module)
 window.anime = {
 
+    PKAGUYA: {
+        title: 'Cosmic Princess Kaguya!',
+        image: 'https://upload.wikimedia.org/wikipedia/en/thumb/1/1c/Cosmic_Princess_Kaguya%21_poster.jpg/250px-Cosmic_Princess_Kaguya%21_poster.jpg',
+        PKM: {
+            chapter: 'Movie',
+            video: [
+                'https://rumble.com/embed/v770lxk/?pub=4pbwfc'
+            ],
+            dubbed: [
+                'https://rumble.com/embed/v770llc/?pub=4pbwfc'
+            ],
+        },
+    },
+
     EVANGELION: {
         title: 'Evangelion',
         image: 'https://upload.wikimedia.org/wikipedia/en/thumb/7/72/Evangelion_retouched.png/250px-Evangelion_retouched.png',
@@ -3034,7 +3048,8 @@ video: [
             chapter: 'Season 2',
             video: [
                   'https://rumble.com/embed/v76q32g/?pub=4p3ufg',
-                  'https://rumble.com/embed/v76q1rq/?pub=4p3ufg'
+                  'https://rumble.com/embed/v76q1rq/?pub=4p3ufg',
+                  'https://rumble.com/embed/v770kdo/?pub=4pbwfc'
             ],
             episodeTitles: [
                 'JP 1. Ai Comes to the Yozakura Family / Mini Kyoichiro',
@@ -6170,13 +6185,15 @@ video: [
         video: [
             'https://rumble.com/embed/v761vas/?pub=4p3ufg',
             'https://rumble.com/embed/v76d12w/?pub=4p3ufg',
-            'https://rumble.com/embed/v76pera/?pub=4p3ufg'
+            'https://rumble.com/embed/v76pera/?pub=4p3ufg',
+            'https://rumble.com/embed/v770kga/?pub=4pbwfc'
         ],
         episodeTitles: [],
         dubbed: [
             'https://rumble.com/embed/v761vgo/?pub=4p3ufg',
             'https://rumble.com/embed/v76d13c/?pub=4p3ufg',
-            'https://rumble.com/embed/v76perk/?pub=4p3ufg'
+            'https://rumble.com/embed/v76perk/?pub=4p3ufg',
+            'https://rumble.com/embed/v770kla/?pub=4pbwfc'
         ],
         dubbedepisodetitle: [],
     },
