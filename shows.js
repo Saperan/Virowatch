@@ -1976,6 +1976,20 @@ window.shows = {
                 '8. Guardians of Godolkin'
             ],
         },
+        genvs2: {
+            chapter: 'Season 2',
+video: [
+  'https://rumble.com/embed/v7723hc/?pub=4pd30m',
+  'https://rumble.com/embed/v7723js/?pub=4pd30m',
+  'https://rumble.com/embed/v7723oi/?pub=4pd30m',
+  'https://rumble.com/embed/v7723r4/?pub=4pd30m',
+  'https://rumble.com/embed/v7723uc/?pub=4pd30m',
+  'https://rumble.com/embed/v7723w8/?pub=4pd30m',
+  'https://rumble.com/embed/v7723y8/?pub=4pd30m',
+  'https://rumble.com/embed/v77240u/?pub=4pd30m'
+],
+            episodeTitles: [],
+        },
     },
 
         theboys: {
