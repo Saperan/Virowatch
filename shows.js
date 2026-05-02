@@ -1,5 +1,13 @@
 // shows.js (Non-module)
+
 window.shows = {
+
+    PITSORT: {
+    title: '[BETA] PitSport Live',
+    image: 'https://styles.redditmedia.com/t5_gimzou/styles/profileIcon_xcbdmlpt1vgg1.png?frame=1&auto=webp&crop=256%3A256%2Csmart&s=a81a6627212a1de0d75a0e4381aa963812a1da5c',
+    // video/episodeTitles are populated dynamically by pitsport-live.js
+    // Sub-chapters (PSLiveNow, PSUpcoming) will be injected at runtime
+},
 
     TED: {
         title: 'Ted',
