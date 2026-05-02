@@ -1,6 +1,145 @@
 // anime.js (Non-module)
 window.anime = {
 
+    COTE: {
+        title: 'Classroom of the Elite',
+        image: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/52/Y%C5%8Dkoso_Jitsuryoku_Shij%C5%8D_Shugi_no_Ky%C5%8Dshitsu_e%2C_Volume_1.jpg/250px-Y%C5%8Dkoso_Jitsuryoku_Shij%C5%8D_Shugi_no_Ky%C5%8Dshitsu_e%2C_Volume_1.jpg',
+        COTES1: {
+            chapter: 'Season 1',
+            video: [
+                  'https://rumble.com/embed/v773u42/?pub=4pd30m',
+  'https://rumble.com/embed/v773uf6/?pub=4pd30m',
+  'https://rumble.com/embed/v773uja/?pub=4pd30m',
+  'https://rumble.com/embed/v773uq8/?pub=4pd30m',
+  'https://rumble.com/embed/v773uts/?pub=4pd30m',
+  'https://rumble.com/embed/v773uy2/?pub=4pd30m',
+  'https://rumble.com/embed/v773v1i/?pub=4pd30m',
+  'https://rumble.com/embed/v773v4k/?pub=4pd30m',
+  'https://rumble.com/embed/v773v7y/?pub=4pd30m',
+  'https://rumble.com/embed/v773vb8/?pub=4pd30m',
+  'https://rumble.com/embed/v773vf6/?pub=4pd30m',
+  'https://rumble.com/embed/v773vhi/?pub=4pd30m'
+            ],
+            dubbed: [
+                  'https://rumble.com/embed/v773t7g/?pub=4pd30m',
+  'https://rumble.com/embed/v773ta2/?pub=4pd30m',
+  'https://rumble.com/embed/v773tcm/?pub=4pd30m',
+  'https://rumble.com/embed/v773tfc/?pub=4pd30m',
+  'https://rumble.com/embed/v773ti2/?pub=4pd30m',
+  'https://rumble.com/embed/v773tle/?pub=4pd30m',
+  'https://rumble.com/embed/v773tog/?pub=4pd30m',
+  'https://rumble.com/embed/v773trm/?pub=4pd30m',
+  'https://rumble.com/embed/v773tty/?pub=4pd30m',
+  'https://rumble.com/embed/v773twa/?pub=4pd30m',
+  'https://rumble.com/embed/v773u0u/?pub=4pd30m',
+  'https://rumble.com/embed/v773u42/?pub=4pd30m'
+            ],
+        },
+        COTES2: {
+            chapter: 'Season 2',
+            video: [
+                  'https://rumble.com/embed/v773wti/?pub=4pd30m',
+  'https://rumble.com/embed/v773wxm/?pub=4pd30m',
+  'https://rumble.com/embed/v773x12/?pub=4pd30m',
+  'https://rumble.com/embed/v773x3k/?pub=4pd30m',
+  'https://rumble.com/embed/v773x6a/?pub=4pd30m',
+  'https://rumble.com/embed/v773x8u/?pub=4pd30m',
+  'https://rumble.com/embed/v773xec/?pub=4pd30m',
+  'https://rumble.com/embed/v773xh2/?pub=4pd30m',
+  'https://rumble.com/embed/v773xjg/?pub=4pd30m',
+  'https://rumble.com/embed/v773xmm/?pub=4pd30m',
+  'https://rumble.com/embed/v773xok/?pub=4pd30m',
+  'https://rumble.com/embed/v773xqw/?pub=4pd30m',
+  'https://rumble.com/embed/v773xtm/?pub=4pd30m'
+            ],
+            dubbed: [
+                  'https://rumble.com/embed/v773vhi/?pub=4pd30m',
+  'https://rumble.com/embed/v773voq/?pub=4pd30m',
+  'https://rumble.com/embed/v773vqw/?pub=4pd30m',
+  'https://rumble.com/embed/v773vtq/?pub=4pd30m',
+  'https://rumble.com/embed/v773vwc/?pub=4pd30m',
+  'https://rumble.com/embed/v773vyk/?pub=4pd30m',
+  'https://rumble.com/embed/v773w0w/?pub=4pd30m',
+  'https://rumble.com/embed/v773w6w/?pub=4pd30m',
+  'https://rumble.com/embed/v773w8w/?pub=4pd30m',
+  'https://rumble.com/embed/v773wbg/?pub=4pd30m',
+  'https://rumble.com/embed/v773we4/?pub=4pd30m',
+  'https://rumble.com/embed/v773wg6/?pub=4pd30m',
+  'https://rumble.com/embed/v773wiq/?pub=4pd30m'
+            ],
+        },
+                COTES3: {
+            chapter: 'Season 3',
+            video: [
+                  'https://rumble.com/embed/v7742e2/?pub=4pd30m',
+  'https://rumble.com/embed/v7742gm/?pub=4pd30m',
+  'https://rumble.com/embed/v7742j6/?pub=4pd30m',
+  'https://rumble.com/embed/v7742lo/?pub=4pd30m',
+  'https://rumble.com/embed/v7742oa/?pub=4pd30m',
+  'https://rumble.com/embed/v7742qk/?pub=4pd30m',
+  'https://rumble.com/embed/v7742tu/?pub=4pd30m',
+  'https://rumble.com/embed/v7742wo/?pub=4pd30m',
+  'https://rumble.com/embed/v7742yo/?pub=4pd30m',
+  'https://rumble.com/embed/v774316/?pub=4pd30m',
+  'https://rumble.com/embed/v77433c/?pub=4pd30m',
+  'https://rumble.com/embed/v774378/?pub=4pd30m',
+  'https://rumble.com/embed/v77439k/?pub=4pd30m'
+            ],
+            dubbed: [
+                  'https://rumble.com/embed/v774132/?pub=4pd30m',
+  'https://rumble.com/embed/v77415g/?pub=4pd30m',
+  'https://rumble.com/embed/v77417w/?pub=4pd30m',
+  'https://rumble.com/embed/v7741as/?pub=4pd30m',
+  'https://rumble.com/embed/v7741dk/?pub=4pd30m',
+  'https://rumble.com/embed/v7741gq/?pub=4pd30m',
+  'https://rumble.com/embed/v7741jg/?pub=4pd30m',
+  'https://rumble.com/embed/v7741mo/?pub=4pd30m',
+  'https://rumble.com/embed/v7741pk/?pub=4pd30m',
+  'https://rumble.com/embed/v7741sm/?pub=4pd30m',
+  'https://rumble.com/embed/v7741vs/?pub=4pd30m',
+  'https://rumble.com/embed/v7741yw/?pub=4pd30m',
+  'https://rumble.com/embed/v77421o/?pub=4pd30m'
+            ],
+        },
+                        COTES4: {
+            chapter: 'Season 4',
+video: [
+  'https://rumble.com/embed/v77443i/?pub=4pd30m',
+  'https://rumble.com/embed/v77447k/?pub=4pd30m',
+  'https://rumble.com/embed/v7744c6/?pub=4pd30m',
+  'https://rumble.com/embed/v7744gk/?pub=4pd30m',
+  'https://rumble.com/embed/v7744jc/?pub=4pd30m',
+  'https://rumble.com/embed/v7744oa/?pub=4pd30m',
+  'https://rumble.com/embed/v7744ta/?pub=4pd30m',
+  'https://rumble.com/embed/v7744ve/?pub=4pd30m'
+],
+            dubbed: [
+            ],
+        },
+    },
+
+    WHA: {
+        title: 'Witch Hat Atelier',
+        image: 'https://imgs.search.brave.com/bQMi5i10XEIW0gu-A_fYXCU_R0zfS_d5TLKUGbFCFKo/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9wcmV2/aWV3LnJlZGQuaXQv/d2l0Y2gtaGF0LWF0/ZWxpZXItYW5pbWUt/d2VsY29tZS12aXN1/YWwtdjAtbDhlams0/Mm8wNHVmMS5wbmc_/YXV0bz13ZWJwJnM9/YTFlNDRkMDM4ZWVk/ZDllYTAwZDM1ZGM1/MWUzOTI5NDMwOWJm/YWIxNQ',
+        WHAS1: {
+            chapter: 'Season 1',
+            video: [
+                  'https://rumble.com/embed/v773s6u/?pub=4pd30m',
+  'https://rumble.com/embed/v773s8k/?pub=4pd30m',
+  'https://rumble.com/embed/v773sae/?pub=4pd30m',
+  'https://rumble.com/embed/v773sci/?pub=4pd30m',
+  'https://rumble.com/embed/v773se6/?pub=4pd30m',
+            ],
+            dubbed: [
+                  'https://rumble.com/embed/v773sl2/?pub=4pd30m',
+  'https://rumble.com/embed/v773snw/?pub=4pd30m',
+  'https://rumble.com/embed/v773spi/?pub=4pd30m',
+  'https://rumble.com/embed/v773sr8/?pub=4pd30m',
+  'https://rumble.com/embed/v773sty/?pub=4pd30m'
+            ],
+        },
+    },
+
     ARBO: {
         title: 'Akashic Records of Bastard Magic Instructor',
         image: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/51/Roku_de_Nashi_Majutsu_K%C5%8Dshi_to_Akashic_Records_light_novel_volume_1_cover.jpg/250px-Roku_de_Nashi_Majutsu_K%C5%8Dshi_to_Akashic_Records_light_novel_volume_1_cover.jpg',
