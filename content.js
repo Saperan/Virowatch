@@ -203,9 +203,49 @@ function applyTheme(key) {
     mov = key; ep = 0; season = null; dubbed = false;
     saveState();
     document.querySelector('.dubbed-toggle')?.classList.remove('active');
+
+    // ── PitSport: data arrives async, handle loading state ───────
+    if (key === 'PITSORT' && cat === 'shows') {
+      const pitData = window.mediaData?.shows?.PITSORT;
+      const hasVideos = pitData && Object.keys(pitData).some(k =>
+        !RESERVED_KEYS.includes(k) &&
+        typeof pitData[k] === 'object' &&
+        pitData[k].video?.length
+      );
+
+      if (!hasVideos) {
+        // Show the player area immediately with a loading indicator
+        if (episodeContainer) episodeContainer.style.display = 'flex';
+        const listEl = document.getElementById('episodeListContainer');
+        if (listEl) listEl.innerHTML =
+          '<div class="episode" style="opacity:0.6;cursor:default;">⏳ Loading live events…</div>';
+        seasonSelectorContainer.innerHTML = '';
+
+        if (!window._pitsportLoaded) {
+          // Kick off the fetch if it hasn't started yet
+          if (!window._pitsportLoading && typeof window.reloadPitSport === 'function') {
+            window.reloadPitSport();
+          }
+        }
+        // The pitsportReady listener below will finish rendering once data arrives
+        return;
+      }
+    }
+    // ── Normal path ───────────────────────────────────────────────
     updateSeasonSelector(); updateEpisodeList(); updateVideo(0); updateDownloads();
     if(episodeContainer) episodeContainer.style.display = 'flex';
   }
+
+  // When PitSport finishes loading, refresh the player if it's currently open
+  window.addEventListener('pitsportReady', () => {
+    if (cat === 'shows' && mov === 'PITSORT') {
+      ep = 0; season = null;
+      updateSeasonSelector();
+      updateEpisodeList();
+      updateVideo(0);
+      updateDownloads();
+    }
+  });
 
   // Update season dropdown
   function updateSeasonSelector(){
@@ -248,6 +288,17 @@ function applyTheme(key) {
     if (!vids[index]) return;
     if(spinner) spinner.style.display = 'block';
     const iframe = document.getElementById('videoPlayer');
+    
+    // --- NEW ANTI-POPUP LOGIC ---
+    // If watching PitSport, strictly sandbox the iframe to block new tabs and redirects.
+    if (mov === 'PITSORT') {
+      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-forms');
+    } else {
+      // Remove sandbox for normal content (Rumble) so it behaves natively.
+      iframe.removeAttribute('sandbox');
+    }
+    // ----------------------------
+
     iframe.classList.add('fade-out');
     iframe.onload = () => setTimeout(() => { if(spinner) spinner.style.display = 'none'; iframe.classList.remove('fade-out'); }, 200);
     iframe.src = vids[index];
