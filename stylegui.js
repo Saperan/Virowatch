@@ -16,6 +16,8 @@
     { name: 'Lunora', description: 'Based off the Lunora website', file: 'extra_css/lunorastyle.css' },
     { name: 'System24', description: 'Based off the System24 Discord theme https://github.com/refact0r/system24/blob/main/theme/system24.theme.css "This is what Virowatch should look like." -Saperan', file: 'extra_css/system24.css' },
     { name: 'Frutiger Aero', description: 'Based off Frutiger Aero Images (one of the first custom CSS created for Virowatch in an idea to add customizability)', file: 'extra_css/virostyle-frutiger-aero.css' },
+    { name: 'Amoled PC', description: 'Extra dark version (theoretically should turn off your amoled screen pixels)', file: 'extra_css/virostyle-amoled.css' },
+    { name: 'Amoled Mobile', description: 'Extra dark version (theoretically should turn off your amoled screen pixels)', file: 'extra_css/virostyle-mobile-amoled.css' },
     /* ADD EXTRA CSS FILES HERE */
   ];
 
