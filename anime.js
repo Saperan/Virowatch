@@ -282,13 +282,15 @@ video: [
   'https://rumble.com/embed/v773sae/?pub=4pd30m',
   'https://rumble.com/embed/v773sci/?pub=4pd30m',
   'https://rumble.com/embed/v773se6/?pub=4pd30m',
+  'https://rumble.com/embed/v778xy6/?pub=4pbwfc'
             ],
             dubbed: [
                   'https://rumble.com/embed/v773sl2/?pub=4pd30m',
   'https://rumble.com/embed/v773snw/?pub=4pd30m',
   'https://rumble.com/embed/v773spi/?pub=4pd30m',
   'https://rumble.com/embed/v773sr8/?pub=4pd30m',
-  'https://rumble.com/embed/v773sty/?pub=4pd30m'
+  'https://rumble.com/embed/v773sty/?pub=4pd30m',
+  'https://rumble.com/embed/v778xt6/?pub=4pbwfc'
             ],
         },
     },
@@ -3377,7 +3379,8 @@ video: [
             video: [
                   'https://rumble.com/embed/v76q32g/?pub=4p3ufg',
                   'https://rumble.com/embed/v76q1rq/?pub=4p3ufg',
-                  'https://rumble.com/embed/v770kdo/?pub=4pbwfc'
+                  'https://rumble.com/embed/v770kdo/?pub=4pbwfc',
+                  'https://rumble.com/embed/v778y1g/?pub=4pbwfc'
             ],
             episodeTitles: [
                 'JP 1. Ai Comes to the Yozakura Family / Mini Kyoichiro',
