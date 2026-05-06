@@ -4168,6 +4168,37 @@ video: [
                 '12. The Ones We Must Protect'
             ]
         },
+        SHS4: {
+            chapter: 'Season 4',
+            video: [
+                  'https://rumble.com/embed/v77aao8/?pub=4pbwfc',
+  'https://rumble.com/embed/v77aark/?pub=4pbwfc',
+  'https://rumble.com/embed/v77aauw/?pub=4pbwfc',
+  'https://rumble.com/embed/v77aaym/?pub=4pbwfc',
+  'https://rumble.com/embed/v77ab20/?pub=4pbwfc',
+  'https://rumble.com/embed/v77ab6c/?pub=4pbwfc',
+  'https://rumble.com/embed/v77ab9s/?pub=4pbwfc',
+  'https://rumble.com/embed/v77abd2/?pub=4pbwfc',
+  'https://rumble.com/embed/v77abgi/?pub=4pbwfc',
+  'https://rumble.com/embed/v77abjo/?pub=4pbwfc',
+  'https://rumble.com/embed/v77abn6/?pub=4pbwfc',
+  'https://rumble.com/embed/v77abqg/?pub=4pbwfc'
+            ],
+            dubbed: [
+                  'https://rumble.com/embed/v77ac1m/?pub=4pbwfc',
+  'https://rumble.com/embed/v77ac5g/?pub=4pbwfc',
+  'https://rumble.com/embed/v77ac9i/?pub=4pbwfc',
+  'https://rumble.com/embed/v77acd4/?pub=4pbwfc',
+  'https://rumble.com/embed/v77acgc/?pub=4pbwfc',
+  'https://rumble.com/embed/v77ack8/?pub=4pbwfc',
+  'https://rumble.com/embed/v77aco0/?pub=4pbwfc',
+  'https://rumble.com/embed/v77acrq/?pub=4pbwfc',
+  'https://rumble.com/embed/v77acuu/?pub=4pbwfc',
+  'https://rumble.com/embed/v77acxo/?pub=4pbwfc',
+  'https://rumble.com/embed/v77ad0o/?pub=4pbwfc',
+  'https://rumble.com/embed/v77ad3w/?pub=4pbwfc'
+            ],
+        },
     },
     MTRC: {
         title: 'My Teen Romantic Comedy',
