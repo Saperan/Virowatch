@@ -20,6 +20,36 @@ window.shows = {
   'https://rumble.com/embed/v77c2fo/?pub=4pbwfc'
             ],
         },
+                FROMS2: {
+            chapter: 'Season 2',
+            video: [
+  'https://rumble.com/embed/v77cgxg/?pub=4pbwfc',
+  'https://rumble.com/embed/v77ch5m/?pub=4pbwfc',
+  'https://rumble.com/embed/v77chhk/?pub=4pbwfc',
+  'https://rumble.com/embed/v77chri/?pub=4pbwfc',
+  'https://rumble.com/embed/v77ci44/?pub=4pbwfc',
+  'https://rumble.com/embed/v77cicc/?pub=4pbwfc',
+  'https://rumble.com/embed/v77cimc/?pub=4pbwfc',
+  'https://rumble.com/embed/v77ciue/?pub=4pbwfc',
+  'https://rumble.com/embed/v77cj66/?pub=4pbwfc',
+  'https://rumble.com/embed/v77cjkm/?pub=4pbwfc'
+            ],
+        },
+                        FROMS3: {
+            chapter: 'Season 3',
+            video: [
+  'https://rumble.com/embed/v77cljo/?pub=4pbwfc',
+  'https://rumble.com/embed/v77clv8/?pub=4pbwfc',
+  'https://rumble.com/embed/v77cmci/?pub=4pbwfc',
+  'https://rumble.com/embed/v77cmou/?pub=4pbwfc',
+  'https://rumble.com/embed/v77cn0s/?pub=4pbwfc',
+  'https://rumble.com/embed/v77cnee/?pub=4pbwfc',
+  'https://rumble.com/embed/v77cnpi/?pub=4pbwfc',
+  'https://rumble.com/embed/v77co1o/?pub=4pbwfc',
+  'https://rumble.com/embed/v77cofc/?pub=4pbwfc',
+  'https://rumble.com/embed/v77cpcm/?pub=4pbwfc'
+            ],
+        },
     },
 
     PITSORT: {
