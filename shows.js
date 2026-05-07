@@ -2,6 +2,26 @@
 
 window.shows = {
 
+    FROM: {
+        title: 'From',
+        image: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/fa/From_title_card.jpg/250px-From_title_card.jpg',
+        FROMS1: {
+            chapter: 'Season 1',
+            video: [
+                  'https://rumble.com/embed/v77c0bi/?pub=4pbwfc',
+  'https://rumble.com/embed/v77c0ha/?pub=4pbwfc',
+  'https://rumble.com/embed/v77c0r8/?pub=4pbwfc',
+  'https://rumble.com/embed/v77c0zs/?pub=4pbwfc',
+  'https://rumble.com/embed/v77c172/?pub=4pbwfc',
+  'https://rumble.com/embed/v77c1ds/?pub=4pbwfc',
+  'https://rumble.com/embed/v77c1l8/?pub=4pbwfc',
+  'https://rumble.com/embed/v77c1vy/?pub=4pbwfc',
+  'https://rumble.com/embed/v77c24m/?pub=4pbwfc',
+  'https://rumble.com/embed/v77c2fo/?pub=4pbwfc'
+            ],
+        },
+    },
+
     PITSORT: {
     title: '[BETA] PitSport Live',
     image: 'https://styles.redditmedia.com/t5_gimzou/styles/profileIcon_xcbdmlpt1vgg1.png?frame=1&auto=webp&crop=256%3A256%2Csmart&s=a81a6627212a1de0d75a0e4381aa963812a1da5c',
