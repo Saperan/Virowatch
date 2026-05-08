@@ -6607,14 +6607,16 @@ video: [
             'https://rumble.com/embed/v761vas/?pub=4p3ufg',
             'https://rumble.com/embed/v76d12w/?pub=4p3ufg',
             'https://rumble.com/embed/v76pera/?pub=4p3ufg',
-            'https://rumble.com/embed/v770kga/?pub=4pbwfc'
+            'https://rumble.com/embed/v770kga/?pub=4pbwfc',
+            'https://rumble.com/embed/v77e6p0/?pub=4pbwfc',
         ],
         episodeTitles: [],
         dubbed: [
             'https://rumble.com/embed/v761vgo/?pub=4p3ufg',
             'https://rumble.com/embed/v76d13c/?pub=4p3ufg',
             'https://rumble.com/embed/v76perk/?pub=4p3ufg',
-            'https://rumble.com/embed/v770kla/?pub=4pbwfc'
+            'https://rumble.com/embed/v770kla/?pub=4pbwfc',
+            'https://rumble.com/embed/v77e6aa/?pub=4pbwfc',
         ],
         dubbedepisodetitle: [],
     },
