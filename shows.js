@@ -50,6 +50,14 @@ window.shows = {
   'https://rumble.com/embed/v77cpcm/?pub=4pbwfc'
             ],
         },
+                        FROMS4: {
+            chapter: 'Season 4',
+            video: [
+  'https://rumble.com/embed/v77dv3s/?pub=4pbwfc',
+  'https://rumble.com/embed/v77dva4/?pub=4pbwfc',
+  'https://rumble.com/embed/v77dvuy/?pub=4pbwfc'
+            ],
+        },
     },
 
     PITSORT: {
