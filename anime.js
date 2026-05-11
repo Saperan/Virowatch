@@ -67,6 +67,33 @@ window.anime = {
   'https://rumble.com/embed/v77id5g/?pub=4pfa6w'
             ],
         },
+        FRS2: {
+            chapter: 'Season 2',
+            video: [
+                  'https://rumble.com/embed/v77itz6/?pub=4pfa6w',
+  'https://rumble.com/embed/v77iu5c/?pub=4pfa6w',
+  'https://rumble.com/embed/v77iuba/?pub=4pfa6w',
+  'https://rumble.com/embed/v77iuhu/?pub=4pfa6w',
+  'https://rumble.com/embed/v77ium4/?pub=4pfa6w',
+  'https://rumble.com/embed/v77iuq2/?pub=4pfa6w',
+  'https://rumble.com/embed/v77iuve/?pub=4pfa6w',
+  'https://rumble.com/embed/v77iv0u/?pub=4pfa6w',
+  'https://rumble.com/embed/v77iv80/?pub=4pfa6w',
+  'https://rumble.com/embed/v77ivcy/?pub=4pfa6w'
+            ],
+            dubbed: [
+                  'https://rumble.com/embed/v77iryy/?pub=4pfa6w',
+  'https://rumble.com/embed/v77is3s/?pub=4pfa6w',
+  'https://rumble.com/embed/v77is9g/?pub=4pfa6w',
+  'https://rumble.com/embed/v77isea/?pub=4pfa6w',
+  'https://rumble.com/embed/v77isk6/?pub=4pfa6w',
+  'https://rumble.com/embed/v77isqe/?pub=4pfa6w',
+  'https://rumble.com/embed/v77isxg/?pub=4pfa6w',
+  'https://rumble.com/embed/v77it3k/?pub=4pfa6w',
+  'https://rumble.com/embed/v77it9i/?pub=4pfa6w',
+  'https://rumble.com/embed/v77itey/?pub=4pfa6w'
+            ],
+        },
     },
 
     HSDXD: {
