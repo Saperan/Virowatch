@@ -2534,7 +2534,8 @@ video: [
                 'https://rumble.com/embed/v6sob2b/?pub=4ljicf',
                 'https://rumble.com/embed/v6sob2r/?pub=4ljicf',
                 'https://rumble.com/embed/v6sob3h/?pub=4ljicf',
-                'https://rumble.com/embed/v6sob4b/?pub=4ljicf'
+                'https://rumble.com/embed/v6sob4b/?pub=4ljicf',
+                'https://rumble.com/embed/v77lvss/?pub=4pfa6w'
             ],
             episodeTitles: [
                     '1. Yikes',
