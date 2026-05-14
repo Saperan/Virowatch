@@ -3635,8 +3635,36 @@ video: [
         },
                 OVERLORDS4: {
             chapter: 'Season 4',
-            video: [],
-            dubbed: [],
+            video: [
+  'https://rumble.com/embed/v77nkyq/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nl16/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nl3e/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nl5s/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nl82/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nl9s/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nlc2/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nlei/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nlhq/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nlki/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nlno/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nlqs/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nlsg/?pub=4lwt4v'
+            ],
+            dubbed: [
+  'https://rumble.com/embed/v77njs6/?pub=4lwt4v',
+  'https://rumble.com/embed/v77njuw/?pub=4lwt4v',
+  'https://rumble.com/embed/v77njx2/?pub=4lwt4v',
+  'https://rumble.com/embed/v77njzy/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nk3e/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nk62/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nk9g/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nkbs/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nkfg/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nkk2/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nkne/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nkpw/?pub=4lwt4v',
+  'https://rumble.com/embed/v77nks0/?pub=4lwt4v'
+            ],
         },
     },
 
