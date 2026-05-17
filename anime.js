@@ -1,6 +1,42 @@
 // anime.js (Non-module)
 window.anime = {
 
+    PARADISEKISS: {
+        title: 'Paradise Kiss',
+        image: 'https://imgs.search.brave.com/6-mu6iVE6IziQjEgkU6g_Cwlu-FvfKlPjOtZecjs00g/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tLm1l/ZGlhLWFtYXpvbi5j/b20vaW1hZ2VzL0kv/NTFaSi1tQjRuQUwu/anBn',
+        PKS1: {
+            chapter: 'Season 1',
+            video: [
+  'https://rumble.com/embed/v77s962/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s974/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s996/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s9ae/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s9be/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s9cm/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s9ee/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s9fw/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s9hk/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s9j4/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s9la/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s9mm/?pub=4lwt4v'
+            ],
+            dubbed: [
+  'https://rumble.com/embed/v77s7zo/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s80o/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s81m/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s82q/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s83u/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s85o/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s86y/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s882/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s89i/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s8au/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s8by/?pub=4lwt4v',
+  'https://rumble.com/embed/v77s8di/?pub=4lwt4v'
+            ],
+        },
+    },
+
     JOJO: {
         title: 'JoJos Bizarre Adventure',
         image: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f7/JoJo_no_Kimyou_na_Bouken_cover_-_vol1.jpg/250px-JoJo_no_Kimyou_na_Bouken_cover_-_vol1.jpg',
