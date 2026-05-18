@@ -7305,7 +7305,7 @@ video: [
             'https://rumble.com/embed/v76d13c/?pub=4p3ufg',
             'https://rumble.com/embed/v76perk/?pub=4p3ufg',
             'https://rumble.com/embed/v770kla/?pub=4pbwfc',
-            'https://rumble.com/embed/v77e6aa/?pub=4pbwfc',
+            'https://rumble.com/embed/v77u4p4/?pub=4pbwfc',
             'https://rumble.com/embed/v77nh4e/?pub=4lwt4v',
         ],
         dubbedepisodetitle: [],
