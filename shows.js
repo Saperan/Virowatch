@@ -2274,7 +2274,8 @@ video: [
                 'https://rumble.com/embed/v76yzzc/?pub=4p3ufg',
                 'https://rumble.com/embed/v76zmqq/?pub=4p3ufg',
                 'https://rumble.com/embed/v77a75y/?pub=4pd30m',
-                'https://rumble.com/embed/v77lvss/?pub=4pfa6w'
+                'https://rumble.com/embed/v77lvss/?pub=4pfa6w',
+                'https://rumble.com/embed/v77xlv4/?pub=4pd30m'
             ],
             episodeTitles: [
                 '1. Fifteen Inches of Sheer Dynamite',
