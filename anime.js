@@ -229,7 +229,21 @@ window.anime = {
   'https://rumble.com/embed/v77y86q/?pub=4lwt4v',
   'https://rumble.com/embed/v77y8gw/?pub=4lwt4v',
   'https://rumble.com/embed/v77y8sm/?pub=4lwt4v',
-  'https://rumble.com/embed/v77y91s/?pub=4lwt4v'
+  'https://rumble.com/embed/v77y91s/?pub=4lwt4v',
+  'https://rumble.com/embed/v77ybkk/?pub=4lwt4v',
+  'https://rumble.com/embed/v77ybr6/?pub=4lwt4v',
+  'https://rumble.com/embed/v77yc18/?pub=4lwt4v',
+  'https://rumble.com/embed/v77yca6/?pub=4lwt4v',
+  'https://rumble.com/embed/v77ycko/?pub=4lwt4v',
+  'https://rumble.com/embed/v77yctq/?pub=4lwt4v',
+  'https://rumble.com/embed/v77yd0a/?pub=4lwt4v',
+  'https://rumble.com/embed/v77yd8u/?pub=4lwt4v',
+  'https://rumble.com/embed/v77ydik/?pub=4lwt4v',
+  'https://rumble.com/embed/v77yds0/?pub=4lwt4v',
+  'https://rumble.com/embed/v77ydzy/?pub=4lwt4v',
+  'https://rumble.com/embed/v77ye92/?pub=4lwt4v',
+  'https://rumble.com/embed/v77yeia/?pub=4lwt4v',
+  'https://rumble.com/embed/v77yep2/?pub=4lwt4v'
             ],
             dubbed: [
   'https://rumble.com/embed/v77wctu/?pub=4lwt4v',
