@@ -940,7 +940,8 @@ video: [
   'https://rumble.com/embed/v7744ta/?pub=4pd30m',
   'https://rumble.com/embed/v7744ve/?pub=4pd30m',
   'https://rumble.com/embed/v77u8pu/?pub=4lwt4v',
-  'https://rumble.com/embed/v77u8u8/?pub=4lwt4v'
+  'https://rumble.com/embed/v77u8u8/?pub=4lwt4v',
+  'https://rumble.com/embed/v7806mc/?pub=4lwt4v'
 ],
             dubbed: [
             ],
@@ -960,6 +961,7 @@ video: [
   'https://rumble.com/embed/v773se6/?pub=4pd30m',
   'https://rumble.com/embed/v778xy6/?pub=4pbwfc',
   'https://rumble.com/embed/v77u8b2/?pub=4lwt4v',
+  'https://rumble.com/embed/v7806iy/?pub=4lwt4v',
             ],
             dubbed: [
                   'https://rumble.com/embed/v773sl2/?pub=4pd30m',
@@ -969,6 +971,7 @@ video: [
   'https://rumble.com/embed/v773sty/?pub=4pd30m',
   'https://rumble.com/embed/v778xt6/?pub=4pbwfc',
   'https://rumble.com/embed/v77u86g/?pub=4lwt4v',
+  'https://rumble.com/embed/v7806de/?pub=4lwt4v',
             ],
         },
     },
