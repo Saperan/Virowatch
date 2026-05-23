@@ -1,6 +1,44 @@
 // anime.js (Non-module)
 window.anime = {
 
+    AKIBAMAIDWAR: {
+        title: 'Akiba Maid Wars',
+        image: 'https://upload.wikimedia.org/wikipedia/en/thumb/2/23/Akiba_Maid_War_key_visual.jpg/250px-Akiba_Maid_War_key_visual.jpg',
+        AMWS1: {
+            chapter: 'Season 1',
+            video: [
+  'https://rumble.com/embed/v7831jo/?pub=4pjhzw',
+  'https://rumble.com/embed/v7831l6/?pub=4pjhzw',
+  'https://rumble.com/embed/v7831mq/?pub=4pjhzw',
+  'https://rumble.com/embed/v7831p4/?pub=4pjhzw',
+  'https://rumble.com/embed/v7831qy/?pub=4pjhzw',
+  'https://rumble.com/embed/v7831sk/?pub=4pjhzw',
+  'https://rumble.com/embed/v7831um/?pub=4pjhzw',
+  'https://rumble.com/embed/v7831ws/?pub=4pjhzw',
+  'https://rumble.com/embed/v7831yg/?pub=4pjhzw',
+  'https://rumble.com/embed/v783208/?pub=4pjhzw',
+  'https://rumble.com/embed/v78322y/?pub=4pjhzw',
+  'https://rumble.com/embed/v78325c/?pub=4pjhzw',
+  'https://rumble.com/embed/v78326w/?pub=4pjhzw'
+            ],
+            dubbed: [
+                'https://rumble.com/embed/v7832e8/?pub=4pjhzw',
+                  'https://rumble.com/embed/v7834b2/?pub=4pjhzw',
+  'https://rumble.com/embed/v7834ey/?pub=4pjhzw',
+  'https://rumble.com/embed/v7834hs/?pub=4pjhzw',
+  'https://rumble.com/embed/v7834le/?pub=4pjhzw',
+  'https://rumble.com/embed/v7834o8/?pub=4pjhzw',
+  'https://rumble.com/embed/v7834r4/?pub=4pjhzw',
+  'https://rumble.com/embed/v7834u8/?pub=4pjhzw',
+  'https://rumble.com/embed/v7834x4/?pub=4pjhzw',
+  'https://rumble.com/embed/v7834zm/?pub=4pjhzw',
+  'https://rumble.com/embed/v783524/?pub=4pjhzw',
+  'https://rumble.com/embed/v78354c/?pub=4pjhzw',
+  'https://rumble.com/embed/v78356u/?pub=4pjhzw'
+            ],
+        },
+    },
+
     PARADISEKISS: {
         title: 'Paradise Kiss',
         image: 'https://imgs.search.brave.com/6-mu6iVE6IziQjEgkU6g_Cwlu-FvfKlPjOtZecjs00g/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tLm1l/ZGlhLWFtYXpvbi5j/b20vaW1hZ2VzL0kv/NTFaSi1tQjRuQUwu/anBn',
