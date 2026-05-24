@@ -1,5 +1,41 @@
 // anime.js (Non-module)
 window.anime = {
+    
+    GIRLSLT: {
+        title: 'Girls Last Tour',
+        image: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Girls%27_Last_Tour%2C_Volume_1.jpg/250px-Girls%27_Last_Tour%2C_Volume_1.jpg',
+        GLTS1: {
+            chapter: 'Season 1',
+            video: [
+                  'https://rumble.com/embed/v7850b4/?pub=4pjhzw',
+  'https://rumble.com/embed/v7850l6/?pub=4pjhzw',
+  'https://rumble.com/embed/v7850sq/?pub=4pjhzw',
+  'https://rumble.com/embed/v7850yo/?pub=4pjhzw',
+  'https://rumble.com/embed/v78516u/?pub=4pjhzw',
+  'https://rumble.com/embed/v7851dq/?pub=4pjhzw',
+  'https://rumble.com/embed/v7851iu/?pub=4pjhzw',
+  'https://rumble.com/embed/v7851pi/?pub=4pjhzw',
+  'https://rumble.com/embed/v7851uo/?pub=4pjhzw',
+  'https://rumble.com/embed/v78521o/?pub=4pjhzw',
+  'https://rumble.com/embed/v7852a4/?pub=4pjhzw',
+  'https://rumble.com/embed/v7852ja/?pub=4pjhzw'
+            ],
+            dubbed: [
+                  'https://rumble.com/embed/v784vu6/?pub=4pjhzw',
+  'https://rumble.com/embed/v784w2s/?pub=4pjhzw',
+  'https://rumble.com/embed/v784w98/?pub=4pjhzw',
+  'https://rumble.com/embed/v784wgg/?pub=4pjhzw',
+  'https://rumble.com/embed/v784woi/?pub=4pjhzw',
+  'https://rumble.com/embed/v784wuu/?pub=4pjhzw',
+  'https://rumble.com/embed/v784x12/?pub=4pjhzw',
+  'https://rumble.com/embed/v784x66/?pub=4pjhzw',
+  'https://rumble.com/embed/v784xag/?pub=4pjhzw',
+  'https://rumble.com/embed/v784xhg/?pub=4pjhzw',
+  'https://rumble.com/embed/v784xq2/?pub=4pjhzw',
+  'https://rumble.com/embed/v784y0c/?pub=4pjhzw'
+            ],
+        },
+    },
 
     AKIBAMAIDWAR: {
         title: 'Akiba Maid Wars',
