@@ -1,5 +1,90 @@
 // anime.js (Non-module)
 window.anime = {
+
+    GIRLSUNDPANZER: {
+        title: 'Girls & Panzer',
+        image: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f0/Girls_und_Panzer_TV_key_visual.png/250px-Girls_und_Panzer_TV_key_visual.png',
+        GUNDPAZNERS1: {
+            chapter: 'Season 1',
+            video: [
+  'https://rumble.com/embed/v7860no/?pub=4pjhzw',
+  'https://rumble.com/embed/v7860pi/?pub=4pjhzw',
+  'https://rumble.com/embed/v7860rq/?pub=4pjhzw',
+  'https://rumble.com/embed/v7860uk/?pub=4pjhzw',
+  'https://rumble.com/embed/v7860x6/?pub=4pjhzw',
+  'https://rumble.com/embed/v7860zs/?pub=4pjhzw',
+  'https://rumble.com/embed/v786134/?pub=4pjhzw',
+  'https://rumble.com/embed/v78615a/?pub=4pjhzw',
+  'https://rumble.com/embed/v78617g/?pub=4pjhzw',
+  'https://rumble.com/embed/v7861aa/?pub=4pjhzw',
+  'https://rumble.com/embed/v7861dg/?pub=4pjhzw',
+  'https://rumble.com/embed/v7861gs/?pub=4pjhzw'
+            ],
+            dubbed: [
+  'https://rumble.com/embed/v7861ro/?pub=4pjhzw',
+  'https://rumble.com/embed/v7861v2/?pub=4pjhzw',
+  'https://rumble.com/embed/v7861x6/?pub=4pjhzw',
+  'https://rumble.com/embed/v7861zc/?pub=4pjhzw',
+  'https://rumble.com/embed/v786226/?pub=4pjhzw',
+  'https://rumble.com/embed/v78625m/?pub=4pjhzw',
+  'https://rumble.com/embed/v78627i/?pub=4pjhzw',
+  'https://rumble.com/embed/v78628u/?pub=4pjhzw',
+  'https://rumble.com/embed/v7862aw/?pub=4pjhzw',
+  'https://rumble.com/embed/v7862dm/?pub=4pjhzw',
+  'https://rumble.com/embed/v7862fm/?pub=4pjhzw',
+  'https://rumble.com/embed/v7862ig/?pub=4pjhzw'
+            ],
+        },
+        GUPSP: {
+            chapter: 'Specials',
+            video: [
+  'https://rumble.com/embed/v7862fm/?pub=4pjhzw',
+  'https://rumble.com/embed/v7862ig/?pub=4pjhzw',
+  'https://rumble.com/embed/v78630m/?pub=4pjhzw',
+  'https://rumble.com/embed/v786320/?pub=4pjhzw',
+  'https://rumble.com/embed/v78633g/?pub=4pjhzw',
+  'https://rumble.com/embed/v786360/?pub=4pjhzw',
+  'https://rumble.com/embed/v786388/?pub=4pjhzw',
+  'https://rumble.com/embed/v78639q/?pub=4pjhzw',
+  'https://rumble.com/embed/v7863bg/?pub=4pjhzw',
+  'https://rumble.com/embed/v7863co/?pub=4pjhzw',
+  'https://rumble.com/embed/v7863e2/?pub=4pjhzw',
+  'https://rumble.com/embed/v7863fk/?pub=4pjhzw',
+  'https://rumble.com/embed/v7863ha/?pub=4pjhzw',
+  'https://rumble.com/embed/v7863is/?pub=4pjhzw',
+  'https://rumble.com/embed/v7863kk/?pub=4pjhzw',
+  'https://rumble.com/embed/v7863lu/?pub=4pjhzw',
+  'https://rumble.com/embed/v7863qg/?pub=4pjhzw',
+  'https://rumble.com/embed/v7863rm/?pub=4pjhzw',
+  'https://rumble.com/embed/v7863tm/?pub=4pjhzw',
+  'https://rumble.com/embed/v7863xo/?pub=4pjhzw',
+  'https://rumble.com/embed/v7863zk/?pub=4pjhzw',
+  'https://rumble.com/embed/v78642g/?pub=4pjhzw',
+  'https://rumble.com/embed/v78644g/?pub=4pjhzw',
+  'https://rumble.com/embed/v78645y/?pub=4pjhzw',
+  'https://rumble.com/embed/v78648y/?pub=4pjhzw',
+  'https://rumble.com/embed/v7864bu/?pub=4pjhzw',
+  'https://rumble.com/embed/v7864ea/?pub=4pjhzw'
+            ],
+        },
+        GUPMOVIES: {
+            chapter: 'Movies',
+            video: [
+  'https://rumble.com/embed/v78676a/?pub=4pjhzw',
+  'https://rumble.com/embed/v7867g0/?pub=4pjhzw',
+  'https://rumble.com/embed/v7867uq/?pub=4pjhzw',
+  'https://rumble.com/embed/v7868c0/?pub=4pjhzw',
+  'https://rumble.com/embed/v7868oi/?pub=4pjhzw'
+            ],
+            dubbed: [
+  'https://rumble.com/embed/v7869io/?pub=4pjhzw',
+  'https://rumble.com/embed/v7869se/?pub=4pjhzw',
+  'https://rumble.com/embed/v786a4c/?pub=4pjhzw',
+  'https://rumble.com/embed/v786am8/?pub=4pjhzw',
+  'https://rumble.com/embed/v786azw/?pub=4pjhzw'
+            ],
+        },
+    },
     
     GIRLSLT: {
         title: 'Girls Last Tour',
