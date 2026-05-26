@@ -1,77 +1,102 @@
-document.addEventListener('DOMContentLoaded', async () => {
-  const RESERVED_KEYS = ['title','image','video','episodeTitles','customDownloads','dubbed','dubbedepisodetitle','dubbedcustomdownloads'];
+document.addEventListener("DOMContentLoaded", async () => {
+  const RESERVED_KEYS = [
+    "title",
+    "image",
+    "video",
+    "episodeTitles",
+    "customDownloads",
+    "dubbed",
+    "dubbedepisodetitle",
+    "dubbedcustomdownloads",
+  ];
   // Load all data into one object
-  window.mediaData = { movies: window.movies||{}, shows: window.shows||{}, anime: window.anime||{}, lunora: {} };
-
-  const linkEl = document.getElementById('themeStylesheet');
-  const THEME_HREF = {
-    'auto': null,
-    'desktop-dark': 'virostyle.css',
-    'desktop-light': 'virostyle-light.css',
-    'mobile-dark': 'virostyle2.css',
-    'mobile-light': 'virostyle2-light.css'
+  window.mediaData = {
+    movies: window.movies || {},
+    shows: window.shows || {},
+    anime: window.anime || {},
+    lunora: {},
   };
-  const spinner = document.getElementById('videoSpinner');
+
+  const linkEl = document.getElementById("themeStylesheet");
+  const THEME_HREF = {
+    auto: null,
+    "desktop-dark": "virostyle.css",
+    "desktop-light": "virostyle-light.css",
+    "mobile-dark": "virostyle2.css",
+    "mobile-light": "virostyle2-light.css",
+  };
+  const spinner = document.getElementById("videoSpinner");
 
   // Global State
-  let cat=null, mov=null, season=null, ep=0, dubbed=false, timer;
+  let cat = null,
+    mov = null,
+    season = null,
+    ep = 0,
+    dubbed = false,
+    timer;
 
   function isMobileViewport() {
-    const w = window.innerWidth, h = window.innerHeight;
-    return w <= 768 || (w / h) <= (9 / 16);
+    const w = window.innerWidth,
+      h = window.innerHeight;
+    return w <= 768 || w / h <= 9 / 16;
   }
-function resolveThemeHref(key) {
-    if (key === 'auto') return isMobileViewport() ? 'virostyle2.css' : 'virostyle.css';
-    
+  function resolveThemeHref(key) {
+    if (key === "auto")
+      return isMobileViewport() ? "virostyle2.css" : "virostyle.css";
+
     // If it's a built-in key (e.g. 'desktop-dark'), use the map.
     // Otherwise, if it's a path like 'extra_css/style.css', use it directly.
     if (THEME_HREF[key]) return THEME_HREF[key];
-    return key; 
+    return key;
   }
 
-const themeSelect = document.getElementById('app-sidebar-theme-select');
+  const themeSelect = document.getElementById("app-sidebar-theme-select");
 
   // Theme: apply by key or custom file path
-function applyTheme(key) {
-  if (linkEl) linkEl.href = resolveThemeHref(key);
-  localStorage.setItem('theme', key);
-  
-  if (themeSelect) {
-    // Check if the option already exists in the dropdown
-    let exists = Array.from(themeSelect.options).some(opt => opt.value === key);
-    
-    // If it's a custom style and NOT in the dropdown yet, add it so it shows up
-    if (!exists && key !== 'auto' && !THEME_HREF[key]) {
-      const opt = document.createElement('option');
-      opt.value = key;
-      opt.textContent = key.split('/').pop().replace('.css', '') + ' (Custom)';
-      themeSelect.appendChild(opt);
+  function applyTheme(key) {
+    if (linkEl) linkEl.href = resolveThemeHref(key);
+    localStorage.setItem("theme", key);
+
+    if (themeSelect) {
+      // Check if the option already exists in the dropdown
+      let exists = Array.from(themeSelect.options).some(
+        (opt) => opt.value === key,
+      );
+
+      // If it's a custom style and NOT in the dropdown yet, add it so it shows up
+      if (!exists && key !== "auto" && !THEME_HREF[key]) {
+        const opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent =
+          key.split("/").pop().replace(".css", "") + " (Custom)";
+        themeSelect.appendChild(opt);
+      }
+      themeSelect.value = key;
     }
-    themeSelect.value = key;
   }
-}
 
-  const saved = localStorage.getItem('theme');
-  applyTheme(saved ? saved : 'auto');
+  const saved = localStorage.getItem("theme");
+  applyTheme(saved ? saved : "auto");
 
   if (themeSelect) {
-    themeSelect.addEventListener('change', () => applyTheme(themeSelect.value));
+    themeSelect.addEventListener("change", () => applyTheme(themeSelect.value));
   }
 
   // When theme is Auto, re-apply on resize so layout follows viewport
-  window.addEventListener('resize', () => {
-    if (localStorage.getItem('theme') === 'auto' && linkEl) linkEl.href = resolveThemeHref('auto');
+  window.addEventListener("resize", () => {
+    if (localStorage.getItem("theme") === "auto" && linkEl)
+      linkEl.href = resolveThemeHref("auto");
   });
 
   // --- Custom CSS (saved locally, inject into page, removable) ---
-  const CUSTOM_CSS_KEY = 'virowatch_custom_css';
-  const customListEl = document.getElementById('app-custom-css-list');
-  const customFileInput = document.getElementById('app-custom-css-file');
-  const importCssBtn = document.getElementById('app-import-css-btn');
+  const CUSTOM_CSS_KEY = "virowatch_custom_css";
+  const customListEl = document.getElementById("app-custom-css-list");
+  const customFileInput = document.getElementById("app-custom-css-file");
+  const importCssBtn = document.getElementById("app-import-css-btn");
 
   function getCustomCssList() {
     try {
-      return JSON.parse(localStorage.getItem(CUSTOM_CSS_KEY) || '[]');
+      return JSON.parse(localStorage.getItem(CUSTOM_CSS_KEY) || "[]");
     } catch (_) {
       return [];
     }
@@ -82,20 +107,20 @@ function applyTheme(key) {
   }
 
   function applyCustomCss(list) {
-    list.forEach(item => {
-      const existing = document.getElementById('custom-css-' + item.id);
+    list.forEach((item) => {
+      const existing = document.getElementById("custom-css-" + item.id);
       if (existing) existing.remove();
     });
-    list.forEach(item => {
-      if (item.type === 'inline') {
-        const style = document.createElement('style');
-        style.id = 'custom-css-' + item.id;
+    list.forEach((item) => {
+      if (item.type === "inline") {
+        const style = document.createElement("style");
+        style.id = "custom-css-" + item.id;
         style.textContent = item.value;
         document.head.appendChild(style);
-      } else if (item.type === 'url' && item.value) {
-        const link = document.createElement('link');
-        link.id = 'custom-css-' + item.id;
-        link.rel = 'stylesheet';
+      } else if (item.type === "url" && item.value) {
+        const link = document.createElement("link");
+        link.id = "custom-css-" + item.id;
+        link.rel = "stylesheet";
         link.href = item.value;
         document.head.appendChild(link);
       }
@@ -105,23 +130,23 @@ function applyTheme(key) {
   function renderCustomCssList() {
     if (!customListEl) return;
     const list = getCustomCssList();
-    customListEl.innerHTML = '';
-    list.forEach(item => {
-      const row = document.createElement('div');
-      row.className = 'app-sidebar-custom-item';
-      const name = document.createElement('span');
+    customListEl.innerHTML = "";
+    list.forEach((item) => {
+      const row = document.createElement("div");
+      row.className = "app-sidebar-custom-item";
+      const name = document.createElement("span");
       name.title = item.name;
       name.textContent = item.name;
-      const removeBtn = document.createElement('button');
-      removeBtn.type = 'button';
-      removeBtn.className = 'app-sidebar-custom-remove';
-      removeBtn.setAttribute('aria-label', 'Remove');
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "app-sidebar-custom-remove";
+      removeBtn.setAttribute("aria-label", "Remove");
       removeBtn.dataset.id = item.id;
-      removeBtn.addEventListener('click', () => {
-        const arr = getCustomCssList().filter(i => i.id !== item.id);
+      removeBtn.addEventListener("click", () => {
+        const arr = getCustomCssList().filter((i) => i.id !== item.id);
         saveCustomCssList(arr);
         applyCustomCss(arr);
-        const el = document.getElementById('custom-css-' + item.id);
+        const el = document.getElementById("custom-css-" + item.id);
         if (el) el.remove();
         renderCustomCssList();
       });
@@ -135,95 +160,138 @@ function applyTheme(key) {
   renderCustomCssList();
 
   if (importCssBtn && customFileInput) {
-    importCssBtn.addEventListener('click', () => customFileInput.click());
-    customFileInput.addEventListener('change', () => {
+    importCssBtn.addEventListener("click", () => customFileInput.click());
+    customFileInput.addEventListener("change", () => {
       const file = customFileInput.files && customFileInput.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = () => {
         const list = getCustomCssList();
-        const id = 'custom-' + Date.now();
-        list.push({ id, name: file.name || 'Custom CSS', type: 'inline', value: reader.result || '' });
+        const id = "custom-" + Date.now();
+        list.push({
+          id,
+          name: file.name || "Custom CSS",
+          type: "inline",
+          value: reader.result || "",
+        });
         saveCustomCssList(list);
         applyCustomCss(list);
         renderCustomCssList();
       };
       reader.readAsText(file);
-      customFileInput.value = '';
+      customFileInput.value = "";
     });
   }
 
   // Save and Load State
   function saveState() {
-    localStorage.setItem('lastState', JSON.stringify({ cat, mov, season, ep, dubbed }));
+    localStorage.setItem(
+      "lastState",
+      JSON.stringify({ cat, mov, season, ep, dubbed }),
+    );
   }
 
   // Helpers
-  const currentData = () => (cat && mediaData[cat] ? mediaData[cat][mov] : null);
-  function activeData(){
+  const currentData = () =>
+    cat && mediaData[cat] ? mediaData[cat][mov] : null;
+  function activeData() {
     const data = currentData();
     if (!data) return null;
     if (season && data[season]) return data[season];
-    const seasons = Object.keys(data).filter(k => !RESERVED_KEYS.includes(k) && typeof data[k]==='object');
-    if (seasons.length){ season = seasons[0]; return data[season]; }
+    const seasons = Object.keys(data).filter(
+      (k) => !RESERVED_KEYS.includes(k) && typeof data[k] === "object",
+    );
+    if (seasons.length) {
+      season = seasons[0];
+      return data[season];
+    }
     return data;
   }
 
   // Elements
-  const movieListWrapper = document.getElementById('movieListWrapper');
-  const movieList = document.getElementById('movieList');
-  const categoryContainer = document.getElementById('categoryContainer');
-  const episodeContainer = document.getElementById('episodeContainer');
-  const seasonSelectorContainer = document.getElementById('seasonSelectorContainer');
-  const heroSection = document.getElementById('hero'); // Ensure this matches HTML ID if used
+  const movieListWrapper = document.getElementById("movieListWrapper");
+  const movieList = document.getElementById("movieList");
+  const categoryContainer = document.getElementById("categoryContainer");
+  const episodeContainer = document.getElementById("episodeContainer");
+  const seasonSelectorContainer = document.getElementById(
+    "seasonSelectorContainer",
+  );
+  const heroSection = document.getElementById("hero"); // Ensure this matches HTML ID if used
 
   // Render list for a specific category (Menu clicks)
-  function renderList(category){
+  function renderList(category) {
     cat = category;
-    movieList.innerHTML = '';
-    Object.entries(mediaData[category]||{}).forEach(([key,info]) => {
-      const div = document.createElement('div');
-      div.className = 'movie-item';
+    window._vwlCurrentCat = category;
+    movieList.innerHTML = "";
+    Object.entries(mediaData[category] || {}).forEach(([key, info]) => {
+      if (info && info._hidden) return; // skip Anikoto entries injected by anikoto-loader
+      const div = document.createElement("div");
+      div.className = "movie-item";
       div.dataset.movie = key;
-      div.innerHTML = `<img src="${info.image||'https://via.placeholder.com/150'}" loading="lazy"/><p class="kanit-extralight">${info.title||key}</p>`;
+      div.innerHTML = `<img src="${info.image || "https://via.placeholder.com/150"}" loading="lazy"/><p class="kanit-extralight">${info.title || key}</p>`;
       const clean = div.cloneNode(true);
-      clean.addEventListener('click', () => selectMovie(key));
+      clean.addEventListener("click", () => selectMovie(key));
       movieList.appendChild(clean);
     });
-    if(heroSection) heroSection.style.display = 'none';
-    if(categoryContainer) categoryContainer.style.display = 'none';
-    if(movieListWrapper) movieListWrapper.style.display = 'block';
-    
-    const clContainer = document.getElementById('changelog-container');
-    if(clContainer) clContainer.style.marginTop = '20px';
+    if (heroSection) heroSection.style.display = "none";
+    if (categoryContainer) categoryContainer.style.display = "none";
+    if (movieListWrapper) movieListWrapper.style.display = "block";
+
+    // Show category nav bar with active state
+    const navBar = document.getElementById("categoryNavBar");
+    if (navBar) {
+      navBar.style.display = "flex";
+      navBar.querySelectorAll(".cat-nav-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.cat === category);
+      });
+    }
+
+    const clContainer = document.getElementById("changelog-container");
+    if (clContainer) clContainer.style.marginTop = "20px";
   }
 
   // Select movie (Load Player)
-  function selectMovie(key){
-    mov = key; ep = 0; season = null; dubbed = false;
+  function selectMovie(key) {
+    mov = key;
+    ep = 0;
+    season = null;
+    dubbed = false;
     saveState();
-    document.querySelector('.dubbed-toggle')?.classList.remove('active');
+    document.querySelector(".dubbed-toggle")?.classList.remove("active");
+    // Update now-playing title
+    const npt = document.getElementById("nowPlayingTitle");
+    if (npt) npt.textContent = mediaData[cat]?.[key]?.title || key;
 
     // ── PitSport: data arrives async, handle loading state ───────
-    if (key === 'PITSORT' && cat === 'shows') {
+    if (key === "PITSORT" && cat === "shows") {
       const pitData = window.mediaData?.shows?.PITSORT;
-      const hasVideos = pitData && Object.keys(pitData).some(k =>
-        !RESERVED_KEYS.includes(k) &&
-        typeof pitData[k] === 'object' &&
-        pitData[k].video?.length
-      );
+      const hasVideos =
+        pitData &&
+        Object.keys(pitData).some(
+          (k) =>
+            !RESERVED_KEYS.includes(k) &&
+            typeof pitData[k] === "object" &&
+            pitData[k].video?.length,
+        );
 
       if (!hasVideos) {
         // Show the player area immediately with a loading indicator
-        if (episodeContainer) episodeContainer.style.display = 'flex';
-        const listEl = document.getElementById('episodeListContainer');
-        if (listEl) listEl.innerHTML =
-          '<div class="episode" style="opacity:0.6;cursor:default;">⏳ Loading live events…</div>';
-        seasonSelectorContainer.innerHTML = '';
+        if (episodeContainer) {
+          episodeContainer.style.display = "flex";
+          document.body.classList.add("modal-open");
+        }
+        const listEl = document.getElementById("episodeListContainer");
+        if (listEl)
+          listEl.innerHTML =
+            '<div class="episode" style="opacity:0.6;cursor:default;">⏳ Loading live events…</div>';
+        seasonSelectorContainer.innerHTML = "";
 
         if (!window._pitsportLoaded) {
           // Kick off the fetch if it hasn't started yet
-          if (!window._pitsportLoading && typeof window.reloadPitSport === 'function') {
+          if (
+            !window._pitsportLoading &&
+            typeof window.reloadPitSport === "function"
+          ) {
             window.reloadPitSport();
           }
         }
@@ -232,14 +300,22 @@ function applyTheme(key) {
       }
     }
     // ── Normal path ───────────────────────────────────────────────
-    updateSeasonSelector(); updateEpisodeList(); updateVideo(0); updateDownloads();
-    if(episodeContainer) episodeContainer.style.display = 'flex';
+    updateSeasonSelector();
+    updateEpisodeList();
+    updateVideo(0);
+    updateDownloads();
+    if (episodeContainer) {
+      episodeContainer.style.display = "flex";
+      document.body.classList.add("modal-open");
+      document.body.classList.remove("app-sidebar-open"); // close sidebar if open
+    }
   }
 
   // When PitSport finishes loading, refresh the player if it's currently open
-  window.addEventListener('pitsportReady', () => {
-    if (cat === 'shows' && mov === 'PITSORT') {
-      ep = 0; season = null;
+  window.addEventListener("pitsportReady", () => {
+    if (cat === "shows" && mov === "PITSORT") {
+      ep = 0;
+      season = null;
       updateSeasonSelector();
       updateEpisodeList();
       updateVideo(0);
@@ -248,76 +324,116 @@ function applyTheme(key) {
   });
 
   // Update season dropdown
-  function updateSeasonSelector(){
-    seasonSelectorContainer.innerHTML = '';
-    const data = currentData(); if (!data) return;
-    const seasons = Object.keys(data).filter(k => !RESERVED_KEYS.includes(k) && typeof data[k]==='object');
+  function updateSeasonSelector() {
+    seasonSelectorContainer.innerHTML = "";
+    const data = currentData();
+    if (!data) return;
+    const seasons = Object.keys(data).filter(
+      (k) => !RESERVED_KEYS.includes(k) && typeof data[k] === "object",
+    );
     if (!seasons.length) return;
-    const select = document.createElement('select');
-    select.id = 'seasonSelector';
-    seasons.forEach((s,i) => {
-      const opt = document.createElement('option');
-      opt.value = s; opt.textContent = data[s].chapter||s;
-      if (i===0 && !season) season = s;
+    const select = document.createElement("select");
+    select.id = "seasonSelector";
+    seasons.forEach((s, i) => {
+      const opt = document.createElement("option");
+      opt.value = s;
+      opt.textContent = data[s].chapter || s;
+      if (i === 0 && !season) season = s;
       select.appendChild(opt);
     });
     select.value = season;
-    select.addEventListener('change', e => { season = e.target.value; ep = 0; saveState(); updateEpisodeList(); updateVideo(0); updateDownloads(); });
+    select.addEventListener("change", (e) => {
+      season = e.target.value;
+      ep = 0;
+      saveState();
+      updateEpisodeList();
+      updateVideo(0);
+      updateDownloads();
+    });
     seasonSelectorContainer.appendChild(select);
   }
 
   // Update episode list
-  function updateEpisodeList(){
-    const container = document.getElementById('episodeListContainer');
-    container.innerHTML = '';
-    const data = activeData(); if (!data) return;
-    const titles = (dubbed && data.dubbedepisodetitle?.length)? data.dubbedepisodetitle : data.episodeTitles || [];
-    (data.video||[]).forEach((_,i) => {
-      const div = document.createElement('div');
-      div.className = 'episode'; div.textContent = titles[i] || `Episode ${i+1}`;
+  function updateEpisodeList() {
+    const container = document.getElementById("episodeListContainer");
+    container.innerHTML = "";
+    const data = activeData();
+    if (!data) return;
+    const titles =
+      dubbed && data.dubbedepisodetitle?.length
+        ? data.dubbedepisodetitle
+        : data.episodeTitles || [];
+    (data.video || []).forEach((_, i) => {
+      const div = document.createElement("div");
+      div.className = "episode";
+      div.textContent = titles[i] || `Episode ${i + 1}`;
       div.dataset.episodeIndex = i;
-      div.addEventListener('click', () => updateVideo(i));
+      div.addEventListener("click", () => updateVideo(i));
       container.appendChild(div);
     });
   }
 
   // Update video player
-  function updateVideo(index){
-    const data = activeData(); if (!data) return;
-    const vids = (dubbed && data.dubbed?.length)? data.dubbed : data.video || [];
+  function updateVideo(index) {
+    const data = activeData();
+    if (!data) return;
+    const vids = dubbed && data.dubbed?.length ? data.dubbed : data.video || [];
     if (!vids[index]) return;
-    if(spinner) spinner.style.display = 'block';
-    const iframe = document.getElementById('videoPlayer');
-    
+    if (spinner) spinner.style.display = "block";
+    const iframe = document.getElementById("videoPlayer");
+
     // --- NEW ANTI-POPUP LOGIC ---
     // If watching PitSport, strictly sandbox the iframe to block new tabs and redirects.
-    if (mov === 'PITSORT') {
-      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-forms');
+    if (mov === "PITSORT") {
+      iframe.setAttribute(
+        "sandbox",
+        "allow-scripts allow-same-origin allow-presentation allow-forms",
+      );
     } else {
       // Remove sandbox for normal content (Rumble) so it behaves natively.
-      iframe.removeAttribute('sandbox');
+      iframe.removeAttribute("sandbox");
     }
     // ----------------------------
 
-    iframe.classList.add('fade-out');
-    iframe.onload = () => setTimeout(() => { if(spinner) spinner.style.display = 'none'; iframe.classList.remove('fade-out'); }, 200);
+    iframe.classList.add("fade-out");
+    iframe.onload = () =>
+      setTimeout(() => {
+        if (spinner) spinner.style.display = "none";
+        iframe.classList.remove("fade-out");
+      }, 200);
     iframe.src = vids[index];
     ep = index;
     saveState();
     highlightEpisode(index);
   }
 
-  function highlightEpisode(i){
-    document.querySelectorAll('.episode').forEach(el => el.classList.remove('active'));
-    document.querySelector(`.episode[data-episode-index="${i}"]`)?.classList.add('active');
+  function highlightEpisode(i) {
+    document
+      .querySelectorAll(".episode")
+      .forEach((el) => el.classList.remove("active"));
+    document
+      .querySelector(`.episode[data-episode-index="${i}"]`)
+      ?.classList.add("active");
   }
 
-  function updateDownloads(){
-    const dc = document.getElementById('downloadContainer'); dc.innerHTML = '';
-    const data = activeData(); if (!data) return;
-    const downs = (dubbed && data.dubbedcustomdownloads?.[ep]?.length)? data.dubbedcustomdownloads[ep] : data.customDownloads?.[ep] || [];
-    if (downs.length) downs.forEach(d => { const a = document.createElement('a'); a.href = d.url; a.textContent = d.name; a.className = 'button'; dc.appendChild(a); });
-    else dc.innerHTML = '<p>No downloads available</p>'; 
+  function updateDownloads() {
+    const dc = document.getElementById("downloadContainer");
+    dc.innerHTML = "";
+    const data = activeData();
+    if (!data) return;
+    const downs =
+      dubbed && data.dubbedcustomdownloads?.[ep]?.length
+        ? data.dubbedcustomdownloads[ep]
+        : data.customDownloads?.[ep] || [];
+    if (downs.length)
+      downs.forEach((d) => {
+        const a = document.createElement("a");
+        a.href = d.url;
+        a.textContent = d.name;
+        a.className = "button";
+        dc.appendChild(a);
+      });
+    else dc.innerHTML = ""; // nothing to show when no downloads
   }
 
   // ==========================================
@@ -343,81 +459,105 @@ function applyTheme(key) {
     return j;
   }
 
-  document.getElementById('searchInput').addEventListener('input', e => {
+  // Search clear button
+  const searchClearBtn = document.getElementById("searchClear");
+  if (searchClearBtn) {
+    searchClearBtn.addEventListener("click", () => {
+      const sInput = document.getElementById("searchInput");
+      if (sInput) {
+        sInput.value = "";
+        sInput.dispatchEvent(new Event("input"));
+        sInput.focus();
+      }
+    });
+  }
+
+  document.getElementById("searchInput").addEventListener("input", (e) => {
+    const clearBtn = document.getElementById("searchClear");
+    if (clearBtn) clearBtn.style.display = e.target.value ? "block" : "none";
     clearTimeout(timer);
     timer = setTimeout(() => {
       const q = e.target.value.trim().toLowerCase();
-      
+
       // 1. If empty, go back to Categories
       if (!q) {
-         if (heroSection) heroSection.style.display = '';
-         if (categoryContainer) categoryContainer.style.display = '';
-         if (movieListWrapper) movieListWrapper.style.display = 'none';
-         movieList.innerHTML = '';
-         return;
+        if (heroSection) heroSection.style.display = "";
+        if (categoryContainer) categoryContainer.style.display = "";
+        if (movieListWrapper) movieListWrapper.style.display = "none";
+        const navBar = document.getElementById("categoryNavBar");
+        if (navBar) navBar.style.display = "none";
+        movieList.innerHTML = "";
+        return;
       }
 
       // 2. If typing, Hide Categories & Show List Wrapper
-      if (heroSection) heroSection.style.display = 'none';
-      if (categoryContainer) categoryContainer.style.display = 'none';
-      if (movieListWrapper) movieListWrapper.style.display = 'block';
-      
+      if (heroSection) heroSection.style.display = "none";
+      if (categoryContainer) categoryContainer.style.display = "none";
+      if (movieListWrapper) movieListWrapper.style.display = "block";
+
       // 3. Score all items: how many query letters match in order (+ bonus for exact substring)
-      movieList.innerHTML = '';
-      const categoriesToCheck = ['movies', 'shows', 'anime', 'lunora'];
+      movieList.innerHTML = "";
+      const categoriesToCheck = ["movies", "shows", "anime", "lunora"];
       const scored = [];
 
-      categoriesToCheck.forEach(catKey => {
-          const catData = mediaData[catKey];
-          if (!catData) return;
-          Object.entries(catData).forEach(([key, info]) => {
-              const title = (info.title || key).toLowerCase();
-              const count = subsequenceMatchCount(title, q);
-              if (count === 0) return;
-              const exactBonus = title.includes(q) ? 0.5 : 0;
-              scored.push({ catKey, key, info, score: count + exactBonus });
-          });
+      categoriesToCheck.forEach((catKey) => {
+        const catData = mediaData[catKey];
+        if (!catData) return;
+        Object.entries(catData).forEach(([key, info]) => {
+          const title = (info.title || key).toLowerCase();
+          const count = subsequenceMatchCount(title, q);
+          if (count === 0) return;
+          const exactBonus = title.includes(q) ? 0.5 : 0;
+          scored.push({ catKey, key, info, score: count + exactBonus });
+        });
       });
 
       // Sort by score descending (best matches first)
       scored.sort((a, b) => b.score - a.score);
 
       if (scored.length === 0) {
-          movieList.innerHTML = '<p style="text-align:center; width:100%; margin-top:20px;">No results found.</p>';
-          return;
+        movieList.innerHTML =
+          '<p style="text-align:center; width:100%; margin-top:20px;">No results found.</p>';
+        return;
       }
 
       scored.forEach(({ catKey, key, info }) => {
-          const div = document.createElement('div');
-          div.className = 'movie-item';
-          div.innerHTML = `
-            <img src="${info.image||'https://via.placeholder.com/150'}" loading="lazy"/>
-            <p class="kanit-extralight">${info.title||key}</p>
+        const div = document.createElement("div");
+        div.className = "movie-item";
+        div.innerHTML = `
+            <img src="${info.image || "https://via.placeholder.com/150"}" loading="lazy"/>
+            <p class="kanit-extralight">${info.title || key}</p>
           `;
-          div.addEventListener('click', () => {
-              cat = catKey;
-              selectMovie(key);
-          });
-          movieList.appendChild(div);
+        div.addEventListener("click", () => {
+          cat = catKey;
+          selectMovie(key);
+        });
+        movieList.appendChild(div);
       });
     }, 300);
   });
 
-  // Newest added: first 2 anime + first 2 shows from data
+  // Newest added: first 3 anime + first 3 shows from data
   function renderNewestAdded() {
-    const listEl = document.getElementById('newestAddedList');
+    const listEl = document.getElementById("newestAddedList");
     if (!listEl) return;
-    listEl.innerHTML = '';
-    const animeFirst2 = Object.entries(mediaData.anime || {}).slice(0, 2);
-    const showsFirst2 = Object.entries(mediaData.shows || {}).slice(0, 2);
-    [...animeFirst2.map(([k,v]) => ({ catKey: 'anime', key: k, info: v })), ...showsFirst2.map(([k,v]) => ({ catKey: 'shows', key: k, info: v }))].forEach(({ catKey, key, info }) => {
-      const div = document.createElement('div');
-      div.className = 'newest-added-item';
-      div.innerHTML = `<img src="${info.image || 'https://via.placeholder.com/150'}" loading="lazy" alt=""><span>${info.title || key}</span>`;
-      div.addEventListener('click', () => {
-        if (heroSection) heroSection.style.display = 'none';
-        if (categoryContainer) categoryContainer.style.display = 'none';
-        if (movieListWrapper) movieListWrapper.style.display = 'none';
+    listEl.innerHTML = "";
+    const animeFirst3 = Object.entries(mediaData.anime || {})
+      .filter(([, v]) => !v._hidden)
+      .slice(0, 3);
+    const showsFirst3 = Object.entries(mediaData.shows || {}).slice(0, 3);
+    [
+      ...animeFirst3.map(([k, v]) => ({ catKey: "anime", key: k, info: v })),
+      ...showsFirst3.map(([k, v]) => ({ catKey: "shows", key: k, info: v })),
+    ].forEach(({ catKey, key, info }) => {
+      const div = document.createElement("div");
+      div.className = "newest-added-item";
+      div.dataset.cat = catKey; // drives the CSS ::before badge
+      div.innerHTML = `<img src="${info.image || "https://via.placeholder.com/150"}" loading="lazy" alt=""><span>${info.title || key}</span>`;
+      div.addEventListener("click", () => {
+        if (heroSection) heroSection.style.display = "none";
+        if (categoryContainer) categoryContainer.style.display = "none";
+        if (movieListWrapper) movieListWrapper.style.display = "none";
         cat = catKey;
         selectMovie(key);
       });
@@ -426,28 +566,67 @@ function applyTheme(key) {
   }
   renderNewestAdded();
 
-  // Category Banners Click (only the category cards, not the link inside Movies)
-  document.querySelectorAll('.movie-item-banner').forEach(b => {
-    b.addEventListener('click', async (e) => {
-      if (e.target.closest('a.category-card-link')) return;
-      const c = b.dataset.category;
+  // Category Nav Bar button clicks
+  document.querySelectorAll(".cat-nav-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const c = btn.dataset.cat;
       if (!c) return;
-      if (c === 'lunora') {
+      window._vwlCurrentCat = c;
+      if (c === "lunora") {
         const loader = window.lunoraLoader;
-        if (!loader) { console.warn('Lunora loader not available'); return; }
+        if (!loader) {
+          console.warn("Lunora loader not available");
+          return;
+        }
         if (!loader.isLoaded()) {
-          if(heroSection) heroSection.style.display = 'none';
-          if(categoryContainer) categoryContainer.style.display = 'none';
-          if(movieListWrapper) { movieListWrapper.style.display = 'block'; movieListWrapper.style.opacity = '0.6'; }
-          movieList.innerHTML = '<div class="movie-item" style="flex:1 1 100%;text-align:center;padding:40px;min-width:100%;">Loading Lunora content...</div>';
+          if (heroSection) heroSection.style.display = "none";
+          if (movieListWrapper) movieListWrapper.style.display = "block";
+          movieList.innerHTML =
+            '<div style="grid-column:1/-1;text-align:center;padding:40px;opacity:0.6;">Loading Movies…</div>';
           try {
             const data = await loader.load();
             mediaData.lunora = data;
           } catch (err) {
-            movieList.innerHTML = '<div class="movie-item" style="flex:1 1 100%;text-align:center;padding:40px;color:#e74c3c;min-width:100%;">Failed to load Lunora. Check network.</div>';
+            movieList.innerHTML =
+              '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#e74c3c;">Failed to load Lunora. Check network.</div>';
             return;
           }
-          if(movieListWrapper) movieListWrapper.style.opacity = '';
+        }
+      }
+      renderList(c);
+    });
+  });
+
+  // Category Banners Click (only the category cards, not the link inside Movies)
+  document.querySelectorAll(".movie-item-banner").forEach((b) => {
+    b.addEventListener("click", async (e) => {
+      if (e.target.closest("a.category-card-link")) return;
+      const c = b.dataset.category;
+      if (!c) return;
+      if (c === "lunora") {
+        const loader = window.lunoraLoader;
+        if (!loader) {
+          console.warn("Lunora loader not available");
+          return;
+        }
+        if (!loader.isLoaded()) {
+          if (heroSection) heroSection.style.display = "none";
+          if (categoryContainer) categoryContainer.style.display = "none";
+          if (movieListWrapper) {
+            movieListWrapper.style.display = "block";
+            movieListWrapper.style.opacity = "0.6";
+          }
+          movieList.innerHTML =
+            '<div class="movie-item" style="flex:1 1 100%;text-align:center;padding:40px;min-width:100%;">Loading Lunora content...</div>';
+          try {
+            const data = await loader.load();
+            mediaData.lunora = data;
+          } catch (err) {
+            movieList.innerHTML =
+              '<div class="movie-item" style="flex:1 1 100%;text-align:center;padding:40px;color:#e74c3c;min-width:100%;">Failed to load Lunora. Check network.</div>';
+            return;
+          }
+          if (movieListWrapper) movieListWrapper.style.opacity = "";
         }
       }
       renderList(c);
@@ -455,114 +634,163 @@ function applyTheme(key) {
   });
 
   // Dubbed Toggle
-  const dubToggle = document.querySelector('.dubbed-toggle');
-  if(dubToggle) {
-      dubToggle.addEventListener('click', e => {
-        e.preventDefault(); dubbed = !dubbed; saveState();
-        e.target.classList.toggle('active', dubbed); updateEpisodeList(); updateVideo(ep); updateDownloads();
-      }); 
+  const dubToggle = document.querySelector(".dubbed-toggle");
+  if (dubToggle) {
+    dubToggle.addEventListener("click", (e) => {
+      e.preventDefault();
+      dubbed = !dubbed;
+      saveState();
+      e.target.classList.toggle("active", dubbed);
+      updateEpisodeList();
+      updateVideo(ep);
+      updateDownloads();
+    });
   }
 
   // Player Buttons
-  const prevBtn = document.getElementById('prevEpisode');
-  if(prevBtn) prevBtn.addEventListener('click', e => { e.preventDefault(); updateVideo(ep-1); updateDownloads(); });
-  
-  const nextBtn = document.getElementById('nextEpisode');
-  if(nextBtn) nextBtn.addEventListener('click', e => { e.preventDefault(); updateVideo(ep+1); updateDownloads(); });
+  const prevBtn = document.getElementById("prevEpisode");
+  if (prevBtn)
+    prevBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      updateVideo(ep - 1);
+      updateDownloads();
+    });
 
-  const backBtn = document.getElementById('backToCategory');
-  if(backBtn) backBtn.addEventListener('click', e => { e.preventDefault(); resetView(); });
+  const nextBtn = document.getElementById("nextEpisode");
+  if (nextBtn)
+    nextBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      updateVideo(ep + 1);
+      updateDownloads();
+    });
+
+  const backBtn = document.getElementById("backToCategory");
+  if (backBtn)
+    backBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      resetView();
+    });
 
   function resetView() {
-    if(episodeContainer) episodeContainer.style.display = 'none';
-    if(movieListWrapper) movieListWrapper.style.display = 'none';
-    if(heroSection) heroSection.style.display = '';
-    if(categoryContainer) categoryContainer.style.display = '';
-    localStorage.removeItem('lastState');
+    if (episodeContainer) episodeContainer.style.display = "none";
+    document.body.classList.remove("modal-open");
+    if (movieListWrapper) movieListWrapper.style.display = "none";
+    if (heroSection) heroSection.style.display = "";
+    if (categoryContainer) categoryContainer.style.display = "";
+    localStorage.removeItem("lastState");
     // Clear search on back
-    const sInput = document.getElementById('searchInput');
-    if(sInput) sInput.value = '';
-    const vid = document.getElementById('videoPlayer');
-    if(vid) vid.src = ""; // Stop audio
+    const sInput = document.getElementById("searchInput");
+    if (sInput) sInput.value = "";
+    const vid = document.getElementById("videoPlayer");
+    if (vid) vid.src = ""; // Stop audio
+    // Hide category nav bar and clear now-playing
+    const navBar = document.getElementById("categoryNavBar");
+    if (navBar) navBar.style.display = "none";
+    const npt = document.getElementById("nowPlayingTitle");
+    if (npt) npt.textContent = "";
+    const clearBtn = document.getElementById("searchClear");
+    if (clearBtn) clearBtn.style.display = "none";
   }
 
   // Render Changelogs
-  (function renderChangelogs(){
+  (function renderChangelogs() {
     if (!Array.isArray(window.changelogs)) return;
-    const container = document.getElementById('changelog-container');
-    if(!container) return;
-    window.changelogs.forEach(log => {
-      const box = document.createElement('div');
-      box.className = 'changelog-box';
+    const container = document.getElementById("changelog-container");
+    if (!container) return;
+    window.changelogs.forEach((log) => {
+      const box = document.createElement("div");
+      box.className = "changelog-box";
       box.innerHTML = `<h3>${log.version}</h3><p>${log.description}</p>`;
       container.appendChild(box);
     });
   })();
 
   // Ensure hero/category use explicit flex on initial load (matches wider layout when returning via title)
-  let last = JSON.parse(localStorage.getItem('lastState') || 'null');
+  let last = JSON.parse(localStorage.getItem("lastState") || "null");
   if (!last?.cat) {
-    if(heroSection) heroSection.style.display = 'flex';
-    if(categoryContainer) categoryContainer.style.display = 'flex';
+    if (heroSection) heroSection.style.display = "flex";
+    if (categoryContainer) categoryContainer.style.display = "flex";
   }
-  if (last?.cat === 'lunora' && window.lunoraLoader && !window.lunoraLoader.isLoaded()) {
+  if (
+    last?.cat === "lunora" &&
+    window.lunoraLoader &&
+    !window.lunoraLoader.isLoaded()
+  ) {
     try {
       const data = await window.lunoraLoader.load();
       mediaData.lunora = data;
-    } catch (_) { last = null; }
+    } catch (_) {
+      last = null;
+    }
   }
   if (last?.cat && mediaData[last.cat]?.[last.mov]) {
     renderList(last.cat);
-    if(movieListWrapper) movieListWrapper.style.display = 'block';
+    if (movieListWrapper) movieListWrapper.style.display = "block";
     mov = last.mov;
     season = last.season;
     ep = last.ep || 0;
     dubbed = !!last.dubbed;
-    document.querySelector('.dubbed-toggle')?.classList.toggle('active', dubbed);
+    document
+      .querySelector(".dubbed-toggle")
+      ?.classList.toggle("active", dubbed);
     updateSeasonSelector();
     updateEpisodeList();
     updateVideo(ep);
     updateDownloads();
-    if(episodeContainer) episodeContainer.style.display = 'flex';
+    if (episodeContainer) {
+      episodeContainer.style.display = "flex";
+      document.body.classList.add("modal-open");
+    }
+    // Restore now-playing title
+    const npt = document.getElementById("nowPlayingTitle");
+    if (npt)
+      npt.textContent = mediaData[last.cat]?.[last.mov]?.title || last.mov;
   }
 
   // Sidebar Logic
-  const sidebarToggle = document.getElementById('sidebarToggle');
-  const sidebarMenu = document.getElementById('sidebarMenu');
-  const sidebarOverlay = document.getElementById('sidebarOverlay');
-  const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+  const sidebarToggle = document.getElementById("sidebarToggle");
+  const sidebarMenu = document.getElementById("sidebarMenu");
+  const sidebarOverlay = document.getElementById("sidebarOverlay");
+  const sidebarCloseBtn = document.getElementById("sidebarCloseBtn");
 
-  if(sidebarToggle && sidebarMenu && sidebarOverlay) {
-      function openSidebar() {
-        sidebarMenu.classList.add('active');
-        sidebarOverlay.classList.add('active');
-        sidebarMenu.setAttribute('aria-hidden', 'false');
+  if (sidebarToggle && sidebarMenu && sidebarOverlay) {
+    function openSidebar() {
+      sidebarMenu.classList.add("active");
+      sidebarOverlay.classList.add("active");
+      sidebarMenu.setAttribute("aria-hidden", "false");
+    }
+
+    function closeSidebar() {
+      sidebarMenu.classList.remove("active");
+      sidebarOverlay.classList.remove("active");
+      sidebarMenu.setAttribute("aria-hidden", "true");
+    }
+
+    sidebarToggle.addEventListener("click", openSidebar);
+    if (sidebarCloseBtn)
+      sidebarCloseBtn.addEventListener("click", closeSidebar);
+    sidebarOverlay.addEventListener("click", closeSidebar);
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && sidebarMenu.classList.contains("active")) {
+        closeSidebar();
       }
-
-      function closeSidebar() {
-        sidebarMenu.classList.remove('active');
-        sidebarOverlay.classList.remove('active');
-        sidebarMenu.setAttribute('aria-hidden', 'true');
-      }
-
-      sidebarToggle.addEventListener('click', openSidebar);
-      if(sidebarCloseBtn) sidebarCloseBtn.addEventListener('click', closeSidebar);
-      sidebarOverlay.addEventListener('click', closeSidebar);
-
-      document.addEventListener('keydown', e => {
-        if(e.key === 'Escape' && sidebarMenu.classList.contains('active')) {
-          closeSidebar();
-        }
-      });
+    });
   }
 
   // Expose for watchlist (and any external module) to load content directly
-  window.viroPlay = async function(catKey, key) {
-    if (catKey === 'lunora' && window.lunoraLoader && !window.lunoraLoader.isLoaded()) {
+  window.viroPlay = async function (catKey, key) {
+    if (
+      catKey === "lunora" &&
+      window.lunoraLoader &&
+      !window.lunoraLoader.isLoaded()
+    ) {
       try {
         const data = await window.lunoraLoader.load();
         mediaData.lunora = data;
-      } catch (_) { return false; }
+      } catch (_) {
+        return false;
+      }
     }
     if (!mediaData[catKey] || !mediaData[catKey][key]) return false;
     cat = catKey;
