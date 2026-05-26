@@ -1,590 +1,718 @@
-/* === Virowatch Non Changelog now 0.16 === */
-    .bottom-text {
-      margin-bottom: 20px;
-      text-align: center;
-      opacity: 0.7;
-      font-size: 14px;
-    }
-/* === Reset & Base === */
+/* === Virowatch Desktop - Dark mode (Restored Colors) === */
+.bottom-text {
+    margin-bottom: 20px;
+    text-align: center;
+    opacity: 0.7;
+    font-size: 14px;
+}
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Kanit", sans-serif;  /* Normalize Kanit font everywhere */
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Kanit", sans-serif;
 }
 
 body {
-  background-color: #121212;
-  color: #eaeaea;
-  overflow-x: hidden;
-  line-height: 1.6;
+    background-color: #121212;
+    color: #eaeaea;
+    overflow-x: hidden;
+    line-height: 1.6;
 }
 
 /* === Scrollbar Styling === */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+    width: 8px;
+    height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #555;
-  border-radius: 4px;
+    background: #555;
+    border-radius: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: #1a1a1a;
+    background: #1a1a1a;
 }
 
-/* === Container === */
-.container, .episode-container {
-  overflow: visible;
+.container,
+.episode-container {
+    overflow: visible;
 }
 .container {
-  max-width: auto;
-  margin: auto;
-  padding: 20px;
+    max-width: auto;
+    margin: auto;
+    padding: 20px;
 }
 
-/* === Header === */
 header {
-  text-align: center;
-  margin-bottom: 30px;
+    text-align: center;
+    margin-bottom: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: #1a1a1a;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding-top: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #333;
+    margin-left: -20px;
+    margin-right: -20px;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 header h1 {
-  font-size: 2.5rem;
-  font-weight: 300;
-  color: white;
+    font-size: 2.5rem;
+    font-weight: 300;
+    color: white;
 }
 header img {
-  vertical-align: middle;
+    vertical-align: middle;
 }
 
-/* === Search === */
 .search-box {
-  display: flex;
-  justify-content: center;
-  margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
 }
+.search-input-wrap {
+    position: relative;
+    width: 80%;
+    max-width: 500px;
+}
+.search-input-wrap input,
 .search-box input {
-  background-color: #333;
-  color: #fff;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 6px;
-  width: 80%;
-  max-width: 500px;
-  font-size: 1rem;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    padding: 12px 36px 12px 20px;
+    border-radius: 6px;
+    width: 100%;
+    font-size: 1rem;
+}
+.search-clear-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 4px;
+    display: none;
+    transition: color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+.search-clear-btn:hover {
+    color: rgba(255, 255, 255, 0.7);
 }
 
-
-/* === Hero (Home: Newest + Categories) - centered === */
 #hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 40px;
-  width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
+    width: 100%;
 }
 
-/* --- Newest added: single compact row, no scroll --- */
 .newest-added {
-  margin-bottom: 28px;
-  width: 100%;
-  max-width: 640px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+    margin-bottom: 28px;
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 .newest-added-title {
-  font-family: inherit;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.75);
-  margin-bottom: 10px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.75);
+    margin-bottom: 10px;
 }
 .newest-added-grid {
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
 }
 .newest-added-item {
-  flex: 0 0 100px;
-  position: relative;
-  border-radius: 8px;
-  overflow: hidden;
-  cursor: pointer;
-  aspect-ratio: 2/3;
-  max-height: 150px;
-  border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    flex: 0 0 100px;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    aspect-ratio: 2/3;
+    max-height: 150px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
 }
 .newest-added-item:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 16px rgba(255,255,255,0.15);
-  border-color: rgba(255,255,255,0.25);
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
 }
 .newest-added-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 .newest-added-item span {
-  font-family: inherit;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 12px 6px 6px;
-  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: 500;
-  line-height: 1.15;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    font-family: inherit;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px 6px 6px;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.9) 0%,
+        transparent 100%
+    );
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 500;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* --- Browse by category (original size) --- */
 .categories-section {
-  margin-bottom: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  align-self: stretch;
-  width: 100%;
+    margin-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-self: stretch;
+    width: 100%;
 }
 .categories-title {
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.9);
-  margin-bottom: 24px;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 24px;
 }
 .category-cards {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 25px;
-  align-self: stretch;
-  width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+    align-self: stretch;
+    width: 100%;
 }
 .movie-item-banner.category-card {
-  flex: 1 1 280px;
-  max-width: 350px;
-  position: relative;
-  border-radius: 14px;
-  overflow: hidden;
-  cursor: pointer;
-  border: 2px solid rgba(255,255,255,0.06);
-  background: linear-gradient(145deg, rgba(30,30,30,0.9), rgba(20,20,20,0.95));
-  box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    flex: 1 1 280px;
+    max-width: 350px;
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.06);
+    background: linear-gradient(145deg, rgba(30, 30, 30, 0.9), rgba(20, 20, 20, 0.95));
+    box-shadow:
+        0 6px 20px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease,
+        border-color 0.3s ease;
 }
 .movie-item-banner.category-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 14px 36px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.12);
-  border-color: rgba(255,255,255,0.2);
+    transform: translateY(-4px);
+    box-shadow:
+        0 14px 36px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 .movie-item-banner.category-card img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  display: block;
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
 }
 .movie-item-banner.category-card .category-card-link {
-  display: block;
+    display: block;
 }
 .movie-item-banner.category-card .category-card-link:focus {
-  outline: none;
+    outline: none;
 }
-/* Lunora Movies: whole card is the link so label click also redirects */
-.movie-item-banner.category-card[data-category="movies"] .category-card-link--full {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
+.movie-item-banner.category-card[data-category="movies"]
+    .category-card-link--full {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
 }
-.movie-item-banner.category-card[data-category="movies"] .category-card-link--full .category-card-label {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  margin: 0;
-  padding: 20px 16px;
-  box-sizing: border-box;
-  background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
-  color: #fff;
-  font-size: 1.1rem;
-  font-weight: 500;
-  text-align: left;
-}
+.movie-item-banner.category-card[data-category="movies"]
+    .category-card-link--full
+    .category-card-label,
 .movie-item-banner .category-card-label,
 .movie-item-banner p {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  margin: 0;
-  padding: 20px 16px;
-  box-sizing: border-box;
-  background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
-  color: #fff;
-  font-size: 1.1rem;
-  font-weight: 500;
-  text-align: left;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20px 16px;
+    box-sizing: border-box;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.92) 0%,
+        rgba(0, 0, 0, 0.4) 60%,
+        transparent 100%
+    );
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-align: left;
 }
 
-/* === Movie List === */
+/* === Category Nav Bar === */
+.category-nav-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+.cat-nav-btn {
+    padding: 7px 18px;
+    border-radius: 99px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.65);
+    font-family: "Kanit", sans-serif;
+    font-size: 0.88rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.cat-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+.cat-nav-btn.active {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    font-weight: 500;
+}
+
 .movie-list-wrapper {
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 10px 0;
-  margin-bottom: 10px;
-  scroll-behavior: smooth;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  position: relative;
-  z-index: 2;
-}
-.movie-list-wrapper::-webkit-scrollbar {
-  height: 8px;
-}
-.movie-list-wrapper::-webkit-scrollbar-thumb {
-  background: #555;
-  border-radius: 4px;
-}
-.movie-list-wrapper::-webkit-scrollbar-track {
-  background: #1a1a1a;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 2;
 }
 
 .movie-list {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  gap: 14px;
-  padding: 5px 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 14px;
+    padding: 5px 0;
 }
 
 .movie-item {
-  flex: 0 0 auto;
-  width: 130px;
-  height: 190px;
-  background-color: #1f1f1f;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-  overflow: hidden;
-  cursor: pointer;
-  position: relative;
-  transition: transform 0.25s ease, box-shadow 0.3s ease;
-  scroll-snap-align: start;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2/3;
+    background-color: #1f1f1f;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.3s ease;
+    border: 1px solid #1f1f1f;
 }
 .movie-item:hover {
-  transform: scale(1.07);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+    transform: scale(1.07);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
 }
 .movie-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 12px;
-  transition: opacity 0.3s ease;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+    transition: opacity 0.3s ease;
 }
 .movie-item p {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  background: rgba(0, 0, 0, 0.65);
-  font-size: 0.85rem;
-  font-weight: 300;
-  color: #eee;
-  text-align: center;
-  padding: 6px 4px;
-  border-radius: 0 0 12px 12px;
-  backdrop-filter: blur(3px);
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.65);
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: #eee;
+    text-align: center;
+    padding: 6px 4px;
+    border-radius: 0 0 12px 12px;
+    backdrop-filter: blur(3px);
 }
 
-/* === Seasons Dropdown === */
 .seasons-dropdown {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  padding: 8px 12px;
-  background: #222;
-  border-radius: 8px;
-  max-width: 100%;
-  scrollbar-width: thin;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    padding: 8px 12px;
+    background: #222;
+    border-radius: 8px;
+    max-width: 100%;
+    scrollbar-width: thin;
 }
 .seasons-dropdown button {
-  flex: 0 0 auto;
-  padding: 8px 14px;
-  border: none;
-  border-radius: 6px;
-  background: #333;
-  color: #eee;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+    flex: 0 0 auto;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    background: #333;
+    color: #eee;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 .seasons-dropdown button.active {
-  background: #555;
+    background: #555;
+    color: #eee;
 }
 .seasons-dropdown button:hover {
-  background: #444;
+    background: #444;
 }
 
-/* === Episode Container === */
+/* === Episode Modal === */
 .episode-container {
-  display: flex;
-  gap: 5px;
-  margin-top: 45px;
-  align-items: stretch; /* This is the key */
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: #121212;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+body.modal-open {
+    overflow: hidden;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: rgba(26, 26, 26, 0.85);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+.modal-back-btn {
+    flex-shrink: 0;
+    padding: 7px 14px;
+    border-radius: 8px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #eee;
+    font-family: "Kanit", sans-serif;
+    font-size: 0.88rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+.modal-back-btn:hover {
+    background: #333;
+}
+.modal-title {
+    flex: 1;
+    font-family: "Kanit", sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #eee;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.modal-header-actions {
+    flex-shrink: 0;
+    display: flex;
+    gap: 8px;
+}
+.modal-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    min-height: 0;
 }
 .sidebar {
-  flex: 0 0 250px;
-  overflow-y: auto;
-  background: #2b2b2b;
-  padding: 10px;
-  border-radius: 10px;
-
-  /* Remove max-height if you want it to match .player */
-  max-height: none;
+    width: 260px;
+    flex-shrink: 0;
+    overflow-y: auto;
+    background: #2b2b2b;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 12px;
 }
 .episode {
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 10px;
-  background: #1a1a1a;
-  cursor: pointer;
-  transition: all 0.3s ease;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background: #1a1a1a;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid #333;
+    color: #eee;
 }
 .episode:hover {
-  transform: scale(1.03);
-  background-color: #3b3b3b;
+    transform: scale(1.03);
+    background-color: #3b3b3b;
 }
 .episode.active {
-  background: #444;
+    background: #444;
 }
 
 /* === Player Container === */
 .player {
-  flex: 1;
-  background: #000;
-  border-radius: 10px;
-  padding: 15px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-  z-index: 1;
+    flex: 1;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    position: relative;
 }
 
-/* === Video Frame === */
 iframe#videoPlayer {
-  width: 100%;
-  height: 65vh;
-  max-height: 600px;
-  border: none;
-  border-radius: 10px;
-  background-color: #000;
-  transition: opacity 0.3s ease;
+    flex: 1;
+    width: 100%;
+    min-height: 200px;
+    border: none;
+    background-color: #000;
+    transition: opacity 0.3s ease;
 }
 
-/* === Spinner While Loading === */
 .spinner {
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 60px;
-  height: 60px;
-  border: 6px solid #555;
-  border-top-color: #ccc;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  display: none;
-  z-index: 10;
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    border: 6px solid #555;
+    border-top-color: #ccc;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: none;
+    z-index: 10;
 }
 
-/* === Controls === */
-.controls {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 20px;
-  z-index: 1;
+/* === Player Controls Bar === */
+.player-controls {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    flex-wrap: wrap;
 }
 
-/* === Button Styles === */
 .button {
-  padding: 10px 20px;
-  border-radius: 25px;
-  background: linear-gradient(145deg, #2b2b2b, #1e1e1e);
-  color: #eaeaea;
-  font-size: 1rem;
-  text-decoration: none;
-  border: none;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  /* font-family removed here since * covers it */
+    padding: 10px 20px;
+    border-radius: 25px;
+    background: linear-gradient(145deg, #2b2b2b, #1e1e1e);
+    color: #eaeaea;
+    font-size: 1rem;
+    text-decoration: none;
+    border: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 .button:hover {
-  background: #3a3a3a;
-  transform: translateY(-2px);
+    background: #3a3a3a;
+    transform: translateY(-2px);
 }
-
-/* === Toggle Dubbed Button (Active State) === */
 .button.dubbed-toggle.active {
-  background: #666;
-  color: white;
-  font-weight: bold;
+    background: #666;
+    color: white;
+    font-weight: bold;
 }
 
-/* === Download Container === */
 #downloadContainer {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 15px;
-  width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+    width: 100%;
 }
 
-/* === Changelog === */
 .changelog-container {
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 10px;
-  padding: 15px;
-  max-height: 250px;
-  overflow-y: auto;
-  width: 100%;
-  margin-top: 40px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 15px;
+    max-height: 250px;
+    overflow-y: auto;
+    width: 100%;
+    margin-top: 40px;
 }
 .changelog-box {
-  background: #2a2a2a;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 10px;
+    background: #2a2a2a;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #333;
 }
 .changelog-box h3 {
-  color: #fff;
-  font-weight: 500;
-  margin-bottom: 5px;
+    color: #fff;
+    font-weight: 500;
+    margin-bottom: 5px;
 }
 .changelog-box p {
-  color: #ccc;
-  font-size: 0.9rem;
+    color: #ccc;
+    font-size: 0.9rem;
 }
 
-/* === Fade Effect === */
 .fade-out {
-  opacity: 0;
-  transition: opacity 0.3s ease;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 .fade-transition {
-  opacity: 0;
-  transition: opacity 0.3s ease;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 .fade-transition.show {
-  opacity: 1;
+    opacity: 1;
 }
 
-/* === Animations === */
 @keyframes spin {
-  100% {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
 }
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 .section-animate {
-  animation: fadeInUp 0.6s ease forwards;
+    animation: fadeInUp 0.6s ease forwards;
 }
 
-/* === Responsive === */
 @media (max-width: 768px) {
-  .episode-container {
-    flex-direction: column;
-  }
-  .sidebar {
-    width: 100%;
-    flex: unset;
-  }
-  .player {
-    padding: 10px;
-  }
-  iframe#videoPlayer {
-    height: 50vh;
-  }
-  .controls {
-    flex-direction: column;
-    gap: 8px;
-  }
-  .button {
-    width: 100%;
-    text-align: center;
-  }
+    .movie-list {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+    }
+    .modal-body {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        max-height: 180px;
+        flex-shrink: 0;
+    }
+    .modal-header {
+        padding: 8px 12px;
+        gap: 8px;
+    }
+    .modal-title {
+        font-size: 0.88rem;
+    }
+    .modal-back-btn {
+        padding: 5px 10px;
+        font-size: 0.82rem;
+    }
+    .player-controls {
+        padding: 8px 10px;
+        gap: 6px;
+    }
 }
 
-/* === Misc === */
 html {
-  scroll-behavior: smooth;
+    scroll-behavior: smooth;
 }
-p, span, label, button, input, textarea, div, h1, h2, h3, h4, h5, h6 {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  white-space: normal;
+p,
+span,
+label,
+button,
+input,
+textarea,
+div,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
 }
 
-/* === Season Selector === */
 #seasonSelector {
-  background: #1a1a1a;
-  color: #eaeaea;
-  font-weight: 300;
-  border: none;
-  border-radius: 10px;
-  padding: 10px 14px;
-  margin-bottom: 10px;
-  width: 100%;
-  font-size: 1rem;
-  box-sizing: border-box;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    background: #1a1a1a;
+    color: #eaeaea;
+    font-weight: 300;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    width: 100%;
+    font-size: 1rem;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition:
+        background-color 0.3s ease,
+        transform 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 #seasonSelector:hover,
 #seasonSelector:focus {
-  background-color: #333;
-  outline: none;
-  transform: scale(1.02);
+    background-color: #333;
+    outline: none;
+    transform: scale(1.02);
 }
-.episode-container {
-  max-height: 600px;
-  align-items: stretch;
-}
-.sidebar, .player {
-  max-height: 600px;
-}
-.player, .sidebar, .movie-item, .movie-item-banner, .button, .episode, #seasonSelector { opacity: 0; animation: simpleAppear 0.8s ease-out forwards; transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1); }
 
-@keyframes simpleAppear { from { opacity: 0; } to { opacity: 1; } }
+/* full-screen modal — height constraints removed */
+.movie-item,
+.movie-item-banner,
+.button,
+.episode,
+#seasonSelector {
+    opacity: 0;
+    animation: simpleAppear 0.8s ease-out forwards;
+    transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+@keyframes simpleAppear {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
 
 /* =====================================================
    VIROWATCH CSS PATCH — add to ALL theme CSS files
@@ -593,19 +721,19 @@ p, span, label, button, input, textarea, div, h1, h2, h3, h4, h5, h6 {
 
 /* .site-title replaces style="cursor: pointer;" on <h1> */
 .site-title {
-  cursor: pointer;
-  text-align: center;
+    cursor: pointer;
+    text-align: center;
 }
 
 /* .site-title-icon-link replaces bare <a> wrapper */
 .site-title-icon-link {
-  display: inline;
-  text-decoration: none;
+    display: inline;
+    text-decoration: none;
 }
 
 /* .site-title-icon replaces width="60" height="60" style="vertical-align: bottom;" on <img> */
 .site-title-icon {
-  width: 60px;
-  height: 60px;
-  vertical-align: bottom;
+    width: 60px;
+    height: 60px;
+    vertical-align: bottom;
 }
