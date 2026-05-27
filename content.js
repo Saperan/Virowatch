@@ -250,6 +250,47 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (clContainer) clContainer.style.marginTop = "20px";
   }
 
+  // Helper to handle and inject dynamic watermark modifications
+  function updateWatermarksAndBadges() {
+    // 1. Change "1080p" watermarks to "Vidsrc" and "stream" to "Anikoto" if they exist as DOM elements
+    document.querySelectorAll(".watermark, .badge, .stream-indicator").forEach(el => {
+      let txt = el.textContent.trim();
+      if (txt.toLowerCase() === "1080p") el.textContent = "Vidsrc";
+      if (txt.toLowerCase() === "stream") el.textContent = "Anikoto";
+    });
+
+    // 2. Add or remove gray Virowatch watermark based on category (anime.js / shows.js)
+    let existingVirowatch = document.getElementById("virowatch-anime-shows-watermark");
+    if (existingVirowatch) existingVirowatch.remove();
+
+    if ((cat === "anime" || cat === "shows") && episodeContainer) {
+      const vwBadge = document.createElement("div");
+      vwBadge.id = "virowatch-anime-shows-watermark";
+      vwBadge.textContent = "Virowatch";
+      // Embedded CSS styling to position it neatly over the video window seamlessly
+      vwBadge.style.cssText = `
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        color: rgba(128, 128, 128, 0.7);
+        font-family: 'Kanit', sans-serif;
+        font-size: 14px;
+        font-weight: bold;
+        pointer-events: none;
+        z-index: 10;
+        background: rgba(0, 0, 0, 0.4);
+        padding: 4px 8px;
+        border-radius: 4px;
+      `;
+      // Append it near the video player container
+      const playerWrapper = document.getElementById("videoPlayer")?.parentElement;
+      if (playerWrapper) {
+        playerWrapper.style.position = "relative";
+        playerWrapper.appendChild(vwBadge);
+      }
+    }
+  }
+
   // Select movie (Load Player)
   function selectMovie(key) {
     mov = key;
@@ -299,16 +340,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
     }
-    // ── Normal path ───────────────────────────────────────────────
+    
+    // ── Normal path & Faster Loading Execution ──────────────────────
     updateSeasonSelector();
     updateEpisodeList();
-    updateVideo(0);
-    updateDownloads();
+    
     if (episodeContainer) {
       episodeContainer.style.display = "flex";
       document.body.classList.add("modal-open");
       document.body.classList.remove("app-sidebar-open"); // close sidebar if open
     }
+
+    // FIX: Render structural changes first, then load iframe content to prevent black screens
+    setTimeout(() => {
+      updateVideo(0);
+      updateDownloads();
+      updateWatermarksAndBadges();
+    }, 50);
   }
 
   // When PitSport finishes loading, refresh the player if it's currently open
@@ -320,6 +368,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       updateEpisodeList();
       updateVideo(0);
       updateDownloads();
+      updateWatermarksAndBadges();
     }
   });
 
@@ -349,6 +398,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       updateEpisodeList();
       updateVideo(0);
       updateDownloads();
+      updateWatermarksAndBadges();
     });
     seasonSelectorContainer.appendChild(select);
   }
@@ -368,7 +418,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       div.className = "episode";
       div.textContent = titles[i] || `Episode ${i + 1}`;
       div.dataset.episodeIndex = i;
-      div.addEventListener("click", () => updateVideo(i));
+      div.addEventListener("click", () => {
+        updateVideo(i);
+        updateWatermarksAndBadges();
+      });
       container.appendChild(div);
     });
   }
@@ -383,14 +436,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const iframe = document.getElementById("videoPlayer");
 
     // --- NEW ANTI-POPUP LOGIC ---
-    // If watching PitSport, strictly sandbox the iframe to block new tabs and redirects.
     if (mov === "PITSORT") {
       iframe.setAttribute(
         "sandbox",
         "allow-scripts allow-same-origin allow-presentation allow-forms",
       );
     } else {
-      // Remove sandbox for normal content (Rumble) so it behaves natively.
       iframe.removeAttribute("sandbox");
     }
     // ----------------------------
@@ -439,7 +490,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ==========================================
   //  UPDATED SEARCH LOGIC (Mixes all content)
   // ==========================================
-  // Subsequence match: query letters appear in title in order (not necessarily consecutive)
   function matchesSubsequence(title, query) {
     if (!query.length) return true;
     let j = 0;
@@ -449,7 +499,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     return j === query.length;
   }
 
-  // How many query letters appear in title in order (0..query.length). Used to rank "closest" matches.
   function subsequenceMatchCount(title, query) {
     if (!query.length) return 0;
     let j = 0;
@@ -459,7 +508,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     return j;
   }
 
-  // Search clear button
   const searchClearBtn = document.getElementById("searchClear");
   if (searchClearBtn) {
     searchClearBtn.addEventListener("click", () => {
@@ -479,7 +527,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     timer = setTimeout(() => {
       const q = e.target.value.trim().toLowerCase();
 
-      // 1. If empty, go back to Categories
       if (!q) {
         if (heroSection) heroSection.style.display = "";
         if (categoryContainer) categoryContainer.style.display = "";
@@ -490,12 +537,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      // 2. If typing, Hide Categories & Show List Wrapper
       if (heroSection) heroSection.style.display = "none";
       if (categoryContainer) categoryContainer.style.display = "none";
       if (movieListWrapper) movieListWrapper.style.display = "block";
 
-      // 3. Score all items: how many query letters match in order (+ bonus for exact substring)
       movieList.innerHTML = "";
       const categoriesToCheck = ["movies", "shows", "anime", "lunora"];
       const scored = [];
@@ -512,7 +557,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
       });
 
-      // Sort by score descending (best matches first)
       scored.sort((a, b) => b.score - a.score);
 
       if (scored.length === 0) {
@@ -534,10 +578,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
         movieList.appendChild(div);
       });
-    }, 300);
+    }, 150); // Lowered from 300 to 150ms for faster query responsiveness
   });
 
-  // Newest added: first 3 anime + first 3 shows from data
+  // Newest added
   function renderNewestAdded() {
     const listEl = document.getElementById("newestAddedList");
     if (!listEl) return;
@@ -552,7 +596,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     ].forEach(({ catKey, key, info }) => {
       const div = document.createElement("div");
       div.className = "newest-added-item";
-      div.dataset.cat = catKey; // drives the CSS ::before badge
+      div.dataset.cat = catKey;
       div.innerHTML = `<img src="${info.image || "https://via.placeholder.com/150"}" loading="lazy" alt=""><span>${info.title || key}</span>`;
       div.addEventListener("click", () => {
         if (heroSection) heroSection.style.display = "none";
@@ -574,21 +618,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       window._vwlCurrentCat = c;
       if (c === "lunora") {
         const loader = window.lunoraLoader;
-        if (!loader) {
-          console.warn("Lunora loader not available");
-          return;
-        }
+        if (!loader) return;
         if (!loader.isLoaded()) {
           if (heroSection) heroSection.style.display = "none";
           if (movieListWrapper) movieListWrapper.style.display = "block";
-          movieList.innerHTML =
-            '<div style="grid-column:1/-1;text-align:center;padding:40px;opacity:0.6;">Loading Movies…</div>';
+          movieList.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;opacity:0.6;">Loading Movies…</div>';
           try {
             const data = await loader.load();
             mediaData.lunora = data;
           } catch (err) {
-            movieList.innerHTML =
-              '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#e74c3c;">Failed to load Lunora. Check network.</div>';
+            movieList.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#e74c3c;">Failed to load Lunora. Check network.</div>';
             return;
           }
         }
@@ -597,7 +636,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  // Category Banners Click (only the category cards, not the link inside Movies)
+  // Category Banners Click
   document.querySelectorAll(".movie-item-banner").forEach((b) => {
     b.addEventListener("click", async (e) => {
       if (e.target.closest("a.category-card-link")) return;
@@ -605,10 +644,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!c) return;
       if (c === "lunora") {
         const loader = window.lunoraLoader;
-        if (!loader) {
-          console.warn("Lunora loader not available");
-          return;
-        }
+        if (!loader) return;
         if (!loader.isLoaded()) {
           if (heroSection) heroSection.style.display = "none";
           if (categoryContainer) categoryContainer.style.display = "none";
@@ -616,14 +652,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             movieListWrapper.style.display = "block";
             movieListWrapper.style.opacity = "0.6";
           }
-          movieList.innerHTML =
-            '<div class="movie-item" style="flex:1 1 100%;text-align:center;padding:40px;min-width:100%;">Loading Lunora content...</div>';
+          movieList.innerHTML = '<div class="movie-item" style="flex:1 1 100%;text-align:center;padding:40px;min-width:100%;">Loading Lunora content...</div>';
           try {
             const data = await loader.load();
             mediaData.lunora = data;
           } catch (err) {
-            movieList.innerHTML =
-              '<div class="movie-item" style="flex:1 1 100%;text-align:center;padding:40px;color:#e74c3c;min-width:100%;">Failed to load Lunora. Check network.</div>';
+            movieList.innerHTML = '<div class="movie-item" style="flex:1 1 100%;text-align:center;padding:40px;color:#e74c3c;min-width:100%;">Failed to load Lunora. Check network.</div>';
             return;
           }
           if (movieListWrapper) movieListWrapper.style.opacity = "";
@@ -644,6 +678,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       updateEpisodeList();
       updateVideo(ep);
       updateDownloads();
+      updateWatermarksAndBadges();
     });
   }
 
@@ -654,6 +689,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       e.preventDefault();
       updateVideo(ep - 1);
       updateDownloads();
+      updateWatermarksAndBadges();
     });
 
   const nextBtn = document.getElementById("nextEpisode");
@@ -662,6 +698,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       e.preventDefault();
       updateVideo(ep + 1);
       updateDownloads();
+      updateWatermarksAndBadges();
     });
 
   const backBtn = document.getElementById("backToCategory");
@@ -678,18 +715,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (heroSection) heroSection.style.display = "";
     if (categoryContainer) categoryContainer.style.display = "";
     localStorage.removeItem("lastState");
-    // Clear search on back
     const sInput = document.getElementById("searchInput");
     if (sInput) sInput.value = "";
     const vid = document.getElementById("videoPlayer");
-    if (vid) vid.src = ""; // Stop audio
-    // Hide category nav bar and clear now-playing
+    if (vid) vid.src = ""; 
     const navBar = document.getElementById("categoryNavBar");
     if (navBar) navBar.style.display = "none";
     const npt = document.getElementById("nowPlayingTitle");
     if (npt) npt.textContent = "";
     const clearBtn = document.getElementById("searchClear");
     if (clearBtn) clearBtn.style.display = "none";
+    
+    let existingVirowatch = document.getElementById("virowatch-anime-shows-watermark");
+    if (existingVirowatch) existingVirowatch.remove();
   }
 
   // Render Changelogs
@@ -705,7 +743,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   })();
 
-  // Ensure hero/category use explicit flex on initial load (matches wider layout when returning via title)
+  // Initial load state checks
   let last = JSON.parse(localStorage.getItem("lastState") || "null");
   if (!last?.cat) {
     if (heroSection) heroSection.style.display = "flex";
@@ -735,13 +773,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       ?.classList.toggle("active", dubbed);
     updateSeasonSelector();
     updateEpisodeList();
-    updateVideo(ep);
-    updateDownloads();
+    
     if (episodeContainer) {
       episodeContainer.style.display = "flex";
       document.body.classList.add("modal-open");
     }
-    // Restore now-playing title
+    
+    setTimeout(() => {
+      updateVideo(ep);
+      updateDownloads();
+      updateWatermarksAndBadges();
+    }, 50);
+
     const npt = document.getElementById("nowPlayingTitle");
     if (npt)
       npt.textContent = mediaData[last.cat]?.[last.mov]?.title || last.mov;
@@ -778,7 +821,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Expose for watchlist (and any external module) to load content directly
   window.viroPlay = async function (catKey, key) {
     if (
       catKey === "lunora" &&
