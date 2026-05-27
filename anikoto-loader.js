@@ -1,12 +1,17 @@
 /**
- * anikoto-loader.js  —  Virowatch × Anikoto / MegaPlay  v3.2
+ * anikoto-loader.js  —  Virowatch × Anikoto / MegaPlay  v3.5
  *
- * Fixes:
+ * Fixes & Enhancements:
  * - Reliable proxy chain with retries + safe JSON parsing
  * - Hover-prefetch so clicking a card feels instant
  * - Background preloads extra pages so search has real coverage
  * - Search shows result count + "still loading" hint
  * - Deep master database search endpoint queries included
+ * - Persistent localStorage cache for instant cross-session fuzzy search
+ * - Aggressive data minimization to respect storage quotas (~10k+ series capability)
+ * - Supercharged aggressive background crawling (10 pages concurrently, 50ms sleep)
+ * - Live Search Result Injection (Populates active search screen dynamically as bg works)
+ * - FIX: Global Search Activation (Anime results now search instantly without needing to click the Anime tab first)
  */
 (function () {
   "use strict";
@@ -16,6 +21,7 @@
   const PER_PAGE = 24;
   const TIMEOUT  = 10000;
   const BG_PAGES = 6; // extra pages silently preloaded for search
+  const CACHE_KEY = "anikoto_cache";
 
   // ── Proxy list ────────────────────────────────────────────────────
   const PROXIES = [
@@ -75,13 +81,75 @@
   }
 
   // ── State ──────────────────────────────────────────────────────────
-  let page       = 0;
-  let totalPages = 1;
-  let fetching   = false;
-  let bgLoading  = false;
-  let cache      = [];   // all fetched anime metadata (drives search)
-  let iObs       = null;
-  let searchTid  = null;
+  let page               = 0;
+  let totalPages         = 1;
+  let fetching           = false;
+  let bgLoading          = false;
+  let cache              = [];   // all fetched anime metadata (drives search)
+  let iObs               = null;
+  let searchTid          = null;
+  let currentSearchQuery = "";   // Tracks active search for live injection
+
+  // ── Persistent Cache Management ────────────────────────────────────
+  function loadCache() {
+    try {
+      const stored = localStorage.getItem(CACHE_KEY);
+      if (stored) {
+        cache = JSON.parse(stored);
+      }
+    } catch (e) {
+      console.warn("Anikoto: Unable to parse local storage cache.", e);
+    }
+  }
+
+  function saveToCache(items) {
+    if (!Array.isArray(items)) return;
+
+    const existingIds = new Set(cache.map(a => String(a.id)));
+    let hasNewData = false;
+    let newlyAdded = [];
+
+    items.forEach(item => {
+      const idStr = String(item.id);
+      if (!existingIds.has(idStr)) {
+        // Data Minimization: Save only critical UI/Search keys to maximize quota space
+        const cacheObj = {
+          id: item.id,
+          title: item.title || "",
+          poster: item.poster || item.image || ""
+        };
+        cache.push(cacheObj);
+        newlyAdded.push(cacheObj);
+        existingIds.add(idStr);
+        hasNewData = true;
+      }
+    });
+
+    if (hasNewData) {
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+      } catch (e) {
+        console.error("Anikoto: Local storage quota exceeded or unavailable.", e);
+      }
+
+      // Dynamically inject newly discovered hits directly into active user search
+      injectLiveResults(newlyAdded);
+
+      // Dynamically append new cards to the grid if the anime category is currently open
+      if (isAnimeView()) {
+        const grid = document.getElementById("anikoto-grid");
+        if (grid) {
+          newlyAdded.forEach(item => {
+            if (!grid.querySelector(`[data-ani-id="${item.id}"]`)) {
+              // Insert before the sentinel so infinite-scroll stays at the bottom
+              const sentinel = document.getElementById("anikoto-sentinel");
+              grid.insertBefore(makeCard(item), sentinel || null);
+            }
+          });
+        }
+      }
+    }
+  }
 
   // ── Embed URL ──────────────────────────────────────────────────────
   function embedUrl(ep, type) {
@@ -157,8 +225,8 @@
     card.dataset.aniId = String(item.id);
     card.dataset.done  = "0";
 
-    const img  = document.createElement("img");
-    img.src     = item.poster || "";
+    const img   = document.createElement("img");
+    img.src     = item.poster || item.image || ""; // Fallback support for cached schemas
     img.alt     = "";
     img.loading = "lazy";
 
@@ -168,7 +236,7 @@
 
     const badge = document.createElement("span");
     badge.className   = "ani-badge";
-    badge.textContent = "STREAM";
+    badge.textContent = "Anikoto";
 
     card.appendChild(img);
     card.appendChild(p);
@@ -193,6 +261,21 @@
     document.getElementById("anikoto-grid")
       ?.querySelectorAll(".ani-skeleton")
       .forEach(sk => sk.remove());
+  }
+
+  // ── Render cached items to the grid immediately ───────────────────
+  // Called once after buildDOM() — gives instant first-paint from localStorage
+  // before any network response arrives.
+  function renderCacheToGrid() {
+    if (!cache.length) return;
+    const grid = document.getElementById("anikoto-grid");
+    if (!grid) return;
+    cache.forEach(item => {
+      if (!grid.querySelector(`[data-ani-id="${item.id}"]`)) {
+        grid.appendChild(makeCard(item));
+      }
+    });
+    armObserver();
   }
 
   // ── Load page (visible grid) ──────────────────────────────────────
@@ -223,37 +306,44 @@
     totalPages = pg.total_pages || 1;
 
     const items = data.data || [];
-    cache = cache.concat(items);
+    saveToCache(items);
 
     const grid = document.getElementById("anikoto-grid");
-    if (grid) items.forEach(item => grid.appendChild(makeCard(item)));
+    if (grid) {
+      // Grid handles rendering current page updates fresh
+      items.forEach(item => {
+        if (!grid.querySelector(`[data-ani-id="${item.id}"]`)) {
+          grid.appendChild(makeCard(item));
+        }
+      });
+    }
 
     armObserver();
 
     if (n === 1 && !bgLoading) bgPreload();
   }
 
-  // ── Background preload (for search) ──────────────────────────────
+  // ── Aggressive Background Preload ─────────────────────────────────
   async function bgPreload() {
     bgLoading = true;
     let p = 2;
     while (p <= totalPages) {
       const batch = [];
-      for (let i = 0; i < 4 && p <= totalPages; i++, p++) {
+      // Pull 10 pages concurrently to maximize speeds
+      for (let i = 0; i < 10 && p <= totalPages; i++, p++) {
         batch.push(apiFetch(`${BASE}/recent-anime?page=${p}&per_page=${PER_PAGE}`));
       }
       const results = await Promise.all(batch);
       for (const data of results) {
         if (!data?.ok) continue;
         const items = data.data || [];
-        const existingIds = new Set(cache.map(a => a.id));
-        const fresh = items.filter(a => !existingIds.has(a.id));
-        cache = cache.concat(fresh);
+        saveToCache(items); // Instantly passes new batches into local cache and search injector
         if (data.pagination?.total_pages) totalPages = data.pagination.total_pages;
       }
-      await sleep(300);
+      await sleep(50); // Minimal sleep delay between batches
     }
     bgLoading = false;
+    console.log(`Anikoto: Full database cached! Total items: ${cache.length}`);
   }
 
   // ── Infinite scroll ───────────────────────────────────────────────
@@ -319,6 +409,39 @@
 
   let currentSearchId = 0; 
 
+  // ── Live Result Injection ──────────────────────────────────────────
+  function injectLiveResults(newItems) {
+    if (!currentSearchQuery || currentSearchQuery.length < 2) return;
+
+    const ml = document.getElementById("movieList");
+    if (!ml) return;
+
+    const liveHits = newItems.filter(a => fuzzyMatch(a.title, currentSearchQuery));
+    if (liveHits.length === 0) return;
+
+    let addedCount = 0;
+    liveHits.forEach(a => {
+      if (!ml.querySelector(`[data-ani-id="${a.id}"]`)) {
+        // Surgically append any background matches into the search list view dynamically
+        const separator = ml.querySelector(".ani-search-sep");
+        if (separator) {
+          ml.insertBefore(makeCard(a), separator);
+        } else {
+          ml.appendChild(makeCard(a));
+        }
+        addedCount++;
+      }
+    });
+
+    if (addedCount > 0) {
+      const indicator = Array.from(ml.querySelectorAll('.ani-search-sep')).find(el => el.textContent.includes("matches") || el.textContent.includes("Searching"));
+      if (indicator && indicator.textContent.includes("Searching")) {
+        indicator.textContent = `✨ Background worker matched ${addedCount} more titles live...`;
+        indicator.style.color = "rgba(99,102,241, 0.9)";
+      }
+    }
+  }
+
   async function doSearch(q) {
     cleanSearchCards();
     if (!q || q.length < 2) return;
@@ -335,7 +458,7 @@
       ml.insertBefore(card, ml.children[targetIndex] || null);
     }
 
-    // 1. Instant Local Search (Fixed: changed createCard to makeCard)
+    // 1. Instant Local Search
     const localHits = cache.filter(a => fuzzyMatch(a.title, q));
     
     if (localHits.length > 0) {
@@ -362,6 +485,10 @@
 
       if (res?.ok && Array.isArray(res.data)) {
         const remoteHits = res.data;
+        
+        // Save newly found remote hits to cache so they are remembered next time
+        saveToCache(remoteHits);
+
         const newHits = remoteHits.filter(item => !localHits.some(local => String(local.id) === String(item.id)));
 
         if (localHits.length === 0 && newHits.length === 0) {
@@ -373,7 +500,6 @@
           return;
         }
 
-        // Fixed: changed createCard to makeCard here too
         newHits.slice(0, 12).forEach(a => {
           insertMixed(makeCard(a));
         });
@@ -396,22 +522,22 @@
     }
   }
 
-  // ── Hook Search Event Listener (Fixed: Restored missing function) ──
+  // ── Hook Search Event Listener ─────────────────────────────────────
   function hookSearch() {
     const input = document.getElementById("searchInput");
     if (!input) return;
     input.addEventListener("input", (e) => {
-      if (window._vwlCurrentCat === "anime") {
-        clearTimeout(searchTid);
-        const q = e.target.value.trim();
-        searchTid = setTimeout(() => {
-          if (q.length < 2) {
-            cleanSearchCards();
-          } else {
-            doSearch(q);
-          }
-        }, 350);
-      }
+      clearTimeout(searchTid);
+      const q = e.target.value.trim();
+      currentSearchQuery = q; // Save the updated active query strings for live injection updates
+
+      searchTid = setTimeout(() => {
+        if (q.length < 2) {
+          cleanSearchCards();
+        } else {
+          doSearch(q);
+        }
+      }, 350);
     });
   }
 
@@ -473,13 +599,15 @@
 
   // ── Init ──────────────────────────────────────────────────────────
   document.addEventListener("DOMContentLoaded", () => {
+    loadCache(); // Hydrate local cache instantly on document load
     setTimeout(() => {
       injectCSS();
       if (!buildDOM()) return;
       watchVisibility();
       updateVis();
       hookSearch();
-      loadPage(1);
+      renderCacheToGrid(); // Paint cached cards instantly — no network wait
+      loadPage(1);         // Then fetch fresh data and fill in gaps / new arrivals
     }, 300);
   });
 })();
