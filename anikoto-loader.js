@@ -52,11 +52,6 @@
 
   // ── Core fetch with proxy chain + retry ───────────────────────────
   async function apiFetch(url, retries = 2) {
-    try {
-      const r = await fetch(url);
-      if (r.ok) return r.json();
-    } catch (_) {}
-
     const order = winProxy !== null
       ? [winProxy, ...PROXIES.map((_, i) => i).filter(i => i !== winProxy)]
       : PROXIES.map((_, i) => i);
@@ -241,16 +236,22 @@
   // ── Background preload (for search) ──────────────────────────────
   async function bgPreload() {
     bgLoading = true;
-    for (let p = 2; p <= Math.min(BG_PAGES, totalPages); p++) {
-      while (fetching) await sleep(600);
-      await sleep(700); 
-      const data = await apiFetch(`${BASE}/recent-anime?page=${p}&per_page=${PER_PAGE}`);
-      if (!data?.ok) break;
-      const items = data.data || [];
-      const existingIds = new Set(cache.map(a => a.id));
-      const fresh = items.filter(a => !existingIds.has(a.id));
-      cache = cache.concat(fresh);
-      if (data.pagination?.total_pages) totalPages = data.pagination.total_pages;
+    let p = 2;
+    while (p <= totalPages) {
+      const batch = [];
+      for (let i = 0; i < 4 && p <= totalPages; i++, p++) {
+        batch.push(apiFetch(`${BASE}/recent-anime?page=${p}&per_page=${PER_PAGE}`));
+      }
+      const results = await Promise.all(batch);
+      for (const data of results) {
+        if (!data?.ok) continue;
+        const items = data.data || [];
+        const existingIds = new Set(cache.map(a => a.id));
+        const fresh = items.filter(a => !existingIds.has(a.id));
+        cache = cache.concat(fresh);
+        if (data.pagination?.total_pages) totalPages = data.pagination.total_pages;
+      }
+      await sleep(300);
     }
     bgLoading = false;
   }
@@ -327,13 +328,20 @@
 
     const mySearchId = ++currentSearchId;
 
+    function insertMixed(card) {
+      const nativeCards = Array.from(ml.children).filter(c => !c.classList.contains('ani-card') && !c.classList.contains('ani-search-sep'));
+      const aniCards = Array.from(ml.children).filter(c => c.classList.contains('ani-card'));
+      const targetIndex = Math.min(aniCards.length * 2, nativeCards.length + aniCards.length);
+      ml.insertBefore(card, ml.children[targetIndex] || null);
+    }
+
     // 1. Instant Local Search (Fixed: changed createCard to makeCard)
     const localHits = cache.filter(a => fuzzyMatch(a.title, q));
     
     if (localHits.length > 0) {
       localHits.forEach(a => {
         if (!ml.querySelector(`[data-ani-id="${a.id}"]`)) {
-          ml.appendChild(makeCard(a));
+          insertMixed(makeCard(a));
         }
       });
     }
@@ -367,7 +375,7 @@
 
         // Fixed: changed createCard to makeCard here too
         newHits.slice(0, 12).forEach(a => {
-          ml.appendChild(makeCard(a));
+          insertMixed(makeCard(a));
         });
 
         const totalCount = localHits.length + newHits.length;
