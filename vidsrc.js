@@ -95,7 +95,7 @@
     window.mediaData.lunora      = window.mediaData.lunora || {};
     window.mediaData.lunora[`VIDSRC_${id}`] = {
       title   : title,
-      image   : `https://via.placeholder.com/300x450/111111/ffffff?text=${encodeURIComponent(title)}`,
+      image   : "data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==",
       _hidden : true,
       VIDSRC_S1: {
         chapter       : "Movie",
@@ -125,13 +125,14 @@
     const card = document.createElement("div");
     card.className       = "movie-item vidsrc-card";
     card.dataset.vsrcId  = String(item.imdb_id);
+    card.dataset.movie   = `VIDSRC_${item.imdb_id}`;
 
     const img  = document.createElement("img");
     if (item.poster) {
       img.src = item.poster;
       img.dataset.loaded = "true";
     } else {
-      img.src = `https://via.placeholder.com/300x450/111111/ffffff?text=${encodeURIComponent(item.title)}`;
+      img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==";
       posterObserver.observe(img);
     }
     img.alt     = "";
@@ -142,8 +143,9 @@
     p.textContent = item.title || "";
 
     const badge = document.createElement("span");
-    badge.className   = "vidsrc-badge";
-    badge.textContent = item.quality || "HD";
+    badge.className   = "ani-badge";
+    badge.style.background = "rgba(231, 76, 60, 0.88)";
+    badge.textContent = "Vidsrc";
 
     card.appendChild(img);
     card.appendChild(p);
@@ -151,6 +153,7 @@
 
     card.addEventListener("click",      () => onCardClick(card, item));
     card.addEventListener("mouseenter", () => prefetchSeries(item), { passive: true });
+    window._vwlAttachButton?.(card);
     return card;
   }
 
@@ -213,7 +216,7 @@
     let p = 2;
     while (p <= totalPages && p < 100) { // Limit to 100 pages to avoid overwhelming
       const batch = [];
-      for (let i = 0; i < 4 && p <= totalPages && p < 100; i++, p++) {
+      for (let i = 0; i < 2 && p <= totalPages && p < 100; i++, p++) {
         batch.push(apiFetch(`${BASE_URL}${p}.json`));
       }
       const results = await Promise.all(batch);
@@ -225,7 +228,7 @@
         cache = cache.concat(fresh);
         if (data.pages) totalPages = data.pages;
       }
-      await sleep(300);
+      await sleep(1500); // 1.5 seconds delay between batches to ensure buttery smooth UI
     }
     bgLoading = false;
   }
