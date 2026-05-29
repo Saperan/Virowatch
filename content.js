@@ -44,26 +44,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (key === "auto")
       return isMobileViewport() ? "virostyle2.css" : "virostyle.css";
 
-    // If it's a built-in key (e.g. 'desktop-dark'), use the map.
-    // Otherwise, if it's a path like 'extra_css/style.css', use it directly.
     if (THEME_HREF[key]) return THEME_HREF[key];
     return key;
   }
 
   const themeSelect = document.getElementById("app-sidebar-theme-select");
 
-  // Theme: apply by key or custom file path
   function applyTheme(key) {
     if (linkEl) linkEl.href = resolveThemeHref(key);
     localStorage.setItem("theme", key);
 
     if (themeSelect) {
-      // Check if the option already exists in the dropdown
       let exists = Array.from(themeSelect.options).some(
         (opt) => opt.value === key,
       );
 
-      // If it's a custom style and NOT in the dropdown yet, add it so it shows up
       if (!exists && key !== "auto" && !THEME_HREF[key]) {
         const opt = document.createElement("option");
         opt.value = key;
@@ -82,13 +77,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     themeSelect.addEventListener("change", () => applyTheme(themeSelect.value));
   }
 
-  // When theme is Auto, re-apply on resize so layout follows viewport
   window.addEventListener("resize", () => {
     if (localStorage.getItem("theme") === "auto" && linkEl)
       linkEl.href = resolveThemeHref("auto");
   });
 
-  // --- Custom CSS (saved locally, inject into page, removable) ---
   const CUSTOM_CSS_KEY = "virowatch_custom_css";
   const customListEl = document.getElementById("app-custom-css-list");
   const customFileInput = document.getElementById("app-custom-css-file");
@@ -183,7 +176,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Save and Load State
   function saveState() {
     localStorage.setItem(
       "lastState",
@@ -191,7 +183,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   }
 
-  // Helpers
   const currentData = () =>
     cat && mediaData[cat] ? mediaData[cat][mov] : null;
   function activeData() {
@@ -208,7 +199,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     return data;
   }
 
-  // Elements
   const movieListWrapper = document.getElementById("movieListWrapper");
   const movieList = document.getElementById("movieList");
   const categoryContainer = document.getElementById("categoryContainer");
@@ -216,15 +206,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   const seasonSelectorContainer = document.getElementById(
     "seasonSelectorContainer",
   );
-  const heroSection = document.getElementById("hero"); // Ensure this matches HTML ID if used
+  const heroSection = document.getElementById("hero");
 
-  // Render list for a specific category (Menu clicks)
   function renderList(category) {
     cat = category;
     window._vwlCurrentCat = category;
     movieList.innerHTML = "";
     Object.entries(mediaData[category] || {}).forEach(([key, info]) => {
-      if (info && info._hidden) return; // skip Anikoto entries injected by anikoto-loader
+      if (info && info._hidden) return;
       const div = document.createElement("div");
       div.className = "movie-item";
       div.dataset.movie = key;
@@ -237,7 +226,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (categoryContainer) categoryContainer.style.display = "none";
     if (movieListWrapper) movieListWrapper.style.display = "block";
 
-    // Show category nav bar with active state
     const navBar = document.getElementById("categoryNavBar");
     if (navBar) {
       navBar.style.display = "flex";
@@ -250,16 +238,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (clContainer) clContainer.style.marginTop = "20px";
   }
 
-  // Helper to handle and inject dynamic watermark modifications
   function updateWatermarksAndBadges() {
-    // 1. Change "1080p" watermarks to "Vidsrc" and "stream" to "Anikoto" if they exist as DOM elements
     document.querySelectorAll(".watermark, .badge, .stream-indicator").forEach(el => {
       let txt = el.textContent.trim();
       if (txt.toLowerCase() === "1080p") el.textContent = "Vidsrc";
       if (txt.toLowerCase() === "stream") el.textContent = "Anikoto";
     });
 
-    // 2. Add or remove gray Virowatch watermark based on category (anime.js / shows.js)
     let existingVirowatch = document.getElementById("virowatch-anime-shows-watermark");
     if (existingVirowatch) existingVirowatch.remove();
 
@@ -267,7 +252,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const vwBadge = document.createElement("div");
       vwBadge.id = "virowatch-anime-shows-watermark";
       vwBadge.textContent = "Virowatch";
-      // Embedded CSS styling to position it neatly over the video window seamlessly
       vwBadge.style.cssText = `
         position: absolute;
         top: 15px;
@@ -282,7 +266,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         padding: 4px 8px;
         border-radius: 4px;
       `;
-      // Append it near the video player container
       const playerWrapper = document.getElementById("videoPlayer")?.parentElement;
       if (playerWrapper) {
         playerWrapper.style.position = "relative";
@@ -291,7 +274,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Select movie (Load Player)
   function selectMovie(key) {
     mov = key;
     ep = 0;
@@ -299,11 +281,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     dubbed = false;
     saveState();
     document.querySelector(".dubbed-toggle")?.classList.remove("active");
-    // Update now-playing title
     const npt = document.getElementById("nowPlayingTitle");
     if (npt) npt.textContent = mediaData[cat]?.[key]?.title || key;
 
-    // ── PitSport: data arrives async, handle loading state ───────
     if (key === "PITSORT" && cat === "shows") {
       const pitData = window.mediaData?.shows?.PITSORT;
       const hasVideos =
@@ -316,7 +296,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
 
       if (!hasVideos) {
-        // Show the player area immediately with a loading indicator
         if (episodeContainer) {
           episodeContainer.style.display = "flex";
           document.body.classList.add("modal-open");
@@ -328,7 +307,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         seasonSelectorContainer.innerHTML = "";
 
         if (!window._pitsportLoaded) {
-          // Kick off the fetch if it hasn't started yet
           if (
             !window._pitsportLoading &&
             typeof window.reloadPitSport === "function"
@@ -336,22 +314,19 @@ document.addEventListener("DOMContentLoaded", async () => {
             window.reloadPitSport();
           }
         }
-        // The pitsportReady listener below will finish rendering once data arrives
         return;
       }
     }
     
-    // ── Normal path & Faster Loading Execution ──────────────────────
     updateSeasonSelector();
     updateEpisodeList();
     
     if (episodeContainer) {
       episodeContainer.style.display = "flex";
       document.body.classList.add("modal-open");
-      document.body.classList.remove("app-sidebar-open"); // close sidebar if open
+      document.body.classList.remove("app-sidebar-open");
     }
 
-    // FIX: Render structural changes first, then load iframe content to prevent black screens
     setTimeout(() => {
       updateVideo(0);
       updateDownloads();
@@ -359,7 +334,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 50);
   }
 
-  // When PitSport finishes loading, refresh the player if it's currently open
   window.addEventListener("pitsportReady", () => {
     if (cat === "shows" && mov === "PITSORT") {
       ep = 0;
@@ -372,13 +346,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Update season dropdown
   function updateSeasonSelector() {
     seasonSelectorContainer.innerHTML = "";
-    const data = currentData();
+    const data = activeData();
     if (!data) return;
-    const seasons = Object.keys(data).filter(
-      (k) => !RESERVED_KEYS.includes(k) && typeof data[k] === "object",
+    const currentEntry = currentData();
+    const seasons = Object.keys(currentEntry).filter(
+      (k) => !RESERVED_KEYS.includes(k) && typeof currentEntry[k] === "object",
     );
     if (!seasons.length) return;
     const select = document.createElement("select");
@@ -386,7 +360,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     seasons.forEach((s, i) => {
       const opt = document.createElement("option");
       opt.value = s;
-      opt.textContent = data[s].chapter || s;
+      opt.textContent = currentEntry[s].chapter || s;
       if (i === 0 && !season) season = s;
       select.appendChild(opt);
     });
@@ -403,7 +377,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     seasonSelectorContainer.appendChild(select);
   }
 
-  // Update episode list
   function updateEpisodeList() {
     const container = document.getElementById("episodeListContainer");
     container.innerHTML = "";
@@ -426,7 +399,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Update video player
   function updateVideo(index) {
     const data = activeData();
     if (!data) return;
@@ -435,7 +407,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (spinner) spinner.style.display = "block";
     const iframe = document.getElementById("videoPlayer");
 
-    // --- NEW ANTI-POPUP LOGIC ---
     if (mov === "PITSORT") {
       iframe.setAttribute(
         "sandbox",
@@ -444,7 +415,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else {
       iframe.removeAttribute("sandbox");
     }
-    // ----------------------------
 
     iframe.classList.add("fade-out");
     iframe.onload = () =>
@@ -484,12 +454,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         a.className = "button";
         dc.appendChild(a);
       });
-    else dc.innerHTML = ""; // nothing to show when no downloads
+    else dc.innerHTML = "";
   }
 
-  // ==========================================
-  //  UPDATED SEARCH LOGIC (Mixes all content)
-  // ==========================================
   function matchesSubsequence(title, query) {
     if (!query.length) return true;
     let j = 0;
@@ -578,10 +545,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
         movieList.appendChild(div);
       });
-    }, 150); // Lowered from 300 to 150ms for faster query responsiveness
+    }, 150);
   });
 
-  // Newest added
   function renderNewestAdded() {
     const listEl = document.getElementById("newestAddedList");
     if (!listEl) return;
@@ -610,7 +576,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   renderNewestAdded();
 
-  // Category Nav Bar button clicks
   document.querySelectorAll(".cat-nav-btn").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const c = btn.dataset.cat;
@@ -636,7 +601,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  // Category Banners Click
   document.querySelectorAll(".movie-item-banner").forEach((b) => {
     b.addEventListener("click", async (e) => {
       if (e.target.closest("a.category-card-link")) return;
@@ -667,7 +631,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  // Dubbed Toggle
   const dubToggle = document.querySelector(".dubbed-toggle");
   if (dubToggle) {
     dubToggle.addEventListener("click", (e) => {
@@ -682,7 +645,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Player Buttons
   const prevBtn = document.getElementById("prevEpisode");
   if (prevBtn)
     prevBtn.addEventListener("click", (e) => {
@@ -730,7 +692,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (existingVirowatch) existingVirowatch.remove();
   }
 
-  // Render Changelogs
   (function renderChangelogs() {
     if (!Array.isArray(window.changelogs)) return;
     const container = document.getElementById("changelog-container");
@@ -743,7 +704,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   })();
 
-  // Initial load state checks
   let last = JSON.parse(localStorage.getItem("lastState") || "null");
   if (!last?.cat) {
     if (heroSection) heroSection.style.display = "flex";
@@ -790,7 +750,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       npt.textContent = mediaData[last.cat]?.[last.mov]?.title || last.mov;
   }
 
-  // Sidebar Logic
   const sidebarToggle = document.getElementById("sidebarToggle");
   const sidebarMenu = document.getElementById("sidebarMenu");
   const sidebarOverlay = document.getElementById("sidebarOverlay");
@@ -821,7 +780,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  window.viroPlay = async function (catKey, key) {
+  // ── THE FIX: Added silent parameter to load the player invisibly ──
+  window.viroPlay = async function (catKey, key, silent = false) {
     if (
       catKey === "lunora" &&
       window.lunoraLoader &&
@@ -835,8 +795,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
     if (!mediaData[catKey] || !mediaData[catKey][key]) return false;
+    
+    // Set the internal category state silently
     cat = catKey;
-    renderList(catKey);
+    window._vwlCurrentCat = catKey;
+    
+    if (!silent) {
+       renderList(catKey);
+    }
+    
     selectMovie(key);
     return true;
   };
