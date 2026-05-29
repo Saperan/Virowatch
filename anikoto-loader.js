@@ -20,7 +20,7 @@
   const MEGAPLAY = "https://megaplay.buzz/stream/s-2";
   const PER_PAGE = 24;
   const TIMEOUT  = 10000;
-  const BG_PAGES = 6; // extra pages silently preloaded for search
+  const BG_PAGES = 6; 
   const CACHE_KEY = "anikoto_cache";
 
   // ── Proxy list ────────────────────────────────────────────────────
@@ -52,7 +52,7 @@
     },
   ];
 
-  let winProxy = null; // index of last successful proxy (cached for speed)
+  let winProxy = null; 
 
   function sleep(ms) { return new Promise(res => setTimeout(res, ms)); }
 
@@ -85,10 +85,10 @@
   let totalPages         = 1;
   let fetching           = false;
   let bgLoading          = false;
-  let cache              = [];   // all fetched anime metadata (drives search)
+  let cache              = [];   
   let iObs               = null;
   let searchTid          = null;
-  let currentSearchQuery = "";   // Tracks active search for live injection
+  let currentSearchQuery = "";   
 
   // ── Persistent Cache Management ────────────────────────────────────
   function loadCache() {
@@ -112,7 +112,6 @@
     items.forEach(item => {
       const idStr = String(item.id);
       if (!existingIds.has(idStr)) {
-        // Data Minimization: Save only critical UI/Search keys to maximize quota space
         const cacheObj = {
           id: item.id,
           title: item.title || "",
@@ -132,16 +131,13 @@
         console.error("Anikoto: Local storage quota exceeded or unavailable.", e);
       }
 
-      // Dynamically inject newly discovered hits directly into active user search
       injectLiveResults(newlyAdded);
 
-      // Dynamically append new cards to the grid if the anime category is currently open
       if (isAnimeView()) {
         const grid = document.getElementById("anikoto-grid");
         if (grid) {
           newlyAdded.forEach(item => {
             if (!grid.querySelector(`[data-ani-id="${item.id}"]`)) {
-              // Insert before the sentinel so infinite-scroll stays at the bottom
               const sentinel = document.getElementById("anikoto-sentinel");
               grid.insertBefore(makeCard(item), sentinel || null);
             }
@@ -180,7 +176,7 @@
 
   // ── Hover-prefetch so clicking feels instant ──────────────────────
   async function prefetchSeries(id) {
-    if (window.mediaData?.anime?.[`ANI_${id}`]) return; // already done
+    if (window.mediaData?.anime?.[`ANI_${id}`]) return; 
     const data = await apiFetch(`${BASE}/series/${id}`);
     if (data?.ok) {
       injectEntry(id, data.data?.anime || {}, data.data?.episodes || []);
@@ -192,9 +188,14 @@
     const id  = card.dataset.aniId;
     const key = `ANI_${id}`;
 
+    // Raise priority flag — pauses background loaders in both this file
+    // and vidsrc.js so all network bandwidth goes to the clicked content.
+    window._vwPriority = true;
+
     if (card.dataset.done === "1" || window.mediaData?.anime?.[key]) {
       card.dataset.done = "1";
-      window.viroPlay?.("anime", key);
+      window.viroPlay?.("anime", key, true); // True = Silent Category Switch
+      window._vwPriority = false;
       return;
     }
 
@@ -208,6 +209,7 @@
       card.classList.remove("ani-loading");
       if (badge) badge.textContent = "STREAM";
       toast("Could not load episodes — check connection");
+      window._vwPriority = false;
       return;
     }
 
@@ -215,7 +217,12 @@
     card.dataset.done = "1";
     card.classList.remove("ani-loading");
     if (badge) badge.textContent = "STREAM";
-    window.viroPlay?.("anime", key);
+    
+    // Play the content but instruct the UI not to obliterate the current screen 
+    window.viroPlay?.("anime", key, true);
+
+    // Release priority — background loaders resume
+    window._vwPriority = false;
   }
 
   // ── Card element ──────────────────────────────────────────────────
@@ -223,10 +230,11 @@
     const card = document.createElement("div");
     card.className     = "movie-item ani-card";
     card.dataset.aniId = String(item.id);
+    card.dataset.movie = `ANI_${item.id}`;
     card.dataset.done  = "0";
 
     const img   = document.createElement("img");
-    img.src     = item.poster || item.image || ""; // Fallback support for cached schemas
+    img.src     = item.poster || item.image || ""; 
     img.alt     = "";
     img.loading = "lazy";
 
@@ -244,6 +252,7 @@
 
     card.addEventListener("click",      () => onCardClick(card));
     card.addEventListener("mouseenter", () => prefetchSeries(card.dataset.aniId), { passive: true });
+    window._vwlAttachButton?.(card);
     return card;
   }
 
@@ -264,8 +273,6 @@
   }
 
   // ── Render cached items to the grid immediately ───────────────────
-  // Called once after buildDOM() — gives instant first-paint from localStorage
-  // before any network response arrives.
   function renderCacheToGrid() {
     if (!cache.length) return;
     const grid = document.getElementById("anikoto-grid");
@@ -310,7 +317,6 @@
 
     const grid = document.getElementById("anikoto-grid");
     if (grid) {
-      // Grid handles rendering current page updates fresh
       items.forEach(item => {
         if (!grid.querySelector(`[data-ani-id="${item.id}"]`)) {
           grid.appendChild(makeCard(item));
@@ -328,8 +334,10 @@
     bgLoading = true;
     let p = 2;
     while (p <= totalPages) {
+      // ── Priority freeze: pause bg work while user is loading content ──
+      while (window._vwPriority) await sleep(300);
+
       const batch = [];
-      // Pull 10 pages concurrently to maximize speeds
       for (let i = 0; i < 10 && p <= totalPages; i++, p++) {
         batch.push(apiFetch(`${BASE}/recent-anime?page=${p}&per_page=${PER_PAGE}`));
       }
@@ -337,10 +345,10 @@
       for (const data of results) {
         if (!data?.ok) continue;
         const items = data.data || [];
-        saveToCache(items); // Instantly passes new batches into local cache and search injector
+        saveToCache(items); 
         if (data.pagination?.total_pages) totalPages = data.pagination.total_pages;
       }
-      await sleep(50); // Minimal sleep delay between batches
+      await sleep(50); 
     }
     bgLoading = false;
     console.log(`Anikoto: Full database cached! Total items: ${cache.length}`);
@@ -422,7 +430,6 @@
     let addedCount = 0;
     liveHits.forEach(a => {
       if (!ml.querySelector(`[data-ani-id="${a.id}"]`)) {
-        // Surgically append any background matches into the search list view dynamically
         const separator = ml.querySelector(".ani-search-sep");
         if (separator) {
           ml.insertBefore(makeCard(a), separator);
@@ -458,7 +465,6 @@
       ml.insertBefore(card, ml.children[targetIndex] || null);
     }
 
-    // 1. Instant Local Search
     const localHits = cache.filter(a => fuzzyMatch(a.title, q));
     
     if (localHits.length > 0) {
@@ -469,7 +475,6 @@
       });
     }
 
-    // 2. Add full database indicator
     const sep = document.createElement("div");
     sep.className = "ani-search-sep";
     sep.style.cssText = "grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem; padding: 12px 10px; font-family: 'Kanit', sans-serif;";
@@ -486,7 +491,6 @@
       if (res?.ok && Array.isArray(res.data)) {
         const remoteHits = res.data;
         
-        // Save newly found remote hits to cache so they are remembered next time
         saveToCache(remoteHits);
 
         const newHits = remoteHits.filter(item => !localHits.some(local => String(local.id) === String(item.id)));
@@ -529,7 +533,7 @@
     input.addEventListener("input", (e) => {
       clearTimeout(searchTid);
       const q = e.target.value.trim();
-      currentSearchQuery = q; // Save the updated active query strings for live injection updates
+      currentSearchQuery = q; 
 
       searchTid = setTimeout(() => {
         if (q.length < 2) {
@@ -599,15 +603,15 @@
 
   // ── Init ──────────────────────────────────────────────────────────
   document.addEventListener("DOMContentLoaded", () => {
-    loadCache(); // Hydrate local cache instantly on document load
+    loadCache(); 
     setTimeout(() => {
       injectCSS();
       if (!buildDOM()) return;
       watchVisibility();
       updateVis();
       hookSearch();
-      renderCacheToGrid(); // Paint cached cards instantly — no network wait
-      loadPage(1);         // Then fetch fresh data and fill in gaps / new arrivals
+      renderCacheToGrid(); 
+      loadPage(1);         
     }, 300);
   });
 })();
