@@ -110,6 +110,81 @@
       showToast('Player not ready — try again');
       return;
     }
+
+    // Dynamically reconstruct missing Anikoto/Vidsrc data from their IDs
+    if (item.key.startsWith('VIDSRC_')) {
+      var imdbId = item.key.replace('VIDSRC_', '');
+      window.mediaData = window.mediaData || {};
+      window.mediaData.lunora = window.mediaData.lunora || {};
+      if (!window.mediaData.lunora[item.key]) {
+         window.mediaData.lunora[item.key] = {
+           title: item.title,
+           image: item.image,
+           _hidden: true,
+           VIDSRC_S1: {
+             chapter: "Movie",
+             video: ['https://vidsrc.me/embed/movie?imdb=' + imdbId],
+             episodeTitles: [item.title]
+           }
+         };
+      }
+    } else if (item.key.startsWith('ANI_')) {
+      item.cat = 'anime'; // Guarantee correct category routing
+      var aniId = item.key.replace('ANI_', '');
+      window.mediaData = window.mediaData || {};
+      window.mediaData.anime = window.mediaData.anime || {};
+      if (!window.mediaData.anime[item.key]) {
+         showToast('Fetching episodes...');
+         fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://anikotoapi.site/series/' + aniId))
+           .then(function(r) { return r.json(); })
+           .then(function(j) {
+              var data = JSON.parse(j.contents);
+              if (data && data.data && data.data.episodes) {
+                 var episodes = data.data.episodes;
+                 var season = {
+                   chapter: "Episodes",
+                   video: episodes.map(function(ep) {
+                     var sourceStr = "";
+                     if (ep.sources && ep.sources.length) {
+                       var src = ep.sources.find(function(s) { return s.type === "sub"; });
+                       if (src) sourceStr = src.source;
+                     }
+                     return "https://megaplay.buzz/stream/s-2?id=" + ep.id + "&ep=" + ep.number + "&source=" + sourceStr;
+                   }),
+                   episodeTitles: episodes.map(function(ep, i) { return ep.title || 'Episode ' + (ep.number || i + 1); })
+                 };
+                 
+                 var hasDub = episodes.some(function(ep) {
+                   return ep.sources && ep.sources.find(function(s) { return s.type === "dub"; });
+                 });
+
+                 if (hasDub) {
+                   season.dubbed = episodes.map(function(ep) {
+                     var sourceStr = "";
+                     if (ep.sources && ep.sources.length) {
+                       var src = ep.sources.find(function(s) { return s.type === "dub"; });
+                       if (src) sourceStr = src.source;
+                     }
+                     return "https://megaplay.buzz/stream/s-2?id=" + ep.id + "&ep=" + ep.number + "&source=" + sourceStr;
+                   });
+                 }
+
+                 window.mediaData.anime[item.key] = {
+                   title: item.title,
+                   image: item.image,
+                   _hidden: true,
+                   ANI_S1: season
+                 };
+                 window.viroPlay(item.cat, item.key);
+              } else {
+                 showToast('Failed to fetch episodes');
+              }
+           })
+           .catch(function() { showToast('Network error fetching episodes'); });
+         return; // Wait for fetch before playing
+      }
+    }
+
     window.viroPlay(item.cat, item.key).then(function (ok) {
       if (!ok) showToast('Could not load — content may have been removed');
     }).catch(function () {
@@ -240,6 +315,8 @@
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
       var cat = window._vwlCurrentCat || 'shows';
+      if (key.startsWith('ANI_')) cat = 'anime';
+      else if (key.startsWith('VIDSRC_')) cat = 'lunora';
 
       if (isInList(key)) {
         removeItem(key);
@@ -260,6 +337,7 @@
 
     mi.appendChild(btn);
   }
+  window._vwlAttachButton = attachButton;
 
   /* ─────────────────────────────────────────────────────
      Observe #movieList
