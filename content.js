@@ -1,4 +1,30 @@
 document.addEventListener("DOMContentLoaded", async () => {
+  // Inject CSS for Virowatch and Lunora badges
+  const vwStyles = document.createElement("style");
+  vwStyles.textContent = `
+    .movie-item { position: relative; }
+    .vw-category-badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      color: #fff;
+      font-family: "Kanit", sans-serif;
+      font-size: .55rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      padding: 2px 6px;
+      border-radius: 3px;
+      pointer-events: none;
+      z-index: 2;
+      backdrop-filter: blur(4px);
+    }
+    @media (max-width: 768px) {
+      .vw-category-badge { font-size: .5rem; padding: 1px 4px; }
+    }
+  `;
+  document.head.appendChild(vwStyles);
+
   const RESERVED_KEYS = [
     "title",
     "image",
@@ -214,14 +240,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     movieList.innerHTML = "";
     Object.entries(mediaData[category] || {}).forEach(([key, info]) => {
       if (info && info._hidden) return;
+      
+      // Determine badge text and color
+      let badgeText = "";
+      let badgeBg = "";
+      if (category === "shows" || category === "anime") {
+          badgeText = "Virowatch";
+          badgeBg = "#444444"; // Virowatch Custom Dark
+      } else if (category === "lunora") {
+          badgeText = "Lunora";
+          badgeBg = "#cd4ec4"; // Lunora Custom Color
+      }
+
       const div = document.createElement("div");
       div.className = "movie-item";
       div.dataset.movie = key;
-      div.innerHTML = `<img src="${info.image || "https://via.placeholder.com/150"}" loading="lazy"/><p class="kanit-extralight">${info.title || key}</p>`;
+      
+      let badgeHtml = badgeText ? `<span class="vw-category-badge" style="background: ${badgeBg};">${badgeText}</span>` : "";
+      
+      div.innerHTML = `
+        <img src="${info.image || "https://via.placeholder.com/150"}" loading="lazy"/>
+        <p class="kanit-extralight">${info.title || key}</p>
+        ${badgeHtml}
+      `;
+      
       const clean = div.cloneNode(true);
       clean.addEventListener("click", () => selectMovie(key));
       movieList.appendChild(clean);
     });
+    
     if (heroSection) heroSection.style.display = "none";
     if (categoryContainer) categoryContainer.style.display = "none";
     if (movieListWrapper) movieListWrapper.style.display = "block";
@@ -533,11 +580,25 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       scored.forEach(({ catKey, key, info }) => {
+        let badgeText = "";
+        let badgeBg = "";
+        if (catKey === "shows" || catKey === "anime") {
+            badgeText = "Virowatch";
+            badgeBg = "#444444";
+        } else if (catKey === "lunora") {
+            badgeText = "Lunora";
+            badgeBg = "#cd4ec4";
+        }
+
         const div = document.createElement("div");
         div.className = "movie-item";
+        
+        let badgeHtml = badgeText ? `<span class="vw-category-badge" style="background: ${badgeBg};">${badgeText}</span>` : "";
+        
         div.innerHTML = `
             <img src="${info.image || "https://via.placeholder.com/150"}" loading="lazy"/>
             <p class="kanit-extralight">${info.title || key}</p>
+            ${badgeHtml}
           `;
         div.addEventListener("click", () => {
           cat = catKey;
@@ -548,22 +609,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 150);
   });
 
-  function renderNewestAdded() {
+function renderNewestAdded() {
     const listEl = document.getElementById("newestAddedList");
     if (!listEl) return;
     listEl.innerHTML = "";
+    
     const animeFirst3 = Object.entries(mediaData.anime || {})
       .filter(([, v]) => !v._hidden)
       .slice(0, 3);
     const showsFirst3 = Object.entries(mediaData.shows || {}).slice(0, 3);
+    
     [
       ...animeFirst3.map(([k, v]) => ({ catKey: "anime", key: k, info: v })),
       ...showsFirst3.map(([k, v]) => ({ catKey: "shows", key: k, info: v })),
     ].forEach(({ catKey, key, info }) => {
+      
       const div = document.createElement("div");
       div.className = "newest-added-item";
+      // Removed position: relative as it is no longer needed for badges
       div.dataset.cat = catKey;
-      div.innerHTML = `<img src="${info.image || "https://via.placeholder.com/150"}" loading="lazy" alt=""><span>${info.title || key}</span>`;
+      
+      div.innerHTML = `
+        <img src="${info.image || "https://via.placeholder.com/150"}" loading="lazy" alt="">
+        <span>${info.title || key}</span>
+      `;
+      
       div.addEventListener("click", () => {
         if (heroSection) heroSection.style.display = "none";
         if (categoryContainer) categoryContainer.style.display = "none";
@@ -571,9 +641,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         cat = catKey;
         selectMovie(key);
       });
+      
       listEl.appendChild(div);
     });
   }
+
   renderNewestAdded();
 
   document.querySelectorAll(".cat-nav-btn").forEach((btn) => {
