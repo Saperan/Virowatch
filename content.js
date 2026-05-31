@@ -1,3 +1,246 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// VIROWATCH UNIVERSAL AD & POPUP BLOCKER
+// Runs immediately (before DOMContentLoaded) so it intercepts everything.
+//
+// Whitelist: discord.com and discord.gg popups are always allowed through.
+// Everything else — ad tabs, interstitials, redirect popups — is blocked.
+// ═══════════════════════════════════════════════════════════════════════════
+(function installUniversalBlocker() {
+  'use strict';
+
+  // ── 1. Popup whitelist ────────────────────────────────────────────────────
+  // Only origins in this list may open a new window via window.open().
+  // Discord links (join links, invites, app pages) are the sole exception.
+  const POPUP_WHITELIST = [
+    'discord.com',
+    'discord.gg',
+    'discordapp.com',
+  ];
+
+  function isWhitelisted(url) {
+    if (!url || typeof url !== 'string') return false;
+    try {
+      const hostname = new URL(url, location.href).hostname.replace(/^www\./, '');
+      return POPUP_WHITELIST.some(w => hostname === w || hostname.endsWith('.' + w));
+    } catch (_) {
+      // Relative URLs, 'about:blank', etc. — block by default
+      return false;
+    }
+  }
+
+  // ── 2. Override window.open ───────────────────────────────────────────────
+  const _nativeOpen = window.open.bind(window);
+  window.open = function (url, target, features) {
+    if (isWhitelisted(url)) {
+      return _nativeOpen(url, target, features);
+    }
+    console.info('[VW Blocker] window.open blocked:', url);
+    return null;
+  };
+
+  // ── 3. Block beforeunload / unload hijacking ──────────────────────────────
+  // Some ad scripts attach beforeunload to force a redirect or dialog.
+  const _nativeAddEventListener = EventTarget.prototype.addEventListener;
+  EventTarget.prototype.addEventListener = function (type, listener, options) {
+    if ((type === 'beforeunload' || type === 'unload') && this === window) {
+      console.info('[VW Blocker] beforeunload/unload listener suppressed.');
+      return;
+    }
+    return _nativeAddEventListener.call(this, type, listener, options);
+  };
+
+  // ── 4. Neutralise document.write (used by many ad loaders) ───────────────
+  const _nativeWrite = document.write.bind(document);
+  document.write = function (...args) {
+    // Only permit calls that come during the initial synchronous parse
+    // (readyState === 'loading'). Ad scripts call this later.
+    if (document.readyState === 'loading') {
+      return _nativeWrite(...args);
+    }
+    console.info('[VW Blocker] document.write blocked after page load.');
+  };
+
+  // ── 5. Block known ad-network domains via fetch / XHR ────────────────────
+  const AD_HOSTNAMES = [
+    'doubleclick.net',
+    'googlesyndication.com',
+    'googletagservices.com',
+    'adnxs.com',
+    'taboola.com',
+    'outbrain.com',
+    'popads.net',
+    'popcash.net',
+    'propellerads.com',
+    'trafficjunky.net',
+    'juicyads.com',
+    'exoclick.com',
+    'adsterra.com',
+    'hilltopads.net',
+    'traffichunt.com',
+    'adskeeper.co.uk',
+    'mgid.com',
+    'revcontent.com',
+    'bidvertiser.com',
+    'clickadu.com',
+    'adcash.com',
+    'zedo.com',
+    'undertone.com',
+  ];
+
+  function isAdUrl(url) {
+    if (!url || typeof url !== 'string') return false;
+    try {
+      const hostname = new URL(url, location.href).hostname.replace(/^www\./, '');
+      return AD_HOSTNAMES.some(ad => hostname === ad || hostname.endsWith('.' + ad));
+    } catch (_) { return false; }
+  }
+
+  // Patch fetch
+  const _nativeFetch = window.fetch;
+  window.fetch = function (input, init) {
+    const url = typeof input === 'string' ? input : (input && input.url);
+    if (isAdUrl(url)) {
+      console.info('[VW Blocker] fetch blocked:', url);
+      return Promise.reject(new Error('Blocked by VW Ad Blocker'));
+    }
+    return _nativeFetch.call(this, input, init);
+  };
+
+  // Patch XMLHttpRequest
+  const _nativeXhrOpen = XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+    if (isAdUrl(url)) {
+      console.info('[VW Blocker] XHR blocked:', url);
+      // Mark it so send() does nothing
+      this._vwBlocked = true;
+    }
+    return _nativeXhrOpen.call(this, method, url, ...rest);
+  };
+  const _nativeXhrSend = XMLHttpRequest.prototype.send;
+  XMLHttpRequest.prototype.send = function (...args) {
+    if (this._vwBlocked) return;
+    return _nativeXhrSend.apply(this, args);
+  };
+
+  // ── 6. MutationObserver — block ad iframes & popunder scripts injected
+  //       dynamically by third-party embed players (anikoto, pitsport, etc.)
+  // ─────────────────────────────────────────────────────────────────────────
+  const AD_IFRAME_PATTERNS = [
+    /popads/i,
+    /popcash/i,
+    /propellerads/i,
+    /exoclick/i,
+    /adsterra/i,
+    /trafficjunky/i,
+    /juicyads/i,
+    /hilltopads/i,
+    /traffichunt/i,
+    /adskeeper/i,
+    /bidvertiser/i,
+    /clickadu/i,
+    /adcash/i,
+    /doubleclick\.net/i,
+    /googlesyndication/i,
+    /\bad(s|vert|frame|server|network)\b/i,
+  ];
+
+  function looksLikeAdIframe(el) {
+    if (el.tagName !== 'IFRAME' && el.tagName !== 'SCRIPT') return false;
+    const src = el.src || el.getAttribute('src') || '';
+    // Whitelisted embed domains — never remove these
+    const EMBED_SAFE = [
+      'rumble.com', 'megaplay.buzz', 'anikotoapi.site', 'pitsport.xyz',
+      'vidsrc.', 'pushmdz.', 'voe.sx', 'dood.', 'filemoon.', 'streamed.',
+      'streameast.', 'weakspell.', 'sportsurge.', 'discord.com', 'discord.gg',
+      'corsproxy.io', 'allorigins.win', 'codetabs.com', 'thingproxy.freeboard.io',
+    ];
+    if (EMBED_SAFE.some(safe => src.includes(safe))) return false;
+    if (isAdUrl(src)) return true;
+    if (AD_IFRAME_PATTERNS.some(re => re.test(src))) return true;
+    // Zero-size or off-screen iframes not from safe sources
+    if (el.tagName === 'IFRAME') {
+      const w = parseInt(el.width || el.style.width || '999', 10);
+      const h = parseInt(el.height || el.style.height || '999', 10);
+      if ((w <= 1 || h <= 1) && src && !EMBED_SAFE.some(s => src.includes(s))) return true;
+    }
+    return false;
+  }
+
+  const domObserver = new MutationObserver(mutations => {
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (node.nodeType !== Node.ELEMENT_NODE) continue;
+        // Check the node itself
+        if (looksLikeAdIframe(node)) {
+          console.info('[VW Blocker] Removed injected ad element:', node.src || node.tagName);
+          node.remove();
+          continue;
+        }
+        // Check descendants
+        node.querySelectorAll && node.querySelectorAll('iframe, script').forEach(el => {
+          if (looksLikeAdIframe(el)) {
+            console.info('[VW Blocker] Removed nested ad element:', el.src || el.tagName);
+            el.remove();
+          }
+        });
+      }
+    }
+  });
+
+  // Start observing as early as possible
+  function startObserver() {
+    domObserver.observe(document.documentElement || document.body || document, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
+  if (document.documentElement) {
+    startObserver();
+  } else {
+    document.addEventListener('DOMContentLoaded', startObserver, { once: true });
+  }
+
+  // ── 7. Shared probe-iframe sandbox utility ────────────────────────────────
+  // Both pitsport-live.js and anikoto-loader.js create hidden probe iframes
+  // to verify embed URLs. This central helper enforces the anti-popup sandbox
+  // on every probe, normalising behaviour across all loaders.
+  window._vwProbeIframe = function probeIframe(url, timeoutMs) {
+    timeoutMs = timeoutMs || 7000;
+    return new Promise(resolve => {
+      const iframe = document.createElement('iframe');
+      Object.assign(iframe.style, {
+        position: 'fixed', top: '-9999px', left: '-9999px',
+        width: '1px', height: '1px', opacity: '0',
+        pointerEvents: 'none', border: 'none',
+      });
+      // Anti-popup sandbox: scripts and same-origin allowed for probe,
+      // but allow-popups is intentionally omitted.
+      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+
+      let done = false;
+      const finish = ok => {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        try { document.body.removeChild(iframe); } catch (_) {}
+        resolve(ok);
+      };
+      const timer = setTimeout(() => finish(false), timeoutMs);
+      iframe.onload  = () => finish(true);
+      iframe.onerror = () => finish(false);
+      iframe.src = url;
+      document.body.appendChild(iframe);
+    });
+  };
+
+  console.info('[VW Blocker] Universal ad & popup blocker installed. Discord whitelisted.');
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// END OF UNIVERSAL BLOCKER
+// ═══════════════════════════════════════════════════════════════════════════
+
 document.addEventListener("DOMContentLoaded", async () => {
   // Inject CSS for Virowatch and Lunora badges
   const vwStyles = document.createElement("style");
@@ -455,12 +698,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     const iframe = document.getElementById("videoPlayer");
 
     if (mov === "PITSORT") {
+      // PitSport needs a slightly tighter sandbox — no same-origin
+      // (cross-origin sport embeds) but still needs scripts + presentation.
       iframe.setAttribute(
         "sandbox",
         "allow-scripts allow-same-origin allow-presentation allow-forms",
       );
     } else {
-      iframe.removeAttribute("sandbox");
+      // Universal anti-popup sandbox for ALL other embeds (VidSrc, Rumble,
+      // Anikoto, Megaplay, Lunora, etc.).
+      //
+      // allow-scripts          — video players need JS to run
+      // allow-same-origin      — lets the embed read its own cookies/storage
+      // allow-presentation     — required for fullscreen API
+      // allow-forms            — some players submit forms for quality/sub selection
+      // allow-pointer-lock     — needed by some fullscreen video controls
+      //
+      // Intentionally OMITTED:
+      //   allow-popups         — blocks new-tab ad clicks & window.open() calls
+      //   allow-popups-to-escape-sandbox — blocks popup escape trick
+      //   allow-top-navigation — blocks redirect-on-click to ad pages
+      //   allow-top-navigation-by-user-activation — blocks user-click redirects
+      iframe.setAttribute(
+        "sandbox",
+        "allow-scripts allow-same-origin allow-presentation allow-forms allow-pointer-lock",
+      );
     }
 
     iframe.classList.add("fade-out");
