@@ -195,9 +195,10 @@ function probeIframe(url) {
   function showFallback(reason) {
     if (!window.shows) window.shows = {};
 
+    const _existing = window.shows.PITSORT || {};
     window.shows.PITSORT = {
-      title : 'PitSport Live',
-      image : 'https://pitsport.xyz/favicon.ico',
+      title : _existing.title || 'PitSport Live',
+      image : _existing.image || 'https://pitsport.xyz/favicon.ico',
       PSFallback: {
         chapter       : '⚠️ Proxy unavailable',
         video         : ['https://pitsport.xyz/live-now'],
@@ -248,9 +249,10 @@ function probeIframe(url) {
 
     if (!window.shows) window.shows = {};
 
+    const _existing = window.shows.PITSORT || {};
     window.shows.PITSORT = {
-      title : 'PitSport Live',
-      image : 'https://pitsport.xyz/favicon.ico',
+      title : _existing.title || 'PitSport Live',
+      image : _existing.image || 'https://pitsport.xyz/favicon.ico',
     };
 
     const liveNowFinal  = resolved.slice(0, liveNowRaw.length);
