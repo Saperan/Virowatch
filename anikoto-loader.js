@@ -1,5 +1,5 @@
 /**
- * anikoto-loader.js  —  Virowatch × Anikoto / MegaPlay  v3.5
+ * anikoto-loader.js  —  Virowatch × Anikoto / MegaPlay  v4.0
  *
  * Fixes & Enhancements:
  * - Reliable proxy chain with retries + safe JSON parsing
@@ -12,6 +12,7 @@
  * - Supercharged aggressive background crawling (10 pages concurrently, 50ms sleep)
  * - Live Search Result Injection (Populates active search screen dynamically as bg works)
  * - FIX: Global Search Activation (Anime results now search instantly without needing to click the Anime tab first)
+ * - v4.0 FIX: Automated Service Worker Caching (Option 1) + Smarter Cache Lifetime Verification (Option 2)
  */
 (function () {
   "use strict";
@@ -89,20 +90,34 @@
   let iObs               = null;
   let searchTid          = null;
   let currentSearchQuery = "";   
+  let cacheTimestamp     = Date.now();
+  let cacheIsComplete    = false;
 
   // ── Persistent Cache Management ────────────────────────────────────
   function loadCache() {
     try {
       const stored = localStorage.getItem(CACHE_KEY);
       if (stored) {
-        cache = JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        // Look for our smart object layout (v4.0)
+        if (parsed && typeof parsed === "object" && Array.isArray(parsed.items)) {
+          cache           = parsed.items;
+          cacheTimestamp  = parsed.updatedAt || Date.now();
+          cacheIsComplete = parsed.isComplete || false;
+          totalPages      = parsed.totalPages || 1;
+        } else if (Array.isArray(parsed)) {
+          // Backward compatibility with legacy direct-array format (v3.5)
+          cache           = parsed;
+          cacheTimestamp  = 0; // Force immediate update lifecycle check
+          cacheIsComplete = false;
+        }
       }
     } catch (e) {
       console.warn("Anikoto: Unable to parse local storage cache.", e);
     }
   }
 
-  function saveToCache(items) {
+  function saveToCache(items, isFullyComplete = false) {
     if (!Array.isArray(items)) return;
 
     const existingIds = new Set(cache.map(a => String(a.id)));
@@ -124,24 +139,37 @@
       }
     });
 
-    if (hasNewData) {
+    if (isFullyComplete) {
+      cacheIsComplete = true;
+    }
+
+    if (hasNewData || isFullyComplete) {
       try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+        const backupObj = {
+          updatedAt: cacheTimestamp,
+          isComplete: cacheIsComplete,
+          totalPages: totalPages,
+          items: cache
+        };
+        localStorage.setItem(CACHE_KEY, JSON.stringify(backupObj));
       } catch (e) {
         console.error("Anikoto: Local storage quota exceeded or unavailable.", e);
       }
 
-      injectLiveResults(newlyAdded);
+      if (newlyAdded.length > 0) {
+        injectLiveResults(newlyAdded);
 
-      if (isAnimeView()) {
-        const grid = document.getElementById("anikoto-grid");
-        if (grid) {
-          newlyAdded.forEach(item => {
-            if (!grid.querySelector(`[data-ani-id="${item.id}"]`)) {
-              const sentinel = document.getElementById("anikoto-sentinel");
-              grid.insertBefore(makeCard(item), sentinel || null);
-            }
-          });
+if (isAnimeView()) {
+          const grid = document.getElementById("anikoto-grid");
+          if (grid) {
+            newlyAdded.forEach(item => {
+              if (!grid.querySelector(`[data-ani-id="${item.id}"]`)) {
+                // Fix: Append directly to the grid. The sentinel is a sibling, 
+                // so this safely keeps the cards above the sentinel layer.
+                grid.appendChild(makeCard(item));
+              }
+            });
+          }
         }
       }
     }
@@ -188,13 +216,11 @@
     const id  = card.dataset.aniId;
     const key = `ANI_${id}`;
 
-    // Raise priority flag — pauses background loaders in both this file
-    // and vidsrc.js so all network bandwidth goes to the clicked content.
     window._vwPriority = true;
 
     if (card.dataset.done === "1" || window.mediaData?.anime?.[key]) {
       card.dataset.done = "1";
-      window.viroPlay?.("anime", key, true); // True = Silent Category Switch
+      window.viroPlay?.("anime", key, true); 
       window._vwPriority = false;
       return;
     }
@@ -218,10 +244,7 @@
     card.classList.remove("ani-loading");
     if (badge) badge.textContent = "STREAM";
     
-    // Play the content but instruct the UI not to obliterate the current screen 
     window.viroPlay?.("anime", key, true);
-
-    // Release priority — background loaders resume
     window._vwPriority = false;
   }
 
@@ -326,15 +349,27 @@
 
     armObserver();
 
-    if (n === 1 && !bgLoading) bgPreload();
+    // Verification wrapper for smart loading interval
+    if (n === 1 && !bgLoading) {
+      const CACHE_MAX_AGE = 24 * 60 * 60 * 1000; // 24 Hours in ms
+      const isCacheFresh = cacheIsComplete && (Date.now() - cacheTimestamp < CACHE_MAX_AGE);
+      
+      if (!isCacheFresh) {
+        bgPreload();
+      } else {
+        console.log(`Anikoto: Cache is fresh (${Math.round((Date.now() - cacheTimestamp) / 60000)}m old) and fully built. Bypassing background crawler.`);
+      }
+    }
   }
 
   // ── Aggressive Background Preload ─────────────────────────────────
   async function bgPreload() {
     bgLoading = true;
     let p = 2;
+    cacheTimestamp = Date.now();
+    cacheIsComplete = false;
+
     while (p <= totalPages) {
-      // ── Priority freeze: pause bg work while user is loading content ──
       while (window._vwPriority) await sleep(300);
 
       const batch = [];
@@ -351,6 +386,7 @@
       await sleep(50); 
     }
     bgLoading = false;
+    saveToCache([], true); // Final save to confirm complete indexing state
     console.log(`Anikoto: Full database cached! Total items: ${cache.length}`);
   }
 
@@ -604,6 +640,14 @@
   // ── Init ──────────────────────────────────────────────────────────
   document.addEventListener("DOMContentLoaded", () => {
     loadCache(); 
+
+    // Automated Service Worker registration hook (Option 1 Implementation)
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js")
+        .then(reg => console.log("Anikoto Service Worker registered successfully with scope:", reg.scope))
+        .catch(err => console.error("Anikoto Service Worker registration failed:", err));
+    }
+
     setTimeout(() => {
       injectCSS();
       if (!buildDOM()) return;
