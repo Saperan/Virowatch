@@ -17,12 +17,14 @@
 (function () {
   "use strict";
 
-  const BASE     = "https://anikotoapi.site";
-  const MEGAPLAY = "https://megaplay.buzz/stream/s-2";
-  const PER_PAGE = 24;
-  const TIMEOUT  = 10000;
-  const BG_PAGES = 6; 
+  const BASE      = "https://anikotoapi.site";
+  const MEGAPLAY  = "https://megaplay.buzz/stream/s-2";
+  const PER_PAGE  = 24;
+  const TIMEOUT   = 10000;
+  const BG_PAGES  = 6; 
   const CACHE_KEY = "anikoto_cache";
+  // Key that stores ONLY the lightweight title index for instant search
+  const TITLE_INDEX_KEY = "anikoto_title_index";
 
   // ── Proxy list ────────────────────────────────────────────────────
   const PROXIES = [
@@ -93,6 +95,36 @@
   let cacheTimestamp     = Date.now();
   let cacheIsComplete    = false;
 
+  // ── Title index — lightweight id→title map for instant search ────
+  // This is saved separately so it survives cache purges and loads
+  // instantly without needing the full poster/image data.
+  let titleIndex = {}; // { "12345": "Naruto", ... }
+
+  function loadTitleIndex() {
+    try {
+      const raw = localStorage.getItem(TITLE_INDEX_KEY);
+      if (raw) titleIndex = JSON.parse(raw);
+    } catch (_) {}
+  }
+
+  function saveTitleIndex() {
+    try {
+      localStorage.setItem(TITLE_INDEX_KEY, JSON.stringify(titleIndex));
+    } catch (_) {}
+  }
+
+  function mergeTitlesToIndex(items) {
+    let changed = false;
+    items.forEach(item => {
+      const id = String(item.id);
+      if (id && item.title && !titleIndex[id]) {
+        titleIndex[id] = item.title;
+        changed = true;
+      }
+    });
+    if (changed) saveTitleIndex();
+  }
+
   // ── Persistent Cache Management ────────────────────────────────────
   function loadCache() {
     try {
@@ -114,6 +146,17 @@
       }
     } catch (e) {
       console.warn("Anikoto: Unable to parse local storage cache.", e);
+    }
+
+    // Load the standalone title index (faster than walking all cache items)
+    loadTitleIndex();
+
+    // Back-fill title index from existing cache items in case index was cleared
+    if (cache.length > 0 && Object.keys(titleIndex).length < cache.length) {
+      cache.forEach(item => {
+        if (item.id && item.title) titleIndex[String(item.id)] = item.title;
+      });
+      saveTitleIndex();
     }
   }
 
@@ -138,6 +181,9 @@
         hasNewData = true;
       }
     });
+
+    // Always sync titles into the lightweight index (even if cache already had item)
+    mergeTitlesToIndex(items);
 
     if (isFullyComplete) {
       cacheIsComplete = true;
@@ -312,6 +358,16 @@ if (isAnimeView()) {
   async function loadPage(n) {
     if (fetching) return;
     fetching = true;
+
+    // Show the progress bar during initial fetch if index isn't fully built
+    if (n === 1 && !cacheIsComplete) {
+      const idxCount = Object.keys(titleIndex).length;
+      const label = idxCount > 0
+        ? `Anikoto · ${idxCount.toLocaleString()} titles ready · refreshing…`
+        : "Anikoto · connecting…";
+      updateProgress(0, 2, label);
+    }
+
     addSkeletons(8);
 
     const data = await apiFetch(`${BASE}/recent-anime?page=${n}&per_page=${PER_PAGE}`);
@@ -357,6 +413,8 @@ if (isAnimeView()) {
       if (!isCacheFresh) {
         bgPreload();
       } else {
+        // Cache is fresh — hide any progress bar that was shown during connect
+        hideProgress();
         console.log(`Anikoto: Cache is fresh (${Math.round((Date.now() - cacheTimestamp) / 60000)}m old) and fully built. Bypassing background crawler.`);
       }
     }
@@ -368,6 +426,9 @@ if (isAnimeView()) {
     let p = 2;
     cacheTimestamp = Date.now();
     cacheIsComplete = false;
+
+    // Show the progress bar immediately
+    updateProgress(1, totalPages || 2, null);
 
     while (p <= totalPages) {
       while (window._vwPriority) await sleep(300);
@@ -383,11 +444,16 @@ if (isAnimeView()) {
         saveToCache(items); 
         if (data.pagination?.total_pages) totalPages = data.pagination.total_pages;
       }
+
+      // Update progress bar after each batch
+      updateProgress(p - 1, totalPages, null);
+
       await sleep(50); 
     }
     bgLoading = false;
     saveToCache([], true); // Final save to confirm complete indexing state
-    console.log(`Anikoto: Full database cached! Total items: ${cache.length}`);
+    hideProgress();
+    console.log(`Anikoto: Full database cached! Total items: ${cache.length}, Titles indexed: ${Object.keys(titleIndex).length}`);
   }
 
   // ── Infinite scroll ───────────────────────────────────────────────
@@ -501,15 +567,31 @@ if (isAnimeView()) {
       ml.insertBefore(card, ml.children[targetIndex] || null);
     }
 
+    // 1) Search the full cache (has poster images)
     const localHits = cache.filter(a => fuzzyMatch(a.title, q));
-    
+    const shownIds = new Set();
+
     if (localHits.length > 0) {
       localHits.forEach(a => {
-        if (!ml.querySelector(`[data-ani-id="${a.id}"]`)) {
+        const idStr = String(a.id);
+        if (!ml.querySelector(`[data-ani-id="${idStr}"]`)) {
           insertMixed(makeCard(a));
+          shownIds.add(idStr);
         }
       });
     }
+
+    // 2) Also search the lightweight title index for titles not yet in cache
+    //    This gives instant results even before the full cache has built.
+    const indexHits = Object.entries(titleIndex)
+      .filter(([id, title]) => !shownIds.has(id) && fuzzyMatch(title, q));
+    indexHits.forEach(([id, title]) => {
+      if (!ml.querySelector(`[data-ani-id="${id}"]`)) {
+        // Synthesise a minimal item — poster will lazy-load on hover/click
+        insertMixed(makeCard({ id: Number(id), title, poster: "" }));
+        shownIds.add(id);
+      }
+    });
 
     const sep = document.createElement("div");
     sep.className = "ani-search-sep";
@@ -529,9 +611,9 @@ if (isAnimeView()) {
         
         saveToCache(remoteHits);
 
-        const newHits = remoteHits.filter(item => !localHits.some(local => String(local.id) === String(item.id)));
+        const newHits = remoteHits.filter(item => !shownIds.has(String(item.id)));
 
-        if (localHits.length === 0 && newHits.length === 0) {
+        if (shownIds.size === 0 && newHits.length === 0) {
           const noResults = document.createElement("div");
           noResults.className = "ani-search-sep";
           noResults.style.cssText = "grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.3); font-size: 0.9rem; padding: 20px;";
@@ -544,14 +626,14 @@ if (isAnimeView()) {
           insertMixed(makeCard(a));
         });
 
-        const totalCount = localHits.length + newHits.length;
+        const totalCount = shownIds.size + newHits.length;
         const countIndicator = document.createElement("div");
         countIndicator.className = "ani-search-sep";
         countIndicator.style.cssText = "grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.2); font-size: 0.75rem; padding: 8px 0;";
         countIndicator.textContent = `Found ${totalCount} total database matches`;
         ml.appendChild(countIndicator);
       } else {
-        if (localHits.length === 0) {
+        if (shownIds.size === 0) {
           sep.textContent = "No matches found in full database.";
         }
       }
@@ -588,6 +670,113 @@ if (isAnimeView()) {
     t.textContent = msg; t.className = "vwl-show";
     clearTimeout(t._tid);
     t._tid = setTimeout(() => { t.className = ""; }, 2600);
+  }
+
+  // ── Fetch Progress Bar ────────────────────────────────────────────
+  // A slim bar anchored to the bottom-center of the screen that shows
+  // Anikoto background-fetch progress. Disappears when done.
+  let _progressBar = null;
+  let _progressLabel = null;
+  let _progressFill = null;
+  let _progressHideTimer = null;
+
+  function ensureProgressBar() {
+    if (_progressBar) return;
+
+    const bar = document.createElement("div");
+    bar.id = "ani-progress-bar";
+    bar.innerHTML = `
+      <span id="ani-progress-label">Anikoto · indexing…</span>
+      <div id="ani-progress-track">
+        <div id="ani-progress-fill"></div>
+      </div>
+    `;
+    document.body.appendChild(bar);
+    _progressBar   = bar;
+    _progressFill  = document.getElementById("ani-progress-fill");
+    _progressLabel = document.getElementById("ani-progress-label");
+
+    // Inject bar CSS once
+    if (!document.getElementById("ani-progress-css")) {
+      const s = document.createElement("style");
+      s.id = "ani-progress-css";
+      s.textContent = `
+        #ani-progress-bar {
+          position: fixed;
+          bottom: 24px;
+          left: 80px;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          z-index: 100;
+          pointer-events: none;
+          opacity: 1;
+          transition: opacity 0.5s ease;
+          background: rgba(14, 14, 14, 0.82);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 14px;
+          padding: 10px 14px;
+          width: 188px;
+        }
+        #ani-progress-bar.ani-progress-hidden {
+          opacity: 0;
+        }
+        #ani-progress-label {
+          font-family: "Kanit", sans-serif;
+          font-size: 0.66rem;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.35);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        #ani-progress-track {
+          width: 100%;
+          height: 2px;
+          background: rgba(255, 255, 255, 0.07);
+          border-radius: 999px;
+          overflow: hidden;
+        }
+        #ani-progress-fill {
+          height: 100%;
+          width: 0%;
+          background: rgba(255, 255, 255, 0.4);
+          border-radius: 999px;
+          transition: width 0.4s ease;
+        }
+        @media (max-width: 480px) {
+          #ani-progress-bar { left: 70px; width: 160px; bottom: 20px; }
+        }
+      `;
+      document.head.appendChild(s);
+    }
+  }
+
+  function updateProgress(pagesLoaded, pagesTotal, label) {
+    ensureProgressBar();
+    clearTimeout(_progressHideTimer);
+    _progressBar.classList.remove("ani-progress-hidden");
+
+    const pct = pagesTotal > 0 ? Math.min(100, Math.round((pagesLoaded / pagesTotal) * 100)) : 0;
+    _progressFill.style.width = pct + "%";
+
+    const count = Object.keys(titleIndex).length;
+    _progressLabel.textContent = label
+      || `Anikoto · ${count.toLocaleString()} titles · ${pct}%`;
+  }
+
+  function hideProgress() {
+    if (!_progressBar) return;
+    const count = Object.keys(titleIndex).length;
+    _progressLabel.textContent = `Anikoto · ${count.toLocaleString()} titles indexed ✓`;
+    _progressFill.style.width = "100%";
+    _progressHideTimer = setTimeout(() => {
+      _progressBar.classList.add("ani-progress-hidden");
+    }, 2200);
   }
 
   // ── Build DOM ─────────────────────────────────────────────────────
