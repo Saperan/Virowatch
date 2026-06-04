@@ -355,11 +355,12 @@
         imdbHits.slice(0, 12).forEach(item => {
           if (!ml.querySelector(`[data-vsrc-id="${item.id}"]`)) {
             const isMovie = item.qid === "movie";
-            const pseudoItem = {
+const pseudoItem = {
               imdb_id: item.id,
               title: item.l + (item.y ? ` (${item.y})` : ""),
               poster: item.i?.imageUrl || "",
-              embed_url: isMovie ? `https://vidsrc.me/embed/movie?imdb=${item.id}` : `https://vidsrc.me/embed/tv?imdb=${item.id}`,
+              // Swapping .me for .pro to bypass common ISP/DNS network blocks
+              embed_url: isMovie ? `https://vidsrc.pro/embed/movie?imdb=${item.id}` : `https://vidsrc.pro/embed/tv?imdb=${item.id}`,
               quality: isMovie ? "MOVIE" : "SHOW"
             };
             insertMixed(makeCard(pseudoItem));
