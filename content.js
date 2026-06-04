@@ -28,7 +28,7 @@
     }
   }
 
-// ── 2. Override window.open ───────────────────────────────────────────────
+  // ── 2. Override window.open ───────────────────────────────────────────────
   const _nativeOpen = window.open.bind(window);
   window.open = function (url, target, features) {
     if (isWhitelisted(url)) {
@@ -697,20 +697,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (spinner) spinner.style.display = "block";
     const iframe = document.getElementById("videoPlayer");
 
-if (mov === "PITSORT") {
+    if (mov === "PITSORT") {
+      // PitSport needs a slightly tighter sandbox — no same-origin
+      // (cross-origin sport embeds) but still needs scripts + presentation.
       iframe.setAttribute(
         "sandbox",
         "allow-scripts allow-same-origin allow-presentation allow-forms allow-fullscreen",
       );
     } else {
-      // VidSrc and similar players will crash or refuse to load if popups are entirely sandboxed.
-      // We add allow-popups here to satisfy the player, relying on browser ad-blockers for safety.
+      // Universal anti-popup sandbox for ALL other embeds (VidSrc, Rumble,
+      // Anikoto, Megaplay, Lunora, etc.).
+      //
+      // allow-scripts          — video players need JS to run
+      // allow-same-origin      — lets the embed read its own cookies/storage
+      // allow-presentation     — required for fullscreen API
+      // allow-fullscreen       — Firefox requires this explicitly in the sandbox
+      //                          token list when sandbox is set via JS; without it
+      //                          requestFullscreen() and player pause/controls fail
+      // allow-forms            — some players submit forms for quality/sub selection
+      // allow-pointer-lock     — needed by some fullscreen video controls
+      //
+      // Intentionally OMITTED:
+      //   allow-popups         — blocks new-tab ad clicks & window.open() calls
+      //   allow-popups-to-escape-sandbox — blocks popup escape trick
+      //   allow-top-navigation — blocks redirect-on-click to ad pages
+      //   allow-top-navigation-by-user-activation — blocks user-click redirects
       iframe.setAttribute(
         "sandbox",
-        "allow-scripts allow-same-origin allow-presentation allow-forms allow-pointer-lock allow-fullscreen allow-popups allow-popups-to-escape-sandbox"
+        "allow-scripts allow-same-origin allow-presentation allow-forms allow-pointer-lock allow-fullscreen",
       );
-      // Strip referrer to bypass standard hotlink protection
-      iframe.setAttribute("referrerpolicy", "no-referrer");
     }
     // Setting sandbox via setAttribute clears the allowfullscreen reflected
     // property in some browsers — restore it explicitly so it stays in sync.
