@@ -702,7 +702,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // (cross-origin sport embeds) but still needs scripts + presentation.
       iframe.setAttribute(
         "sandbox",
-        "allow-scripts allow-same-origin allow-presentation allow-forms",
+        "allow-scripts allow-same-origin allow-presentation allow-forms allow-fullscreen",
       );
     } else {
       // Universal anti-popup sandbox for ALL other embeds (VidSrc, Rumble,
@@ -711,6 +711,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       // allow-scripts          — video players need JS to run
       // allow-same-origin      — lets the embed read its own cookies/storage
       // allow-presentation     — required for fullscreen API
+      // allow-fullscreen       — Firefox requires this explicitly in the sandbox
+      //                          token list when sandbox is set via JS; without it
+      //                          requestFullscreen() and player pause/controls fail
       // allow-forms            — some players submit forms for quality/sub selection
       // allow-pointer-lock     — needed by some fullscreen video controls
       //
@@ -721,9 +724,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       //   allow-top-navigation-by-user-activation — blocks user-click redirects
       iframe.setAttribute(
         "sandbox",
-        "allow-scripts allow-same-origin allow-presentation allow-forms allow-pointer-lock",
+        "allow-scripts allow-same-origin allow-presentation allow-forms allow-pointer-lock allow-fullscreen",
       );
     }
+    // Setting sandbox via setAttribute clears the allowfullscreen reflected
+    // property in some browsers — restore it explicitly so it stays in sync.
+    iframe.allowFullscreen = true;
 
     iframe.classList.add("fade-out");
     iframe.onload = () =>
