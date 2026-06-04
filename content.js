@@ -35,14 +35,7 @@
       return _nativeOpen(url, target, features);
     }
     console.info('[VW Blocker] window.open blocked:', url);
-    // Return a dummy object so third-party player scripts don't crash
-    return {
-      blur: () => {},
-      focus: () => {},
-      close: () => {},
-      postMessage: () => {},
-      closed: false
-    };
+    return null;
   };
 
   // ── 3. Block beforeunload / unload hijacking ──────────────────────────────
