@@ -65,27 +65,46 @@
   let iObs       = null;
   let searchTid  = null;
 
-  // ── Poster Lazy-loading Observer ──────────────────────────────────
-  const posterObserver = new IntersectionObserver((entries) => {
-    entries.forEach(async entry => {
-      if (entry.isIntersecting) {
-        const img = entry.target;
-        posterObserver.unobserve(img);
-        const card = img.closest('.vidsrc-card');
-        const imdbId = card?.dataset.vsrcId;
-        if (!imdbId || img.dataset.loaded) return;
-        
-        try {
-          const data = await apiFetch(`https://v3.sg.media-imdb.com/suggestion/x/${imdbId}.json`);
+  // ── Poster Lazy-loading Observer (rate-limited queue) ────────────
+  // The old approach fired unlimited concurrent apiFetch calls whenever
+  // many cards entered the viewport at once, causing UI jank.
+  // This version funnels requests through a small concurrency pool.
+  const POSTER_CONCURRENCY = 3;
+  let posterActive = 0;
+  const posterQueue = [];
+
+  function processPosterQueue() {
+    while (posterActive < POSTER_CONCURRENCY && posterQueue.length > 0) {
+      const { img, imdbId } = posterQueue.shift();
+      posterActive++;
+      apiFetch(`https://v3.sg.media-imdb.com/suggestion/x/${imdbId}.json`)
+        .then(data => {
           const match = data?.d?.find(i => i.id === imdbId);
-          if (match && match.i && match.i.imageUrl) {
+          if (match?.i?.imageUrl) {
             img.src = match.i.imageUrl;
             img.dataset.loaded = "true";
             const cachedItem = cache.find(c => c.imdb_id === imdbId);
             if (cachedItem) cachedItem.poster = match.i.imageUrl;
           }
-        } catch(err) {}
-      }
+        })
+        .catch(() => {})
+        .finally(() => {
+          posterActive--;
+          processPosterQueue();
+        });
+    }
+  }
+
+  const posterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const img = entry.target;
+      posterObserver.unobserve(img);
+      const card = img.closest('.vidsrc-card');
+      const imdbId = card?.dataset.vsrcId;
+      if (!imdbId || img.dataset.loaded) return;
+      posterQueue.push({ img, imdbId });
+      processPosterQueue();
     });
   }, { rootMargin: "300px" });
 
@@ -113,11 +132,22 @@
 
   // ── Card click ────────────────────────────────────────────────────
   async function onCardClick(card, item) {
+    // Guard against double-clicks / re-entrant calls while viroPlay resolves
+    if (card.dataset.clicking === "1") return;
+    card.dataset.clicking = "1";
+    card.classList.add("vidsrc-loading");
+
     const key = `VIDSRC_${item.imdb_id}`;
     if (!window.mediaData?.lunora?.[key]) {
       injectEntry(item.imdb_id, item.title, item.embed_url);
     }
-    window.viroPlay?.("lunora", key);
+    await window.viroPlay?.("lunora", key);
+
+    // Reset after a short delay so the card is re-clickable after navigating back
+    setTimeout(() => {
+      card.dataset.clicking = "0";
+      card.classList.remove("vidsrc-loading");
+    }, 800);
   }
 
   // ── Card element ──────────────────────────────────────────────────
@@ -418,16 +448,20 @@
       .vidsrc-sep-line{flex:1;height:1px;background:rgba(255,255,255,.1);}
       .vidsrc-sep-label{color:rgba(255,255,255,.35);font-family:"Kanit",sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;flex-shrink:0;}
       #vidsrc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:14px;padding:5px 0 20px;}
-      .vidsrc-badge{position:absolute;top:6px;left:6px;background:rgba(239,68,68,.88);color:#fff;font-family:"Kanit",sans-serif;font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 6px;border-radius:3px;pointer-events:none;z-index:2;backdrop-filter:blur(4px);}
-      .vidsrc-card{position:relative;cursor:pointer;overflow:hidden;border-radius:12px;transition:transform 0.2s,box-shadow 0.2s;}
+      /* Badge: works for both .vidsrc-badge and the shared .ani-badge class used on vidsrc cards */
+      .vidsrc-badge,.vidsrc-card .ani-badge{position:absolute;top:6px;left:6px;background:rgba(231,76,60,.88) !important;color:#fff;font-family:"Kanit",sans-serif;font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 6px;border-radius:3px;pointer-events:none;z-index:2;backdrop-filter:blur(4px);}
+      /* Override right-positioning from ani-badge so vidsrc badge stays top-left */
+      .vidsrc-card .ani-badge{right:auto !important;}
+      .vidsrc-card{position:relative;cursor:pointer;overflow:hidden;border-radius:12px;transition:transform 0.2s,box-shadow 0.2s;user-select:none;}
       .vidsrc-card:hover{transform:translateY(-4px);box-shadow:0 8px 16px rgba(0,0,0,0.5);}
-      .vidsrc-card img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:12px;}
+      .vidsrc-card:active{transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,0.4);}
+      .vidsrc-card img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:12px;display:block;}
       .vidsrc-card p{position:absolute;bottom:0;left:0;right:0;margin:0;padding:30px 10px 10px;background:linear-gradient(transparent,rgba(0,0,0,0.9));color:#fff;font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-      .vidsrc-card.vidsrc-loading{opacity:.5;pointer-events:none;}
+      .vidsrc-card.vidsrc-loading{opacity:.55;pointer-events:none;cursor:wait;}
       .vidsrc-skeleton{aspect-ratio:2/3;border-radius:12px;background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.04) 75%);background-size:300% 100%;animation:vidsrc-shim 1.5s infinite linear;}
       @keyframes vidsrc-shim{0%{background-position:300% 0}100%{background-position:-300% 0}}
       .vidsrc-error{color:rgba(255,100,100,.75);font-family:"Kanit",sans-serif;font-size:.85rem;text-align:center;padding:24px;grid-column:1/-1;}
-      @media(max-width:768px){#vidsrc-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;}.vidsrc-badge{font-size:.5rem;padding:1px 4px;} .vidsrc-card p{font-size:0.75rem;}}
+      @media(max-width:768px){#vidsrc-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;}.vidsrc-badge,.vidsrc-card .ani-badge{font-size:.5rem;padding:1px 4px;} .vidsrc-card p{font-size:0.75rem;}}
     `;
     document.head.appendChild(s);
   }
