@@ -12,7 +12,7 @@
 (function () {
   'use strict';
 
-  const BASE    = 'https://pitsport.xyz';
+  const BASE    = 'https://pitsport.live';
   const TIMEOUT = 7000;
 
   window._pitsportLoaded  = false;
@@ -198,10 +198,10 @@ function probeIframe(url) {
     const _existing = window.shows.PITSORT || {};
     window.shows.PITSORT = {
       title : _existing.title || 'PitSport Live',
-      image : _existing.image || 'https://pitsport.xyz/favicon.ico',
+      image : _existing.image || 'https://pitsport.live/favicon.ico',
       PSFallback: {
         chapter       : '⚠️ Proxy unavailable',
-        video         : ['https://pitsport.xyz/live-now'],
+        video         : ['https://pitsport.live/live-now'],
         episodeTitles : [`Open PitSport Live (${reason})`],
       },
     };
