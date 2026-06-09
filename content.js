@@ -1,3 +1,4 @@
+
 // ═══════════════════════════════════════════════════════════════════════════
 // VIROWATCH UNIVERSAL AD & POPUP BLOCKER
 // Runs immediately (before DOMContentLoaded) so it intercepts everything.
@@ -85,6 +86,10 @@
     'adcash.com',
     'zedo.com',
     'undertone.com',
+    // Ad networks observed in vsembed.ru / vidsrc embed players
+    'b7510.com',        // iclick ad network — ERR_CERT_AUTHORITY_INVALID
+    'cloudnestra.com',  // dead CDN injected by embed players
+    'vsembed.ru',       // broken embed player — injects b7510 ads, sbx.html 404s, CORB in Chromium
   ];
 
   function isAdUrl(url) {
@@ -142,6 +147,9 @@
     /doubleclick\.net/i,
     /googlesyndication/i,
     /\bad(s|vert|frame|server|network)\b/i,
+    /b7510\.com/i,       // iclick ad network seen in vsembed players
+    /cloudnestra\.com/i, // dead CDN injected by embed players
+    /vsembed\.ru/i,      // broken embed player — sbx.html 404, CORB, b7510 ad injection
   ];
 
   function looksLikeAdIframe(el) {
@@ -149,10 +157,11 @@
     const src = el.src || el.getAttribute('src') || '';
     // Whitelisted embed domains — never remove these
     const EMBED_SAFE = [
-      'rumble.com', 'megaplay.buzz', 'anikotoapi.site', 'pitsport.xyz',
-      'vidsrc.', 'pushmdz.', 'voe.sx', 'dood.', 'filemoon.', 'streamed.',
+      'rumble.com', 'megaplay.buzz', 'anikotoapi.site', 'pitsport.live',
+      'vidsrc.', 'vidsrc.fyi', 'pushmdz.', 'voe.sx', 'dood.', 'filemoon.', 'streamed.',
       'streameast.', 'weakspell.', 'sportsurge.', 'discord.com', 'discord.gg',
-      'corsproxy.io', 'allorigins.win', 'codetabs.com', 'thingproxy.freeboard.io',
+      'allorigins.win', 'codetabs.com', 'api.codetabs.com',
+      'cors.sh', 'corsproxy.org', 'crossorigin.me',
     ];
     if (EMBED_SAFE.some(safe => src.includes(safe))) return false;
     if (isAdUrl(src)) return true;
@@ -697,39 +706,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (spinner) spinner.style.display = "block";
     const iframe = document.getElementById("videoPlayer");
 
-    if (mov === "PITSORT") {
-      // PitSport needs a slightly tighter sandbox — no same-origin
-      // (cross-origin sport embeds) but still needs scripts + presentation.
-      iframe.setAttribute(
-        "sandbox",
-        "allow-scripts allow-same-origin allow-presentation allow-forms allow-fullscreen",
-      );
-    } else {
-      // Universal anti-popup sandbox for ALL other embeds (VidSrc, Rumble,
-      // Anikoto, Megaplay, Lunora, etc.).
-      //
-      // allow-scripts          — video players need JS to run
-      // allow-same-origin      — lets the embed read its own cookies/storage
-      // allow-presentation     — required for fullscreen API
-      // allow-fullscreen       — Firefox requires this explicitly in the sandbox
-      //                          token list when sandbox is set via JS; without it
-      //                          requestFullscreen() and player pause/controls fail
-      // allow-forms            — some players submit forms for quality/sub selection
-      // allow-pointer-lock     — needed by some fullscreen video controls
-      //
-      // Intentionally OMITTED:
-      //   allow-popups         — blocks new-tab ad clicks & window.open() calls
-      //   allow-popups-to-escape-sandbox — blocks popup escape trick
-      //   allow-top-navigation — blocks redirect-on-click to ad pages
-      //   allow-top-navigation-by-user-activation — blocks user-click redirects
-      iframe.setAttribute(
-        "sandbox",
-        "allow-scripts allow-same-origin allow-presentation allow-forms allow-pointer-lock allow-fullscreen",
-      );
-    }
-    // Setting sandbox via setAttribute clears the allowfullscreen reflected
-    // property in some browsers — restore it explicitly so it stays in sync.
+    // No sandbox — embed players (vidsrc.fyi, anikoto, etc.) need unrestricted
+    // access to sessionStorage/localStorage for player initialisation.
+    // Sandboxing without allow-same-origin forces a null origin in Chromium,
+    // which throws an uncaught SecurityError and prevents the player from loading.
+    // Cross-origin security still fully protects this page regardless of sandbox.
+    iframe.removeAttribute("sandbox");
+
     iframe.allowFullscreen = true;
+    iframe.setAttribute("allow", "fullscreen; autoplay; picture-in-picture; encrypted-media");
 
     iframe.classList.add("fade-out");
     iframe.onload = () =>
@@ -1020,7 +1005,7 @@ function renderNewestAdded() {
     const sInput = document.getElementById("searchInput");
     if (sInput) sInput.value = "";
     const vid = document.getElementById("videoPlayer");
-    if (vid) vid.src = ""; 
+    if (vid) { vid.removeAttribute("sandbox"); vid.src = "about:blank"; }
     const navBar = document.getElementById("categoryNavBar");
     if (navBar) navBar.style.display = "none";
     const npt = document.getElementById("nowPlayingTitle");
@@ -1147,4 +1132,5 @@ function renderNewestAdded() {
     selectMovie(key);
     return true;
   };
+
 });
