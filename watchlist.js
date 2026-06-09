@@ -113,7 +113,7 @@
 
     // Dynamically reconstruct missing Anikoto/Vidsrc data from their IDs
     if (item.key.startsWith('VIDSRC_')) {
-      var imdbId = item.key.replace('VIDSRC_', '');
+      var movieId = item.key.replace('VIDSRC_', '');
       window.mediaData = window.mediaData || {};
       window.mediaData.lunora = window.mediaData.lunora || {};
       if (!window.mediaData.lunora[item.key]) {
@@ -123,7 +123,7 @@
            _hidden: true,
            VIDSRC_S1: {
              chapter: "Movie",
-             video: ['https://vidsrc.me/embed/movie?imdb=' + imdbId],
+             video: ['https://vidsrc.fyi/embed/movie/' + movieId],
              episodeTitles: [item.title]
            }
          };
