@@ -1,15 +1,17 @@
 /**
- * webstreamr.js  —  Virowatch × TMDB + vidsrc.fyi  v1.0
+ * webstreamr.js  —  Virowatch × TMDB + vidsrc.fyi  v1.1
  *
  * Drop-in replacement for vidsrc.js.
  *
  * Catalog : TMDB "popular movies" (free public API, HTTPS, no proxy needed)
- * Streams : vidsrc.fyi embed iframes (no API key, no server, HTTPS, iframe-safe)
+ * Streams : vidsrc.fyi embed iframes, routed through vw-proxy.js
+ *           (Cloudflare Worker — injects a popup-blocking shield)
  * Player  : feeds embed URL into window.viroPlay("lunora", key) exactly as before
  *
- * ── You only need one thing ──────────────────────────────────────────
- *   TMDB_KEY  →  free key from https://www.themoviedb.org/settings/api
- *   (vidsrc.fyi needs no key at all)
+ * ── Setup ───────────────────────────────────────────────────────────
+ *   TMDB_KEY    →  free key from https://www.themoviedb.org/settings/api
+ *   VW_PROXY_URL → your deployed vw-proxy.js worker URL (see that file's
+ *                   header for one-time deployment steps)
  * ────────────────────────────────────────────────────────────────────
  */
 (function () {
@@ -18,18 +20,25 @@
   // Use key from env.js if available, otherwise fall back to built-in
   const TMDB_KEY  = window.ENV?.TMDB_API_KEY || "77d678406118b130512ab8affd953fa9";
 
+  // ── Cloudflare Worker proxy ────────────────────────────────────────
+  // Routes vidsrc.fyi embeds through vw-proxy.js so the fake window.open
+  // is injected server-side before any ad script loads.
+  // Set VW_PROXY_URL in env.js, or replace the fallback string below
+  // with your own workers.dev URL after deploying vw-proxy.js.
+  const WORKER_BASE = window.ENV?.VW_PROXY_URL || "https://virowatcher.vmtgaming13.workers.dev";
+
   const TMDB_BASE = "https://api.themoviedb.org/3";
   const TMDB_IMG  = "https://image.tmdb.org/t/p/w300";
   const TIMEOUT   = 12000;
 
   // ── Embed URL builder ──────────────────────────────────────────────
-  // vidsrc.fyi accepts either an IMDb tt-id or a TMDB numeric id.
-  // We prefer IMDb when available; fall back to TMDB id if not.
+  // Routed through the Cloudflare Worker so the popup shield runs inside
+  // the player's own origin before any vidsrc.fyi ad script can run.
   function embedUrl(item) {
     const id = item.imdb_id || item.tmdb_id;
     const subsOff = window._vwSubsOff || localStorage.getItem("vw_subs_off") === "1";
     const suffix = subsOff ? "?ds_lang=none" : "";
-    return `https://vidsrc.fyi/embed/movie/${id}${suffix}`;
+    return `${WORKER_BASE}/embed/movie/${id}${suffix}`;
   }
 
   // ── Helpers ────────────────────────────────────────────────────────
@@ -105,6 +114,17 @@
     entries.forEach(entry => {
       if (!entry.isIntersecting) return;
       const img = entry.target;
+      // If perf mode is active, don't load — promote to data-src for hover-reveal instead
+      if (document.body.classList.contains('perf-mode')) {
+        const src = img.dataset.lazySrc;
+        if (src) {
+          img.dataset.src = src;
+          delete img.dataset.lazySrc;
+        }
+        // Leave observed so we can re-check when mode changes; or unobserve to save resources
+        posterObserver.unobserve(img);
+        return;
+      }
       posterObserver.unobserve(img);
       const src = img.dataset.lazySrc;
       if (src) { img.src = src; img.removeAttribute("data-lazy-src"); }
@@ -164,10 +184,16 @@
     card.dataset.movie  = `VIDSRC_${item.imdb_id || item.tmdb_id}`;
 
     const img = document.createElement("img");
+    const _perfMode = document.body.classList.contains('perf-mode');
     if (item.poster) {
-      img.src             = "data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==";
-      img.dataset.lazySrc = item.poster;
-      posterObserver.observe(img);
+      if (_perfMode) {
+        // Perf mode: stash in data-src, hover-reveal handles it (same as content.js cards)
+        img.dataset.src = item.poster;
+      } else {
+        img.src             = "data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==";
+        img.dataset.lazySrc = item.poster;
+        posterObserver.observe(img);
+      }
     } else {
       img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==";
     }
@@ -188,7 +214,23 @@
     card.appendChild(badge);
 
     card.addEventListener("click",      () => onCardClick(card, item));
-    card.addEventListener("mouseenter", () => onCardHover(item), { passive: true });
+    card.addEventListener("mouseenter", () => {
+      onCardHover(item);
+      // Perf mode: reveal image after 1 second of hover (cancels if mouse leaves)
+      if (img.dataset.src) {
+        const revealTimer = setTimeout(() => {
+          if (img.dataset.src) {
+            img.src = img.dataset.src;
+            delete img.dataset.src;
+          }
+        }, 1000);
+        card.addEventListener('mouseleave', () => clearTimeout(revealTimer), { once: true });
+      }
+    }, { passive: true });
+    // Also reveal on touch for mobile (no delay needed)
+    card.addEventListener("touchstart", () => {
+      if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
+    }, { once: true, passive: true });
     window._vwlAttachButton?.(card);
     return card;
   }
