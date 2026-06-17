@@ -1,4 +1,3 @@
-
 // ═══════════════════════════════════════════════════════════════════════════
 // VIROWATCH UNIVERSAL AD & POPUP BLOCKER
 // Runs immediately (before DOMContentLoaded) so it intercepts everything.
@@ -30,13 +29,70 @@
   }
 
   // ── 2. Override window.open ───────────────────────────────────────────────
+  // Returns a fake-but-convincing window object instead of null so callers
+  // (ad scripts on the parent page) don't detect that blocking occurred.
+  // NOTE: for cross-origin iframes (vidsrc.fyi) the browser's sandbox
+  // attribute is what blocks popups — this override covers the parent page only.
+  function makeFakeWindow() {
+    var f = {
+      closed: false, name: '', opener: null,
+      innerWidth: 0, innerHeight: 0, outerWidth: 0, outerHeight: 0,
+      screenX: 0, screenY: 0, scrollX: 0, scrollY: 0, devicePixelRatio: 1,
+      location: {
+        href: 'about:blank', origin: 'null', protocol: 'about:',
+        host: '', hostname: '', port: '', pathname: 'blank', search: '', hash: '',
+        assign: function () {}, replace: function () {}, reload: function () {},
+        toString: function () { return 'about:blank'; },
+      },
+      history: { length: 0, back: function () {}, forward: function () {}, go: function () {} },
+      document: {
+        title: '', readyState: 'complete',
+        write: function () {}, writeln: function () {},
+        getElementById: function () { return null; },
+        querySelector: function () { return null; },
+        querySelectorAll: function () { return []; },
+        createElement: function () { return {}; },
+        addEventListener: function () {}, removeEventListener: function () {},
+      },
+      screen:    { width: 0, height: 0, availWidth: 0, availHeight: 0 },
+      navigator: { userAgent: navigator.userAgent },
+      focus:    function () {},
+      blur:     function () {},
+      close:    function () { f.closed = true; },
+      stop:     function () {},
+      print:    function () {},
+      alert:    function () {},
+      confirm:  function () { return false; },
+      prompt:   function () { return null; },
+      postMessage:         function () {},
+      addEventListener:    function () {},
+      removeEventListener: function () {},
+      dispatchEvent:       function () { return false; },
+      getComputedStyle:    function () { return {}; },
+      matchMedia:          function () { return { matches: false, addListener: function () {}, removeEventListener: function () {} }; },
+      // Fake window.open so chained calls also silently succeed
+      open:   function () { return makeFakeWindow(); },
+      setInterval:           function () { return 0; },
+      setTimeout:            function () { return 0; },
+      clearInterval:         function () {},
+      clearTimeout:          function () {},
+      requestAnimationFrame: function () { return 0; },
+      cancelAnimationFrame:  function () {},
+      resizeTo: function () {}, resizeBy: function () {},
+      moveTo:   function () {}, moveBy:   function () {},
+      scrollTo: function () {}, scrollBy: function () {},
+    };
+    f.self = f; f.window = f; f.top = f; f.parent = f; f.frames = f;
+    return f;
+  }
+
   const _nativeOpen = window.open.bind(window);
   window.open = function (url, target, features) {
     if (isWhitelisted(url)) {
       return _nativeOpen(url, target, features);
     }
     console.info('[VW Blocker] window.open blocked:', url);
-    return null;
+    return makeFakeWindow(); // non-null → callers think the popup opened
   };
 
   // ── 3. Block beforeunload / unload hijacking ──────────────────────────────
@@ -162,6 +218,7 @@
       'streameast.', 'weakspell.', 'sportsurge.', 'discord.com', 'discord.gg',
       'allorigins.win', 'codetabs.com', 'api.codetabs.com',
       'cors.sh', 'corsproxy.org', 'crossorigin.me',
+      'workers.dev', // vw-proxy.js — our Cloudflare Worker, serves the vidsrc.fyi embed
     ];
     if (EMBED_SAFE.some(safe => src.includes(safe))) return false;
     if (isAdUrl(src)) return true;
@@ -486,6 +543,108 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
   const heroSection = document.getElementById("hero");
 
+  // ── Performance / Network-Save Mode ──────────────────────────────────────
+  // When enabled, images are not loaded until the card is hovered.
+  // Uses data-src on <img> elements; a shared IntersectionObserver + mouseenter
+  // reveals them on demand. State is persisted in localStorage.
+  const PERF_KEY = 'vw_perf_mode';
+
+  function isPerfMode() {
+    return document.body.classList.contains('perf-mode');
+  }
+
+  function imgTag(src, extraAttrs = '') {
+    const safeSrc = src || 'https://via.placeholder.com/150';
+    if (isPerfMode()) {
+      // Don't set src at all — store in data-src for hover-reveal
+      return `<img data-src="${safeSrc}" loading="lazy" ${extraAttrs}/>`;
+    }
+    return `<img src="${safeSrc}" loading="lazy" ${extraAttrs}/>`;
+  }
+
+  // Attach hover-reveal listener to a card element
+  function attachHoverReveal(el) {
+    const img = el.querySelector('img[data-src]');
+    if (!img) return;
+    el.addEventListener('mouseenter', function onEnter() {
+      // Wait 1 second before loading — cancels if mouse leaves (prevents scroll-past loads)
+      const revealTimer = setTimeout(() => {
+        if (img.dataset.src) {
+          img.src = img.dataset.src;
+          delete img.dataset.src;
+        }
+      }, 1000);
+      el.addEventListener('mouseleave', () => clearTimeout(revealTimer), { once: true });
+      el.removeEventListener('mouseenter', onEnter);
+    }, { once: true });
+    // Touch: reveal immediately (no hover intent ambiguity on mobile)
+    el.addEventListener('touchstart', function onTouch() {
+      if (img.dataset.src) {
+        img.src = img.dataset.src;
+        delete img.dataset.src;
+      }
+      el.removeEventListener('touchstart', onTouch);
+    }, { once: true, passive: true });
+  }
+
+  // Apply/remove perf mode on all currently-rendered cards
+  function applyPerfModeToExisting(enable) {
+    document.querySelectorAll('.movie-item, .newest-added-item').forEach(card => {
+      const img = card.querySelector('img');
+      if (!img) return;
+      if (enable) {
+        // Webstreamr cards use data-lazy-src (their own IntersectionObserver system).
+        // Promote that to data-src so our hover-reveal picks it up, and unobserve
+        // so the posterObserver doesn't fire and load the image anyway.
+        if (img.dataset.lazySrc && !img.dataset.src) {
+          img.dataset.src = img.dataset.lazySrc;
+          delete img.dataset.lazySrc;
+        }
+        // For native content.js cards: stash the real src
+        const realSrc = img.getAttribute('src');
+        const isBlank = !realSrc || realSrc.startsWith('data:image/gif');
+        if (realSrc && !isBlank && !img.dataset.src) {
+          img.dataset.src = realSrc;
+          img.removeAttribute('src');
+        } else if (isBlank && !img.dataset.src) {
+          // Already blanked (webstreamr placeholder) but no stash yet — nothing to do
+        }
+        attachHoverReveal(card);
+      } else {
+        // Restore immediately — covers both content.js and webstreamr cards
+        if (img.dataset.src) {
+          img.src = img.dataset.src;
+          delete img.dataset.src;
+        }
+        // If webstreamr's lazySrc was never promoted, restore that path too
+        if (img.dataset.lazySrc) {
+          img.src = img.dataset.lazySrc;
+          delete img.dataset.lazySrc;
+        }
+      }
+    });
+    if (enable) {
+      document.body.classList.add('perf-mode');
+    } else {
+      document.body.classList.remove('perf-mode');
+    }
+  }
+
+  // Expose globally so the sidebar toggle can call it
+  window.vwTogglePerfMode = function(enable) {
+    localStorage.setItem(PERF_KEY, enable ? '1' : '0');
+    applyPerfModeToExisting(enable);
+    // Sync the checkbox if it exists
+    const cb = document.getElementById('vw-perf-toggle');
+    if (cb) cb.checked = enable;
+  };
+
+  // Init body class on load
+  if (isPerfMode()) {
+    document.body.classList.add('perf-mode');
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
   function renderList(category) {
     cat = category;
     window._vwlCurrentCat = category;
@@ -511,13 +670,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       let badgeHtml = badgeText ? `<span class="vw-category-badge" style="background: ${badgeBg};">${badgeText}</span>` : "";
       
       div.innerHTML = `
-        <img src="${info.image || "https://via.placeholder.com/150"}" loading="lazy"/>
+        ${imgTag(info.image)}
         <p class="kanit-extralight">${info.title || key}</p>
         ${badgeHtml}
       `;
       
       const clean = div.cloneNode(true);
       clean.addEventListener("click", () => selectMovie(key));
+      attachHoverReveal(clean);
       movieList.appendChild(clean);
     });
     
@@ -706,11 +866,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (spinner) spinner.style.display = "block";
     const iframe = document.getElementById("videoPlayer");
 
-    // No sandbox — embed players (vidsrc.fyi, anikoto, etc.) need unrestricted
-    // access to sessionStorage/localStorage for player initialisation.
-    // Sandboxing without allow-same-origin forces a null origin in Chromium,
-    // which throws an uncaught SecurityError and prevents the player from loading.
-    // Cross-origin security still fully protects this page regardless of sandbox.
+    // No sandbox — popup blocking is handled by the Cloudflare Worker proxy
+    // (vw-proxy.js), which injects the fake window.open script server-side
+    // before any vidsrc.fyi ad code runs. Sandboxing without allow-same-origin
+    // forces a null origin in Chromium (SecurityError); with allow-same-origin
+    // but without allow-popups the player detects blocked popups and refuses
+    // to serve content. The worker approach avoids both problems entirely.
     iframe.removeAttribute("sandbox");
 
     iframe.allowFullscreen = true;
@@ -849,7 +1010,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         let badgeHtml = badgeText ? `<span class="vw-category-badge" style="background: ${badgeBg};">${badgeText}</span>` : "";
         
         div.innerHTML = `
-            <img src="${info.image || "https://via.placeholder.com/150"}" loading="lazy"/>
+            ${imgTag(info.image)}
             <p class="kanit-extralight">${info.title || key}</p>
             ${badgeHtml}
           `;
@@ -857,6 +1018,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           cat = catKey;
           selectMovie(key);
         });
+        attachHoverReveal(div);
         movieList.appendChild(div);
       });
     }, 150);
@@ -883,7 +1045,7 @@ function renderNewestAdded() {
       div.dataset.cat = catKey;
       
       div.innerHTML = `
-        <img src="${info.image || "https://via.placeholder.com/150"}" loading="lazy" alt="">
+        ${imgTag(info.image, 'alt=""')}
         <span>${info.title || key}</span>
       `;
       
@@ -895,6 +1057,7 @@ function renderNewestAdded() {
         selectMovie(key);
       });
       
+      attachHoverReveal(div);
       listEl.appendChild(div);
     });
   }
