@@ -303,7 +303,13 @@ if (isAnimeView()) {
     card.dataset.done  = "0";
 
     const img   = document.createElement("img");
-    img.src     = item.poster || item.image || ""; 
+    const _aniPerfMode = document.body.classList.contains('perf-mode');
+    const _aniSrc = item.poster || item.image || "";
+    if (_aniPerfMode && _aniSrc) {
+      img.dataset.src = _aniSrc;  // hover-reveal handles it
+    } else {
+      img.src = _aniSrc;
+    }
     img.alt     = "";
     img.loading = "lazy";
 
@@ -320,7 +326,22 @@ if (isAnimeView()) {
     card.appendChild(badge);
 
     card.addEventListener("click",      () => onCardClick(card));
-    card.addEventListener("mouseenter", () => prefetchSeries(card.dataset.aniId), { passive: true });
+    card.addEventListener("mouseenter", () => {
+      prefetchSeries(card.dataset.aniId);
+      // Perf mode: reveal image after 1 second of hover (cancels if mouse leaves)
+      if (img.dataset.src) {
+        const revealTimer = setTimeout(() => {
+          if (img.dataset.src) {
+            img.src = img.dataset.src;
+            delete img.dataset.src;
+          }
+        }, 1000);
+        card.addEventListener('mouseleave', () => clearTimeout(revealTimer), { once: true });
+      }
+    }, { passive: true });
+    card.addEventListener("touchstart", () => {
+      if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
+    }, { once: true, passive: true });
     window._vwlAttachButton?.(card);
     return card;
   }
