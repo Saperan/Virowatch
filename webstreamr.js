@@ -422,8 +422,6 @@
     const input = document.getElementById("searchInput");
     if (!input) return;
     input.addEventListener("input", (e) => {
-      // Show web results during any search, regardless of current category
-
       clearTimeout(searchTid);
       const q = e.target.value.trim();
 
@@ -434,7 +432,6 @@
         input.dispatchEvent(new Event("input"));
         input.blur();
         (async () => {
-          // Fetch title/poster from TMDB find endpoint
           const found  = await apiFetch(
             `${TMDB_BASE}/find/${imdbId}?api_key=${TMDB_KEY}&external_source=imdb_id`
           );
@@ -449,8 +446,14 @@
       }
 
       searchTid = setTimeout(() => {
-        if (q.length < 2) cleanSearchCards();
-        else doSearch(q);
+        // ── FIX: Only show webstreamr results for queries ≥ 3 chars.
+        // This prevents lunora/movie content from appearing when the user
+        // is just typing 1-2 characters that happen to match many titles.
+        if (q.length < 3) {
+          cleanSearchCards();
+        } else {
+          doSearch(q);
+        }
       }, 360);
     });
   }
