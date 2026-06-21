@@ -8,6 +8,13 @@ window.shows = {
     // Sub-chapters (PSLiveNow, PSUpcoming) will be injected at runtime
 },
 
+    SBLIVE: {
+        title: '[BETA] StreamBroadcast',
+        image: 'https://streambroadcast.net/favicon.ico',
+        // video/episodeTitles are populated dynamically by streambroadcast-live.js
+        // Sub-chapters (SBSoon, SBScheduled) will be injected at runtime
+    },
+
 
 
     FROM: {
