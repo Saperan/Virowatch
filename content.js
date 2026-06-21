@@ -214,6 +214,7 @@
     // Whitelisted embed domains — never remove these
     const EMBED_SAFE = [
       'rumble.com', 'megaplay.buzz', 'anikotoapi.site', 'pitsport.live',
+      'streambroadcast.net', // Added StreamBroadcast to safe list
       'vidsrc.', 'vidsrc.fyi', 'pushmdz.', 'voe.sx', 'dood.', 'filemoon.', 'streamed.',
       'streameast.', 'weakspell.', 'sportsurge.', 'discord.com', 'discord.gg',
       'allorigins.win', 'codetabs.com', 'api.codetabs.com',
@@ -543,108 +544,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
   const heroSection = document.getElementById("hero");
 
-  // ── Performance / Network-Save Mode ──────────────────────────────────────
-  // When enabled, images are not loaded until the card is hovered.
-  // Uses data-src on <img> elements; a shared IntersectionObserver + mouseenter
-  // reveals them on demand. State is persisted in localStorage.
-  const PERF_KEY = 'vw_perf_mode';
-
-  function isPerfMode() {
-    return document.body.classList.contains('perf-mode');
-  }
-
-  function imgTag(src, extraAttrs = '') {
-    const safeSrc = src || 'https://via.placeholder.com/150';
-    if (isPerfMode()) {
-      // Don't set src at all — store in data-src for hover-reveal
-      return `<img data-src="${safeSrc}" loading="lazy" ${extraAttrs}/>`;
-    }
-    return `<img src="${safeSrc}" loading="lazy" ${extraAttrs}/>`;
-  }
-
-  // Attach hover-reveal listener to a card element
-  function attachHoverReveal(el) {
-    const img = el.querySelector('img[data-src]');
-    if (!img) return;
-    el.addEventListener('mouseenter', function onEnter() {
-      // Wait 1 second before loading — cancels if mouse leaves (prevents scroll-past loads)
-      const revealTimer = setTimeout(() => {
-        if (img.dataset.src) {
-          img.src = img.dataset.src;
-          delete img.dataset.src;
-        }
-      }, 1000);
-      el.addEventListener('mouseleave', () => clearTimeout(revealTimer), { once: true });
-      el.removeEventListener('mouseenter', onEnter);
-    }, { once: true });
-    // Touch: reveal immediately (no hover intent ambiguity on mobile)
-    el.addEventListener('touchstart', function onTouch() {
-      if (img.dataset.src) {
-        img.src = img.dataset.src;
-        delete img.dataset.src;
-      }
-      el.removeEventListener('touchstart', onTouch);
-    }, { once: true, passive: true });
-  }
-
-  // Apply/remove perf mode on all currently-rendered cards
-  function applyPerfModeToExisting(enable) {
-    document.querySelectorAll('.movie-item, .newest-added-item').forEach(card => {
-      const img = card.querySelector('img');
-      if (!img) return;
-      if (enable) {
-        // Webstreamr cards use data-lazy-src (their own IntersectionObserver system).
-        // Promote that to data-src so our hover-reveal picks it up, and unobserve
-        // so the posterObserver doesn't fire and load the image anyway.
-        if (img.dataset.lazySrc && !img.dataset.src) {
-          img.dataset.src = img.dataset.lazySrc;
-          delete img.dataset.lazySrc;
-        }
-        // For native content.js cards: stash the real src
-        const realSrc = img.getAttribute('src');
-        const isBlank = !realSrc || realSrc.startsWith('data:image/gif');
-        if (realSrc && !isBlank && !img.dataset.src) {
-          img.dataset.src = realSrc;
-          img.removeAttribute('src');
-        } else if (isBlank && !img.dataset.src) {
-          // Already blanked (webstreamr placeholder) but no stash yet — nothing to do
-        }
-        attachHoverReveal(card);
-      } else {
-        // Restore immediately — covers both content.js and webstreamr cards
-        if (img.dataset.src) {
-          img.src = img.dataset.src;
-          delete img.dataset.src;
-        }
-        // If webstreamr's lazySrc was never promoted, restore that path too
-        if (img.dataset.lazySrc) {
-          img.src = img.dataset.lazySrc;
-          delete img.dataset.lazySrc;
-        }
-      }
-    });
-    if (enable) {
-      document.body.classList.add('perf-mode');
-    } else {
-      document.body.classList.remove('perf-mode');
-    }
-  }
-
-  // Expose globally so the sidebar toggle can call it
-  window.vwTogglePerfMode = function(enable) {
-    localStorage.setItem(PERF_KEY, enable ? '1' : '0');
-    applyPerfModeToExisting(enable);
-    // Sync the checkbox if it exists
-    const cb = document.getElementById('vw-perf-toggle');
-    if (cb) cb.checked = enable;
-  };
-
-  // Init body class on load
-  if (isPerfMode()) {
-    document.body.classList.add('perf-mode');
-  }
-  // ─────────────────────────────────────────────────────────────────────────
-
   function renderList(category) {
     cat = category;
     window._vwlCurrentCat = category;
@@ -670,14 +569,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       let badgeHtml = badgeText ? `<span class="vw-category-badge" style="background: ${badgeBg};">${badgeText}</span>` : "";
       
       div.innerHTML = `
-        ${imgTag(info.image)}
+        <img src="${info.image || "https://via.placeholder.com/150"}" loading="lazy"/>
         <p class="kanit-extralight">${info.title || key}</p>
         ${badgeHtml}
       `;
       
       const clean = div.cloneNode(true);
       clean.addEventListener("click", () => selectMovie(key));
-      attachHoverReveal(clean);
       movieList.appendChild(clean);
     });
     
@@ -743,6 +641,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const npt = document.getElementById("nowPlayingTitle");
     if (npt) npt.textContent = mediaData[cat]?.[key]?.title || key;
 
+    // PitSport Loading Logic
     if (key === "PITSORT" && cat === "shows") {
       const pitData = window.mediaData?.shows?.PITSORT;
       const hasVideos =
@@ -776,6 +675,41 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
     }
+
+    // StreamBroadcast Loading Logic
+    if (key === "SBLIVE" && cat === "shows") {
+      const sbData = window.mediaData?.shows?.SBLIVE;
+      const hasVideos =
+        sbData &&
+        Object.keys(sbData).some(
+          (k) =>
+            !RESERVED_KEYS.includes(k) &&
+            typeof sbData[k] === "object" &&
+            sbData[k].video?.length,
+        );
+
+      if (!hasVideos) {
+        if (episodeContainer) {
+          episodeContainer.style.display = "flex";
+          document.body.classList.add("modal-open");
+        }
+        const listEl = document.getElementById("episodeListContainer");
+        if (listEl)
+          listEl.innerHTML =
+            '<div class="episode" style="opacity:0.6;cursor:default;">⏳ Loading scheduled streams…</div>';
+        seasonSelectorContainer.innerHTML = "";
+
+        if (!window._sbLoaded) {
+          if (
+            !window._sbLoading &&
+            typeof window.reloadStreamBroadcast === "function"
+          ) {
+            window.reloadStreamBroadcast();
+          }
+        }
+        return;
+      }
+    }
     
     updateSeasonSelector();
     updateEpisodeList();
@@ -793,8 +727,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 50);
   }
 
+  // PitSport Ready Handler
   window.addEventListener("pitsportReady", () => {
     if (cat === "shows" && mov === "PITSORT") {
+      ep = 0;
+      season = null;
+      updateSeasonSelector();
+      updateEpisodeList();
+      updateVideo(0);
+      updateDownloads();
+      updateWatermarksAndBadges();
+    }
+  });
+
+  // StreamBroadcast Ready Handler
+  window.addEventListener("sbReady", () => {
+    if (cat === "shows" && mov === "SBLIVE") {
       ep = 0;
       season = null;
       updateSeasonSelector();
@@ -877,13 +825,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     iframe.allowFullscreen = true;
     iframe.setAttribute("allow", "fullscreen; autoplay; picture-in-picture; encrypted-media");
 
-    iframe.classList.add("fade-out");
-    iframe.onload = () =>
-      setTimeout(() => {
-        if (spinner) spinner.style.display = "none";
-        iframe.classList.remove("fade-out");
-      }, 200);
-    iframe.src = vids[index];
+    const targetSrc = vids[index];
+
+    // ── FIX: Clear to about:blank first so same-URL reloads work ──
+    // This fixes the "spam episode 1" issue where the iframe wouldn't
+    // reload because the browser saw the same src and skipped navigation.
+    iframe.src = "about:blank";
+    iframe.onload = null;
+
+    setTimeout(() => {
+      iframe.classList.add("fade-out");
+
+      let loaded = false;
+
+      // Fallback: if onload never fires (embed down, CORS error, etc.),
+      // remove fade-out after 8 seconds so the UI doesn't get stuck.
+      const fallbackTimer = setTimeout(() => {
+        if (!loaded) {
+          if (spinner) spinner.style.display = "none";
+          iframe.classList.remove("fade-out");
+        }
+      }, 8000);
+
+      iframe.onload = () => {
+        loaded = true;
+        clearTimeout(fallbackTimer);
+        setTimeout(() => {
+          if (spinner) spinner.style.display = "none";
+          iframe.classList.remove("fade-out");
+        }, 300);
+      };
+
+      iframe.src = targetSrc;
+    }, 80);
+
     ep = index;
     saveState();
     highlightEpisode(index);
@@ -918,22 +893,42 @@ document.addEventListener("DOMContentLoaded", async () => {
     else dc.innerHTML = "";
   }
 
-  function matchesSubsequence(title, query) {
-    if (!query.length) return true;
-    let j = 0;
-    for (let i = 0; i < title.length && j < query.length; i++) {
-      if (title[i] === query[j]) j++;
-    }
-    return j === query.length;
+  // ── Local catalog title matching ──────────────────────────────────
+  // NOTE: this used to be a pure subsequence matcher ("does every letter of
+  // the query appear in order somewhere in the title?"). That meant a query
+  // like "Romance" would match almost anything, because the letters r-o-m-
+  // a-n-c-e show up *somewhere, in order* in lots of unrelated titles. That
+  // produced the "random scrambled Virowatch content" results. Local catalog
+  // search should only ever match real substrings/words of the title — actual
+  // genre discovery (e.g. "Romance") is handled separately by searchByGenre()
+  // against TMDB/Anilist, which actually know what genre a title belongs to.
+  function normalizeForSearch(str) {
+    return (str || "")
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "") // strip accents
+      .replace(/[^a-z0-9\s]/g, " ")     // punctuation -> space
+      .replace(/\s+/g, " ")
+      .trim();
   }
 
-  function subsequenceMatchCount(title, query) {
-    if (!query.length) return 0;
-    let j = 0;
-    for (let i = 0; i < title.length && j < query.length; i++) {
-      if (title[i] === query[j]) j++;
-    }
-    return j;
+  function matchesSubsequence(title, query) {
+    if (!query.length) return true;
+    return normalizeForSearch(title).includes(normalizeForSearch(query));
+  }
+
+  // Returns a relevance score (0 = no match) for a local catalog match.
+  // Whole-title match > starts-with > whole-word match > plain substring.
+  function localMatchScore(title, query) {
+    const t = normalizeForSearch(title);
+    const q = normalizeForSearch(query);
+    if (!q) return 0;
+    if (t === q) return 100;
+    if (t.startsWith(q)) return 80;
+    const wordBoundary = new RegExp(`\\b${q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`);
+    if (wordBoundary.test(t)) return 60;
+    if (t.includes(q)) return 40;
+    return 0;
   }
 
   const searchClearBtn = document.getElementById("searchClear");
@@ -948,11 +943,423 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
+  // ── Genre keyword mapping for cross-category search ──────────────
+  const TMDB_KEY = window.ENV?.TMDB_API_KEY || "77d678406118b130512ab8affd953fa9";
+  const WORKER_BASE = window.ENV?.VW_PROXY_URL || "https://virowatcher.vmtgaming13.workers.dev";
+  const TMDB_IMG = "https://image.tmdb.org/t/p/w300";
+
+  const GENRE_MAP = {
+    'action':            { tmdb_movie: 28,    tmdb_tv: 10759, anilist: 'Action' },
+    'adventure':         { tmdb_movie: 12,    tmdb_tv: 10759, anilist: 'Adventure' },
+    'comedy':            { tmdb_movie: 35,    tmdb_tv: 35,    anilist: 'Comedy' },
+    'drama':             { tmdb_movie: 18,    tmdb_tv: 18,    anilist: 'Drama' },
+    'fantasy':           { tmdb_movie: 14,    tmdb_tv: 10765, anilist: 'Fantasy' },
+    'horror':            { tmdb_movie: 27,                     anilist: 'Horror' },
+    'mystery':           { tmdb_movie: 9648,  tmdb_tv: 9648,  anilist: 'Mystery' },
+    'romance':           { tmdb_movie: 10749,                  anilist: 'Romance' },
+    'sci-fi':            { tmdb_movie: 878,   tmdb_tv: 10765, anilist: 'Sci-Fi' },
+    'science fiction':   { tmdb_movie: 878,   tmdb_tv: 10765, anilist: 'Sci-Fi' },
+    'thriller':          { tmdb_movie: 53,                     anilist: 'Thriller' },
+    'mecha':             {                                      anilist: 'Mecha' },
+    'slice of life':     {                                      anilist: 'Slice of Life' },
+    'supernatural':      {                                      anilist: 'Supernatural' },
+    'psychological':     {                                      anilist: 'Psychological' },
+    'sports':            {                                      anilist: 'Sports' },
+    'music':             { tmdb_movie: 10402,                  anilist: 'Music' },
+    'crime':             { tmdb_movie: 80,    tmdb_tv: 80 },
+    'war':               { tmdb_movie: 10752, tmdb_tv: 10768 },
+    'western':           { tmdb_movie: 37,    tmdb_tv: 37 },
+    'animation':         { tmdb_movie: 16,    tmdb_tv: 16 },
+    'documentary':       { tmdb_movie: 99,    tmdb_tv: 99 },
+    'family':            { tmdb_movie: 10751, tmdb_tv: 10751 },
+  };
+
+  function matchGenre(query) {
+    const q = query.toLowerCase().trim();
+    if (GENRE_MAP[q]) return { keyword: q, ...GENRE_MAP[q] };
+    // Try multi-word keywords first (e.g. "science fiction", "slice of life")
+    // so they win over a shorter keyword that might also appear in the query.
+    const keywordsByLength = Object.entries(GENRE_MAP).sort(
+      (a, b) => b[0].length - a[0].length
+    );
+    for (const [keyword, ids] of keywordsByLength) {
+      const re = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`);
+      if (re.test(q)) return { keyword, ...ids };
+    }
+    return null;
+  }
+
+  async function fetchTmdbGenre(genreId, type) {
+    if (!genreId) return [];
+    try {
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), 10000);
+      const res = await fetch(
+        `https://api.themoviedb.org/3/discover/${type}?api_key=${TMDB_KEY}&with_genres=${genreId}&sort_by=popularity.desc&page=1`,
+        { signal: ctrl.signal }
+      );
+      clearTimeout(tid);
+      const data = await res.json();
+      return data?.results || [];
+    } catch { return []; }
+  }
+
+  async function fetchAnilistGenre(genre) {
+    if (!genre) return [];
+    const query = `query { Page(page: 1, perPage: 15) { media(genre: "${genre}", sort: POPULARITY_DESC) { id title { romaji english } coverImage { large } } } }`;
+    try {
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), 10000);
+      const res = await fetch('https://graphql.anilist.co', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query }),
+        signal: ctrl.signal
+      });
+      clearTimeout(tid);
+      const data = await res.json();
+      return data?.data?.Page?.media || [];
+    } catch { return []; }
+  }
+
+  // ── Genre tagging for local shows.js / anime.js catalog content ──────
+  // Looks up each Virowatch title's real genres (TMDB for shows, Anilist
+  // for anime) the first time it's needed, then caches the result in
+  // localStorage so it's a one-time network cost per title, not a repeat
+  // hit on every search. Tagged titles can then surface directly in genre
+  // search results (e.g. searching "romance" can show your own Virowatch
+  // titles, not just TMDB/Anilist proxy results) ahead of everything else,
+  // since they're already playable on the site.
+  const GENRE_TAG_CACHE_KEY = "vw_genre_tags_v1";
+  let genreTagCache = {};
+  try {
+    genreTagCache = JSON.parse(localStorage.getItem(GENRE_TAG_CACHE_KEY) || "{}");
+  } catch { genreTagCache = {}; }
+
+  function saveGenreTagCache() {
+    try { localStorage.setItem(GENRE_TAG_CACHE_KEY, JSON.stringify(genreTagCache)); } catch {}
+  }
+
+  function genreTagCacheKey(catKey, key) {
+    return `${catKey}:${key}`;
+  }
+
+  // Reverse lookup: TMDB genre id -> our keyword(s), Anilist genre name -> our keyword(s)
+  const TMDB_TV_ID_TO_KEYWORD = {};
+  const ANILIST_NAME_TO_KEYWORD = {};
+  Object.entries(GENRE_MAP).forEach(([keyword, ids]) => {
+    if (ids.tmdb_tv) {
+      (TMDB_TV_ID_TO_KEYWORD[ids.tmdb_tv] ||= []).push(keyword);
+    }
+    if (ids.anilist) {
+      (ANILIST_NAME_TO_KEYWORD[ids.anilist] ||= []).push(keyword);
+    }
+  });
+
+  async function tmdbSearchTvGenres(title) {
+    try {
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), 10000);
+      const res = await fetch(
+        `https://api.themoviedb.org/3/search/tv?api_key=${TMDB_KEY}&query=${encodeURIComponent(title)}`,
+        { signal: ctrl.signal }
+      );
+      clearTimeout(tid);
+      const data = await res.json();
+      const best = data?.results?.[0];
+      if (!best?.genre_ids) return [];
+      const keywords = new Set();
+      best.genre_ids.forEach(id => {
+        (TMDB_TV_ID_TO_KEYWORD[id] || []).forEach(k => keywords.add(k));
+      });
+      return [...keywords];
+    } catch { return []; }
+  }
+
+  async function anilistSearchGenres(title) {
+    const query = `query ($search: String) { Media(search: $search, type: ANIME) { genres } }`;
+    try {
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), 10000);
+      const res = await fetch('https://graphql.anilist.co', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, variables: { search: title } }),
+        signal: ctrl.signal
+      });
+      clearTimeout(tid);
+      const data = await res.json();
+      const genres = data?.data?.Media?.genres || [];
+      const keywords = new Set();
+      genres.forEach(g => {
+        (ANILIST_NAME_TO_KEYWORD[g] || []).forEach(k => keywords.add(k));
+      });
+      return [...keywords];
+    } catch { return []; }
+  }
+
+  // Resolves (and caches) the genre keywords for one local catalog entry.
+  // Returns an array of keywords, e.g. ["romance", "drama"]. Empty array
+  // means "looked it up, no genre keywords matched" (still cached, so we
+  // don't keep re-querying for titles with no mapped genre).
+  async function tagLocalEntry(catKey, key, info) {
+    const cacheKey = genreTagCacheKey(catKey, key);
+    const cached = genreTagCache[cacheKey];
+    if (cached) return cached.genres;
+
+    const title = info.title || key;
+    let genres = [];
+    if (catKey === "shows") {
+      genres = await tmdbSearchTvGenres(title);
+    } else if (catKey === "anime") {
+      genres = await anilistSearchGenres(title);
+    }
+
+    genreTagCache[cacheKey] = { genres, ts: Date.now() };
+    saveGenreTagCache();
+    return genres;
+  }
+
+  // Tags every shows/anime entry against one specific genre keyword,
+  // resolving lazily and only as needed for the active search. Returns
+  // the list of { catKey, key, info } that match. Capped + sequential-ish
+  // (small concurrency) so a search doesn't fire 70+ requests at once.
+  async function findLocalMatchesForGenre(genreKeyword) {
+    const candidates = [];
+    ["shows", "anime"].forEach(catKey => {
+      const catData = mediaData[catKey];
+      if (!catData) return;
+      Object.entries(catData).forEach(([key, info]) => {
+        if (info && info._hidden) return;
+        candidates.push({ catKey, key, info });
+      });
+    });
+
+    const CONCURRENCY = 5;
+    const matches = [];
+    for (let i = 0; i < candidates.length; i += CONCURRENCY) {
+      const batch = candidates.slice(i, i + CONCURRENCY);
+      const results = await Promise.all(
+        batch.map(c => tagLocalEntry(c.catKey, c.key, c.info))
+      );
+      batch.forEach((c, idx) => {
+        if (results[idx].includes(genreKeyword)) matches.push(c);
+      });
+    }
+    return matches;
+  }
+
+  function makeGenreCard(title, image, badgeText, badgeBg, onClick, key) {
+    const div = document.createElement("div");
+    div.className = "movie-item";
+    // ── FIX: dataset.movie must be set BEFORE _vwlAttachButton runs ──
+    // attachButton() in watchlist.js bails out immediately if
+    // mi.dataset.movie is falsy, so setting this after the card was
+    // already passed through _vwlAttachButton (as a separate step by the
+    // caller) meant the "+" button silently never got added. Accepting the
+    // key here and setting it first fixes that for every genre-search card
+    // that already has a resolvable Virowatch/Lunora key.
+    if (key) div.dataset.movie = key;
+    div.innerHTML = `
+      <img src="${image || 'https://via.placeholder.com/150'}" loading="lazy"/>
+      <p class="kanit-extralight">${title}</p>
+      <span class="vw-category-badge" style="background: ${badgeBg};">${badgeText}</span>
+    `;
+    div.addEventListener("click", onClick);
+    window._vwlAttachButton?.(div);
+    return div;
+  }
+
+  function showToastMsg(msg) {
+    let t = document.getElementById('vwl-toast');
+    if (!t) { t = document.createElement('div'); t.id = 'vwl-toast'; document.body.appendChild(t); }
+    t.textContent = msg;
+    t.className = 'vwl-show';
+    clearTimeout(t._tid);
+    t._tid = setTimeout(() => { t.className = ''; }, 2600);
+  }
+
+  async function searchByGenre(query, genreInfo) {
+    const ml = document.getElementById("movieList");
+    if (!ml) return;
+
+    // Add separator
+    const sep = document.createElement("div");
+    sep.className = "ani-search-sep";
+    sep.style.cssText = "grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem; padding: 12px 10px; font-family: 'Kanit', sans-serif;";
+    sep.textContent = `🎭 Loading "${genreInfo.keyword}" genre results...`;
+    ml.appendChild(sep);
+
+    const [movies, tvShows, anime, localMatches] = await Promise.all([
+      fetchTmdbGenre(genreInfo.tmdb_movie, 'movie'),
+      fetchTmdbGenre(genreInfo.tmdb_tv, 'tv'),
+      fetchAnilistGenre(genreInfo.anilist),
+      findLocalMatchesForGenre(genreInfo.keyword)
+    ]);
+
+    sep.remove();
+
+    // ── Virowatch catalog matches → shown FIRST, since they're already ──
+    // playable directly on the site (no extra resolution/lookup needed).
+    if (localMatches.length > 0) {
+      const localSep = document.createElement("div");
+      localSep.className = "ani-search-sep";
+      localSep.style.cssText = "grid-column: 1/-1; display: flex; align-items: center; gap: 12px; padding: 4px 0 8px;";
+      localSep.innerHTML = `<div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div><span style="color:rgba(255,255,255,.7);font-family:'Kanit',sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;">${genreInfo.keyword} · Virowatch</span><div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div>`;
+      ml.appendChild(localSep);
+
+      localMatches.forEach(({ catKey, key, info }) => {
+        const card = makeGenreCard(
+          info.title || key,
+          info.image,
+          "Virowatch",
+          "#444444",
+          () => { cat = catKey; selectMovie(key); },
+          key
+        );
+        ml.appendChild(card);
+      });
+    }
+
+    // ── TMDB Movies → inject into lunora and display ──
+    if (movies.length > 0) {
+      const movieSep = document.createElement("div");
+      movieSep.className = "ani-search-sep";
+      movieSep.style.cssText = "grid-column: 1/-1; display: flex; align-items: center; gap: 12px; padding: 16px 0 8px;";
+      movieSep.innerHTML = `<div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div><span style="color:rgba(205,78,196,.6);font-family:'Kanit',sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;">${genreInfo.keyword} Movies · TMDB</span><div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div>`;
+      ml.appendChild(movieSep);
+
+      movies.slice(0, 12).forEach(m => {
+        const key = `VIDSRC_${m.id}`;
+        const title = m.title || "Unknown";
+        const poster = m.poster_path ? `${TMDB_IMG}${m.poster_path}` : null;
+
+        // Inject into mediaData.lunora so it's playable
+        if (!window.mediaData.lunora[key]) {
+          window.mediaData.lunora[key] = {
+            title: title + (m.release_date ? ` (${m.release_date.slice(0,4)})` : ""),
+            image: poster || "",
+            _hidden: true,
+            VIDSRC_S1: {
+              chapter: "Movie",
+              video: [`${WORKER_BASE}/embed/movie/${m.id}`],
+              episodeTitles: [title]
+            }
+          };
+        }
+
+        const card = makeGenreCard(
+          title + (m.release_date ? ` (${m.release_date.slice(0,4)})` : ""),
+          poster,
+          "Lunora",
+          "#cd4ec4",
+          () => { cat = "lunora"; selectMovie(key); },
+          key
+        );
+        ml.appendChild(card);
+      });
+    }
+
+    // ── TMDB TV Shows → inject into shows and display ──
+    if (tvShows && tvShows.length > 0) {
+      const tvSep = document.createElement("div");
+      tvSep.className = "ani-search-sep";
+      tvSep.style.cssText = "grid-column: 1/-1; display: flex; align-items: center; gap: 12px; padding: 16px 0 8px;";
+      tvSep.innerHTML = `<div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div><span style="color:rgba(100,100,100,.6);font-family:'Kanit',sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;">${genreInfo.keyword} TV Shows · TMDB</span><div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div>`;
+      ml.appendChild(tvSep);
+
+      tvShows.slice(0, 12).forEach(s => {
+        const key = `VIDSRC_TV_${s.id}`;
+        const title = s.name || "Unknown";
+        const poster = s.poster_path ? `${TMDB_IMG}${s.poster_path}` : null;
+
+        if (!window.mediaData.shows[key]) {
+          window.mediaData.shows[key] = {
+            title: title + (s.first_air_date ? ` (${s.first_air_date.slice(0,4)})` : ""),
+            image: poster || "",
+            _hidden: true,
+            VIDSRC_S1: {
+              chapter: "Season 1",
+              video: [`${WORKER_BASE}/embed/tv/${s.id}/1/1`],
+              episodeTitles: ["Episode 1"]
+            }
+          };
+        }
+
+        const card = makeGenreCard(
+          title + (s.first_air_date ? ` (${s.first_air_date.slice(0,4)})` : ""),
+          poster,
+          "Virowatch",
+          "#444444",
+          () => { cat = "shows"; selectMovie(key); },
+          key
+        );
+        ml.appendChild(card);
+      });
+    }
+
+    // ── Anilist Anime → search anikoto cache/API and display ──
+    if (anime && anime.length > 0) {
+      const aniSep = document.createElement("div");
+      aniSep.className = "ani-search-sep";
+      aniSep.style.cssText = "grid-column: 1/-1; display: flex; align-items: center; gap: 12px; padding: 16px 0 8px;";
+      aniSep.innerHTML = `<div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div><span style="color:rgba(99,102,241,.6);font-family:'Kanit',sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;">${genreInfo.keyword} Anime · Anilist</span><div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div>`;
+      ml.appendChild(aniSep);
+
+      anime.slice(0, 12).forEach(a => {
+        const title = a.title?.english || a.title?.romaji || "Unknown";
+        const poster = a.coverImage?.large || "";
+
+        // No key yet — this card isn't in mediaData until the user clicks
+        // through and we resolve it against the Anikoto database below.
+        const card = makeGenreCard(
+          title,
+          poster,
+          "Anilist",
+          "rgba(99,102,241,0.88)",
+          async () => {
+            // Try to find in anikoto database
+            if (window._anikotoSearchByTitle) {
+              showToastMsg(`Searching for "${title}"...`);
+              const aniKey = await window._anikotoSearchByTitle(title);
+              if (aniKey) {
+                cat = "anime";
+                selectMovie(aniKey);
+              } else {
+                showToastMsg("Not found in streaming database");
+              }
+            } else {
+              showToastMsg("Anime search not ready yet");
+            }
+          }
+        );
+
+        // ── FIX: "+" button for Anilist cards ──
+        // These cards have no Virowatch key yet (it's only known after the
+        // user clicks through), so the normal _vwlAttachButton always
+        // bailed out silently (no dataset.movie => no button). Use a
+        // deferred button instead: clicking "+" resolves the real
+        // ANI_<id> key first via _anikotoSearchByTitle, then adds it.
+        if (window._vwlAttachDeferredButton) {
+          window._vwlAttachDeferredButton(card, async () => {
+            if (!window._anikotoSearchByTitle) return null;
+            const aniKey = await window._anikotoSearchByTitle(title);
+            if (!aniKey) return null;
+            return { key: aniKey, title, image: poster, cat: "anime" };
+          });
+        }
+
+        ml.appendChild(card);
+      });
+    }
+  }
+
+  // ── Search input handler (REPLACES the existing one) ─────────────
   document.getElementById("searchInput").addEventListener("input", (e) => {
     const clearBtn = document.getElementById("searchClear");
     if (clearBtn) clearBtn.style.display = e.target.value ? "block" : "none";
     clearTimeout(timer);
-    timer = setTimeout(() => {
+    timer = setTimeout(async () => {
       const q = e.target.value.trim().toLowerCase();
 
       if (!q) {
@@ -962,6 +1369,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         const navBar = document.getElementById("categoryNavBar");
         if (navBar) navBar.style.display = "none";
         movieList.innerHTML = "";
+        // Explicitly clean up webstreamr & anikoto search cards
+        document.getElementById("movieList")
+          ?.querySelectorAll(".vidsrc-card, .ani-card, .vidsrc-search-sep, .ani-search-sep")
+          .forEach(el => el.remove());
         return;
       }
 
@@ -970,6 +1381,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (movieListWrapper) movieListWrapper.style.display = "block";
 
       movieList.innerHTML = "";
+
+      // ── Check for genre keyword search (e.g. "Romance", "sci-fi") ──
+      // This no longer depends on query length — a word-boundary match in
+      // matchGenre() already prevents false positives on longer phrases.
+      const genreInfo = matchGenre(q);
+      const isGenreSearch = !!genreInfo;
+
+      // ── Local catalog search: real substring/word matching only ──
+      // (no more "scrambled" results from subsequence matching — see
+      // localMatchScore() above for why that was happening)
       const categoriesToCheck = ["movies", "shows", "anime", "lunora"];
       const scored = [];
 
@@ -977,20 +1398,29 @@ document.addEventListener("DOMContentLoaded", async () => {
         const catData = mediaData[catKey];
         if (!catData) return;
         Object.entries(catData).forEach(([key, info]) => {
-          const title = (info.title || key).toLowerCase();
-          const count = subsequenceMatchCount(title, q);
-          if (count === 0) return;
-          const exactBonus = title.includes(q) ? 0.5 : 0;
-          scored.push({ catKey, key, info, score: count + exactBonus });
+          if (info && info._hidden) return;
+          const title = info.title || key;
+          const score = localMatchScore(title, q);
+          if (score === 0) return;
+          scored.push({ catKey, key, info, score });
         });
       });
 
       scored.sort((a, b) => b.score - a.score);
 
-      if (scored.length === 0) {
+      if (scored.length === 0 && !isGenreSearch) {
         movieList.innerHTML =
           '<p style="text-align:center; width:100%; margin-top:20px;">No results found.</p>';
-        return;
+      }
+
+      // If this is also a genre search, label the local title matches so
+      // it's clear they matched the title text rather than the genre itself.
+      if (scored.length && isGenreSearch) {
+        const titleSep = document.createElement("div");
+        titleSep.className = "ani-search-sep";
+        titleSep.style.cssText = "grid-column: 1/-1; display: flex; align-items: center; gap: 12px; padding: 4px 0 8px;";
+        titleSep.innerHTML = `<div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div><span style="color:rgba(255,255,255,.5);font-family:'Kanit',sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;">Matching "${q}" by title</span><div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div>`;
+        movieList.appendChild(titleSep);
       }
 
       scored.forEach(({ catKey, key, info }) => {
@@ -1006,11 +1436,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const div = document.createElement("div");
         div.className = "movie-item";
+        div.dataset.movie = key;
         
         let badgeHtml = badgeText ? `<span class="vw-category-badge" style="background: ${badgeBg};">${badgeText}</span>` : "";
         
         div.innerHTML = `
-            ${imgTag(info.image)}
+            <img src="${info.image || "https://via.placeholder.com/150"}" loading="lazy"/>
             <p class="kanit-extralight">${info.title || key}</p>
             ${badgeHtml}
           `;
@@ -1018,10 +1449,18 @@ document.addEventListener("DOMContentLoaded", async () => {
           cat = catKey;
           selectMovie(key);
         });
-        attachHoverReveal(div);
+        // ── FIX: Attach watchlist button to search result cards ──
+        // (dataset.movie is already set above, before this runs)
+        window._vwlAttachButton?.(div);
         movieList.appendChild(div);
       });
-    }, 150);
+
+      // ── Genre search: fetch from TMDB + Anilist ──
+
+      if (isGenreSearch) {
+        await searchByGenre(q, genreInfo);
+      }
+    }, 200);
   });
 
 function renderNewestAdded() {
@@ -1045,7 +1484,7 @@ function renderNewestAdded() {
       div.dataset.cat = catKey;
       
       div.innerHTML = `
-        ${imgTag(info.image, 'alt=""')}
+        <img src="${info.image || "https://via.placeholder.com/150"}" loading="lazy" alt="">
         <span>${info.title || key}</span>
       `;
       
@@ -1057,7 +1496,6 @@ function renderNewestAdded() {
         selectMovie(key);
       });
       
-      attachHoverReveal(div);
       listEl.appendChild(div);
     });
   }
