@@ -353,7 +353,7 @@
                         <span class="vw-perf-label-text">
                             <span class="vw-perf-icon">🖼️</span>
                             <span>
-                                <strong>Data Saver</strong>
+                                <strong>Data Saver (broken for now)</strong>
                                 <small>Images load on hover only</small>
                             </span>
                         </span>
@@ -606,79 +606,11 @@
         </script>
         <script src="pitsport-live.js"></script>
         <script src="stylegui.js"></script>
-        <script src="movies.js"></script>
         <script src="shows.js"></script>
         <script src="anime.js"></script>
         <script src="lunora-loader.js"></script>
-        <script src="changelogs.js"></script>
         <script src="content.js"></script>
-        <!-- ── CORS Proxy Fix ────────────────────────────────────────────────
-             Runs before anikoto-loader.js to patch out dead/blocked proxies.
-             Dead:  thingproxy.freeboard.io (DNS gone), corsproxy.io (403s)
-             Broken: allorigins.win/get returns no CORS header on null origin
-             Working replacements ordered by reliability for file:// + https origins:
-               1. allorigins.win/raw  — no JSON wrapper, better null-origin support
-               2. api.codetabs.com/v1/proxy?quest= — reliable, permissive CORS
-               3. cors.sh — requires Origin header but generally works
-        ──────────────────────────────────────────────────────────────────── -->
-        <script>
-        (function patchCorsProxies() {
-          // Proxy list used by anikoto-loader.js — override before it reads them
-          window._vwCorsProxies = [
-            url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-            url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-            url => `https://corsproxy.org/?${encodeURIComponent(url)}`,
-          ];
-
-          // Capture current fetch (may already be content.js's ad-blocker version — that's fine,
-          // we wrap it so the chain is: ProxyFix -> AdBlocker -> native fetch).
-          // Use a direct reference rather than .bind() to avoid double-binding issues.
-          const _origFetch = window.fetch;
-          const DEAD_PROXIES = [
-            'thingproxy.freeboard.io/fetch/',
-            'corsproxy.io/?url=',
-            'allorigins.win/get?url=',   // /get has null-origin CORS issues
-          ];
-          // Domains to silently drop (broken/dead, cause Chromium ERR_NAME_NOT_RESOLVED or CORB)
-          const BLOCK_HOSTS = [
-            'vsembed.ru',     // broken embed — 404 sbx.html, injects b7510 ads, causes CORB
-            'b7510.com',      // iclick ad network — ERR_CERT_AUTHORITY_INVALID
-            'cloudnestra.com' // dead CDN — ERR_NAME_NOT_RESOLVED
-          ];
-          const ANIKOTO_API = 'anikotoapi.site';
-
-          window.fetch = function(input, init) {
-            let url = typeof input === 'string' ? input : (input && input.url) || '';
-            // Block dead/broken hosts before they hit the network
-            if (BLOCK_HOSTS.some(h => url.includes(h))) {
-              console.info('[VW ProxyFix] Blocked dead host fetch:', url);
-              return Promise.reject(new TypeError('Blocked by VW ProxyFix: dead/broken host'));
-            }
-            const isDead = DEAD_PROXIES.some(d => url.includes(d));
-            if (isDead && url.includes(ANIKOTO_API)) {
-              // Extract the inner URL being proxied and re-proxy via codetabs
-              const innerMatch = url.match(/[?&](?:url|quest)=([^&]+)/);
-              const inner = innerMatch ? decodeURIComponent(innerMatch[1]) : `https://${ANIKOTO_API}/recent-anime?page=1&per_page=24`;
-              const fixed = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(inner)}`;
-              console.info('[VW ProxyFix] Redirected dead proxy to codetabs:', fixed);
-              return _origFetch.call(window, fixed, init);
-            }
-            if (isDead) {
-              // Generic dead-proxy rewrite — swap host to codetabs
-              const innerMatch = url.match(/[?&](?:url|quest)=([^&]+)/);
-              if (innerMatch) {
-                const inner = decodeURIComponent(innerMatch[1]);
-                const fixed = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(inner)}`;
-                console.info('[VW ProxyFix] Rewrote dead proxy:', fixed);
-                return _origFetch.call(window, fixed, init);
-              }
-            }
-            return _origFetch.call(window, input, init);
-          };
-
-          console.info('[VW ProxyFix] CORS proxy patch installed.');
-        })();
-        </script>
+        <script src="streambroadcast-live.js"></script>
         <script src="anikoto-loader.js"></script>
         <script src="sw.js"></script>
         <script src="webstreamr.js"></script>
