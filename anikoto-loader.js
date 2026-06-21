@@ -27,7 +27,43 @@
   const TITLE_INDEX_KEY = "anikoto_title_index";
 
   // ── Proxy list ────────────────────────────────────────────────────
+  // UPDATED: allorigins.win is currently broken (CORS headers missing).
+  // Reordered to try codetabs first, added whateverorigin.org as alternative.
+  // Set CUSTOM_PROXY_URL to your own Cloudflare Worker for maximum reliability.
+  const CUSTOM_PROXY_URL = ""; // e.g. "https://my-proxy.workers.dev/?url="
+
   const PROXIES = [
+    // 0. Custom proxy (user-configured, highest priority if set)
+    ...(CUSTOM_PROXY_URL ? [{
+      build: u => `${CUSTOM_PROXY_URL}${encodeURIComponent(u)}`,
+      parse: r => r.json(),
+    }] : []),
+    // 1. codetabs — most reliable, returns raw content directly
+    {
+      build: u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+      parse: r => r.json(),
+    },
+    // 2. corsproxy.io — returns raw content directly
+    {
+      build: u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+      parse: r => r.json(),
+    },
+    // 3. whateverorigin — allorigins alternative, returns { contents: "..." }
+    {
+      build: u => `https://www.whateverorigin.org/get?url=${encodeURIComponent(u)}`,
+      parse: async r => {
+        const j = await r.json();
+        const raw = j.contents;
+        if (!raw) throw new Error("no contents");
+        return typeof raw === "string" ? JSON.parse(raw) : raw;
+      },
+    },
+    // 4. allorigins raw — intermittently working
+    {
+      build: u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+      parse: r => r.json(),
+    },
+    // 5. allorigins get — intermittently working
     {
       build: u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
       parse: async r => {
@@ -37,20 +73,9 @@
         return typeof raw === "string" ? JSON.parse(raw) : raw;
       },
     },
-    {
-      build: u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-      parse: r => r.json(),
-    },
-    {
-      build: u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-      parse: r => r.json(),
-    },
+    // 6. thingproxy — last resort
     {
       build: u => `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(u)}`,
-      parse: r => r.json(),
-    },
-    {
-      build: u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
       parse: r => r.json(),
     },
   ];
@@ -60,7 +85,7 @@
   function sleep(ms) { return new Promise(res => setTimeout(res, ms)); }
 
   // ── Core fetch with proxy chain + retry ───────────────────────────
-  async function apiFetch(url, retries = 2) {
+  async function apiFetch(url, retries = 3) {
     const order = winProxy !== null
       ? [winProxy, ...PROXIES.map((_, i) => i).filter(i => i !== winProxy)]
       : PROXIES.map((_, i) => i);
@@ -73,13 +98,26 @@
           const tid  = setTimeout(() => ctrl.abort(), TIMEOUT);
           const r    = await fetch(proxy.build(url), { signal: ctrl.signal });
           clearTimeout(tid);
-          if (!r.ok) continue;
+          if (!r.ok) {
+            console.warn(`Anikoto: Proxy ${idx} returned HTTP ${r.status} for ${url}`);
+            continue;
+          }
           const data = await proxy.parse(r);
-          if (data) { winProxy = idx; return data; }
-        } catch (_) {}
+          if (data) {
+            winProxy = idx;
+            return data;
+          }
+        } catch (err) {
+          // CORS errors, network errors, abort errors — all caught here
+          console.warn(`Anikoto: Proxy ${idx} failed:`, err.message || err);
+        }
       }
-      if (attempt < retries - 1) await sleep(1200 * (attempt + 1));
+      if (attempt < retries - 1) {
+        console.log(`Anikoto: Retry ${attempt + 2}/${retries} for ${url}`);
+        await sleep(1500 * (attempt + 1));
+      }
     }
+    console.error(`Anikoto: All proxies exhausted for ${url}`);
     return null;
   }
 
@@ -303,13 +341,8 @@ if (isAnimeView()) {
     card.dataset.done  = "0";
 
     const img   = document.createElement("img");
-    const _aniPerfMode = document.body.classList.contains('perf-mode');
     const _aniSrc = item.poster || item.image || "";
-    if (_aniPerfMode && _aniSrc) {
-      img.dataset.src = _aniSrc;  // hover-reveal handles it
-    } else {
-      img.src = _aniSrc;
-    }
+    img.src     = _aniSrc;
     img.alt     = "";
     img.loading = "lazy";
 
@@ -325,23 +358,13 @@ if (isAnimeView()) {
     card.appendChild(p);
     card.appendChild(badge);
 
-    card.addEventListener("click",      () => onCardClick(card));
+    card.addEventListener("click", () => onCardClick(card));
+    
+    // Keep only data prefetch on hover, remove image lag logic
     card.addEventListener("mouseenter", () => {
       prefetchSeries(card.dataset.aniId);
-      // Perf mode: reveal image after 1 second of hover (cancels if mouse leaves)
-      if (img.dataset.src) {
-        const revealTimer = setTimeout(() => {
-          if (img.dataset.src) {
-            img.src = img.dataset.src;
-            delete img.dataset.src;
-          }
-        }, 1000);
-        card.addEventListener('mouseleave', () => clearTimeout(revealTimer), { once: true });
-      }
     }, { passive: true });
-    card.addEventListener("touchstart", () => {
-      if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
-    }, { once: true, passive: true });
+    
     window._vwlAttachButton?.(card);
     return card;
   }
@@ -527,16 +550,181 @@ if (isAnimeView()) {
       .forEach(el => el.remove());
   }
 
-  function fuzzyMatch(title, query) {
+// ── Search fuzzy matcher (used by the in-grid search box, which shows ALL hits) ──
+function fuzzyMatch(title, query) {
     const t = (title || "").toLowerCase();
     const q = query.toLowerCase();
-    if (t.includes(q)) return true; 
+    if (t.includes(q)) return true;
 
     const normT = t.replace(/[^a-z0-9]/g, "");
     const normQ = q.replace(/[^a-z0-9]/g, "");
-    
+
     return normQ.length > 0 && normT.includes(normQ);
-  }
+}
+
+// ── Title-match scoring (used by deepPageSearch to pick the BEST hit, not the first) ──
+// This is what fixes the "MHA: Memories" / "MHA Season 2" / "MHA Season 3" all beating
+// real Season 1 to the punch when the user clicks an Anilist "My Hero Academia" card.
+//
+// Tier table (higher = better):
+//   1000  exact match after normalization                       "my hero academia" == "My Hero Academia"
+//    900  exact match ignoring season / subtitle / year suffix  "My Hero Academia: Memories" -> base "my hero academia" == q
+//         (but only when query is the bare base title — see below)
+//    700  title starts with query at a word boundary            "my hero academia season 2" starts with "my hero academia"
+//    500  query appears as a whole word anywhere in title       "my hero academia" is a whole word in "watch my hero academia online"
+//    300  plain substring (case-insensitive, normalized)        "my hero acad" inside "my hero academia"
+//    200  alphanumeric-only substring (preserves old fuzzyMatch "bokunohero" inside "bokunoheroacademia"
+//         fallback behavior for tight queries)
+// At every non-exact tier, shorter titles beat longer titles at the same tier — so
+// "My Hero Academia" (len 18) beats "My Hero Academia: Memories" (len 28) at tier 700
+// when the query is "My Hero Academia".
+function normalizeTitle(s) {
+    return (s || "")
+        .toLowerCase()
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")   // strip accents
+        .replace(/[^a-z0-9\s]/g, " ")      // punctuation -> space
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+// Reduce "My Hero Academia Season 2" / "My Hero Academia: Memories" / "My Hero Academia (2016)"
+// to their base form "my hero academia" so we can tell when a title IS the base series
+// vs a spinoff/special/season of it.
+function stripSeasonNoise(s) {
+    return normalizeTitle(s)
+        .replace(/\s*season\s*\d+.*$/, "")
+        .replace(/\s*part\s*\d+.*$/, "")
+        .replace(/\s*cour\s*\d+.*$/, "")
+        .replace(/\s*\d{4}$/, "")          // trailing 4-digit year
+        .replace(/\s*$/, "");
+}
+
+function scoreTitleMatch(title, query) {
+    const t = normalizeTitle(title);
+    const q = normalizeTitle(query);
+    if (!q || !t) return 0;
+
+    // Tier 1: exact match
+    if (t === q) return 1000;
+
+    // Tier 2: title's "base" (no season/subtitle/year suffix) exactly equals query.
+    // This is what lets real Season 1 ("My Hero Academia") win over
+    // "My Hero Academia: Memories" when the user searches "My Hero Academia":
+    //   "my hero academia: memories" -> stripSeasonNoise -> "my hero academia"
+    //   BUT the title is longer than the base, so we score it 900, not 1000.
+    // And "My Hero Academia" (the real S1) hits tier 1 (1000) and beats it.
+    const base = stripSeasonNoise(title);
+    if (base === q && t !== q) return 900;
+
+    // Tier 3: title starts with query, on a word boundary
+    if (t === q || t.startsWith(q + " ")) {
+        return 700 - Math.max(0, t.length - q.length);
+    }
+
+    // Tier 4: query appears as a whole word anywhere
+    const re = new RegExp(`\\b${q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`);
+    if (re.test(t)) {
+        return 500 - Math.max(0, t.length - q.length);
+    }
+
+    // Tier 5: plain substring (case-insensitive, normalized)
+    if (t.includes(q)) {
+        return 300 - Math.max(0, t.length - q.length);
+    }
+
+    // Tier 6: alphanumeric-only substring (preserves old fuzzyMatch fallback)
+    const nt = t.replace(/[^a-z0-9]/g, "");
+    const nq = q.replace(/[^a-z0-9]/g, "");
+    if (nq.length > 0 && nt.includes(nq)) {
+        return 200 - Math.max(0, nt.length - nq.length);
+    }
+
+    return 0;
+}
+
+function pickBestCandidate(query, candidates) {
+    let best = null;
+    let bestScore = 0;
+    for (const c of candidates) {
+        const score = scoreTitleMatch(c.title || "", query);
+        if (score > bestScore) {
+            bestScore = score;
+            best = c;
+            // Tier 1 (exact) is unbeatable — bail early.
+            if (bestScore >= 1000) return { best, bestScore };
+        }
+    }
+    return { best, bestScore };
+}
+
+// ── FIX: there is no `/series?search=` endpoint on the real Anikoto API ──
+// (only `/recent-anime` for listings and `/series/{id}` for one show — see
+// https://anikotoapi.site/ docs). Every call to `${BASE}/series?search=...`
+// was hitting a route that doesn't exist, so it failed on every proxy,
+// burning through all retries (up to ~18 requests with backoff) before
+// giving up — which is why Anilist → Anikoto resolution looked broken or
+// just very slow. This walks the real `/recent-anime` listing a few pages
+// deep looking for a fuzzy title match, on top of what's already cached.
+//
+// SCORING FIX (the bug you reported): the old version used `.find()` which
+// returns the FIRST candidate whose title contains the query as a substring.
+// For "My Hero Academia" that meant whichever of {S1, S2, S3, Memories, ...}
+// happened to be crawled first won, with no preference for the real Season 1.
+// Now we score every candidate seen and return the single best one, short-
+// circuiting only on a true exact (tier-1000) match.
+let deepSearchInFlight = null; // dedupe concurrent calls for the same run
+async function deepPageSearch(query, maxPages = 8) {
+    const q = (query || "").trim();
+    if (!q) return null;
+
+    // ── Stage 1: pool candidates from cache + title index ──────────────
+    // Score each, short-circuit on a true exact match.
+    const localPool = cache
+        .map(a => ({ id: a.id, title: a.title, poster: a.poster || "" }));
+
+    // Add index entries that aren't already in the cache pool
+    const localIds = new Set(localPool.map(c => String(c.id)));
+    Object.entries(titleIndex).forEach(([id, title]) => {
+        if (!localIds.has(id)) {
+            localPool.push({ id: Number(id), title, poster: "" });
+        }
+    });
+
+    let { best, bestScore } = pickBestCandidate(q, localPool);
+    if (bestScore >= 1000) return best;
+
+    // ── Stage 2: page forward through /recent-anime ────────────────────
+    // Track running best across all pages; only short-circuit on a true
+    // exact match. This is what lets us discover a better match on page 5
+    // than the first fuzzy hit on page 1.
+    let p = Math.max(1, page);
+    for (let i = 0; i < maxPages && p <= totalPages; i++, p++) {
+        let data;
+        try {
+            data = await apiFetch(`${BASE}/recent-anime?page=${p}&per_page=${PER_PAGE}`);
+        } catch (_) {
+            break;
+        }
+        if (!data?.ok) break;
+
+        const items = data.data || [];
+        saveToCache(items);
+        if (data.pagination?.total_pages) totalPages = data.pagination.total_pages;
+
+        const { best: pageBest, bestScore: pageScore } = pickBestCandidate(q, items);
+        if (pageScore > bestScore) {
+            bestScore = pageScore;
+            best = pageBest;
+            if (bestScore >= 1000) return best;
+        }
+    }
+
+    // Return the best non-exact match found, if anything scored above 0.
+    // (Threshold of >0 matches the old fuzzyMatch acceptance bar — we never
+    // return a worse result than the old "first hit" code would have.)
+    return bestScore > 0 ? best : null;
+}
 
   let currentSearchId = 0; 
 
@@ -614,56 +802,55 @@ if (isAnimeView()) {
       }
     });
 
-    const sep = document.createElement("div");
-    sep.className = "ani-search-sep";
-    sep.style.cssText = "grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem; padding: 12px 10px; font-family: 'Kanit', sans-serif;";
-    sep.textContent = "🔍 Searching full database...";
-    ml.appendChild(sep);
+    // 3) Not found locally yet — page forward through the real
+    //    /recent-anime listing looking for more matches. There is no
+    //    server-side search endpoint on the Anikoto API (only
+    //    /recent-anime and /series/{id}), so this is the only way to
+    //    extend search coverage beyond what's already cached.
+    if (shownIds.size === 0) {
+      const sep = document.createElement("div");
+      sep.className = "ani-search-sep";
+      sep.style.cssText = "grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem; padding: 12px 10px; font-family: 'Kanit', sans-serif;";
+      sep.textContent = "🔍 Checking more pages of the database...";
+      ml.appendChild(sep);
 
-    try {
-      const res = await apiFetch(`${BASE}/series?search=${encodeURIComponent(q)}`);
-      
-      if (mySearchId !== currentSearchId) return;
+      let p = Math.max(1, page);
+      let foundAny = false;
+      for (let i = 0; i < 8 && p <= totalPages; i++, p++) {
+        if (mySearchId !== currentSearchId) { sep.remove(); return; }
+
+        let data;
+        try {
+          data = await apiFetch(`${BASE}/recent-anime?page=${p}&per_page=${PER_PAGE}`);
+        } catch (_) {
+          break;
+        }
+        if (!data?.ok) break;
+
+        const items = data.data || [];
+        saveToCache(items);
+        if (data.pagination?.total_pages) totalPages = data.pagination.total_pages;
+
+        const hits = items.filter(a => fuzzyMatch(a.title, q) && !shownIds.has(String(a.id)));
+        hits.forEach(a => {
+          insertMixed(makeCard(a));
+          shownIds.add(String(a.id));
+          foundAny = true;
+        });
+        if (foundAny) break; // stop as soon as we find something on this page
+      }
 
       sep.remove();
-
-      if (res?.ok && Array.isArray(res.data)) {
-        const remoteHits = res.data;
-        
-        saveToCache(remoteHits);
-
-        const newHits = remoteHits.filter(item => !shownIds.has(String(item.id)));
-
-        if (shownIds.size === 0 && newHits.length === 0) {
-          const noResults = document.createElement("div");
-          noResults.className = "ani-search-sep";
-          noResults.style.cssText = "grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.3); font-size: 0.9rem; padding: 20px;";
-          noResults.textContent = `No matches found for "${q}"`;
-          ml.appendChild(noResults);
-          return;
-        }
-
-        newHits.slice(0, 12).forEach(a => {
-          insertMixed(makeCard(a));
-        });
-
-        const totalCount = shownIds.size + newHits.length;
-        const countIndicator = document.createElement("div");
-        countIndicator.className = "ani-search-sep";
-        countIndicator.style.cssText = "grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.2); font-size: 0.75rem; padding: 8px 0;";
-        countIndicator.textContent = `Found ${totalCount} total database matches`;
-        ml.appendChild(countIndicator);
-      } else {
-        if (shownIds.size === 0) {
-          sep.textContent = "No matches found in full database.";
-        }
-      }
-    } catch (err) {
-      if (mySearchId === currentSearchId) {
-        sep.textContent = "Error connecting to full database search.";
+      if (shownIds.size === 0) {
+        const noResults = document.createElement("div");
+        noResults.className = "ani-search-sep";
+        noResults.style.cssText = "grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.3); font-size: 0.9rem; padding: 20px;";
+        noResults.textContent = `No matches found for "${q}" yet — it may not be cached. Try the Anime tab to let more of the database load.`;
+        ml.appendChild(noResults);
       }
     }
   }
+
 
   // ── Hook Search Event Listener ─────────────────────────────────────
   function hookSearch() {
@@ -675,7 +862,10 @@ if (isAnimeView()) {
       currentSearchQuery = q; 
 
       searchTid = setTimeout(() => {
-        if (q.length < 2) {
+        // ── FIX: Only show anikoto results for queries ≥ 3 chars.
+        // Prevents virowatch anime content from flooding search when
+        // the user is typing short queries unrelated to anime.
+        if (q.length < 3) {
           cleanSearchCards();
         } else {
           doSearch(q);
@@ -842,10 +1032,47 @@ if (isAnimeView()) {
       .ani-skeleton{aspect-ratio:2/3;border-radius:12px;background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.04) 75%);background-size:300% 100%;animation:ani-shim 1.5s infinite linear;}
       @keyframes ani-shim{0%{background-position:300% 0}100%{background-position:-300% 0}}
       .ani-error{color:rgba(255,100,100,.75);font-family:"Kanit",sans-serif;font-size:.85rem;text-align:center;padding:24px;grid-column:1/-1;}
+      
+      /* TRUE PERFORMANCE MODE */
+      /* content-visibility tells the browser to skip rendering cards 
+         until they are scrolled into view. This eliminates scroll lag. */
+      .perf-mode .ani-card {
+        content-visibility: auto;
+        contain-intrinsic-size: 135px 260px;
+      }
+      
       @media(max-width:768px){#anikoto-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;}.ani-badge{font-size:.5rem;padding:1px 4px;}}
     `;
     document.head.appendChild(s);
   }
+
+  // ── Expose search-by-title for genre search integration ──────────
+  // Called by content.js when a user clicks an Anilist genre card.
+  // Searches the Anikoto API, fetches episodes, and injects into mediaData.
+  //
+  // FIX: this used to call `${BASE}/series?search=...`, which is not a real
+  // endpoint on the Anikoto API (it only has /recent-anime and
+  // /series/{id} — see https://anikotoapi.site/). That call failed on every
+  // proxy every time, burning through ~18 requests with backoff before
+  // giving up, which is why clicking an Anilist genre result usually just
+  // showed "Not found" (or took forever first). Now it checks what's
+  // already cached/indexed, and if that's not enough, pages forward
+  // through the real /recent-anime listing via deepPageSearch().
+  window._anikotoSearchByTitle = async function(title) {
+    try {
+      const bestMatch = await deepPageSearch(title, 8);
+      if (!bestMatch) return null;
+
+      const seriesData = await apiFetch(`${BASE}/series/${bestMatch.id}`);
+      if (!seriesData?.ok) return null;
+
+      injectEntry(bestMatch.id, seriesData.data?.anime || {}, seriesData.data?.episodes || []);
+      return `ANI_${bestMatch.id}`;
+    } catch (e) {
+      console.error("Anikoto search-by-title failed:", e);
+      return null;
+    }
+  };
 
   // ── Init ──────────────────────────────────────────────────────────
   document.addEventListener("DOMContentLoaded", () => {
