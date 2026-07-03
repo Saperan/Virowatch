@@ -52,144 +52,6 @@
             rel="stylesheet"
         />
         <link rel="stylesheet" href="sidebar.css" />
-        <style>
-        /* ── Performance / Data Saver Mode ─────────────────────────── */
-
-        /* Card placeholder when perf mode is active and image hasn't loaded yet */
-        body.perf-mode .movie-item img:not([src]),
-        body.perf-mode .newest-added-item img:not([src]) {
-            display: block;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 50%, #1e1e1e 100%);
-            background-size: 200% 200%;
-            animation: vw-perf-shimmer 2s ease infinite;
-        }
-
-        @keyframes vw-perf-shimmer {
-            0%   { background-position: 0% 50%; }
-            50%  { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* Hint overlay so user knows hovering reveals the image */
-        body.perf-mode .movie-item:has(img:not([src]))::after,
-        body.perf-mode .newest-added-item:has(img:not([src]))::after {
-            content: '🖼️';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -60%);
-            font-size: 1.6rem;
-            opacity: 0.35;
-            pointer-events: none;
-        }
-
-        body.perf-mode .movie-item:has(img:not([src])):hover::after,
-        body.perf-mode .newest-added-item:has(img:not([src])):hover::after {
-            display: none;
-        }
-
-        /* Smooth reveal once src is set */
-        .movie-item img,
-        .newest-added-item img {
-            transition: opacity 0.35s ease;
-        }
-        .movie-item img:not([src]),
-        .newest-added-item img:not([src]) {
-            opacity: 0;
-        }
-
-        /* ── Perf Toggle Switch in Sidebar ──────────────────────────── */
-        .vw-perf-label {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            cursor: pointer;
-            padding: 10px 12px;
-            border-radius: 8px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.07);
-            margin-top: 6px;
-            transition: background 0.2s;
-        }
-        .vw-perf-label:hover {
-            background: rgba(255,255,255,0.08);
-        }
-        .vw-perf-label-text {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex: 1;
-        }
-        .vw-perf-icon {
-            font-size: 1.3rem;
-            flex-shrink: 0;
-        }
-        .vw-perf-label-text strong {
-            display: block;
-            font-size: 0.88rem;
-            color: #eee;
-            font-weight: 500;
-        }
-        .vw-perf-label-text small {
-            display: block;
-            font-size: 0.74rem;
-            color: rgba(255,255,255,0.45);
-            margin-top: 1px;
-        }
-        .vw-perf-switch {
-            position: relative;
-            flex-shrink: 0;
-        }
-        .vw-perf-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-            position: absolute;
-        }
-        .vw-perf-slider {
-            display: block;
-            width: 42px;
-            height: 24px;
-            background: rgba(255,255,255,0.12);
-            border-radius: 99px;
-            position: relative;
-            transition: background 0.25s;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .vw-perf-slider::before {
-            content: '';
-            position: absolute;
-            width: 18px;
-            height: 18px;
-            top: 2px;
-            left: 2px;
-            background: rgba(255,255,255,0.55);
-            border-radius: 50%;
-            transition: transform 0.25s, background 0.25s;
-        }
-        .vw-perf-switch input:checked + .vw-perf-slider {
-            background: rgba(80, 200, 120, 0.35);
-            border-color: rgba(80, 200, 120, 0.5);
-        }
-        .vw-perf-switch input:checked + .vw-perf-slider::before {
-            transform: translateX(18px);
-            background: #50c878;
-        }
-        </style>
-        <script>
-        // Init perf mode body class ASAP (before content.js runs) to avoid FOUC
-        (function() {
-            if (localStorage.getItem('vw_perf_mode') === '1') {
-                document.documentElement.classList.add('perf-mode-pending');
-                document.addEventListener('DOMContentLoaded', function() {
-                    document.body.classList.add('perf-mode');
-                });
-            }
-        })();
-        </script>
     </head>
     <body>
         <div id="styleGuiOverlay" class="style-gui-overlay">
@@ -322,46 +184,6 @@
                             >Open Style GUI</span
                         >
                     </button>
-                </div>
-
-                <!-- Style Preview Panel (Modal) -->
-                <div
-                    id="app-sidebar-style-preview-panel"
-                    class="app-sidebar-style-preview-panel"
-                    style="display: none"
-                >
-                    <div class="app-sidebar-style-preview-content">
-                        <p class="app-sidebar-style-preview-name"></p>
-                        <pre
-                            id="app-sidebar-style-preview-css"
-                            class="app-sidebar-style-preview-css"
-                        ></pre>
-                        <div class="app-sidebar-style-preview-actions">
-                            <button
-                                id="app-sidebar-style-apply-now-btn"
-                                class="app-sidebar-style-apply-now-btn"
-                            >
-                                Apply Now
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="app-sidebar-custom-section">
-                    <span class="app-sidebar-theme-label">⚡ Performance</span>
-                    <label class="vw-perf-label" for="vw-perf-toggle">
-                        <span class="vw-perf-label-text">
-                            <span class="vw-perf-icon">🖼️</span>
-                            <span>
-                                <strong>Data Saver (broken for now)</strong>
-                                <small>Images load on hover only</small>
-                            </span>
-                        </span>
-                        <span class="vw-perf-switch">
-                            <input type="checkbox" id="vw-perf-toggle" />
-                            <span class="vw-perf-slider"></span>
-                        </span>
-                    </label>
                 </div>
 
                 <div class="app-sidebar-link-section">
@@ -520,9 +342,8 @@
                         <div id="videoSpinner" class="spinner"></div>
                         <iframe
                             id="videoPlayer"
-                            src="about:blank"
+                            src=""
                             allowfullscreen
-                            allow="fullscreen; autoplay; picture-in-picture; encrypted-media"
                             class="fade-out"
                         ></iframe>
                         <div class="player-controls">
@@ -610,29 +431,8 @@
         <script src="anime.js"></script>
         <script src="lunora-loader.js"></script>
         <script src="content.js"></script>
-        <script src="streambroadcast-live.js"></script>
         <script src="anikoto-loader.js"></script>
-        <script src="sw.js"></script>
-        <script src="webstreamr.js"></script>
         <script src="sidebar.js"></script>
         <script src="watchlist.js"></script>
-        <script>
-        // ── Performance / Data Saver toggle init ──────────────────────────
-        (function() {
-            var cb = document.getElementById('vw-perf-toggle');
-            if (!cb) return;
-            var PERF_KEY = 'vw_perf_mode';
-            // Sync checkbox to stored state
-            cb.checked = localStorage.getItem(PERF_KEY) === '1';
-            cb.addEventListener('change', function() {
-                if (window.vwTogglePerfMode) {
-                    window.vwTogglePerfMode(cb.checked);
-                } else {
-                    // content.js not ready yet — just save and reload
-                    localStorage.setItem(PERF_KEY, cb.checked ? '1' : '0');
-                }
-            });
-        })();
-        </script>
     </body>
 </html>
