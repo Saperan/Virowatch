@@ -104,162 +104,13 @@
   /* ─────────────────────────────────────────────────────
      Load item into player — uses window.viroPlay from content.js
   ───────────────────────────────────────────────────── */
-  /* ─────────────────────────────────────────────────────────────
-     Load item into player — uses window.viroPlay from content.js
-     Supports VIDSRC, ANI (Anikoto), and VN (VidNest) dynamic reconstruction
-  ───────────────────────────────────────────────────────────── */
   function loadItem(item) {
     document.body.classList.remove('app-sidebar-open');
     if (typeof window.viroPlay !== 'function') {
       showToast('Player not ready — try again');
       return;
     }
-
-    var key = item.key;
-
-    // ── VidNest: Movies ───────────────────────────────────────────
-    if (key.startsWith('VN_MOV_')) {
-      var vnMovId = key.replace('VN_MOV_', '');
-      item.cat = 'movies'; // Guarantee correct category routing
-      window.mediaData = window.mediaData || {};
-      window.mediaData.movies = window.mediaData.movies || {};
-      if (!window.mediaData.movies[key]) {
-        window.mediaData.movies[key] = {
-          title: item.title,
-          image: item.image,
-          _hidden: true,
-          VN_S1: {
-            chapter: "Movie",
-            video: ['https://vidnest.fun/embed/movie/' + vnMovId],
-            episodeTitles: [item.title]
-          }
-        };
-      }
-    }
-
-    // ── VidNest: TV Shows ─────────────────────────────────────────
-    else if (key.startsWith('VN_TV_')) {
-      var vnTvId = key.replace('VN_TV_', '');
-      item.cat = 'shows'; // Guarantee correct category routing
-      window.mediaData = window.mediaData || {};
-      window.mediaData.shows = window.mediaData.shows || {};
-      if (!window.mediaData.shows[key]) {
-        // Minimal fallback reconstruction (Season 1, Episode 1)
-        window.mediaData.shows[key] = {
-          title: item.title,
-          image: item.image,
-          _hidden: true,
-          VN_S1: {
-            chapter: "Season 1",
-            video: ['https://vidnest.fun/embed/tv/' + vnTvId + '/1/1'],
-            episodeTitles: ["Play"]
-          }
-        };
-      }
-    }
-
-    // ── VidNest: Anime ────────────────────────────────────────────
-    else if (key.startsWith('VN_ANI_')) {
-      var vnAniId = key.replace('VN_ANI_', '');
-      item.cat = 'anime'; // Guarantee correct category routing
-      window.mediaData = window.mediaData || {};
-      window.mediaData.anime = window.mediaData.anime || {};
-      if (!window.mediaData.anime[key]) {
-        // Minimal fallback reconstruction (Episode 1)
-        window.mediaData.anime[key] = {
-          title: item.title,
-          image: item.image,
-          _hidden: true,
-          VN_S1: {
-            chapter: "Episodes",
-            video: ['https://vidnest.fun/embed/anime/' + vnAniId + '/1'],
-            episodeTitles: ["Episode 1"]
-          }
-        };
-      }
-    }
-
-    // ── VIDSRC Movies (Legacy Webstreamr) ─────────────────────────
-    else if (key.startsWith('VIDSRC_')) {
-      var movieId = key.replace('VIDSRC_', '');
-      item.cat = 'lunora'; // Guarantee correct category routing
-      window.mediaData = window.mediaData || {};
-      window.mediaData.lunora = window.mediaData.lunora || {};
-      if (!window.mediaData.lunora[key]) {
-        window.mediaData.lunora[key] = {
-          title: item.title,
-          image: item.image,
-          _hidden: true,
-          VIDSRC_S1: {
-            chapter: "Movie",
-            video: ['https://vidsrc.fyi/embed/movie/' + movieId],
-            episodeTitles: [item.title]
-          }
-        };
-      }
-    }
-
-    // ── Anikoto / MegaPlay Anime ──────────────────────────────────
-    else if (key.startsWith('ANI_')) {
-      item.cat = 'anime'; // Guarantee correct category routing
-      var aniId = key.replace('ANI_', '');
-      window.mediaData = window.mediaData || {};
-      window.mediaData.anime = window.mediaData.anime || {};
-      
-      if (!window.mediaData.anime[key]) {
-        showToast('Fetching episodes...');
-        fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://anikotoapi.site/series/' + aniId))
-          .then(function(r) { return r.json(); })
-          .then(function(j) {
-            var data = JSON.parse(j.contents);
-            if (data && data.data && data.data.episodes) {
-              var episodes = data.data.episodes;
-              var season = {
-                chapter: "Episodes",
-                video: episodes.map(function(ep) {
-                  var sourceStr = "";
-                  if (ep.sources && ep.sources.length) {
-                    var src = ep.sources.find(function(s) { return s.type === "sub"; });
-                    if (src) sourceStr = src.source;
-                  }
-                  return "https://megaplay.buzz/stream/s-2?id=" + ep.id + "&ep=" + ep.number + "&source=" + sourceStr;
-                }),
-                episodeTitles: episodes.map(function(ep, i) { return ep.title || 'Episode ' + (ep.number || i + 1); })
-              };
-              
-              var hasDub = episodes.some(function(ep) {
-                return ep.sources && ep.sources.find(function(s) { return s.type === "dub"; });
-              });
-
-              if (hasDub) {
-                season.dubbed = episodes.map(function(ep) {
-                  var sourceStr = "";
-                  if (ep.sources && ep.sources.length) {
-                    var src = ep.sources.find(function(s) { return s.type === "dub"; });
-                    if (src) sourceStr = src.source;
-                  }
-                  return "https://megaplay.buzz/stream/s-2?id=" + ep.id + "&ep=" + ep.number + "&source=" + sourceStr;
-                });
-              }
-
-              window.mediaData.anime[key] = {
-                title: item.title,
-                image: item.image,
-                _hidden: true,
-                ANI_S1: season
-              };
-              window.viroPlay(item.cat, key);
-            } else {
-              showToast('Failed to fetch episodes');
-            }
-          })
-          .catch(function() { showToast('Network error fetching episodes'); });
-        return; // Wait for fetch before playing
-      }
-    }
-
-    // ── Trigger Player ────────────────────────────────────────────
-    window.viroPlay(item.cat, key).then(function (ok) {
+    window.viroPlay(item.cat, item.key).then(function (ok) {
       if (!ok) showToast('Could not load — content may have been removed');
     }).catch(function () {
       showToast('Failed to load item');
@@ -389,8 +240,6 @@
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
       var cat = window._vwlCurrentCat || 'shows';
-      if (key.startsWith('ANI_')) cat = 'anime';
-      else if (key.startsWith('VIDSRC_')) cat = 'lunora';
 
       if (isInList(key)) {
         removeItem(key);
@@ -411,61 +260,6 @@
 
     mi.appendChild(btn);
   }
-  window._vwlAttachButton = attachButton;
-
-  /* ─────────────────────────────────────────────────────
-     Add (+) button for cards whose Virowatch key isn't known
-     yet — e.g. Anilist genre-search results, which only resolve
-     to a real ANI_<id> key once the user clicks through to play.
-     `resolveItem` is an async function returning either
-     { key, title, image, cat } or null/falsy if resolution fails.
-  ───────────────────────────────────────────────────── */
-  function attachDeferredButton(mi, resolveItem) {
-    if (mi.querySelector('.vwl-add-btn')) return;
-    var p   = mi.querySelector('p');
-    var img = mi.querySelector('img');
-    if (!p || !img) return;
-
-    var btn = document.createElement('button');
-    btn.className = 'vwl-add-btn';
-    btn.title = 'Add to watchlist';
-    btn.setAttribute('aria-label', 'Watchlist');
-    btn.innerHTML = SVG_PLUS;
-
-    btn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      if (btn.classList.contains('vwl-spinning') || btn.classList.contains('vwl-checked')) return;
-
-      btn.classList.add('vwl-spinning');
-      Promise.resolve(resolveItem()).then(function (item) {
-        btn.classList.remove('vwl-spinning');
-        if (!item || !item.key) {
-          showToast('Could not find this title to add it');
-          return;
-        }
-        // The resolved key might already be in the watchlist (e.g. the
-        // user added it from somewhere else first) — reflect that.
-        if (isInList(item.key)) {
-          btn.classList.add('vwl-checked');
-          btn.innerHTML = SVG_CHECK;
-          btn.title = 'In watchlist';
-          return;
-        }
-        addItem(item);
-        btn.dataset.key = item.key;
-        btn.classList.add('vwl-checked');
-        btn.innerHTML = SVG_CHECK;
-        btn.title = 'In watchlist';
-      }).catch(function () {
-        btn.classList.remove('vwl-spinning');
-        showToast('Could not add to watchlist');
-      });
-    });
-
-    mi.appendChild(btn);
-  }
-  window._vwlAttachDeferredButton = attachDeferredButton;
-
 
   /* ─────────────────────────────────────────────────────
      Observe #movieList
