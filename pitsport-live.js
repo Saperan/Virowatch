@@ -1,165 +1,74 @@
 /**
  * pitsport-live.js  —  Virowatch PitSport Live Integration
  *
- * Fetches the PitSport live-now page, extracts:
- * • The current "Live Now" events
- * • The "Upcoming Live" events
- *
- * Tries a direct fetch then several public CORS proxies in sequence.
- * Caches the working proxy to speed up subsequent requests.
+ * PitSport's site is now a client-rendered Next.js app, so the event
+ * listings and embed links don't exist in the raw HTML anymore — only
+ * after the page hydrates in a real browser. Scraping it is no longer
+ * viable. Instead this calls PitSport's own public JSON API directly,
+ * which is CORS-open (Access-Control-Allow-Origin: *), so no proxy is
+ * needed at all.
  */
 
 (function () {
   'use strict';
 
-  const BASE    = 'https://pitsport.live';
-  const TIMEOUT = 7000;
+  const API        = 'https://api.pitsport.live/v1';
+  const WATCH_BASE = 'https://pitsport.xyz/watch';
+  const TIMEOUT    = 7000;
 
   window._pitsportLoaded  = false;
   window._pitsportLoading = false;
 
-  const PROXY_BUILDERS = [
-    u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
-    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-    u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-    u => `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(u)}`,
-  ];
-  
-  let successfulProxy = null;
-
   // ─────────────────────────────────────────────────────────────────
-  // 1.  Fetch helpers — Proxy caching for parallel speed
+  // 1.  Fetch helper
   // ─────────────────────────────────────────────────────────────────
 
-  async function fetchHTML(url) {
+  async function fetchJSON(url) {
     try {
-      const r = await fetch(url, { mode: 'cors' });
-      if (r.ok) return r.text();
-    } catch (_) {}
-
-    // Prioritize the proxy that successfully worked last time
-    const proxiesToTry = successfulProxy 
-      ? [successfulProxy, ...PROXY_BUILDERS.filter(p => p !== successfulProxy)]
-      : PROXY_BUILDERS;
-
-    for (const build of proxiesToTry) {
-      const proxyUrl = build(url);
-      try {
-        const ctrl = new AbortController();
-        const tid  = setTimeout(() => ctrl.abort(), 8000);
-        const r    = await fetch(proxyUrl, { signal: ctrl.signal });
-        clearTimeout(tid);
-        if (r.ok) {
-          successfulProxy = build; // Cache for subsequent parallel requests
-          return r.text();
-        }
-      } catch (err) {}
+      const ctrl = new AbortController();
+      const tid  = setTimeout(() => ctrl.abort(), 8000);
+      const r    = await fetch(url, { signal: ctrl.signal });
+      clearTimeout(tid);
+      if (!r.ok) return null;
+      return await r.json();
+    } catch (_) {
+      return null;
     }
-    return null;
-  }
-
-  function parseHTML(html) {
-    return new DOMParser().parseFromString(html, 'text/html');
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // 2.  DOM Extraction using linear positioning 
+  // 2.  Turn the categorized API response into a flat event list
   // ─────────────────────────────────────────────────────────────────
 
-  function extractEvents(doc, headingId, max) {
+  function flattenStreams(data) {
+    if (!data || !Array.isArray(data.categories)) return [];
     const events = [];
-    const targetHeading = doc.getElementById(headingId);
-    if (!targetHeading) return events;
-
-    const otherHeadingId = headingId === 'livenow' ? 'upcoming' : 'livenow';
-    const otherHeading = doc.getElementById(otherHeadingId);
-
-    const allLinks = Array.from(doc.querySelectorAll('a[href*="/watch/"]'));
-    const validLinks = allLinks.filter(a => {
-      // Must be physically after the target heading in the document
-      if (!(targetHeading.compareDocumentPosition(a) & Node.DOCUMENT_POSITION_FOLLOWING)) {
-        return false;
+    for (const cat of data.categories) {
+      for (const s of cat.streams || []) {
+        const id = (s.uri || '').replace('/watch/', '');
+        if (!id) continue;
+        events.push({
+          id,
+          title     : cat.category ? `${cat.category} - ${s.title}` : s.title,
+          watchUrl  : `${WATCH_BASE}/${id}`,
+          timestamp : s.timestamp || 0,
+        });
       }
-      // If we are "livenow", must be before "upcoming" to avoid bleeding sections
-      if (headingId === 'livenow' && otherHeading) {
-        if (!(otherHeading.compareDocumentPosition(a) & Node.DOCUMENT_POSITION_PRECEDING)) {
-          return false;
-        }
-      }
-      return true;
-    });
-
-    const uniqueHrefs = new Set();
-    for (const a of validLinks) {
-      if (events.length >= max) break;
-      const href = a.getAttribute('href');
-      if (!href || !href.startsWith('/watch/')) continue;
-      
-      if (uniqueHrefs.has(href)) continue; // Prevent duplicates
-      uniqueHrefs.add(href);
-
-      events.push({ url: BASE + href, title: extractTitle(a) });
     }
     return events;
   }
 
-  function extractTitle(aEl) {
-    const candidates = [
-      aEl.querySelector('[class*="font-bold"]'),
-      aEl.querySelector('h2'),
-      aEl.querySelector('h3'),
-      aEl.querySelector('[class*="text-xl"]'),
-      aEl.querySelector('[class*="text-lg"]'),
-    ];
-    for (const el of candidates) {
-      if (!el) continue;
-      const t = el.textContent.trim();
-      if (t && t.length > 3 && !/^\d$/.test(t)) return t.replace(/\n/g, ' ').replace(/\s{2,}/g, ' ');
-    }
-    let best = '';
-    aEl.querySelectorAll('*').forEach(el => {
-      const t = Array.from(el.childNodes)
-          .filter(n => n.nodeType === Node.TEXT_NODE)
-          .map(n => n.nodeValue.trim())
-          .join(' ');
-      if (t.length > best.length && t.length < 120 && !/^\d{1,2}\s+\w+/.test(t)) best = t;
-    });
-    return best || 'Live Event';
-  }
-
   // ─────────────────────────────────────────────────────────────────
-  // 3.  Embed extraction
+  // 3.  Embed resolution — per-stream API returns the real embed iframe
   // ─────────────────────────────────────────────────────────────────
 
-  async function extractEmbedUrl(watchUrl) {
-    const html = await fetchHTML(watchUrl);
-    if (!html) return watchUrl;
-
-    const doc = parseHTML(html);
-
-    for (const iframe of doc.querySelectorAll('iframe')) {
-      const src = iframe.getAttribute('src') || iframe.getAttribute('data-src') || '';
-      if (!src.startsWith('blob:') && /^https?:\/\//.test(src)) return src;
-    }
-
-    const patterns = [
-      /["'](https?:\/\/[^"'\s]+\/(?:embed|player|stream|live|watch)[^"'\s]*?)["']/gi,
-      /["'](https?:\/\/(?:pushmdz|vidsrc|embedme|voe\.sx|dood\.la|filemoon|streamed|streameast|weakspell|sportsurge)[^"'\s]*?)["']/gi,
-      /["'](https?:\/\/[^"'\s]+\.m3u8[^"'\s]*)["']/gi,
-    ];
-    for (const script of doc.querySelectorAll('script')) {
-      const text = script.textContent || '';
-      for (const re of patterns) {
-        re.lastIndex = 0;
-        const m = re.exec(text);
-        if (m) return m[1];
-      }
-    }
-
-    return watchUrl;
+  async function resolveEmbedUrl(ev) {
+    const data = await fetchJSON(`${API}/stream/${ev.id}`);
+    const iframe = data?.content?.[0]?.iframe;
+    return iframe || ev.watchUrl;
   }
 
-function probeIframe(url) {
+  function probeIframe(url) {
     return new Promise(resolve => {
       const iframe = document.createElement('iframe');
       Object.assign(iframe.style, {
@@ -167,11 +76,10 @@ function probeIframe(url) {
         width: '1px', height: '1px', opacity: '0',
         pointerEvents: 'none', border: 'none',
       });
-      
-      // --- NEW ANTI-POPUP LOGIC ---
+
       // Prevent the background stream verifier from opening popups while testing
       iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-      
+
       let done = false;
       const finish = ok => {
         if (done) return;
@@ -195,13 +103,12 @@ function probeIframe(url) {
   function showFallback(reason) {
     if (!window.shows) window.shows = {};
 
-    const _existing = window.shows.PITSORT || {};
     window.shows.PITSORT = {
-      title : _existing.title || 'PitSport Live',
-      image : _existing.image || 'https://pitsport.live/favicon.ico',
+      title : 'PitSport Live',
+      image : 'https://pitsport.xyz/favicon.ico',
       PSFallback: {
-        chapter       : '⚠️ Proxy unavailable',
-        video         : ['https://pitsport.live/live-now'],
+        chapter       : '⚠️ PitSport unavailable',
+        video         : ['https://pitsport.xyz/live-now'],
         episodeTitles : [`Open PitSport Live (${reason})`],
       },
     };
@@ -219,44 +126,43 @@ function probeIframe(url) {
     if (window._pitsportLoading) return;
     window._pitsportLoading = true;
 
-    const html = await fetchHTML(`${BASE}/live-now`);
-    if (!html) {
-      showFallback('all CORS proxies blocked');
+    const [live, day] = await Promise.all([
+      fetchJSON(`${API}/streams/live`),
+      fetchJSON(`${API}/streams/24h`),
+    ]);
+
+    if (!live && !day) {
+      showFallback('PitSport API unreachable');
       return;
     }
 
-    const doc = parseHTML(html);
-    
-    // INCREASING THE LIMITS HERE
-    const liveNowRaw  = extractEvents(doc, 'livenow',  20); 
-    const upcomingRaw = extractEvents(doc, 'upcoming', 20);
-    
-    const allRaw      = [...liveNowRaw, ...upcomingRaw];
+    const liveNowRaw = flattenStreams(live).slice(0, 20);
+    const liveIds    = new Set(liveNowRaw.map(e => e.id));
 
-    if (!allRaw.length) {
-      showFallback('no events found or DOM changed');
+    // "Upcoming" = 24h list minus anything already shown as live now
+    const upcomingRaw = flattenStreams(day)
+      .filter(e => !liveIds.has(e.id))
+      .sort((a, b) => a.timestamp - b.timestamp)
+      .slice(0, 20);
+
+    if (!liveNowRaw.length && !upcomingRaw.length) {
+      showFallback('no live or upcoming events');
       return;
     }
 
-    const resolved = await Promise.all(
-      allRaw.map(async ev => ({
-        ...ev,
-        embedUrl: await extractEmbedUrl(ev.url),
-      }))
-    );
+    const [liveNowFinal, upcomingFinal] = await Promise.all([
+      Promise.all(liveNowRaw.map(async ev => ({ ...ev, embedUrl: await resolveEmbedUrl(ev) }))),
+      Promise.all(upcomingRaw.map(async ev => ({ ...ev, embedUrl: await resolveEmbedUrl(ev) }))),
+    ]);
 
-    Promise.allSettled(resolved.map(ev => probeIframe(ev.embedUrl)));
+    Promise.allSettled([...liveNowFinal, ...upcomingFinal].map(ev => probeIframe(ev.embedUrl)));
 
     if (!window.shows) window.shows = {};
 
-    const _existing = window.shows.PITSORT || {};
     window.shows.PITSORT = {
-      title : _existing.title || 'PitSport Live',
-      image : _existing.image || 'https://pitsport.xyz/favicon.ico',
+      title : 'PitSport Live',
+      image : 'https://pitsport.xyz/favicon.ico',
     };
-
-    const liveNowFinal  = resolved.slice(0, liveNowRaw.length);
-    const upcomingFinal = resolved.slice(liveNowRaw.length);
 
     if (liveNowFinal.length) {
       window.shows.PITSORT.PSLiveNow = {
