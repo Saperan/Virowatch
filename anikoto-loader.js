@@ -12,13 +12,20 @@
   "use strict";
 
   const BASE     = "https://anikotoapi.site";
-  const MEGAPLAY = "https://megaplay.buzz/stream/s-2";
+  const MEGAPLAY = "https://megaplay.buzz/stream/s-3";
   const PER_PAGE = 24;
   const TIMEOUT  = 10000;
-  const BG_PAGES = 6; // extra pages silently preloaded for search
+
+  // Your Cloudflare Worker (reliable, adds CORS). Tried first; public
+  // proxies below stay as fallback. Set to "" to disable.
+  const WORKER = "https://anikoto-request.vmtgaming13.workers.dev";
 
   // ── Proxy list ────────────────────────────────────────────────────
   const PROXIES = [
+    ...(WORKER ? [{
+      build: u => `${WORKER}/api?u=${encodeURIComponent(u)}`,
+      parse: r => r.json(),
+    }] : []),
     {
       build: u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
       parse: async r => {
@@ -75,17 +82,20 @@
   }
 
   // ── State ──────────────────────────────────────────────────────────
-  let page       = 0;
+  let page       = 1;
   let totalPages = 1;
   let fetching   = false;
-  let bgLoading  = false;
-  let cache      = [];   // all fetched anime metadata (drives search)
-  let iObs       = null;
+  let cache      = [];   // all fetched anime metadata (drives instant search)
   let searchTid  = null;
 
   // ── Embed URL ──────────────────────────────────────────────────────
+  // MegaPlay's s-2 route serves an error page when no Referer header is sent
+  // (always the case for pages opened via file://). The s-3 route wraps s-2
+  // in an iframe on megaplay's own origin, so the inner request has a
+  // Referer and plays everywhere.
   function embedUrl(ep, type) {
-    if (ep.embed_url?.[type]) return ep.embed_url[type];
+    if (ep.embed_url?.[type])
+      return ep.embed_url[type].replace(/\/stream\/s-\d+\//, "/stream/s-3/");
     if (ep.episode_embed_id) return `${MEGAPLAY}/${ep.episode_embed_id}/${type}`;
     return "";
   }
@@ -119,35 +129,80 @@
     }
   }
 
+  // ── Check whether an episode file really exists on MegaPlay ───────
+  // Via the Worker the probe carries the real Referer, so MegaPlay answers
+  // 200 (player page = file exists) or 404 (not released yet). Without the
+  // Worker we fall back to a public proxy that returns the error page body.
+  async function embedExists(s2Url) {
+    try {
+      const ctrl = new AbortController();
+      const tid  = setTimeout(() => ctrl.abort(), 8000);
+      if (WORKER) {
+        const r = await fetch(
+          `${WORKER}/hls?u=${encodeURIComponent(s2Url)}`,
+          { signal: ctrl.signal },
+        );
+        clearTimeout(tid);
+        return r.status !== 404; // 404 = not on MegaPlay yet; else assume playable
+      }
+      const r = await fetch(
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(s2Url)}`,
+        { signal: ctrl.signal },
+      );
+      clearTimeout(tid);
+      if (!r.ok) return true; // proxy trouble — don't block playback
+      const text = await r.text();
+      if (/Error Code:\s*<span>404/i.test(text)) return false;
+      return true;
+    } catch (_) {
+      return true; // unknown — assume playable
+    }
+  }
+
+  // ── Load a series by id, then play it ─────────────────────────────
+  // statusCb(state) optional: "loading" | "soon" | "error" | "ready".
+  // Returns true if playback started. Reused by grid cards + search results.
+  async function openAnikotoById(id, statusCb) {
+    const key = `ANI_${id}`;
+    const say = (s) => { if (statusCb) statusCb(s); };
+
+    if (!window.mediaData?.anime?.[key]) {
+      if (!statusCb) toast("Loading episodes…");
+      say("loading");
+      const data = await apiFetch(`${BASE}/series/${id}`);
+      if (!data?.ok) { say("error"); toast("Could not load episodes — check connection"); return false; }
+      injectEntry(id, data.data?.anime || {}, data.data?.episodes || []);
+    }
+
+    const vids = (window.mediaData.anime[key]?.ANI_S1?.video || []).filter(Boolean);
+    if (!vids.length) { say("soon"); toast("No episodes released yet — check back after it airs"); return false; }
+
+    // Probe the first episode so missing files show a message, not a 404 page.
+    const s2Url = vids[0].replace("/stream/s-3/", "/stream/s-2/");
+    if (!(await embedExists(s2Url))) {
+      say("soon"); toast("Not on MegaPlay yet — episode should appear soon"); return false;
+    }
+
+    say("ready");
+    window.viroPlay?.("anime", key);
+    return true;
+  }
+  window.openAnikotoById = openAnikotoById;
+
   // ── Card click ────────────────────────────────────────────────────
   async function onCardClick(card) {
     const id  = card.dataset.aniId;
-    const key = `ANI_${id}`;
-
-    if (card.dataset.done === "1" || window.mediaData?.anime?.[key]) {
-      card.dataset.done = "1";
-      window.viroPlay?.("anime", key);
-      return;
-    }
+    if (card.dataset.done === "1") { window.viroPlay?.("anime", `ANI_${id}`); return; }
 
     card.classList.add("ani-loading");
     const badge = card.querySelector(".ani-badge");
-    if (badge) badge.textContent = "LOADING...";
-
-    const data = await apiFetch(`${BASE}/series/${id}`);
-
-    if (!data?.ok) {
-      card.classList.remove("ani-loading");
-      if (badge) badge.textContent = "STREAM";
-      toast("Could not load episodes — check connection");
-      return;
-    }
-
-    injectEntry(id, data.data?.anime || {}, data.data?.episodes || []);
-    card.dataset.done = "1";
+    const ok = await openAnikotoById(id, (s) => {
+      if (!badge) return;
+      badge.textContent =
+        s === "loading" ? "LOADING..." : s === "soon" ? "SOON" : "STREAM";
+    });
     card.classList.remove("ani-loading");
-    if (badge) badge.textContent = "STREAM";
-    window.viroPlay?.("anime", key);
+    if (ok) card.dataset.done = "1";
   }
 
   // ── Card element ──────────────────────────────────────────────────
@@ -195,10 +250,24 @@
       .forEach(sk => sk.remove());
   }
 
-  // ── Load page (visible grid) ──────────────────────────────────────
+  // ── Pager UI state ────────────────────────────────────────────────
+  function updatePager() {
+    const prev  = document.getElementById("anikoto-prev");
+    const next  = document.getElementById("anikoto-next");
+    const label = document.getElementById("anikoto-page-label");
+    if (prev)  prev.disabled  = fetching || page <= 1;
+    if (next)  next.disabled  = fetching || page >= totalPages;
+    if (label) label.textContent = fetching ? "Loading…" : `Page ${page} / ${totalPages}`;
+  }
+
+  // ── Load a single page (replaces grid content) ────────────────────
   async function loadPage(n) {
-    if (fetching) return;
+    if (fetching || n < 1 || n > totalPages) return;
     fetching = true;
+    updatePager();
+
+    const grid = document.getElementById("anikoto-grid");
+    if (grid) grid.innerHTML = "";
     addSkeletons(8);
 
     const data = await apiFetch(`${BASE}/recent-anime?page=${n}&per_page=${PER_PAGE}`);
@@ -206,15 +275,13 @@
     fetching = false;
 
     if (!data?.ok) {
-      if (n === 1) {
-        const grid = document.getElementById("anikoto-grid");
-        if (grid) {
-          const msg = document.createElement("p");
-          msg.className   = "ani-error";
-          msg.textContent = "Could not load streaming anime — check connection.";
-          grid.appendChild(msg);
-        }
+      if (grid) {
+        const msg = document.createElement("p");
+        msg.className   = "ani-error";
+        msg.textContent = "Could not load streaming anime — check connection.";
+        grid.appendChild(msg);
       }
+      updatePager();
       return;
     }
 
@@ -223,52 +290,11 @@
     totalPages = pg.total_pages || 1;
 
     const items = data.data || [];
-    cache = cache.concat(items);
+    const existingIds = new Set(cache.map(a => a.id));
+    cache = cache.concat(items.filter(a => !existingIds.has(a.id)));
 
-    const grid = document.getElementById("anikoto-grid");
     if (grid) items.forEach(item => grid.appendChild(makeCard(item)));
-
-    armObserver();
-
-    if (n === 1 && !bgLoading) bgPreload();
-  }
-
-  // ── Background preload (for search) ──────────────────────────────
-  async function bgPreload() {
-    bgLoading = true;
-    let p = 2;
-    while (p <= totalPages) {
-      const batch = [];
-      for (let i = 0; i < 4 && p <= totalPages; i++, p++) {
-        batch.push(apiFetch(`${BASE}/recent-anime?page=${p}&per_page=${PER_PAGE}`));
-      }
-      const results = await Promise.all(batch);
-      for (const data of results) {
-        if (!data?.ok) continue;
-        const items = data.data || [];
-        const existingIds = new Set(cache.map(a => a.id));
-        const fresh = items.filter(a => !existingIds.has(a.id));
-        cache = cache.concat(fresh);
-        if (data.pagination?.total_pages) totalPages = data.pagination.total_pages;
-      }
-      await sleep(300);
-    }
-    bgLoading = false;
-  }
-
-  // ── Infinite scroll ───────────────────────────────────────────────
-  function armObserver() {
-    const sentinel = document.getElementById("anikoto-sentinel");
-    if (!sentinel || page >= totalPages) { iObs?.disconnect(); iObs = null; return; }
-    iObs?.disconnect();
-    if (!window.IntersectionObserver) { setTimeout(() => loadPage(page + 1), 2000); return; }
-    iObs = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && !fetching) {
-        iObs.disconnect(); iObs = null;
-        loadPage(page + 1);
-      }
-    }, { rootMargin: "400px" });
-    iObs.observe(sentinel);
+    updatePager();
   }
 
   // ── Show / hide Anikoto section ───────────────────────────────────
@@ -299,121 +325,98 @@
     if (ml) mo.observe(ml, { childList: true });
   }
 
-  // ── Search ────────────────────────────────────────────────────────
-  function cleanSearchCards() {
-    document.getElementById("movieList")
-      ?.querySelectorAll(".ani-card, .ani-search-sep")
-      .forEach(el => el.remove());
+  // ── Catalog index for search ──────────────────────────────────────
+  // The API has NO search endpoint, so we build a local index once from the
+  // paginated catalog (89 pages of 100) and cache it in the browser ~24h.
+  // content.js calls window.anikotoSearch(q) to fold results into the main
+  // ranked search.
+  const IDX_KEY = "anikotoIndex_v3"; // v3: added aniListId for AniList matching
+  const IDX_TTL = 24 * 3600 * 1000;
+  let catalog     = [];
+  let indexReady  = false;
+  let buildPromise = null;
+
+  function buildCatalog() {
+    if (!buildPromise) buildPromise = _buildCatalog();
+    return buildPromise;
   }
 
-  function fuzzyMatch(title, query) {
-    const t = (title || "").toLowerCase();
-    const q = query.toLowerCase();
-    if (t.includes(q)) return true; 
-
-    const normT = t.replace(/[^a-z0-9]/g, "");
-    const normQ = q.replace(/[^a-z0-9]/g, "");
-    
-    return normQ.length > 0 && normT.includes(normQ);
-  }
-
-  let currentSearchId = 0; 
-
-  async function doSearch(q) {
-    cleanSearchCards();
-    if (!q || q.length < 2) return;
-
-    const ml = document.getElementById("movieList");
-    if (!ml) return;
-
-    const mySearchId = ++currentSearchId;
-
-    function insertMixed(card) {
-      const nativeCards = Array.from(ml.children).filter(c => !c.classList.contains('ani-card') && !c.classList.contains('ani-search-sep'));
-      const aniCards = Array.from(ml.children).filter(c => c.classList.contains('ani-card'));
-      const targetIndex = Math.min(aniCards.length * 2, nativeCards.length + aniCards.length);
-      ml.insertBefore(card, ml.children[targetIndex] || null);
-    }
-
-    // 1. Instant Local Search (Fixed: changed createCard to makeCard)
-    const localHits = cache.filter(a => fuzzyMatch(a.title, q));
-    
-    if (localHits.length > 0) {
-      localHits.forEach(a => {
-        if (!ml.querySelector(`[data-ani-id="${a.id}"]`)) {
-          insertMixed(makeCard(a));
-        }
-      });
-    }
-
-    // 2. Add full database indicator
-    const sep = document.createElement("div");
-    sep.className = "ani-search-sep";
-    sep.style.cssText = "grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem; padding: 12px 10px; font-family: 'Kanit', sans-serif;";
-    sep.textContent = "🔍 Searching full database...";
-    ml.appendChild(sep);
-
+  async function _buildCatalog() {
     try {
-      const res = await apiFetch(`${BASE}/series?search=${encodeURIComponent(q)}`);
-      
-      if (mySearchId !== currentSearchId) return;
+      const o = JSON.parse(localStorage.getItem(IDX_KEY) || "null");
+      if (o && Date.now() - o.t < IDX_TTL && Array.isArray(o.d) && o.d.length) {
+        catalog = o.d; indexReady = true; return;
+      }
+    } catch (_) {}
 
-      sep.remove();
-
-      if (res?.ok && Array.isArray(res.data)) {
-        const remoteHits = res.data;
-        const newHits = remoteHits.filter(item => !localHits.some(local => String(local.id) === String(item.id)));
-
-        if (localHits.length === 0 && newHits.length === 0) {
-          const noResults = document.createElement("div");
-          noResults.className = "ani-search-sep";
-          noResults.style.cssText = "grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.3); font-size: 0.9rem; padding: 20px;";
-          noResults.textContent = `No matches found for "${q}"`;
-          ml.appendChild(noResults);
-          return;
-        }
-
-        // Fixed: changed createCard to makeCard here too
-        newHits.slice(0, 12).forEach(a => {
-          insertMixed(makeCard(a));
+    const first = await apiFetch(`${BASE}/recent-anime?page=1&per_page=100`);
+    if (!first?.ok) { buildPromise = null; return; } // allow a later retry
+    const totalPages = first.pagination?.total_pages || 1;
+    const map = new Map();
+    const add = (items) => (items || []).forEach((a) => {
+      if (a && a.id != null && !map.has(a.id)) {
+        map.set(a.id, {
+          id: a.id,
+          title: a.title || "",
+          alt: a.alternative || "",
+          poster: a.poster || "",
+          aniListId: a.ani_id ? Number(a.ani_id) : null,
         });
-
-        const totalCount = localHits.length + newHits.length;
-        const countIndicator = document.createElement("div");
-        countIndicator.className = "ani-search-sep";
-        countIndicator.style.cssText = "grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.2); font-size: 0.75rem; padding: 8px 0;";
-        countIndicator.textContent = `Found ${totalCount} total database matches`;
-        ml.appendChild(countIndicator);
-      } else {
-        if (localHits.length === 0) {
-          sep.textContent = "No matches found in full database.";
-        }
-      }
-    } catch (err) {
-      if (mySearchId === currentSearchId) {
-        sep.textContent = "Error connecting to full database search.";
-      }
-    }
-  }
-
-  // ── Hook Search Event Listener (Fixed: Restored missing function) ──
-  function hookSearch() {
-    const input = document.getElementById("searchInput");
-    if (!input) return;
-    input.addEventListener("input", (e) => {
-      if (window._vwlCurrentCat === "anime") {
-        clearTimeout(searchTid);
-        const q = e.target.value.trim();
-        searchTid = setTimeout(() => {
-          if (q.length < 2) {
-            cleanSearchCards();
-          } else {
-            doSearch(q);
-          }
-        }, 350);
       }
     });
+    add(first.data);
+
+    let pageN = 2;
+    async function pageWorker() {
+      while (pageN <= totalPages) {
+        const p = pageN++;
+        const d = await apiFetch(`${BASE}/recent-anime?page=${p}&per_page=100`);
+        if (d?.ok) add(d.data);
+      }
+    }
+    await Promise.all(Array.from({ length: 5 }, pageWorker));
+
+    catalog = [...map.values()];
+    indexReady = true;
+    try { localStorage.setItem(IDX_KEY, JSON.stringify({ t: Date.now(), d: catalog })); } catch (_) {}
   }
+
+  function scoreTitle(title, q) {
+    const t = (title || "").toLowerCase();
+    if (!t) return 0;
+    if (t === q) return 1000;
+    if (t.startsWith(q)) return 600 - Math.min(200, t.length);
+    if (t.includes(q)) return 400 - Math.min(200, t.length);
+    let j = 0;
+    for (let i = 0; i < t.length && j < q.length; i++) if (t[i] === q[j]) j++;
+    return j === q.length ? 120 - Math.min(100, t.length) : 0;
+  }
+
+  // Exposed ranked search over the anikoto catalog (or browsed cache if the
+  // index isn't built yet). Returns [{ id, title, poster, score }].
+  window.anikotoSearch = function (query) {
+    const q = (query || "").toLowerCase().trim();
+    if (q.length < 2) return [];
+    const src = indexReady && catalog.length ? catalog : cache;
+    const res = [];
+    for (const a of src) {
+      const s = Math.max(scoreTitle(a.title, q), scoreTitle(a.alt || a.alternative, q));
+      if (s > 0) res.push({ id: a.id, title: a.title, poster: a.poster, score: s });
+    }
+    res.sort((x, y) => y.score - x.score);
+    return res.slice(0, 60);
+  };
+  window.anikotoIndexReady = () => indexReady;
+
+  // Ensure the catalog index is built (used by the AniList importer).
+  window.anikotoEnsureIndex = () => buildCatalog();
+
+  // Match an AniList media id → anikoto catalog entry (or null).
+  window.anikotoFindByAniList = function (aniListId) {
+    const id = Number(aniListId);
+    if (!id) return null;
+    return catalog.find((a) => a.aniListId === id) || null;
+  };
 
   // ── Toast ─────────────────────────────────────────────────────────
   function toast(msg) {
@@ -438,13 +441,42 @@
     sec.id            = "anikoto-section";
     sec.style.display = "none";
 
-    const grid     = document.createElement("div"); grid.id = "anikoto-grid";
-    const sentinel = document.createElement("div");
-    sentinel.id            = "anikoto-sentinel";
-    sentinel.style.cssText = "height:2px;width:100%;pointer-events:none;";
+    const grid = document.createElement("div"); grid.id = "anikoto-grid";
+
+    const pager = document.createElement("div");
+    pager.id = "anikoto-pager";
+
+    const prev = document.createElement("button");
+    prev.id          = "anikoto-prev";
+    prev.type        = "button";
+    prev.textContent = "‹ Prev";
+    prev.disabled    = true;
+
+    const label = document.createElement("span");
+    label.id          = "anikoto-page-label";
+    label.textContent = "Page 1 / 1";
+
+    const next = document.createElement("button");
+    next.id          = "anikoto-next";
+    next.type        = "button";
+    next.textContent = "Next ›";
+    next.disabled    = true;
+
+    prev.addEventListener("click", () => {
+      loadPage(page - 1);
+      sec.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    next.addEventListener("click", () => {
+      loadPage(page + 1);
+      sec.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    pager.appendChild(prev);
+    pager.appendChild(label);
+    pager.appendChild(next);
 
     sec.appendChild(grid);
-    sec.appendChild(sentinel);
+    sec.appendChild(pager);
     wrapper.insertAdjacentElement("afterend", sec);
     wrapper.insertAdjacentElement("afterend", sep);
     return true;
@@ -466,6 +498,11 @@
       .ani-skeleton{aspect-ratio:2/3;border-radius:12px;background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.04) 75%);background-size:300% 100%;animation:ani-shim 1.5s infinite linear;}
       @keyframes ani-shim{0%{background-position:300% 0}100%{background-position:-300% 0}}
       .ani-error{color:rgba(255,100,100,.75);font-family:"Kanit",sans-serif;font-size:.85rem;text-align:center;padding:24px;grid-column:1/-1;}
+      #anikoto-pager{display:flex;align-items:center;justify-content:center;gap:16px;padding:6px 0 26px;}
+      #anikoto-pager button{background:rgba(99,102,241,.18);border:1px solid rgba(99,102,241,.45);color:#fff;font-family:"Kanit",sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.04em;padding:7px 18px;border-radius:8px;cursor:pointer;transition:background .15s,opacity .15s;}
+      #anikoto-pager button:hover:not(:disabled){background:rgba(99,102,241,.4);}
+      #anikoto-pager button:disabled{opacity:.35;cursor:default;}
+      #anikoto-page-label{color:rgba(255,255,255,.5);font-family:"Kanit",sans-serif;font-size:.75rem;letter-spacing:.08em;min-width:90px;text-align:center;}
       @media(max-width:768px){#anikoto-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;}.ani-badge{font-size:.5rem;padding:1px 4px;}}
     `;
     document.head.appendChild(s);
@@ -478,8 +515,9 @@
       if (!buildDOM()) return;
       watchVisibility();
       updateVis();
-      hookSearch();
       loadPage(1);
+      // Build the search index in the background (cached ~24h).
+      setTimeout(buildCatalog, 2000);
     }, 300);
   });
 })();
