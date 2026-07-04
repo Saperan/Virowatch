@@ -90,6 +90,67 @@
   }
 
   /* ─────────────────────────────────────────────────────
+     AniList import — pull a user's Watching + Planning list
+     (public, no login) and match to Anikoto by AniList id.
+  ───────────────────────────────────────────────────── */
+  var ANILIST_Q =
+    'query($name:String){MediaListCollection(userName:$name,type:ANIME,' +
+    'status_in:[CURRENT,PLANNING,PAUSED]){lists{entries{media{id ' +
+    'title{romaji english}coverImage{large}}}}}}';
+
+  async function importFromAniList() {
+    var name = prompt('Enter your AniList username:');
+    if (!name) return;
+    name = name.trim();
+    if (!name) return;
+    showToast('Fetching AniList…');
+    try {
+      var res = await fetch('https://graphql.anilist.co', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ query: ANILIST_Q, variables: { name: name } }),
+      });
+      var data = await res.json();
+      if (data.errors) { showToast('AniList: user not found or list is private'); return; }
+
+      var lists = (data.data && data.data.MediaListCollection && data.data.MediaListCollection.lists) || [];
+      var entries = [];
+      lists.forEach(function (l) { (l.entries || []).forEach(function (e) { entries.push(e); }); });
+      if (!entries.length) { showToast('No Watching/Planning entries found'); return; }
+
+      showToast('Matching ' + entries.length + ' titles to Anikoto…');
+      if (window.anikotoEnsureIndex) await window.anikotoEnsureIndex();
+      if (typeof window.anikotoFindByAniList !== 'function') {
+        showToast('Anikoto index unavailable — try again'); return;
+      }
+
+      var existing = getList();
+      var added = 0, missing = 0;
+      entries.forEach(function (e) {
+        var m = e.media;
+        if (!m) return;
+        var c = window.anikotoFindByAniList(m.id);
+        if (!c) { missing++; return; }
+        var key = 'ANI_' + c.id;
+        if (existing.some(function (i) { return i.key === key; })) return;
+        existing.push({
+          key: key,
+          title: c.title || (m.title && (m.title.english || m.title.romaji)) || key,
+          image: c.poster || (m.coverImage && m.coverImage.large) || '',
+          cat: 'anime',
+          aniId: c.id,
+        });
+        added++;
+      });
+      setList(existing);
+      refreshSidebar();
+      showToast('Added ' + added + ' from AniList' + (missing ? ' (' + missing + ' not on Anikoto)' : ''));
+    } catch (_) {
+      showToast('AniList import failed — check the username / connection');
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────
      Toast
   ───────────────────────────────────────────────────── */
   function showToast(msg) {
@@ -106,6 +167,18 @@
   ───────────────────────────────────────────────────── */
   function loadItem(item) {
     document.body.classList.remove('app-sidebar-open');
+
+    // Anikoto items must be fetched + injected before playing.
+    var aniId = item.aniId ||
+      (item.key && item.key.indexOf('ANI_') === 0 ? item.key.slice(4) : null);
+    if (aniId && typeof window.openAnikotoById === 'function') {
+      showToast('Loading…');
+      window.openAnikotoById(aniId).then(function (ok) {
+        if (!ok) showToast('Could not load — not available yet');
+      }).catch(function () { showToast('Failed to load item'); });
+      return;
+    }
+
     if (typeof window.viroPlay !== 'function') {
       showToast('Player not ready — try again');
       return;
@@ -205,10 +278,18 @@
     btnRow.appendChild(exportBtn);
     btnRow.appendChild(importBtn);
 
+    var aniListBtn = document.createElement('button');
+    aniListBtn.type = 'button';
+    aniListBtn.className = 'app-sidebar-import-btn';
+    aniListBtn.style.cssText = 'width:100%;margin-top:6px;';
+    aniListBtn.textContent = 'Import from AniList';
+    aniListBtn.addEventListener('click', importFromAniList);
+
     section.appendChild(label);
     section.appendChild(listEl);
     section.appendChild(importInput);
     section.appendChild(btnRow);
+    section.appendChild(aniListBtn);
     nav.appendChild(section);
 
     refreshSidebar();
@@ -219,7 +300,10 @@
   ───────────────────────────────────────────────────── */
   function attachButton(mi) {
     if (mi.querySelector('.vwl-add-btn')) return;
-    var key = mi.dataset.movie;
+
+    // Anikoto cards carry data-ani-id; native cards carry data-movie.
+    var aniId = mi.dataset.aniId;
+    var key   = aniId ? ('ANI_' + aniId) : mi.dataset.movie;
     if (!key) return;
 
     var p   = mi.querySelector('p');
@@ -228,6 +312,7 @@
 
     var title  = p.textContent.trim();
     var image  = img.src || '';
+    var cat    = aniId ? 'anime' : (mi.dataset.cat || window._vwlCurrentCat || 'shows');
     var active = isInList(key);
 
     var btn = document.createElement('button');
@@ -239,7 +324,6 @@
 
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
-      var cat = window._vwlCurrentCat || 'shows';
 
       if (isInList(key)) {
         removeItem(key);
@@ -248,7 +332,9 @@
         btn.title = 'Add to watchlist';
       } else {
         btn.classList.add('vwl-spinning');
-        addItem({ key: key, title: title, image: image, cat: cat });
+        var item = { key: key, title: title, image: image, cat: cat };
+        if (aniId) item.aniId = Number(aniId);
+        addItem(item);
         setTimeout(function () {
           btn.classList.remove('vwl-spinning');
           btn.classList.add('vwl-checked');
@@ -264,17 +350,27 @@
   /* ─────────────────────────────────────────────────────
      Observe #movieList
   ───────────────────────────────────────────────────── */
-  function observeMovieList() {
-    var movieList = document.getElementById('movieList');
-    if (!movieList) return;
-    movieList.querySelectorAll('.movie-item').forEach(attachButton);
+  function observeContainer(el) {
+    if (!el) return;
+    el.querySelectorAll('.movie-item').forEach(attachButton);
     new MutationObserver(function (mutations) {
       mutations.forEach(function (m) {
         m.addedNodes.forEach(function (node) {
           if (node.nodeType === 1 && node.classList.contains('movie-item')) attachButton(node);
         });
       });
-    }).observe(movieList, { childList: true });
+    }).observe(el, { childList: true });
+  }
+
+  function observeMovieList() {
+    observeContainer(document.getElementById('movieList'));
+    // The Anikoto grid is built a moment after load — wait for it.
+    var tries = 0;
+    (function waitGrid() {
+      var g = document.getElementById('anikoto-grid');
+      if (g) observeContainer(g);
+      else if (tries++ < 15) setTimeout(waitGrid, 700);
+    })();
   }
 
   /* ─────────────────────────────────────────────────────
