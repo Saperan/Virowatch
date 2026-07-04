@@ -382,15 +382,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (spinner) spinner.style.display = "block";
     const iframe = document.getElementById("videoPlayer");
 
-    // --- ANTI-POPUP LOGIC ---
-    // Sandbox every embed to block popups/top-level redirects (some third-party
-    // embed providers inject ads that hijack the tab otherwise). Playback,
-    // fullscreen, and same-origin storage stay allowed so players work normally.
-    iframe.setAttribute(
-      "sandbox",
-      "allow-scripts allow-same-origin allow-presentation allow-forms allow-fullscreen",
-    );
-    // ----------------------------
+    // No sandbox / referrer restrictions — embed providers (MegaPlay etc.)
+    // detect them and refuse to play. Popup blocking disabled for now.
+    iframe.removeAttribute("sandbox");
+    iframe.removeAttribute("referrerpolicy");
 
     iframe.classList.add("fade-out");
     iframe.onload = () =>
@@ -492,24 +487,54 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (categoryContainer) categoryContainer.style.display = "none";
       if (movieListWrapper) movieListWrapper.style.display = "block";
 
-      // 3. Score all items: how many query letters match in order (+ bonus for exact substring)
+      // 3. Unified ranked search: native catalog + Anikoto index.
+      //    Best matches first, showing the top 10 with a "Load more" button.
       movieList.innerHTML = "";
       const categoriesToCheck = ["movies", "shows", "anime", "lunora"];
       const scored = [];
+
+      const scoreTitle = (title) => {
+        const t = (title || "").toLowerCase();
+        if (!t) return 0;
+        if (t === q) return 1000;
+        if (t.startsWith(q)) return 600 - Math.min(200, t.length);
+        if (t.includes(q)) return 400 - Math.min(200, t.length);
+        let j = 0;
+        for (let i = 0; i < t.length && j < q.length; i++) if (t[i] === q[j]) j++;
+        return j === q.length ? 120 - Math.min(100, t.length) : 0;
+      };
 
       categoriesToCheck.forEach((catKey) => {
         const catData = mediaData[catKey];
         if (!catData) return;
         Object.entries(catData).forEach(([key, info]) => {
-          const title = (info.title || key).toLowerCase();
-          const count = subsequenceMatchCount(title, q);
-          if (count === 0) return;
-          const exactBonus = title.includes(q) ? 0.5 : 0;
-          scored.push({ catKey, key, info, score: count + exactBonus });
+          if (info._hidden) return; // skip hidden/anikoto-injected dupes
+          const s = scoreTitle(info.title || key);
+          if (s <= 0) return;
+          scored.push({
+            score: s,
+            img: info.image,
+            title: info.title || key,
+            key: key,
+            catKey: catKey,
+            open: () => { cat = catKey; selectMovie(key); },
+          });
         });
       });
 
-      // Sort by score descending (best matches first)
+      // Fold in Anikoto results (full catalog once its index is built).
+      if (window.anikotoSearch) {
+        window.anikotoSearch(q).forEach((a) => {
+          scored.push({
+            score: a.score,
+            img: a.poster,
+            title: a.title,
+            aniId: a.id,
+            open: () => window.openAnikotoById?.(a.id),
+          });
+        });
+      }
+
       scored.sort((a, b) => b.score - a.score);
 
       if (scored.length === 0) {
@@ -518,19 +543,35 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      scored.forEach(({ catKey, key, info }) => {
-        const div = document.createElement("div");
-        div.className = "movie-item";
-        div.innerHTML = `
-            <img src="${info.image || "https://via.placeholder.com/150"}" loading="lazy"/>
-            <p class="kanit-extralight">${info.title || key}</p>
-          `;
-        div.addEventListener("click", () => {
-          cat = catKey;
-          selectMovie(key);
+      let shown = 0;
+      const PAGE = 10;
+      const renderChunk = () => {
+        movieList.querySelector(".search-load-more")?.remove();
+        scored.slice(shown, shown + PAGE).forEach((item) => {
+          const div = document.createElement("div");
+          div.className = "movie-item";
+          if (item.aniId != null) div.dataset.aniId = String(item.aniId);
+          else { div.dataset.movie = item.key; div.dataset.cat = item.catKey; }
+          div.innerHTML =
+            `<img src="${item.img || "https://via.placeholder.com/150"}" loading="lazy"/>` +
+            `<p class="kanit-extralight">${item.title}</p>`;
+          div.addEventListener("click", item.open);
+          movieList.appendChild(div);
         });
-        movieList.appendChild(div);
-      });
+        shown += Math.min(PAGE, scored.length - shown);
+        if (shown < scored.length) {
+          const btn = document.createElement("button");
+          btn.className = "search-load-more";
+          btn.textContent = `Load more (${scored.length - shown})`;
+          btn.style.cssText =
+            "grid-column:1/-1;margin:16px auto;padding:9px 22px;border-radius:8px;" +
+            "background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.5);" +
+            "color:#fff;font-family:'Kanit',sans-serif;font-size:.85rem;cursor:pointer;";
+          btn.addEventListener("click", renderChunk);
+          movieList.appendChild(btn);
+        }
+      };
+      renderChunk();
     }, 300);
   });
 
