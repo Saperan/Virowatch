@@ -1,104 +1,205 @@
 /* ═══════════════════════════════════════════════════════════════════
-   Virowatch Style GUI — v3.0
-   Right-side panel, matches sidebar.css glass aesthetic exactly
+   Virowatch Settings popup + Style GUI — v4.0
+   Centered modal (replaces the old slide-in sidebar); the style list
+   is a searchable grid inside it. Colors come from the --vw-* tokens
+   defined in virohome.css so light/dark themes both work.
    ═══════════════════════════════════════════════════════════════════ */
 
-/* ─── Panel (right-side drawer, mirrors left sidebar) ──────────────── */
-#styleGuiOverlay {
+/* ─── Overlay + modal shell ─────────────────────────────────────────── */
+.vws-overlay {
   position: fixed;
-  top: 0;
-  right: 0;
-  width: 280px;
-  max-width: 85vw;
-  height: 100vh;
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-left: 1px solid rgba(255, 255, 255, 0.15);
-  transform: translateX(100%);
+  inset: 0;
+  z-index: 1000;
   display: flex;
-  flex-direction: column;
-  padding: 24px 0 0;
-  /* ... existing code ... */
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smoother curve */
-  will-change: transform; /* Hardware acceleration */
-  z-index: 1000; /* Ensure it stays above the other sidebar */
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+.vws-overlay.vws-open {
+  opacity: 1;
+  visibility: visible;
 }
 
-#styleGuiOverlay.sg-active {
-  transform: translateX(0);
-}
-
-/* ─── Modal wrapper ─────────────────────────────────────────────────── */
-.sg-modal {
+.vws-modal {
+  width: min(680px, 100%);
+  max-height: min(82vh, 760px);
   display: flex;
   flex-direction: column;
-  height: 100%;
+  background: var(--vw-panel, #1a1a1a);
+  border: 1px solid var(--vw-border-strong, rgba(255, 255, 255, 0.15));
+  border-radius: 16px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
   overflow: hidden;
+  transform: translateY(14px) scale(0.98);
+  transition: transform 0.25s var(--vw-ease, ease);
+}
+.vws-overlay.vws-open .vws-modal {
+  transform: none;
 }
 
 /* ─── Header ────────────────────────────────────────────────────────── */
-.sg-header {
+.vws-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 8px 20px 16px;
+  gap: 12px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--vw-border, rgba(255, 255, 255, 0.08));
   flex-shrink: 0;
 }
-
-.sg-header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.vws-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  object-fit: cover;
 }
-
-.sg-header-icon {
-  font-size: 1rem;
-  line-height: 1;
-  opacity: 0.8;
+.vws-title {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--vw-text-strong, #fff);
+  line-height: 1.2;
 }
-
-.sg-header-title {
-  font-family: 'Kanit', sans-serif;
-  font-size: 0.7rem;
+.vws-sub {
+  font-size: 0.62rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--vw-muted, rgba(255, 255, 255, 0.45));
 }
-
-.sg-close-btn {
-  width: 28px;
-  height: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+.vws-close {
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--vw-chip-border, rgba(255, 255, 255, 0.16));
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 1.1rem;
+  background: var(--vw-chip-bg, rgba(255, 255, 255, 0.08));
+  color: var(--vw-text, #eaeaea);
+  font-size: 1.15rem;
   line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
-
-.sg-close-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
-  color: #fff;
+.vws-close:hover {
+  background: var(--vw-hover-strong, rgba(255, 255, 255, 0.14));
+  border-color: var(--vw-active-border, rgba(255, 255, 255, 0.2));
+  color: var(--vw-text-strong, #fff);
 }
 
-/* ─── Search ────────────────────────────────────────────────────────── */
-.sg-toolbar {
-  padding: 0 16px 14px;
+/* ─── Scrollable body + sections ────────────────────────────────────── */
+.vws-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 22px 26px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--vw-border-strong, rgba(255, 255, 255, 0.15)) transparent;
+}
+.vws-body::-webkit-scrollbar {
+  width: 4px;
+}
+.vws-body::-webkit-scrollbar-thumb {
+  background: var(--vw-border-strong, rgba(255, 255, 255, 0.15));
+  border-radius: 2px;
+}
+.vws-section {
+  margin-bottom: 26px;
+}
+.vws-section:last-child {
+  margin-bottom: 0;
+}
+/* Watchlist section injected by watchlist.js */
+.vws-body .app-sidebar-custom-section {
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--vw-border, rgba(255, 255, 255, 0.08));
+}
+
+/* ─── Section label (shared with the injected Watchlist section) ───── */
+.app-sidebar-theme-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 2px 10px;
+  font-family: "Kanit", sans-serif;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--vw-muted-2, rgba(255, 255, 255, 0.35));
+}
+
+/* ─── Toggle rows (e.g. PitSport auto-load) ─────────────────────────── */
+.vws-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  padding: 2px 2px 0;
+}
+.vws-toggle-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.vws-toggle-title {
+  font-size: 0.85rem;
+  color: var(--vw-text-strong, rgba(255, 255, 255, 0.92));
+}
+.vws-toggle-sub {
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--vw-muted-2, rgba(255, 255, 255, 0.35));
+}
+.vws-switch {
+  appearance: none;
+  -webkit-appearance: none;
   flex-shrink: 0;
+  width: 38px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--vw-input-bg, rgba(255, 255, 255, 0.07));
+  border: 1px solid var(--vw-border-strong, rgba(255, 255, 255, 0.15));
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.vws-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--vw-muted, rgba(255, 255, 255, 0.55));
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.vws-switch:checked {
+  background: var(--vw-accent-bg, #e5e7eb);
+  border-color: transparent;
+}
+.vws-switch:checked::after {
+  transform: translateX(16px);
+  background: var(--vw-accent-fg, #111);
 }
 
+/* ─── Style search ──────────────────────────────────────────────────── */
 .sg-search-wrap {
   position: relative;
+  margin-bottom: 10px;
 }
-
 .sg-search-icon {
   position: absolute;
   left: 12px;
@@ -106,18 +207,17 @@
   transform: translateY(-50%);
   width: 14px;
   height: 14px;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--vw-muted-2, rgba(255, 255, 255, 0.35));
   pointer-events: none;
 }
-
 .sg-search {
   width: 100%;
   padding: 10px 12px 10px 34px;
-  background: rgba(255, 255, 255, 0.10);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.95);
-  font-family: 'Kanit', sans-serif;
+  background: var(--vw-input-bg, rgba(255, 255, 255, 0.07));
+  border: 1px solid var(--vw-input-border, rgba(255, 255, 255, 0.1));
+  border-radius: 99px;
+  color: var(--vw-text, #eaeaea);
+  font-family: "Kanit", sans-serif;
   font-size: 0.9rem;
   font-weight: 300;
   outline: none;
@@ -125,172 +225,626 @@
   transition: background 0.2s, border-color 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
-
 .sg-search::placeholder {
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--vw-faint, rgba(255, 255, 255, 0.3));
 }
-
 .sg-search:focus {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: var(--vw-input-border-focus, rgba(255, 255, 255, 0.3));
 }
 
-/* No tags/filters */
-.sg-filters { display: none; }
-
-/* ─── Scrollable style list ─────────────────────────────────────────── */
+/* ─── Style list (scrolls inside the section) ───────────────────────── */
 .sg-grid {
-  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 8px;
+  max-height: 380px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 4px 16px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  padding: 2px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  scrollbar-color: var(--vw-border-strong, rgba(255, 255, 255, 0.15)) transparent;
 }
-
-.sg-grid::-webkit-scrollbar { width: 4px; }
-.sg-grid::-webkit-scrollbar-track { background: transparent; }
+.sg-grid::-webkit-scrollbar {
+  width: 4px;
+}
 .sg-grid::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--vw-border-strong, rgba(255, 255, 255, 0.15));
   border-radius: 2px;
 }
-.sg-grid::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
 
-/* Empty state */
 .sg-empty {
-  padding: 40px 0;
+  grid-column: 1 / -1;
+  padding: 32px 0;
   text-align: center;
-  color: rgba(255, 255, 255, 0.3);
-  font-family: 'Kanit', sans-serif;
+  color: var(--vw-faint, rgba(255, 255, 255, 0.3));
+  font-family: "Kanit", sans-serif;
   font-size: 0.82rem;
   font-weight: 300;
 }
 
-/* ─── Card — clean row, no image ───────────────────────────────────── */
+/* ─── Style card ────────────────────────────────────────────────────── */
 .sg-card {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
+  background: var(--vw-chip-bg, rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--vw-border, rgba(255, 255, 255, 0.08));
+  border-radius: 10px;
   padding: 10px 12px;
   cursor: default;
   transition: background 0.2s, border-color 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
-
 .sg-card:hover {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.22);
+  background: var(--vw-hover, rgba(255, 255, 255, 0.1));
+  border-color: var(--vw-border-strong, rgba(255, 255, 255, 0.15));
 }
-
 .sg-card--active {
-  background: rgba(255, 255, 255, 0.16) !important;
-  border-color: rgba(255, 255, 255, 0.35) !important;
+  background: var(--vw-hover-strong, rgba(255, 255, 255, 0.14));
+  border-color: var(--vw-active-border, rgba(255, 255, 255, 0.2));
 }
 
-/* Hide thumbnail entirely */
-.sg-card-thumb { display: none; }
-.sg-hover-hint { display: none; }
-.sg-active-pill { display: none; }
-
-/* Card body */
 .sg-card-body {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  height: 100%;
 }
-
 .sg-card-name {
-  font-family: 'Kanit', sans-serif;
+  font-family: "Kanit", sans-serif;
   font-size: 0.9rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--vw-text-strong, #fff);
   line-height: 1.2;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
-
-/* "Active" label inline with name */
 .sg-card--active .sg-card-name::after {
-  content: 'Active';
+  content: "Active";
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--vw-muted, rgba(255, 255, 255, 0.5));
+  border: 1px solid var(--vw-active-border, rgba(255, 255, 255, 0.2));
   padding: 1px 7px;
   border-radius: 99px;
   flex-shrink: 0;
 }
-
 .sg-card-desc {
-  font-family: 'Kanit', sans-serif;
+  font-family: "Kanit", sans-serif;
   font-size: 0.74rem;
   font-weight: 300;
-  color: rgba(255, 255, 255, 0.38);
+  color: var(--vw-muted, rgba(255, 255, 255, 0.38));
   line-height: 1.4;
 }
-
-/* Hide tags */
-.sg-card-tags { display: none; }
-
-/* Action buttons */
 .sg-card-actions {
   display: flex;
   gap: 6px;
-  margin-top: 8px;
+  margin-top: auto;
+  padding-top: 8px;
 }
 
 .sg-btn {
   flex: 1;
   padding: 7px 10px;
-  border-radius: 6px;
-  font-family: 'Kanit', sans-serif;
+  border-radius: 99px;
+  font-family: "Kanit", sans-serif;
   font-size: 0.78rem;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s, transform 0.1s;
   -webkit-tap-highlight-color: transparent;
 }
-
-.sg-btn:active { transform: scale(0.97); }
-
+.sg-btn:active {
+  transform: scale(0.97);
+}
 .sg-btn-apply {
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.95);
+  background: var(--vw-chip-bg, rgba(255, 255, 255, 0.12));
+  border: 1px solid var(--vw-chip-border, rgba(255, 255, 255, 0.2));
+  color: var(--vw-text, #eaeaea);
 }
-
 .sg-btn-apply:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--vw-hover-strong, rgba(255, 255, 255, 0.2));
+  border-color: var(--vw-active-border, rgba(255, 255, 255, 0.3));
+  color: var(--vw-text-strong, #fff);
 }
-
 .sg-btn-download {
   flex: 0 0 auto;
   padding: 7px 10px;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.4);
+  border: 1px solid var(--vw-border, rgba(255, 255, 255, 0.12));
+  color: var(--vw-muted, rgba(255, 255, 255, 0.4));
 }
-
 .sg-btn-download:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.75);
+  background: var(--vw-hover, rgba(255, 255, 255, 0.08));
+  border-color: var(--vw-border-strong, rgba(255, 255, 255, 0.2));
+  color: var(--vw-text, rgba(255, 255, 255, 0.75));
 }
 
-/* ─── Footer — hidden ────────────────────────────────────────────────── */
-.sg-footer { display: none; }
+/* ─── Action buttons (Import CSS / Content Request / Hard Refresh /
+       Watchlist export-import injected by watchlist.js) ─────────────── */
+.app-sidebar-import-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  font-family: "Kanit", sans-serif;
+  font-size: 0.88rem;
+  font-weight: 400;
+  color: var(--vw-text, rgba(255, 255, 255, 0.88));
+  background: var(--vw-chip-bg, rgba(255, 255, 255, 0.07));
+  border: 1px solid var(--vw-chip-border, rgba(255, 255, 255, 0.11));
+  border-radius: 99px;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.app-sidebar-import-btn:hover {
+  background: var(--vw-hover-strong, rgba(255, 255, 255, 0.13));
+  border-color: var(--vw-active-border, rgba(255, 255, 255, 0.2));
+  color: var(--vw-text-strong, #fff);
+}
+.app-sidebar-content-request {
+  gap: 7px;
+}
+.app-sidebar-content-request .app-sidebar-btn-icon {
+  display: flex;
+  align-items: center;
+}
+.app-sidebar-content-request .app-sidebar-btn-icon img {
+  height: 1.1em;
+  width: auto;
+  vertical-align: middle;
+  border-radius: 3px;
+}
 
-/* ─── Toast ──────────────────────────────────────────────────────────── */
+/* ─── Custom CSS list ───────────────────────────────────────────────── */
+.app-sidebar-custom-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.app-sidebar-custom-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--vw-chip-bg, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--vw-border, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+}
+.app-sidebar-custom-item span {
+  flex: 1;
+  font-family: "Kanit", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 300;
+  color: var(--vw-text, rgba(255, 255, 255, 0.8));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.app-sidebar-custom-remove {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 5px;
+  background: rgba(255, 80, 80, 0.18);
+  color: rgba(255, 120, 120, 0.9);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.app-sidebar-custom-remove:hover {
+  background: rgba(255, 80, 80, 0.42);
+  color: #fff;
+}
+.app-sidebar-custom-remove::after {
+  content: "×";
+  display: block;
+  text-align: center;
+}
+
+/* ─── AniList modal (rail button above Settings opens it) ───────────── */
+.anl-overlay {
+  z-index: 1001; /* above the settings popup */
+}
+.anl-modal {
+  width: min(420px, 100%);
+  max-height: min(70vh, 560px);
+}
+.anl-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--vw-chip-bg, rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--vw-chip-border, rgba(255, 255, 255, 0.16));
+  color: var(--vw-text, #eaeaea);
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.anl-step {
+  font-family: "Kanit", sans-serif;
+  font-size: 0.84rem;
+  font-weight: 300;
+  color: var(--vw-text, #eaeaea);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.anl-go {
+  font-weight: 500 !important;
+}
+.anl-status {
+  font-family: "Kanit", sans-serif;
+  font-size: 0.74rem;
+  font-weight: 300;
+  color: var(--vw-muted, rgba(255, 255, 255, 0.45));
+  text-align: center;
+  min-height: 1.2em;
+  padding-top: 8px;
+}
+.anl-logout {
+  margin-bottom: 0 !important;
+}
+.anilist-hint {
+  font-family: "Kanit", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 300;
+  color: var(--vw-muted, rgba(255, 255, 255, 0.45));
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+.anilist-hint a {
+  color: var(--vw-text, #eaeaea);
+}
+.anilist-hint code {
+  font-size: 0.68rem;
+  background: var(--vw-chip-bg, rgba(255, 255, 255, 0.08));
+  padding: 1px 5px;
+  border-radius: 5px;
+  word-break: break-all;
+}
+.anilist-token-input {
+  width: 100%;
+  margin-bottom: 4px;
+  padding: 9px 14px;
+  background: var(--vw-input-bg, rgba(255, 255, 255, 0.07));
+  border: 1px solid var(--vw-input-border, rgba(255, 255, 255, 0.1));
+  border-radius: 99px;
+  color: var(--vw-text, #eaeaea);
+  font-family: "Kanit", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 300;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.anilist-token-input:focus {
+  border-color: var(--vw-input-border-focus, rgba(255, 255, 255, 0.3));
+}
+.anilist-account {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  background: var(--vw-chip-bg, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--vw-border, rgba(255, 255, 255, 0.09));
+  border-radius: 99px;
+}
+.anilist-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.anilist-name {
+  flex: 1;
+  font-family: "Kanit", sans-serif;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--vw-text-strong, #fff);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.anilist-badge {
+  flex-shrink: 0;
+  font-family: "Kanit", sans-serif;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--vw-muted, rgba(255, 255, 255, 0.5));
+  border: 1px solid var(--vw-active-border, rgba(255, 255, 255, 0.2));
+  padding: 1px 7px;
+  border-radius: 99px;
+}
+/* ─── Watch party (watchparty.js) ───────────────────────────────────── */
+.wp-modal-overlay {
+  z-index: 1001;
+}
+.wp-beta {
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  vertical-align: 2px;
+  color: var(--vw-accent-fg, #111);
+  background: var(--vw-accent-bg, #e5e7eb);
+  padding: 1px 6px;
+  border-radius: 99px;
+}
+.wp-gap {
+  margin-top: 18px;
+}
+.wp-joinrow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.wp-joinrow .wp-code {
+  flex: 1;
+  margin-bottom: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+.wp-joinbtn {
+  width: auto !important;
+  margin-bottom: 0 !important;
+  padding-left: 22px !important;
+  padding-right: 22px !important;
+}
+.wp-publist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.wp-pubrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  background: var(--vw-chip-bg, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--vw-border, rgba(255, 255, 255, 0.09));
+  border-radius: 10px;
+}
+.wp-pubtext {
+  flex: 1;
+  min-width: 0;
+  font-family: "Kanit", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 300;
+  color: var(--vw-text, #eaeaea);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wp-pubtitle {
+  color: var(--vw-muted, rgba(255, 255, 255, 0.45));
+}
+.wp-disconnect {
+  border-color: rgba(255, 90, 90, 0.35) !important;
+  color: #ff7a7a !important;
+}
+.wp-fineprint {
+  margin-top: 14px;
+  margin-bottom: 0;
+}
+.wp-ava {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* Chat overlay — floating draggable card over the player (z 200).
+   One panel in the Virowatch modal language: dark glass, hairline
+   border, 16px radius. Grab the header to move it (drag JS in
+   watchparty.js); position persists in localStorage vw_wp_pos. */
+.wp-overlay {
+  position: fixed;
+  top: 76px; /* default clears the player's back button */
+  left: 16px;
+  z-index: 900;
+  width: min(288px, 78vw);
+  display: none;
+  flex-direction: column;
+  font-family: "Kanit", sans-serif;
+  background: rgba(13, 13, 16, 0.86);
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 14px 44px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+.wp-overlay.wp-on {
+  display: flex;
+}
+.wp-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 9px 9px 14px;
+  background: rgba(255, 255, 255, 0.035);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none; /* pointer-drag on touch too */
+}
+.wp-overlay.wp-drag .wp-bar {
+  cursor: grabbing;
+}
+.wp-overlay.wp-min .wp-bar {
+  border-bottom: none;
+}
+.wp-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.7);
+  flex-shrink: 0;
+  margin-right: 3px;
+}
+.wp-bar-label {
+  flex: 1;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wp-mini-btn {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.76rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.wp-mini-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+.wp-leave:hover {
+  background: rgba(255, 80, 80, 0.18);
+  color: #ff8585;
+}
+.wp-pin-on {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+.wp-pubjoin {
+  width: auto;
+  border-radius: 99px;
+  padding: 0 12px;
+  height: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.85);
+}
+.wp-chatbox {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.wp-overlay.wp-min .wp-chatbox {
+  display: none;
+}
+.wp-now {
+  font-size: 0.68rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.55);
+  padding: 8px 14px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wp-now:empty {
+  display: none;
+}
+.wp-msgs {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 158px;
+  overflow: hidden;
+  padding: 8px 14px 2px;
+}
+.wp-msgs:empty {
+  padding: 0;
+}
+.wp-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 0.73rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.4;
+  transition: opacity 0.8s ease;
+}
+.wp-msg b {
+  font-weight: 500;
+  color: #fff;
+}
+.wp-msg.wp-old {
+  opacity: 0.3;
+}
+.wp-msg.wp-sys {
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
+}
+.wp-inputrow {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  padding: 10px 12px 12px;
+}
+.wp-input {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 99px;
+  padding: 6px 13px;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: "Kanit", sans-serif;
+  font-size: 0.74rem;
+  font-weight: 300;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.wp-input:focus {
+  border-color: rgba(255, 255, 255, 0.28);
+}
+.wp-inputrow .wp-mini-btn {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.8);
+}
+.wp-inputrow .wp-mini-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+/* ─── Fine print (Hard Refresh note) ────────────────────────────────── */
+.vws-body .bottom-text {
+  font-size: 0.72rem;
+  color: var(--vw-faint, rgba(255, 255, 255, 0.28));
+  text-align: center;
+  padding: 4px 0 2px;
+  opacity: 1;
+  margin-bottom: 0;
+}
+
+/* ─── Toast ─────────────────────────────────────────────────────────── */
 .sg-toast {
   position: fixed;
   bottom: 88px;
@@ -301,7 +855,7 @@
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.14);
   color: rgba(255, 255, 255, 0.88);
-  font-family: 'Kanit', sans-serif;
+  font-family: "Kanit", sans-serif;
   font-size: 0.8rem;
   font-weight: 300;
   padding: 8px 20px;
@@ -312,35 +866,32 @@
   transition: opacity 0.25s ease, transform 0.25s ease;
   white-space: nowrap;
 }
-
 .sg-toast--show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
-
 .sg-toast--error {
   border-color: rgba(255, 80, 80, 0.3);
   color: rgba(255, 130, 130, 0.9);
 }
 
-/* ─── Sidebar "Open Style GUI" button ───────────────────────────────── */
-.app-sidebar-style-section {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+/* ─── Small screens ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .vws-overlay {
+    padding: 10px;
+  }
+  .vws-modal {
+    max-height: 92vh;
+    border-radius: 14px;
+  }
+  .vws-header {
+    padding: 14px 16px;
+  }
+  .vws-body {
+    padding: 16px 16px 22px;
+  }
+  .sg-grid {
+    grid-template-columns: 1fr;
+    max-height: 330px;
+  }
 }
-
-.app-sidebar-style-toggle-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.app-sidebar-style-icon { font-size: 1rem; }
-.app-sidebar-style-text { font-family: 'Kanit', sans-serif; font-size: 0.9rem; }
-
-/* Hide legacy elements */
-.app-sidebar-style-preview-overlay,
-.app-sidebar-style-preview-panel,
-.app-sidebar-style-loading { display: none !important; }
