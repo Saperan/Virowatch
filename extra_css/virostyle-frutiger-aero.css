@@ -65,186 +65,7 @@ body {
 }
 ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.4); }
 
-.container, .episode-container { overflow: visible; }
-.container { max-width: auto; margin: auto; padding: 20px; }
-
-/* ── Header ────────────────────────────────────────────────────── */
-header {
-  text-align: center;
-  margin-bottom: 20px;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: rgba(240, 248, 255, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  padding-top: 14px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--aero-glass-border);
-  box-shadow: 0 3px 15px var(--aero-glass-shadow);
-  margin-left: -20px;
-  margin-right: -20px;
-  padding-left: 20px;
-  padding-right: 20px;
-}
-header h1 {
-  font-size: 2.6rem;
-  font-weight: 700;
-  color: var(--aero-blue);
-  text-shadow: 1px 1px 0px #fff, 0 0 10px rgba(255,255,255,0.8);
-}
-header img { vertical-align: middle; }
-
-/* ── Search ────────────────────────────────────────────────────── */
-.search-box {
-  display: flex;
-  justify-content: center;
-  margin-top: 10px;
-}
-.search-input-wrap {
-  position: relative;
-  width: 80%;
-  max-width: 500px;
-}
-.search-input-wrap input,
-.search-box input {
-  background: rgba(255, 255, 255, 0.85);
-  color: var(--aero-text);
-  border: 1px solid #a0c0d5;
-  padding: 12px 36px 12px 20px;
-  border-radius: 18px;
-  width: 100%;
-  font-size: 1rem;
-  box-shadow: inset 0 2px 5px rgba(0,0,0,0.08), 0 1px 0 #fff;
-  transition: all 0.25s ease-out;
-}
-.search-box input:focus {
-  border-color: var(--aero-blue);
-  outline: none;
-  box-shadow: 0 0 8px var(--aero-blue-glow), inset 0 1px 2px rgba(0,0,0,0.05);
-}
-.search-clear-btn {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: var(--aero-text-muted);
-  font-size: 1.3rem;
-  cursor: pointer;
-  display: none;
-}
-
-#hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 40px;
-  width: 100%;
-}
-
-/* ── Newest Added ──────────────────────────────────────────────── */
-.newest-added {
-  margin-bottom: 28px;
-  width: 100%;
-  max-width: 640px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.newest-added-title {
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--aero-text-light);
-  text-shadow: 0 1px 0 #fff;
-  margin-bottom: 12px;
-}
-.newest-added-grid {
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: center;
-  gap: 12px;
-  width: 100%;
-}
-.newest-added-item {
-  flex: 0 0 100px;
-  position: relative;
-  border-radius: 10px;
-  overflow: hidden;
-  cursor: pointer;
-  aspect-ratio: 2/3;
-  max-height: 150px;
-  border: 2px solid #fff;
-  box-shadow: 0 4px 12px rgba(0, 50, 100, 0.15);
-  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.15);
-}
-.newest-added-item:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 8px 20px rgba(30, 126, 200, 0.3);
-}
-.newest-added-item img { width: 100%; height: 100%; object-fit: cover; }
-.newest-added-item span {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  padding: 14px 6px 6px;
-  background: linear-gradient(to top, rgba(255,255,255,0.95) 40%, rgba(255,255,255,0) 100%);
-  color: var(--aero-text); font-size: 0.75rem; font-weight: 600;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-
-/* ── Categories ────────────────────────────────────────────────── */
-.categories-section {
-  margin-bottom: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-.categories-title {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--aero-text);
-  text-shadow: 0 1px 0 #fff;
-  margin-bottom: 24px;
-}
-.category-cards {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 25px;
-  width: 100%;
-}
-.movie-item-banner.category-card {
-  flex: 1 1 280px;
-  max-width: 350px;
-  position: relative;
-  border-radius: 20px;
-  overflow: hidden;
-  cursor: pointer;
-  border: 1px solid var(--aero-glass-border);
-  background: linear-gradient(135deg, rgba(255,255,255,0.65), rgba(255,255,255,0.35));
-  box-shadow: 0 8px 24px var(--aero-glass-shadow), inset 0 1px 0 #fff;
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-}
-.movie-item-banner.category-card:hover {
-  transform: translateY(-4px) scale(1.01);
-  border-color: rgba(255,255,255,0.9);
-  box-shadow: 0 12px 30px rgba(0, 100, 220, 0.25);
-}
-.movie-item-banner.category-card img { width: 100%; height: 190px; object-fit: cover; }
-.movie-item-banner.category-card .category-card-link { display: block; }
-.movie-item-banner.category-card[data-category="movies"] .category-card-link--full { position: absolute; inset: 0; z-index: 1; }
-.movie-item-banner.category-card[data-category="movies"] .category-card-link--full .category-card-label,
-.movie-item-banner .category-card-label,
-.movie-item-banner p {
-  position: absolute; bottom: 0; left: 0; width: 100%; margin: 0;
-  padding: 18px;
-  background: linear-gradient(to top, rgba(255,255,255,0.95) 30%, rgba(255,255,255,0.1) 100%);
-  color: var(--aero-text); font-size: 1.15rem; font-weight: 700;
-}
+.episode-container { overflow: visible; }
 
 /* ── Category Nav Bar ──────────────────────────────────────────── */
 .category-nav-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -290,20 +111,6 @@ header img { vertical-align: middle; }
   font-size: 0.85rem; font-weight: 600; color: var(--aero-text); text-align: center;
   padding: 8px 4px; border-top: 1px solid rgba(255,255,255,0.6);
   backdrop-filter: blur(4px);
-}
-
-/* ── Seasons Dropdown ──────────────────────────────────────────── */
-.seasons-dropdown {
-  display: flex; gap: 10px; overflow-x: auto; padding: 8px 12px;
-  background: rgba(255,255,255,0.5); border-radius: 10px; border: 1px solid var(--aero-glass-border);
-}
-.seasons-dropdown button {
-  padding: 8px 14px; border: 1px solid #b8d4e8; border-radius: 6px;
-  background: #fff; color: var(--aero-text-light); font-weight: 600; cursor: pointer;
-}
-.seasons-dropdown button.active {
-  background: linear-gradient(to bottom, #5dba3a 0%, #3e8a25 100%);
-  color: #fff; border-color: #2b6318; text-shadow: 0 -1px 0 rgba(0,0,0,0.2);
 }
 
 /* ── Episode Modal ─────────────────────────────────────────────── */
@@ -361,10 +168,6 @@ iframe#videoPlayer { flex: 1; width: 100%; border: none; }
 }
 
 #downloadContainer { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
-.changelog-container { background: rgba(255,255,255,0.5); border: 1px solid var(--aero-glass-border); border-radius: 12px; padding: 15px; max-height: 250px; overflow-y: auto; margin-top: 40px; }
-.changelog-box { background: #fff; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #c8dceb; }
-.changelog-box h3 { color: var(--aero-text); font-size: 1rem; }
-.changelog-box p { color: var(--aero-text-muted); font-size: 0.9rem; }
 
 .fade-out { opacity: 0; transition: opacity 0.3s; }
 .fade-transition { opacity: 0; transition: opacity 0.3s; }
@@ -379,7 +182,12 @@ iframe#videoPlayer { flex: 1; width: 100%; border: none; }
 }
 #seasonSelector:hover { border-color: var(--aero-blue-light); background: #fbfdfe; }
 
-.player, .sidebar, .movie-item, .movie-item-banner, .button, .episode, #seasonSelector {
+.player,
+.sidebar,
+.movie-item,
+.button,
+.episode,
+#seasonSelector {
   opacity: 0; animation: simpleAppear 0.6s ease-out forwards;
 }
 
@@ -389,6 +197,38 @@ iframe#videoPlayer { flex: 1; width: 100%; border: none; }
   .sidebar { width: 100%; border-left: none; border-top: 1px solid var(--aero-glass-border); max-height: 180px; }
 }
 
-.site-title { cursor: pointer; text-align: center; }
-.site-title-icon-link { display: inline; text-decoration: none; }
-.site-title-icon { width: 60px; height: 60px; vertical-align: bottom; }
+/* ── Virowatch 3a home tokens (rail/header/hero — see virohome.css) ── */
+html[data-vw-theme][data-vw-theme] {
+    --vw-bg: #d4eefa;
+    --vw-bg-rgb: 228, 243, 252;
+    --vw-panel: rgba(255, 255, 255, 0.62);
+    --vw-panel-2: rgba(234, 246, 255, 0.92);
+    --vw-text: #1a3a4a;
+    --vw-text-strong: #0d2836;
+    --vw-icon: #2d5a72;
+    --vw-muted: #4a7088;
+    --vw-muted-2: rgba(74, 112, 136, 0.85);
+    --vw-border: rgba(255, 255, 255, 0.7);
+    --vw-border-strong: rgba(30, 126, 200, 0.35);
+    --vw-active-border: rgba(30, 126, 200, 0.6);
+    --vw-hover: rgba(255, 255, 255, 0.55);
+    --vw-hover-strong: rgba(30, 126, 200, 0.18);
+    --vw-chip-bg: rgba(255, 255, 255, 0.5);
+    --vw-chip-border: rgba(30, 126, 200, 0.3);
+    --vw-input-bg: rgba(255, 255, 255, 0.85);
+    --vw-input-border: #a0c0d5;
+    --vw-input-border-focus: #1e7ec8;
+    --vw-accent-bg: #1e7ec8;
+    --vw-accent-fg: #ffffff;
+    --vw-glow: rgba(30, 126, 200, 0.3);
+    --vw-glow-strong: rgba(30, 126, 200, 0.5);
+}
+
+/* aero is a light theme but its filename lacks "light" — patch the two
+   dark-default bits virohome.css keys off that substring */
+html[data-vw-theme][data-vw-theme] {
+    --vw-faint: rgba(26, 58, 74, 0.4);
+}
+#hero .hero-art {
+    filter: blur(18px) brightness(1.05) saturate(1.05);
+}
