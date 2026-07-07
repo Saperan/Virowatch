@@ -29,17 +29,52 @@
     list.unshift(item);
     setList(list);
     refreshSidebar();
+    if (window.vwAniListPush) window.vwAniListPush('add', item); // sync to AniList
   }
 
   function removeItem(key) {
+    var removed = getList().find(function (i) { return i.key === key; });
     setList(getList().filter(function (i) { return i.key !== key; }));
     refreshSidebar();
-    document.querySelectorAll('.vwl-add-btn[data-key="' + key + '"]').forEach(function (btn) {
-      btn.classList.remove('vwl-checked', 'vwl-spinning');
-      btn.innerHTML = SVG_PLUS;
-      btn.title = 'Add to watchlist';
+    if (removed && window.vwAniListPush) window.vwAniListPush('remove', removed);
+  }
+
+  /* Bulk add without AniList pushes — used by the AniList pull-sync
+     (anilist.js) so imported entries don't echo back to AniList. */
+  window.vwlBulkAdd = function (items) {
+    var list = getList();
+    var added = 0;
+    (items || []).forEach(function (it) {
+      if (!it || !it.key) return;
+      if (list.some(function (i) { return i.key === it.key; })) return;
+      list.push(it);
+      added++;
+    });
+    if (added) { setList(list); refreshSidebar(); }
+    return added;
+  };
+
+  /* Keep every +/✓ card button (movie grid, Anikoto grid, home posters)
+     in step with the list, no matter where the change came from. */
+  function syncAddButtons() {
+    document.querySelectorAll('.vwl-add-btn[data-key]').forEach(function (btn) {
+      if (btn.classList.contains('vwl-spinning')) return; // mid add-animation
+      var active = isInList(btn.dataset.key);
+      btn.classList.toggle('vwl-checked', active);
+      btn.innerHTML = active ? SVG_CHECK : SVG_PLUS;
+      btn.title = active ? 'In watchlist' : 'Add to watchlist';
     });
   }
+
+  /* Exposed for the home UI (hero + newest-added + watchlist view) */
+  window.vwlHas = isInList;
+  window.vwlGet = getList;
+  window.vwlToggle = function (item) {
+    if (isInList(item.key)) { removeItem(item.key); return false; }
+    addItem(item);
+    return true;
+  };
+  window.vwlAttachButton = attachButton;
 
   /* ─────────────────────────────────────────────────────
      SVG icons
@@ -90,67 +125,6 @@
   }
 
   /* ─────────────────────────────────────────────────────
-     AniList import — pull a user's Watching + Planning list
-     (public, no login) and match to Anikoto by AniList id.
-  ───────────────────────────────────────────────────── */
-  var ANILIST_Q =
-    'query($name:String){MediaListCollection(userName:$name,type:ANIME,' +
-    'status_in:[CURRENT,PLANNING,PAUSED]){lists{entries{media{id ' +
-    'title{romaji english}coverImage{large}}}}}}';
-
-  async function importFromAniList() {
-    var name = prompt('Enter your AniList username:');
-    if (!name) return;
-    name = name.trim();
-    if (!name) return;
-    showToast('Fetching AniList…');
-    try {
-      var res = await fetch('https://graphql.anilist.co', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ query: ANILIST_Q, variables: { name: name } }),
-      });
-      var data = await res.json();
-      if (data.errors) { showToast('AniList: user not found or list is private'); return; }
-
-      var lists = (data.data && data.data.MediaListCollection && data.data.MediaListCollection.lists) || [];
-      var entries = [];
-      lists.forEach(function (l) { (l.entries || []).forEach(function (e) { entries.push(e); }); });
-      if (!entries.length) { showToast('No Watching/Planning entries found'); return; }
-
-      showToast('Matching ' + entries.length + ' titles to Anikoto…');
-      if (window.anikotoEnsureIndex) await window.anikotoEnsureIndex();
-      if (typeof window.anikotoFindByAniList !== 'function') {
-        showToast('Anikoto index unavailable — try again'); return;
-      }
-
-      var existing = getList();
-      var added = 0, missing = 0;
-      entries.forEach(function (e) {
-        var m = e.media;
-        if (!m) return;
-        var c = window.anikotoFindByAniList(m.id);
-        if (!c) { missing++; return; }
-        var key = 'ANI_' + c.id;
-        if (existing.some(function (i) { return i.key === key; })) return;
-        existing.push({
-          key: key,
-          title: c.title || (m.title && (m.title.english || m.title.romaji)) || key,
-          image: c.poster || (m.coverImage && m.coverImage.large) || '',
-          cat: 'anime',
-          aniId: c.id,
-        });
-        added++;
-      });
-      setList(existing);
-      refreshSidebar();
-      showToast('Added ' + added + ' from AniList' + (missing ? ' (' + missing + ' not on Anikoto)' : ''));
-    } catch (_) {
-      showToast('AniList import failed — check the username / connection');
-    }
-  }
-
-  /* ─────────────────────────────────────────────────────
      Toast
   ───────────────────────────────────────────────────── */
   function showToast(msg) {
@@ -166,7 +140,7 @@
      Load item into player — uses window.viroPlay from content.js
   ───────────────────────────────────────────────────── */
   function loadItem(item) {
-    document.body.classList.remove('app-sidebar-open');
+    if (window.vwSettingsClose) window.vwSettingsClose(); // close settings popup
 
     // Anikoto items must be fetched + injected before playing.
     var aniId = item.aniId ||
@@ -194,6 +168,8 @@
      Sidebar section
   ───────────────────────────────────────────────────── */
   function refreshSidebar() {
+    syncAddButtons();
+    window.dispatchEvent(new CustomEvent('vwl-updated'));
     var container = document.getElementById('vwl-list');
     if (!container) return;
     var list = getList();
@@ -233,7 +209,8 @@
   }
 
   function buildSidebarSection() {
-    var nav = document.querySelector('.app-sidebar nav');
+    /* Settings popup body (falls back to the legacy sidebar if present) */
+    var nav = document.querySelector('#vwSettingsNav, .app-sidebar nav');
     if (!nav || document.getElementById('vwl-section')) return;
 
     var section = document.createElement('div');
@@ -278,18 +255,10 @@
     btnRow.appendChild(exportBtn);
     btnRow.appendChild(importBtn);
 
-    var aniListBtn = document.createElement('button');
-    aniListBtn.type = 'button';
-    aniListBtn.className = 'app-sidebar-import-btn';
-    aniListBtn.style.cssText = 'width:100%;margin-top:6px;';
-    aniListBtn.textContent = 'Import from AniList';
-    aniListBtn.addEventListener('click', importFromAniList);
-
     section.appendChild(label);
     section.appendChild(listEl);
     section.appendChild(importInput);
     section.appendChild(btnRow);
-    section.appendChild(aniListBtn);
     nav.appendChild(section);
 
     refreshSidebar();
@@ -306,7 +275,7 @@
     var key   = aniId ? ('ANI_' + aniId) : mi.dataset.movie;
     if (!key) return;
 
-    var p   = mi.querySelector('p');
+    var p   = mi.querySelector('p, .title'); // .title = home poster cards
     var img = mi.querySelector('img');
     if (!p || !img) return;
 
@@ -393,25 +362,27 @@
       /* + button on card */
       '.vwl-add-btn{position:absolute;top:5px;left:5px;width:22px;height:22px;padding:0;border:none;border-radius:50%;background:transparent;color:rgba(255,255,255,0.92);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;transition:background .18s,transform .15s;filter:drop-shadow(0 1px 3px rgba(0,0,0,.75));}' +
       '.vwl-add-btn svg{width:12px;height:12px;pointer-events:none;}' +
-      '.movie-item:hover .vwl-add-btn{background:rgba(0,0,0,.52);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}' +
+      '.movie-item:hover .vwl-add-btn,.poster:hover .vwl-add-btn{background:rgba(0,0,0,.52);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}' +
+      /* home posters keep their badge top-left, so the + sits top-right */
+      '.poster .vwl-add-btn{left:auto;right:5px;}' +
       '.vwl-add-btn:hover{transform:scale(1.18);}' +
       '.vwl-add-btn.vwl-checked{background:rgba(255,255,255,.16);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);color:#fff;}' +
       '.vwl-add-btn.vwl-checked:hover{background:rgba(200,55,55,.52);}' +
       '@keyframes vwl-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}' +
       '.vwl-add-btn.vwl-spinning{animation:vwl-spin .42s ease-out forwards;background:rgba(0,0,0,.52);}' +
 
-      /* sidebar watchlist */
+      /* watchlist section (inside the settings popup — uses theme tokens) */
       '.vwl-list{display:flex;flex-direction:column;gap:5px;max-height:250px;overflow-y:auto;margin:8px 0;}' +
       '.vwl-list::-webkit-scrollbar{width:3px;}' +
-      '.vwl-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:2px;}' +
-      '.vwl-item{display:flex;align-items:center;gap:8px;padding:6px 7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:8px;cursor:pointer;transition:background .18s,border-color .18s;min-width:0;}' +
-      '.vwl-item:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);}' +
+      '.vwl-list::-webkit-scrollbar-thumb{background:var(--vw-border-strong,rgba(255,255,255,.14));border-radius:2px;}' +
+      '.vwl-item{display:flex;align-items:center;gap:8px;padding:6px 7px;background:var(--vw-chip-bg,rgba(255,255,255,.06));border:1px solid var(--vw-border,rgba(255,255,255,.09));border-radius:8px;cursor:pointer;transition:background .18s,border-color .18s;min-width:0;}' +
+      '.vwl-item:hover{background:var(--vw-hover-strong,rgba(255,255,255,.12));border-color:var(--vw-active-border,rgba(255,255,255,.2));}' +
       '.vwl-item-img{width:30px;height:44px;object-fit:cover;border-radius:4px;flex-shrink:0;}' +
-      '.vwl-item-title{flex:1;font-size:.78rem;font-weight:500;color:rgba(255,255,255,.88);line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-width:0;}' +
+      '.vwl-item-title{flex:1;font-size:.78rem;font-weight:500;color:var(--vw-text,rgba(255,255,255,.88));line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-width:0;}' +
       '.vwl-item-remove{flex-shrink:0;width:26px;height:26px;padding:5px;border:none;border-radius:5px;background:rgba(255,60,60,.14);color:rgba(255,110,110,.85);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .18s,color .18s;}' +
       '.vwl-item-remove:hover{background:rgba(255,60,60,.4);color:#fff;}' +
       '.vwl-item-remove svg{width:13px;height:13px;}' +
-      '.vwl-empty{font-size:.76rem;color:rgba(255,255,255,.3);text-align:center;padding:12px 0 4px;}' +
+      '.vwl-empty{font-size:.76rem;color:var(--vw-faint,rgba(255,255,255,.3));text-align:center;padding:12px 0 4px;}' +
 
       /* export/import row */
       '.vwl-btn-row{display:flex;gap:6px;margin-top:4px;}' +
