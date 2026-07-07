@@ -24,14 +24,14 @@
   // separate budget, put the 2nd worker on a DIFFERENT Cloudflare account.
   const WORKERS = [
     { url: "https://anikoto-request.vmtgaming13.workers.dev", quality: 720 },
-    { url: "https://ux-anikoto.uxlibrary.workers.dev",        quality: 360 },
+    { url: "https://ux-anikoto.uxlibrary.workers.dev",        quality: "auto" },
   ]
     .filter((w) => w.url)
     .map((w) => ({ ...w, url: w.url.replace(/\/+$/, "") }));
 
   const HLS_CDN    = "https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js";
   const DL_CONC    = 6;      // parallel segment fetches while downloading
-  const AUTO_DELAY = 9000;   // ms before auto-fallback kicks in
+  const AUTO_DELAY = 4000;   // ms before auto-fallback kicks in
   // MegaPlay embed: .../stream/s-3/<id>/<sub|dub>
   const MEGA_RE    = /megaplay\.buzz\/stream\/s-\d+\/(\d+)\/(sub|dub)/i;
 
@@ -592,7 +592,15 @@
         lowLatencyMode: false,
         capLevelToPlayerSize: false,     // don't downgrade to the small player box
         startLevel: -1,
-        abrEwmaDefaultEstimate: 6000000, // assume 6 Mbps so it starts high, not 360p
+        abrEwmaDefaultEstimate: 8000000, // assume 8 Mbps so it starts high, not 360p
+        // Buffer far ahead so single-rendition 1080p (no lower fallback) keeps
+        // enough segments queued to ride out bandwidth dips without stalling.
+        maxBufferLength: 90,             // sec of forward buffer (default 30)
+        maxMaxBufferLength: 1200,        // hard ceiling (default 600)
+        maxBufferSize: 200 * 1000 * 1000,// 200 MB (default 60 MB)
+        backBufferLength: 30,            // keep 30s behind for seeks, drop rest
+        fragLoadingMaxRetry: 6,          // retry a stalled segment instead of dying
+        fragLoadingMaxRetryTimeout: 8000,
       });
       hls.loadSource(fileUrl);
       hls.attachMedia(v);
@@ -616,6 +624,18 @@
       );
     }
   }
+
+  function partyOn() {
+    return typeof window.vwPartyActive === "function" && window.vwPartyActive();
+  }
+
+  // Party started mid-episode → move the current embed to the Backup player.
+  window.addEventListener("vw-party-changed", (e) => {
+    if (e.detail && e.detail.active && current && mode === "embed") {
+      toast("Watch party — using the Backup player so time sync works");
+      playBackup("party");
+    }
+  });
 
   // Player closed / switched to a non-megaplay provider — stop backup.
   function teardown() {
@@ -645,8 +665,10 @@
     b.style.display = "";
     clearTimeout(autoTid);
 
-    if (preferBackup) {
-      playBackup("sticky");
+    if (preferBackup || partyOn()) {
+      // Watch party: always go straight to the Backup player — it's the
+      // only anime player both sides can read/seek, so time sync works.
+      playBackup(preferBackup ? "sticky" : "party");
     } else {
       mode = "embed";
       showEmbed();
@@ -678,16 +700,14 @@
       #viroBackupBtn{cursor:pointer;}
       #viroOverlay{position:absolute;top:10px;right:10px;z-index:6;
         display:flex;gap:8px;align-items:center;}
-      #viroOverlay > *{
-        background:rgba(20,20,24,.82);color:#fff;border:1px solid rgba(255,255,255,.18);
-        border-radius:8px;font-family:"Kanit",sans-serif;font-size:.8rem;font-weight:600;
-        padding:6px 10px;cursor:pointer;backdrop-filter:blur(6px);line-height:1;
-      }
-      #viroOverlay select{appearance:none;-webkit-appearance:none;padding-right:10px;}
-      #viroOverlay > *:hover{background:rgba(40,40,48,.92);}
-      #viroDownloadBtn{text-decoration:none;white-space:nowrap;}
+      /* Controls carry .button so each theme styles them like the rest of
+         the player bar — only size is trimmed to fit over the video. */
+      #viroOverlay .button{font-size:.85rem;padding:7px 14px;line-height:1.2;
+        white-space:nowrap;text-decoration:none;}
+      #viroOverlay select.button{appearance:none;-webkit-appearance:none;
+        text-align:center;}
       @media(max-width:768px){#viroOverlay{top:6px;right:6px;gap:6px;}
-        #viroOverlay > *{font-size:.72rem;padding:5px 8px;}}
+        #viroOverlay .button{font-size:.75rem;padding:6px 10px;}}
     `;
     document.head.appendChild(s);
   }
