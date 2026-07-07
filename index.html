@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Virowatch</title>
         <link id="themeStylesheet" rel="stylesheet" href="virostyle.css" />
-        <link rel="stylesheet" href="stylegui.css" />
+        <link rel="stylesheet" href="stylegui.css?v=5" />
         <script>
             (function () {
                 var link = document.getElementById("themeStylesheet");
@@ -40,6 +40,11 @@
                     localStorage.setItem("theme", saved);
                 }
                 link.href = resolveHref(saved);
+                // Home UI reads this to pick light/dark design tokens
+                document.documentElement.setAttribute(
+                    "data-vw-theme",
+                    link.getAttribute("href") || "",
+                );
             })();
         </script>
         <link
@@ -48,198 +53,258 @@
             type="image/png"
         />
         <link
-            href="https://fonts.googleapis.com/css2?family=Kanit:wght@100;300;400;700&family=Rajdhani:wght@300;500;700&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Kanit:wght@100;300;400;500;700&family=Rajdhani:wght@300;500;700&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="sidebar.css" />
+        <link rel="stylesheet" href="virohome.css?v=1" />
     </head>
     <body>
-        <div id="styleGuiOverlay" class="style-gui-overlay">
-            <div class="sg-modal">
-                <div class="app-sidebar-style-header">
+        <!-- ── Settings popup (replaces the old slide-in sidebar) ── -->
+        <div id="vwSettings" class="vws-overlay" aria-hidden="true">
+            <div
+                class="vws-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Settings"
+            >
+                <div class="vws-header">
+                    <img
+                        src="https://i.ibb.co/FkdMbG4N/virowatch-new-icon-tihngy-cropped.png"
+                        alt=""
+                        class="vws-logo"
+                    />
+                    <div>
+                        <div class="vws-title">Settings</div>
+                        <div class="vws-sub">Virowatch</div>
+                    </div>
                     <button
-                        id="closeStyleGuiBtn"
+                        id="vwSettingsClose"
                         type="button"
-                        class="app-sidebar-style-close-btn"
+                        class="vws-close"
+                        aria-label="Close"
                     >
                         ×
                     </button>
                 </div>
-                <div
-                    id="styleListContainer"
-                    class="app-sidebar-style-list"
-                ></div>
-            </div>
-        </div>
-        <div
-            id="app-sidebar-style-preview-overlay"
-            class="app-sidebar-style-preview-overlay"
-        ></div>
-        <div
-            id="app-sidebar-style-preview-panel"
-            class="app-sidebar-style-preview-panel"
-            style="display: none"
-        >
-            <div class="app-sidebar-style-preview-header">
-                <span class="app-sidebar-style-preview-title"
-                    >Style Preview</span
-                >
-                <button
-                    id="app-sidebar-style-preview-close-btn"
-                    class="app-sidebar-style-preview-close-btn"
-                >
-                    ×
-                </button>
-            </div>
-            <div class="app-sidebar-style-preview-content">
-                <p class="app-sidebar-style-preview-name"></p>
-                <p class="app-sidebar-style-preview-desc"></p>
-                <pre
-                    id="app-sidebar-style-preview-css"
-                    class="app-sidebar-style-preview-css"
-                ></pre>
-                <div class="app-sidebar-style-preview-actions">
-                    <button
-                        id="app-sidebar-style-apply-now-btn"
-                        class="app-sidebar-style-apply-now-btn"
-                    >
-                        Apply Now
-                    </button>
-                    <button
-                        id="app-sidebar-style-copy-btn"
-                        class="app-sidebar-style-copy-btn"
-                    >
-                        Copy CSS
-                    </button>
-                </div>
+                <nav class="vws-body" id="vwSettingsNav">
+                    <div class="vws-section">
+                        <span class="app-sidebar-theme-label"
+                            >🎨 Appearance</span
+                        >
+                        <div class="sg-search-wrap">
+                            <svg
+                                class="sg-search-icon"
+                                viewBox="0 0 20 20"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <circle
+                                    cx="8.5"
+                                    cy="8.5"
+                                    r="5.5"
+                                    stroke="currentColor"
+                                    stroke-width="1.6"
+                                />
+                                <line
+                                    x1="13"
+                                    y1="13"
+                                    x2="16.5"
+                                    y2="16.5"
+                                    stroke="currentColor"
+                                    stroke-width="1.6"
+                                    stroke-linecap="round"
+                                />
+                            </svg>
+                            <input
+                                type="text"
+                                id="sgSearch"
+                                class="sg-search"
+                                placeholder="Search styles…"
+                                autocomplete="off"
+                                spellcheck="false"
+                            />
+                        </div>
+                        <div id="sgGrid" class="sg-grid"></div>
+                    </div>
+                    <div class="vws-section">
+                        <span class="app-sidebar-theme-label">Custom CSS</span>
+                        <input
+                            type="file"
+                            id="app-custom-css-file"
+                            accept=".css,text/css"
+                            class="app-custom-css-file-input"
+                            hidden
+                        />
+                        <button
+                            type="button"
+                            id="app-import-css-btn"
+                            class="app-sidebar-import-btn"
+                        >
+                            Import CSS file
+                        </button>
+                        <div
+                            id="app-custom-css-list"
+                            class="app-sidebar-custom-list"
+                        ></div>
+                    </div>
+                    <div class="vws-section">
+                        <span class="app-sidebar-theme-label"
+                            >📡 Live sports</span
+                        >
+                        <label class="vws-toggle-row" for="pitsportAutoToggle">
+                            <span class="vws-toggle-text">
+                                <span class="vws-toggle-title"
+                                    >Auto-load PitSport</span
+                                >
+                                <span class="vws-toggle-sub"
+                                    >Fetch live sports on startup. Off = loads
+                                    the first time you open PitSport
+                                    Live.</span
+                                >
+                            </span>
+                            <input
+                                type="checkbox"
+                                id="pitsportAutoToggle"
+                                class="vws-switch"
+                            />
+                        </label>
+                    </div>
+                    <div class="vws-section">
+                        <span class="app-sidebar-theme-label">Links</span>
+                        <a
+                            href="https://discord.gg/jdKvsPWNme"
+                            target="_blank"
+                            rel="noopener"
+                            class="app-sidebar-import-btn app-sidebar-content-request"
+                        >
+                            <span
+                                class="app-sidebar-btn-icon"
+                                aria-hidden="true"
+                            >
+                                <img
+                                    src="https://i.ibb.co/FkdMbG4N/virowatch-new-icon-tihngy-cropped.png"
+                                    alt=""
+                                />
+                            </span>
+                            <span class="app-sidebar-btn-text"
+                                >Content Request</span
+                            >
+                        </a>
+                        <button
+                            onclick="refreshPage()"
+                            type="button"
+                            class="app-sidebar-import-btn"
+                        >
+                            Hard Refresh
+                        </button>
+                        <div class="bottom-text">
+                            Press if New Content doesnt show up
+                        </div>
+                        <script>
+                            function refreshPage() {
+                                window.location.reload(true);
+                            }
+                        </script>
+                    </div>
+                    <!-- watchlist.js appends its Watchlist section here -->
+                </nav>
             </div>
         </div>
 
-        <button
-            class="app-sidebar-toggle"
-            type="button"
-            aria-label="Toggle sidebar"
-        >
-            <span></span>
-        </button>
-        <div class="app-sidebar-overlay" aria-hidden="true"></div>
-        <aside class="app-sidebar">
-            <!-- Sidebar header: logo + brand -->
-            <div class="app-sidebar-header">
+        <!-- ── Slim rail — hover to expand; continue watching lives here ── -->
+        <nav class="rail">
+            <div class="rail-brand" id="railBrand">
                 <img
                     src="https://i.ibb.co/FkdMbG4N/virowatch-new-icon-tihngy-cropped.png"
                     alt="Virowatch"
-                    class="app-sidebar-logo"
                 />
-                <div>
-                    <div class="app-sidebar-brand">Virowatch</div>
-                    <div class="app-sidebar-brand-version">Settings</div>
-                </div>
+                <span class="rail-label">Virowatch</span>
             </div>
-            <nav>
-                <div class="app-sidebar-theme-section">
-                    <span class="app-sidebar-theme-label">🎨 Appearance</span>
-                    <select
-                        id="app-sidebar-theme-select"
-                        class="app-sidebar-theme-select"
-                        aria-label="Choose style"
-                    >
-                        <option value="auto">Auto</option>
-                        <option value="desktop-dark">Desktop Dark</option>
-                        <option value="desktop-light">Desktop Light</option>
-                        <option value="mobile-dark">Mobile Dark</option>
-                        <option value="mobile-light">Mobile Light</option>
-                    </select>
-                </div>
-                <div class="app-sidebar-custom-section">
-                    <span class="app-sidebar-theme-label">Custom CSS</span>
-                    <input
-                        type="file"
-                        id="app-custom-css-file"
-                        accept=".css,text/css"
-                        class="app-custom-css-file-input"
-                        hidden
-                    />
-                    <button
-                        type="button"
-                        id="app-import-css-btn"
-                        class="app-sidebar-import-btn"
-                    >
-                        Import CSS file
-                    </button>
-                    <div
-                        id="app-custom-css-list"
-                        class="app-sidebar-custom-list"
-                    ></div>
-                </div>
+            <button
+                class="rail-item active"
+                id="railHomeBtn"
+                data-rail-id="home"
+                type="button"
+                title="Home"
+            >
+                <span class="icon">⌂</span
+                ><span class="rail-label">Home</span>
+            </button>
+            <button
+                class="rail-item"
+                data-cat="lunora"
+                type="button"
+                title="Movies"
+            >
+                <span class="icon">▣</span
+                ><span class="rail-label">Movies</span>
+            </button>
+            <button
+                class="rail-item"
+                data-cat="shows"
+                type="button"
+                title="TV Shows"
+            >
+                <span class="icon">▤</span
+                ><span class="rail-label">TV Shows</span>
+            </button>
+            <button
+                class="rail-item"
+                data-cat="anime"
+                type="button"
+                title="Anime"
+            >
+                <span class="icon">❋</span
+                ><span class="rail-label">Anime</span>
+            </button>
+            <button
+                class="rail-item"
+                id="railWatchlistBtn"
+                data-rail-id="watchlist"
+                type="button"
+                title="Watchlist"
+            >
+                <span class="icon">✓</span
+                ><span class="rail-label">Watchlist</span>
+            </button>
 
-                <div class="app-sidebar-style-section">
-                    <button
-                        id="openStyleGuiBtn"
-                        type="button"
-                        class="app-sidebar-import-btn app-sidebar-style-toggle-btn"
-                    >
-                        <span class="app-sidebar-style-icon">🎨</span>
-                        <span class="app-sidebar-style-text"
-                            >Open Style GUI</span
-                        >
-                    </button>
+            <!-- continue watching (filled by virohome.js) -->
+            <div class="rail-cw" id="railCw" style="display: none">
+                <div class="rail-cw-head">
+                    <span class="rail-label">Continue watching</span>
+                    <span class="collapsed-icon">▶</span>
                 </div>
+                <div class="rail-cw-items" id="railCwItems"></div>
+            </div>
 
-                <div class="app-sidebar-link-section">
-                    <a
-                        href="https://discord.gg/jdKvsPWNme"
-                        target="_blank"
-                        rel="noopener"
-                        class="app-sidebar-import-btn app-sidebar-content-request"
-                    >
-                        <span class="app-sidebar-btn-icon" aria-hidden="true">
-                            <img
-                                src="https://i.ibb.co/FkdMbG4N/virowatch-new-icon-tihngy-cropped.png"
-                                alt=""
-                            />
-                        </span>
-                        <span class="app-sidebar-btn-text"
-                            >Content Request</span
-                        >
-                    </a>
-                </div>
-                <div class="app-sidebar-custom-section">
-                    <button
-                        onclick="refreshPage()"
-                        type="button"
-                        class="app-sidebar-import-btn"
-                    >
-                        Hard Refresh
-                    </button>
-                    <div class="bottom-text">
-                        Press if New Content doesnt show up
-                    </div>
-                    <script>
-                        function refreshPage() {
-                            window.location.reload(true);
-                        }
-                    </script>
-                </div>
-            </nav>
-        </aside>
+            <div class="rail-spacer"></div>
+            <button
+                class="rail-item"
+                id="railAniListBtn"
+                type="button"
+                title="AniList account"
+            >
+                <span class="icon" id="railAniListIcon">◍</span
+                ><span class="rail-label" id="railAniListLabel">AniList</span>
+            </button>
+            <button
+                class="rail-item"
+                id="railSettingsBtn"
+                type="button"
+                title="Settings &amp; themes"
+            >
+                <span class="icon">⚙</span
+                ><span class="rail-label">Settings &amp; themes</span>
+            </button>
+        </nav>
 
-        <div class="container">
-            <header>
-                <h1 class="kanit-light site-title" id="siteTitle">
-                    <a
-                        href="https://discord.gg/jdKvsPWNme"
-                        class="site-title-icon-link"
-                    >
-                        <img
-                            src="https://i.ibb.co/FkdMbG4N/virowatch-new-icon-tihngy-cropped.png"
-                            alt="Join Virowatch Discord!"
-                            class="site-title-icon"
-                    /></a>
-                    Virowatch
-                </h1>
-                <div class="search-box">
-                    <div class="search-input-wrap">
+        <div class="main">
+            <!-- ── Sticky header ── -->
+            <header class="header">
+                <span class="brand" id="headerBrand">Virowatch</span>
+                <div class="search-area">
+                    <div class="search-field">
+                        <span class="glass">⌕</span>
                         <input
                             type="text"
                             id="searchInput"
@@ -255,52 +320,57 @@
                         </button>
                     </div>
                 </div>
-                <br />
             </header>
 
+            <!-- ── Home: hero (featured = newest #1) + newest grid + live sports ── -->
             <div id="hero">
-                <section class="newest-added">
-                    <h2 class="newest-added-title">Newest added</h2>
-                    <div id="newestAddedList" class="newest-added-grid"></div>
-                </section>
-                <section id="categoryContainer" class="categories-section">
-                    <div class="category-cards">
-                        <div
-                            class="movie-item-banner category-card"
-                            data-category="lunora"
-                        >
-                            <img
-                                src="https://i.ibb.co/f15zJkV/Umovies.png"
-                                alt="Lunora Movies"
-                            />
-                            <span class="category-card-label"
-                                >Lunora Movies Content</span
+                <section class="hero" id="heroBanner">
+                    <div class="hero-art" id="heroArt"></div>
+                    <div class="hero-scrim"></div>
+                    <div class="hero-content">
+                        <span class="hero-kicker">Newest added</span>
+                        <h1 class="hero-title" id="heroTitle"></h1>
+                        <div class="hero-tags" id="heroTags"></div>
+                        <div class="hero-actions">
+                            <button
+                                class="btn-primary"
+                                id="heroWatchBtn"
+                                type="button"
                             >
-                        </div>
-                        <div
-                            class="movie-item-banner category-card"
-                            data-category="shows"
-                        >
-                            <img
-                                src="https://variety.com/wp-content/uploads/2024/01/100-Greatest-TV-Shows-V1-2.jpg?w=1024"
-                                alt="Shows"
-                                loading="lazy"
-                            />
-                            <span class="category-card-label">TV Shows</span>
-                        </div>
-                        <div
-                            class="movie-item-banner category-card"
-                            data-category="anime"
-                        >
-                            <img
-                                src="https://static.crunchyroll.com/cr-acquisition/assets/img/start/hero/us-global/background-desktop.jpg"
-                                alt="Anime"
-                                loading="lazy"
-                            />
-                            <span class="category-card-label">Anime</span>
+                                ▶ Watch now
+                            </button>
+                            <button
+                                class="btn-ghost"
+                                id="heroWlBtn"
+                                type="button"
+                            >
+                                + Watchlist
+                            </button>
                         </div>
                     </div>
                 </section>
+
+                <section class="home-section newest-section">
+                    <div class="section-head">
+                        <h2>Newest added</h2>
+                        <a class="more" id="newestSeeAll">see all →</a>
+                    </div>
+                    <div id="newestAddedList" class="poster-grid"></div>
+                </section>
+
+                <!-- Airing soon strip (filled by airing.js from AniList) -->
+                <section
+                    class="sports airing"
+                    id="airingStrip"
+                    style="display: none"
+                ></section>
+
+                <!-- Live sports strip (filled by virohome.js from PitSport) -->
+                <section
+                    class="sports"
+                    id="sportsStrip"
+                    style="display: none"
+                ></section>
             </div>
 
             <div
@@ -364,77 +434,28 @@
                 </div>
             </div>
 
-            <div class="bottom-text">
+            <!-- ── Footer disclaimer ── -->
+            <footer class="footer">
                 Virowatch — All Rights Reserved to Original content Authors<br />All
-                content hosted on this website are from third-party sources from
-                the internet - Virowatch does not host anything by itself.
-            </div>
+                content hosted on this website are from third-party sources
+                from the internet - Virowatch does not host anything by itself.
+            </footer>
         </div>
 
-        <script>
-            const watchNowButton = document.querySelector(".watch");
-            const heroSection = document.getElementById("hero");
-            const categoryBanners =
-                document.querySelectorAll(".movie-item-banner");
-            const backToCategoryButton =
-                document.getElementById("backToCategory");
-            const changelogContainer = document.getElementById(
-                "changelog-container",
-            );
-            const movieListWrapper =
-                document.getElementById("movieListWrapper");
-            const siteTitle = document.getElementById("siteTitle");
-
-            if (watchNowButton) {
-                watchNowButton.addEventListener("click", () => {
-                    heroSection.style.display = "none";
-                    movieListWrapper.style.display = "block";
-                });
-            }
-
-            categoryBanners.forEach((banner) => {
-                banner.addEventListener("click", () => {
-                    heroSection.style.display = "none";
-                });
-            });
-
-            if (backToCategoryButton) {
-                backToCategoryButton.addEventListener("click", () => {
-                    heroSection.style.display = "flex";
-                });
-            }
-
-            if (siteTitle && backToCategoryButton) {
-                siteTitle.addEventListener("click", (e) => {
-                    if (e.target.closest("a")) return;
-                    backToCategoryButton.click();
-                });
-            }
-
-            if (changelogContainer) {
-                const observeChangelog = new MutationObserver(() => {
-                    if (
-                        changelogContainer &&
-                        changelogContainer.offsetHeight > 0
-                    ) {
-                        heroSection.style.display = "flex";
-                    }
-                });
-                observeChangelog.observe(changelogContainer, {
-                    childList: true,
-                    subtree: true,
-                });
-            }
-        </script>
-        <script src="pitsport-live.js"></script>
+        <script src="pitsport-live.js?v=2"></script>
         <script src="stylegui.js"></script>
         <script src="shows.js"></script>
         <script src="anime.js"></script>
         <script src="lunora-loader.js"></script>
-        <script src="content.js?v=5"></script>
+        <script src="content.js?v=7"></script>
         <script src="anikoto-loader.js?v=7"></script>
-        <script src="megaplay-backup.js?v=17"></script>
-        <script src="sidebar.js"></script>
-        <script src="watchlist.js?v=2"></script>
+        <script src="megaplay-backup.js?v=19"></script>
+        <script src="rumble-party.js?v=1"></script>
+        <script src="sidebar.js?v=2"></script>
+        <script src="watchlist.js?v=3"></script>
+        <script src="anilist.js?v=2"></script>
+        <script src="virohome.js?v=1"></script>
+        <script src="airing.js?v=2"></script>
+        <script src="watchparty.js?v=4"></script>
     </body>
 </html>
