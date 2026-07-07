@@ -15,6 +15,9 @@
   const API        = 'https://api.pitsport.live/v1';
   const WATCH_BASE = 'https://pitsport.xyz/watch';
   const TIMEOUT    = 7000;
+  // pitsport.xyz/favicon.ico stopped resolving — use the same logo as shows.js
+  const PITSPORT_LOGO =
+    'https://styles.redditmedia.com/t5_gimzou/styles/profileIcon_xcbdmlpt1vgg1.png?frame=1&auto=webp&crop=256%3A256%2Csmart&s=a81a6627212a1de0d75a0e4381aa963812a1da5c';
 
   window._pitsportLoaded  = false;
   window._pitsportLoading = false;
@@ -77,9 +80,6 @@
         pointerEvents: 'none', border: 'none',
       });
 
-      // Prevent the background stream verifier from opening popups while testing
-      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-
       let done = false;
       const finish = ok => {
         if (done) return;
@@ -105,7 +105,7 @@
 
     window.shows.PITSORT = {
       title : 'PitSport Live',
-      image : 'https://pitsport.xyz/favicon.ico',
+      image : PITSPORT_LOGO,
       PSFallback: {
         chapter       : '⚠️ PitSport unavailable',
         video         : ['https://pitsport.xyz/live-now'],
@@ -161,7 +161,7 @@
 
     window.shows.PITSORT = {
       title : 'PitSport Live',
-      image : 'https://pitsport.xyz/favicon.ico',
+      image : PITSPORT_LOGO,
     };
 
     if (liveNowFinal.length) {
@@ -192,10 +192,19 @@
 
   window.reloadPitSport = buildPitSportData;
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', buildPitSportData);
-  } else {
-    buildPitSportData();
+  // Lazy by default: the API calls only fire when PitSport is opened
+  // (content.js calls window.reloadPitSport from selectMovie). Loading at
+  // startup is opt-in via the settings toggle (localStorage vw_pitsport_auto).
+  function autoLoadEnabled() {
+    try { return localStorage.getItem('vw_pitsport_auto') === '1'; } catch (_) { return false; }
+  }
+
+  if (autoLoadEnabled()) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', buildPitSportData);
+    } else {
+      buildPitSportData();
+    }
   }
 
 })();
