@@ -295,7 +295,17 @@
 
     if (grid) items.forEach(item => grid.appendChild(makeCard(item)));
     updatePager();
+
+    // First page = "newest added" source for the home grid (content.js).
+    if (n === 1 && items.length) {
+      recentItems = items.slice();
+      window.dispatchEvent(new CustomEvent("anikoto-recent"));
+    }
   }
+
+  // ── Newest-added feed for the home page ───────────────────────────
+  let recentItems = [];
+  window.anikotoRecent = () => recentItems.slice();
 
   // ── Show / hide Anikoto section ───────────────────────────────────
   function isAnimeView() {
@@ -418,6 +428,13 @@
     return catalog.find((a) => a.aniListId === id) || null;
   };
 
+  // Reverse lookup: anikoto id → AniList media id (builds the index first).
+  window.anikotoGetAniListId = async function (anikotoId) {
+    await buildCatalog();
+    const e = catalog.find((a) => String(a.id) === String(anikotoId));
+    return e && e.aniListId ? e.aniListId : null;
+  };
+
   // ── Toast ─────────────────────────────────────────────────────────
   function toast(msg) {
     let t = document.getElementById("vwl-toast");
@@ -490,19 +507,19 @@
     s.textContent = `
       #anikoto-sep,.ani-search-sep{display:flex;align-items:center;gap:12px;padding:24px 0 14px;}
       .ani-search-sep{grid-column:1/-1;padding:12px 0 8px;}
-      .ani-sep-line{flex:1;height:1px;background:rgba(255,255,255,.1);}
-      .ani-sep-label{color:rgba(255,255,255,.35);font-family:"Kanit",sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;flex-shrink:0;}
+      .ani-sep-line{flex:1;height:1px;background:var(--vw-border,rgba(255,255,255,.1));}
+      .ani-sep-label{color:var(--vw-muted,rgba(255,255,255,.35));font-family:"Kanit",sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;flex-shrink:0;}
       #anikoto-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:14px;padding:5px 0 20px;}
-      .ani-badge{position:absolute;top:6px;right:6px;background:rgba(99,102,241,.88);color:#fff;font-family:"Kanit",sans-serif;font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 6px;border-radius:3px;pointer-events:none;z-index:2;backdrop-filter:blur(4px);}
+      .ani-badge{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.75);color:#fff;font-family:"Kanit",sans-serif;font-size:.6rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:6px;pointer-events:none;z-index:2;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
       .ani-card.ani-loading{opacity:.5;pointer-events:none;}
-      .ani-skeleton{aspect-ratio:2/3;border-radius:12px;background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.04) 75%);background-size:300% 100%;animation:ani-shim 1.5s infinite linear;}
+      .ani-skeleton{aspect-ratio:2/3;border-radius:12px;background:linear-gradient(90deg,var(--vw-border,rgba(255,255,255,.04)) 25%,var(--vw-hover-strong,rgba(255,255,255,.09)) 50%,var(--vw-border,rgba(255,255,255,.04)) 75%);background-size:300% 100%;animation:ani-shim 1.5s infinite linear;}
       @keyframes ani-shim{0%{background-position:300% 0}100%{background-position:-300% 0}}
       .ani-error{color:rgba(255,100,100,.75);font-family:"Kanit",sans-serif;font-size:.85rem;text-align:center;padding:24px;grid-column:1/-1;}
       #anikoto-pager{display:flex;align-items:center;justify-content:center;gap:16px;padding:6px 0 26px;}
-      #anikoto-pager button{background:rgba(99,102,241,.18);border:1px solid rgba(99,102,241,.45);color:#fff;font-family:"Kanit",sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.04em;padding:7px 18px;border-radius:8px;cursor:pointer;transition:background .15s,opacity .15s;}
-      #anikoto-pager button:hover:not(:disabled){background:rgba(99,102,241,.4);}
+      #anikoto-pager button{background:var(--vw-chip-bg,rgba(255,255,255,.08));border:1px solid var(--vw-chip-border,rgba(255,255,255,.16));color:var(--vw-text,#eaeaea);font-family:"Kanit",sans-serif;font-size:.8rem;font-weight:400;letter-spacing:.04em;padding:7px 18px;border-radius:99px;cursor:pointer;transition:background .18s ease,border-color .18s ease,opacity .15s;}
+      #anikoto-pager button:hover:not(:disabled){background:var(--vw-hover-strong,rgba(255,255,255,.14));border-color:var(--vw-active-border,rgba(255,255,255,.2));}
       #anikoto-pager button:disabled{opacity:.35;cursor:default;}
-      #anikoto-page-label{color:rgba(255,255,255,.5);font-family:"Kanit",sans-serif;font-size:.75rem;letter-spacing:.08em;min-width:90px;text-align:center;}
+      #anikoto-page-label{color:var(--vw-muted,rgba(255,255,255,.5));font-family:"Kanit",sans-serif;font-size:.75rem;letter-spacing:.08em;min-width:90px;text-align:center;}
       @media(max-width:768px){#anikoto-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;}.ani-badge{font-size:.5rem;padding:1px 4px;}}
     `;
     document.head.appendChild(s);
