@@ -55,6 +55,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Theme: apply by key or custom file path
   function applyTheme(key) {
     if (linkEl) linkEl.href = resolveThemeHref(key);
+    // Home UI (virohome.css) picks light/dark tokens from this attribute
+    document.documentElement.setAttribute(
+      "data-vw-theme",
+      resolveThemeHref(key) || "",
+    );
     localStorage.setItem("theme", key);
 
     if (themeSelect) {
@@ -84,8 +89,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // When theme is Auto, re-apply on resize so layout follows viewport
   window.addEventListener("resize", () => {
-    if (localStorage.getItem("theme") === "auto" && linkEl)
+    if (localStorage.getItem("theme") === "auto" && linkEl) {
       linkEl.href = resolveThemeHref("auto");
+      document.documentElement.setAttribute("data-vw-theme", linkEl.href);
+    }
   });
 
   // --- Custom CSS (saved locally, inject into page, removable) ---
@@ -189,6 +196,42 @@ document.addEventListener("DOMContentLoaded", async () => {
       "lastState",
       JSON.stringify({ cat, mov, season, ep, dubbed }),
     );
+    updateContinueWatching();
+  }
+
+  // Continue watching list (drives the rail section in virohome.js)
+  const CW_KEY = "vw_continue";
+  function updateContinueWatching() {
+    if (!cat || !mov || mov === "PITSORT") return; // live sports aren't resumable
+    const info = mediaData[cat]?.[mov];
+    if (!info) return;
+    const data = activeData();
+    const total = (
+      dubbed && data?.dubbed?.length ? data.dubbed : data?.video || []
+    ).length;
+    const sData = season ? info[season] : null;
+    const entry = {
+      cat,
+      mov,
+      season,
+      ep,
+      dubbed,
+      title: info.title || mov,
+      image: info.image || "",
+      total,
+      seasonLabel:
+        (sData && sData.chapter) ||
+        (season && season.indexOf("ANI_") !== 0 ? season : ""),
+      t: Date.now(),
+    };
+    let list = [];
+    try {
+      list = JSON.parse(localStorage.getItem(CW_KEY) || "[]");
+    } catch (_) {}
+    list = list.filter((i) => !(i.cat === cat && i.mov === mov));
+    list.unshift(entry);
+    localStorage.setItem(CW_KEY, JSON.stringify(list.slice(0, 4)));
+    window.dispatchEvent(new CustomEvent("vw-cw-updated"));
   }
 
   // Helpers
@@ -245,16 +288,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         btn.classList.toggle("active", btn.dataset.cat === category);
       });
     }
+    if (window.setRailActive) window.setRailActive(category);
 
     const clContainer = document.getElementById("changelog-container");
     if (clContainer) clContainer.style.marginTop = "20px";
   }
 
-  // Select movie (Load Player)
-  function selectMovie(key) {
+  // Select movie (Load Player) — optionally start at a season/episode
+  function selectMovie(key, startSeason, startEp) {
     mov = key;
     ep = 0;
-    season = null;
+    season =
+      startSeason && mediaData[cat]?.[key]?.[startSeason] ? startSeason : null;
     dubbed = false;
     saveState();
     document.querySelector(".dubbed-toggle")?.classList.remove("active");
@@ -302,12 +347,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     // ── Normal path ───────────────────────────────────────────────
     updateSeasonSelector();
     updateEpisodeList();
-    updateVideo(0);
+    const startIndex =
+      Number.isInteger(startEp) &&
+      startEp > 0 &&
+      (activeData()?.video || [])[startEp]
+        ? startEp
+        : 0;
+    updateVideo(startIndex);
     updateDownloads();
     if (episodeContainer) {
       episodeContainer.style.display = "flex";
       document.body.classList.add("modal-open");
-      document.body.classList.remove("app-sidebar-open"); // close sidebar if open
+      if (window.vwSettingsClose) window.vwSettingsClose(); // close settings popup if open
     }
   }
 
@@ -382,9 +433,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (spinner) spinner.style.display = "block";
     const iframe = document.getElementById("videoPlayer");
 
-    // No sandbox / referrer restrictions — embed providers (MegaPlay etc.)
-    // detect them and refuse to play. Popup blocking disabled for now.
-    iframe.removeAttribute("sandbox");
+    // pitsport.xyz sends X-Frame-Options: sameorigin, so its own pages (the
+    // "no events" fallback + /watch pages) can't be framed. Framing them just
+    // shows a blank box + console error. Detect that and show a manual
+    // open-in-new-tab panel instead of trying to embed it.
+    if (/^https?:\/\/(www\.)?pitsport\.xyz\//i.test(vids[index])) {
+      showPitsportFallback(vids[index]);
+      ep = index;
+      saveState();
+      highlightEpisode(index);
+      return;
+    }
+    clearPitsportFallback();
+
+    // PitSport's sports embeds spawn popup/redirect tabs. Sandbox them WITHOUT
+    // allow-popups / allow-top-navigation so those windows can't open, while
+    // still allowing scripts + same-origin so the player runs. Every other
+    // provider (MegaPlay etc.) detects a sandbox and refuses to play, so they
+    // stay unsandboxed.
+    if (cat === "shows" && mov === "PITSORT") {
+      iframe.setAttribute(
+        "sandbox",
+        "allow-scripts allow-same-origin allow-forms allow-presentation",
+      );
+    } else {
+      iframe.removeAttribute("sandbox");
+    }
     iframe.removeAttribute("referrerpolicy");
 
     iframe.classList.add("fade-out");
@@ -397,6 +471,47 @@ document.addEventListener("DOMContentLoaded", async () => {
     ep = index;
     saveState();
     highlightEpisode(index);
+  }
+
+  // Show a "can't embed — open externally" panel over the player. Used when
+  // PitSport has no live events (fallback) or hands back a pitsport.xyz page.
+  function showPitsportFallback(url) {
+    const iframe = document.getElementById("videoPlayer");
+    if (iframe) { iframe.src = "about:blank"; iframe.style.display = "none"; }
+    if (spinner) spinner.style.display = "none";
+    const player = document.querySelector(".player");
+    if (!player) return;
+    let box = document.getElementById("pitsportFallback");
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "pitsportFallback";
+      box.style.cssText =
+        "position:absolute;inset:0;display:flex;flex-direction:column;" +
+        "align-items:center;justify-content:center;gap:14px;text-align:center;" +
+        "background:#0d0d10;color:#eee;padding:24px;z-index:5;" +
+        'font-family:"Kanit",sans-serif;';
+      player.insertBefore(box, player.firstChild);
+    }
+    box.innerHTML =
+      '<div style="font-size:1.1rem;font-weight:600;">No live PitSport event right now</div>' +
+      '<div style="opacity:.7;max-width:420px;font-size:.9rem;">' +
+      "PitSport can't be embedded here, so it opens in a new tab. " +
+      "Check back when an event is live.</div>";
+    const a = document.createElement("a");
+    a.href = url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.className = "button";
+    a.textContent = "↗ Open PitSport Live";
+    box.appendChild(a);
+    box.style.display = "flex";
+  }
+
+  function clearPitsportFallback() {
+    const box = document.getElementById("pitsportFallback");
+    if (box) box.style.display = "none";
+    const iframe = document.getElementById("videoPlayer");
+    if (iframe) iframe.style.display = "";
   }
 
   function highlightEpisode(i) {
@@ -564,9 +679,11 @@ document.addEventListener("DOMContentLoaded", async () => {
           btn.className = "search-load-more";
           btn.textContent = `Load more (${scored.length - shown})`;
           btn.style.cssText =
-            "grid-column:1/-1;margin:16px auto;padding:9px 22px;border-radius:8px;" +
-            "background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.5);" +
-            "color:#fff;font-family:'Kanit',sans-serif;font-size:.85rem;cursor:pointer;";
+            "grid-column:1/-1;margin:16px auto;padding:9px 22px;border-radius:99px;" +
+            "background:var(--vw-chip-bg,rgba(255,255,255,.08));" +
+            "border:1px solid var(--vw-chip-border,rgba(255,255,255,.16));" +
+            "color:var(--vw-text,#eaeaea);font-size:.85rem;cursor:pointer;" +
+            "transition:background .18s ease,border-color .18s ease;";
           btn.addEventListener("click", renderChunk);
           movieList.appendChild(btn);
         }
@@ -575,37 +692,145 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 300);
   });
 
-  // Newest added: first 3 anime + first 3 shows from data
+  // Newest added: hero (featured = #1) + poster grid — first 6 streaming
+  // anime from Anikoto, then the native Virowatch anime + shows.
   function renderNewestAdded() {
     const listEl = document.getElementById("newestAddedList");
     if (!listEl) return;
     listEl.innerHTML = "";
-    const animeFirst3 = Object.entries(mediaData.anime || {})
+    const aniRecent = (
+      typeof window.anikotoRecent === "function" ? window.anikotoRecent() : []
+    )
+      .slice(0, 6)
+      .map((a) => ({
+        catKey: "anime",
+        key: "ANI_" + a.id,
+        aniId: a.id,
+        info: { title: a.title || "", image: a.poster || "" },
+      }));
+    const animeFirst = Object.entries(mediaData.anime || {})
       .filter(([, v]) => !v._hidden)
-      .slice(0, 3);
-    const showsFirst3 = Object.entries(mediaData.shows || {}).slice(0, 3);
-    [
-      ...animeFirst3.map(([k, v]) => ({ catKey: "anime", key: k, info: v })),
-      ...showsFirst3.map(([k, v]) => ({ catKey: "shows", key: k, info: v })),
-    ].forEach(({ catKey, key, info }) => {
+      .slice(0, 4);
+    const showsFirst = Object.entries(mediaData.shows || {})
+      .filter(([k]) => k !== "PITSORT")
+      .slice(0, 4);
+    const items = [
+      ...aniRecent,
+      ...animeFirst.map(([k, v]) => ({ catKey: "anime", key: k, info: v })),
+      ...showsFirst.map(([k, v]) => ({ catKey: "shows", key: k, info: v })),
+    ];
+
+    const playItem = (item) => {
+      if (item.aniId) {
+        // Anikoto title — fetch + inject episodes, then viroPlay takes over
+        window.openAnikotoById?.(item.aniId);
+        return;
+      }
+      if (heroSection) heroSection.style.display = "none";
+      if (categoryContainer) categoryContainer.style.display = "none";
+      if (movieListWrapper) movieListWrapper.style.display = "none";
+      cat = item.catKey;
+      selectMovie(item.key);
+    };
+
+    // ── Hero = newest added #1, then follows the last hovered poster ──
+    const featured = items[0];
+    const heroArt = document.getElementById("heroArt");
+    const heroTitle = document.getElementById("heroTitle");
+    const heroTags = document.getElementById("heroTags");
+    const heroWatch = document.getElementById("heroWatchBtn");
+    const heroWl = document.getElementById("heroWlBtn");
+
+    const setHero = (item) => {
+      if (!item || !heroArt || !heroTitle) return;
+      const { catKey, key, info } = item;
+      heroArt.style.backgroundImage = info.image
+        ? `url("${info.image}")`
+        : "";
+      heroTitle.textContent = info.title || key;
+      if (heroTags) {
+        heroTags.innerHTML = "";
+        const labels = [catKey === "anime" ? "Anime" : "TV Show"];
+        if (item === featured) labels.push("New");
+        labels.forEach((label) => {
+          const tag = document.createElement("span");
+          tag.className = "tag";
+          tag.textContent = label;
+          heroTags.appendChild(tag);
+        });
+      }
+      if (heroWatch) heroWatch.onclick = () => playItem(item);
+      if (heroWl) {
+        heroWl.dataset.key = key;
+        const syncWl = () => {
+          heroWl.textContent = window.vwlHas?.(key)
+            ? "✓ In watchlist"
+            : "+ Watchlist";
+        };
+        syncWl();
+        heroWl.onclick = () => {
+          const payload = {
+            key,
+            title: info.title || key,
+            image: info.image || "",
+            cat: catKey,
+          };
+          if (item.aniId) payload.aniId = Number(item.aniId);
+          window.vwlToggle?.(payload);
+          syncWl();
+        };
+      }
+    };
+    if (featured) setHero(featured);
+
+    // ── Poster grid ──
+    items.forEach((item, idx) => {
+      const { catKey, key, info } = item;
       const div = document.createElement("div");
-      div.className = "newest-added-item";
-      div.dataset.cat = catKey; // drives the CSS ::before badge
-      div.innerHTML = `<img src="${info.image || "https://via.placeholder.com/150"}" loading="lazy" alt=""><span>${info.title || key}</span>`;
-      div.addEventListener("click", () => {
-        if (heroSection) heroSection.style.display = "none";
-        if (categoryContainer) categoryContainer.style.display = "none";
-        if (movieListWrapper) movieListWrapper.style.display = "none";
-        cat = catKey;
-        selectMovie(key);
+      div.className = "poster";
+      if (item.aniId) {
+        div.dataset.aniId = String(item.aniId); // watchlist button reads this
+      } else {
+        div.dataset.cat = catKey;
+        div.dataset.movie = key;
+      }
+
+      const img = document.createElement("img");
+      img.src = info.image || "https://via.placeholder.com/150";
+      img.loading = "lazy";
+      img.alt = "";
+
+      const badge = document.createElement("span");
+      badge.className = "badge";
+      badge.textContent =
+        idx === 0 ? "NEW" : catKey === "anime" ? "ANIME" : "TV";
+
+      const title = document.createElement("span");
+      title.className = "title";
+      title.textContent = info.title || key;
+
+      div.appendChild(img);
+      div.appendChild(badge);
+      div.appendChild(title);
+      // Same +/✓ button as the movie grid (watchlist.js owns look + state).
+      window.vwlAttachButton?.(div);
+      div.addEventListener("click", () => playItem(item));
+      // Hero follows the last hovered poster (140ms intent so sweeping
+      // across the row doesn't strobe the banner)
+      let heroTid;
+      div.addEventListener("mouseenter", () => {
+        heroTid = setTimeout(() => setHero(item), 140);
       });
+      div.addEventListener("mouseleave", () => clearTimeout(heroTid));
       listEl.appendChild(div);
     });
   }
   renderNewestAdded();
+  // Re-render once the Anikoto first page arrives (it loads async)
+  window.addEventListener("anikoto-recent", renderNewestAdded);
 
-  // Category Nav Bar button clicks
-  document.querySelectorAll(".cat-nav-btn").forEach((btn) => {
+  // Category Nav Bar + rail button clicks
+  document.querySelectorAll(".cat-nav-btn, .rail-item[data-cat]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const c = btn.dataset.cat;
       if (!c) return;
@@ -728,6 +953,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (npt) npt.textContent = "";
     const clearBtn = document.getElementById("searchClear");
     if (clearBtn) clearBtn.style.display = "none";
+    if (window.setRailActive) window.setRailActive("home");
   }
 
   // Render Changelogs
@@ -836,4 +1062,50 @@ document.addEventListener("DOMContentLoaded", async () => {
     selectMovie(key);
     return true;
   };
+
+  // Resume a title at a specific season/episode (rail Continue watching +
+  // the live-sports strip use this).
+  window.viroResume = async function (catKey, key, seasonKey, epIndex, dub) {
+    if (
+      catKey === "anime" &&
+      typeof key === "string" &&
+      key.indexOf("ANI_") === 0 &&
+      !mediaData.anime?.[key]
+    ) {
+      // Anikoto entry not injected yet — fetch it (this also starts playback)
+      if (typeof window.openAnikotoById !== "function") return false;
+      const ok = await window.openAnikotoById(key.slice(4));
+      if (!ok) return false;
+    } else {
+      if (
+        catKey === "lunora" &&
+        window.lunoraLoader &&
+        !window.lunoraLoader.isLoaded()
+      ) {
+        try {
+          const data = await window.lunoraLoader.load();
+          mediaData.lunora = data;
+        } catch (_) {
+          return false;
+        }
+      }
+      if (!mediaData[catKey] || !mediaData[catKey][key]) return false;
+      cat = catKey;
+      renderList(catKey);
+    }
+    cat = catKey;
+    selectMovie(key, seasonKey, epIndex);
+    if (dub) {
+      dubbed = true;
+      document.querySelector(".dubbed-toggle")?.classList.add("active");
+      updateEpisodeList();
+      updateVideo(ep);
+      updateDownloads();
+      saveState();
+    }
+    return true;
+  };
+
+  // Rail "Home" / brand clicks land here (virohome.js)
+  window.viroHome = resetView;
 });
