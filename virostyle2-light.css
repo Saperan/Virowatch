@@ -33,227 +33,8 @@ body {
     background: #e8e8e8;
 }
 
-.container,
 .episode-container {
     overflow: visible;
-}
-.container {
-    max-width: auto;
-    margin: auto;
-    padding: 20px;
-}
-
-header {
-    text-align: center;
-    margin-bottom: 20px;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    background: rgba(245, 245, 245, 0.97);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding-top: 10px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    margin-left: -20px;
-    margin-right: -20px;
-    padding-left: 20px;
-    padding-right: 20px;
-}
-header h1 {
-    font-size: 2.5rem;
-    font-weight: 300;
-    color: #1a1a1a;
-}
-header img {
-    vertical-align: middle;
-}
-
-.search-box {
-    display: flex;
-    justify-content: center;
-    margin-top: 10px;
-}
-.search-input-wrap {
-    position: relative;
-    width: 80%;
-    max-width: 500px;
-}
-.search-input-wrap input,
-.search-box input {
-    background-color: #fff;
-    color: #222;
-    border: 1px solid #ddd;
-    padding: 12px 36px 12px 20px;
-    border-radius: 6px;
-    width: 100%;
-    font-size: 1rem;
-}
-.search-clear-btn {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: rgba(0, 0, 0, 0.3);
-    font-size: 1.3rem;
-    line-height: 1;
-    cursor: pointer;
-    padding: 2px 4px;
-    display: none;
-    transition: color 0.2s;
-    -webkit-tap-highlight-color: transparent;
-}
-.search-clear-btn:hover {
-    color: rgba(0, 0, 0, 0.7);
-}
-
-#hero {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 16px;
-    width: 100%;
-}
-
-.newest-added {
-    margin-bottom: 16px;
-}
-.newest-added-title {
-    font-family: inherit;
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: rgba(0, 0, 0, 0.75);
-    margin-bottom: 8px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-.newest-added-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    width: 100%;
-    max-width: 320px;
-}
-.newest-added-item {
-    display: flex;
-    align-items: center;
-    padding: 10px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    background: #fff;
-    border: 1px solid #eee;
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
-}
-.newest-added-item:hover {
-    background: #f8f8f8;
-    border-color: #ddd;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-}
-.newest-added-item img {
-    display: none;
-}
-.newest-added-item span {
-    font-family: inherit;
-    position: static;
-    padding: 0;
-    background: none;
-    color: #333;
-    font-size: 0.9rem;
-    font-weight: 500;
-    line-height: 1.3;
-}
-
-.categories-section {
-    margin-bottom: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-}
-.categories-title {
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: rgba(0, 0, 0, 0.75);
-    margin-bottom: 8px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-.category-cards {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px;
-    width: 100%;
-    max-width: 360px;
-}
-.movie-item-banner.category-card {
-    flex: 1 1 100px;
-    max-width: 110px;
-    position: relative;
-    border-radius: 10px;
-    overflow: hidden;
-    cursor: pointer;
-    border: 1px solid #e0e0e0;
-    background: #fff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        border-color 0.2s ease;
-}
-.movie-item-banner.category-card:hover {
-    transform: scale(1.03);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-    border-color: #ccc;
-}
-.movie-item-banner.category-card img {
-    width: 100%;
-    height: 80px;
-    object-fit: cover;
-    display: block;
-}
-.movie-item-banner.category-card .category-card-link {
-    display: block;
-}
-.movie-item-banner.category-card .category-card-link:focus {
-    outline: none;
-}
-.movie-item-banner.category-card[data-category="movies"]
-    .category-card-link--full {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-}
-.movie-item-banner.category-card[data-category="movies"]
-    .category-card-link--full
-    .category-card-label,
-.movie-item-banner.category-card .category-card-label,
-.movie-item-banner.category-card p {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    margin: 0;
-    padding: 10px 8px;
-    box-sizing: border-box;
-    background: linear-gradient(
-        to top,
-        rgba(0, 0, 0, 0.9) 0%,
-        transparent 100%
-    );
-    color: #fff;
-    font-size: 0.8rem;
-    font-weight: 500;
-    text-align: left;
 }
 
 /* === Category Nav Bar === */
@@ -342,37 +123,6 @@ header img {
     border-radius: 0 0 12px 12px;
     backdrop-filter: blur(3px);
     border-top: 1px solid #eee;
-}
-
-.seasons-dropdown {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    white-space: nowrap;
-    padding: 8px 12px;
-    background: #e8e8e8;
-    border-radius: 8px;
-    max-width: 100%;
-    scrollbar-width: thin;
-}
-.seasons-dropdown button {
-    flex: 0 0 auto;
-    padding: 8px 14px;
-    border: none;
-    border-radius: 6px;
-    background: #fff;
-    color: #333;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    border: 1px solid #ddd;
-}
-.seasons-dropdown button.active {
-    background: #ddd;
-    color: #1a1a1a;
-}
-.seasons-dropdown button:hover {
-    background: #f5f5f5;
 }
 
 /* === Episode Modal (fullscreen overlay) === */
@@ -553,33 +303,6 @@ iframe#videoPlayer {
     width: 100%;
 }
 
-.changelog-container {
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    padding: 10px;
-    max-height: 150px;
-    overflow-y: auto;
-    width: 100%;
-    margin-top: 20px;
-}
-.changelog-box {
-    background: #f5f5f5;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #eee;
-}
-.changelog-box h3 {
-    color: #1a1a1a;
-    font-weight: 500;
-    margin-bottom: 5px;
-}
-.changelog-box p {
-    color: #555;
-    font-size: 0.9rem;
-}
-
 .fade-out {
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -690,7 +413,6 @@ h6 {
 }
 
 .movie-item,
-.movie-item-banner,
 .button,
 .episode,
 #seasonSelector {
@@ -712,21 +434,3 @@ h6 {
    These replace the inline styles removed from the HTML
    ===================================================== */
 
-/* .site-title replaces style="cursor: pointer;" on <h1> */
-.site-title {
-    cursor: pointer;
-    text-align: center;
-}
-
-/* .site-title-icon-link replaces bare <a> wrapper */
-.site-title-icon-link {
-    display: inline;
-    text-decoration: none;
-}
-
-/* .site-title-icon replaces width="60" height="60" style="vertical-align: bottom;" on <img> */
-.site-title-icon {
-    width: 60px;
-    height: 60px;
-    vertical-align: bottom;
-}
