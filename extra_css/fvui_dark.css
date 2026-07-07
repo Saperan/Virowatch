@@ -70,186 +70,7 @@ body {
 ::-webkit-scrollbar-thumb { background: rgba(var(--color3), 0.4); border-radius: 3px; }
 ::-webkit-scrollbar-track { background: var(--opacity02); }
 
-.container, .episode-container { overflow: visible; }
-.container { max-width: auto; margin: auto; padding: 20px; }
-
-/* ── Header ────────────────────────────────────────────────────── */
-header {
-  text-align: center;
-  margin-bottom: 20px;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: rgba(var(--color2), 0.82);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  padding-top: 14px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(var(--color3), 0.15);
-  margin-left: -20px;
-  margin-right: -20px;
-  padding-left: 20px;
-  padding-right: 20px;
-}
-header h1 {
-  font-family: 'Anurati', sans-serif;
-  font-size: 2.3rem;
-  letter-spacing: 4px;
-  color: #fff;
-  text-shadow: var(--glow01);
-}
-header img { vertical-align: middle; }
-
-/* ── Search ────────────────────────────────────────────────────── */
-.search-box {
-  display: flex;
-  justify-content: center;
-  margin-top: 10px;
-}
-.search-input-wrap {
-  position: relative;
-  width: 80%;
-  max-width: 500px;
-}
-.search-input-wrap input,
-.search-box input {
-  background-color: var(--opacity02a);
-  color: #fff;
-  border: 1px solid rgba(var(--color3), 0.2);
-  padding: 12px 36px 12px 20px;
-  border-radius: 20px;
-  width: 100%;
-  font-size: 0.95rem;
-  backdrop-filter: blur(10px);
-  transition: all 0.3s;
-}
-.search-box input:focus {
-  outline: none;
-  border-color: var(--color03);
-  box-shadow: var(--glow01);
-}
-.search-clear-btn {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: rgba(255,255,255,0.3);
-  font-size: 1.2rem;
-  cursor: pointer;
-  display: none;
-}
-
-#hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 40px;
-  width: 100%;
-}
-
-/* ── Newest Added ──────────────────────────────────────────────── */
-.newest-added {
-  margin-bottom: 28px;
-  width: 100%;
-  max-width: 640px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.newest-added-title {
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--text01);
-  margin-bottom: 12px;
-}
-.newest-added-grid {
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: center;
-  gap: 12px;
-  width: 100%;
-}
-.newest-added-item {
-  flex: 0 0 100px;
-  position: relative;
-  border-radius: 10px;
-  overflow: hidden;
-  cursor: pointer;
-  aspect-ratio: 2/3;
-  max-height: 150px;
-  border: 1px solid rgba(var(--color3), 0.15);
-  box-shadow: var(--glow03-soft);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.newest-added-item:hover {
-  transform: scale(1.05);
-  border-color: var(--color03);
-  box-shadow: var(--glow01);
-}
-.newest-added-item img { width: 100%; height: 100%; object-fit: cover; }
-.newest-added-item span {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  padding: 8px 6px;
-  background: rgba(var(--color2), 0.9);
-  color: #fff; font-size: 0.72rem;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-
-/* ── Categories ────────────────────────────────────────────────── */
-.categories-section {
-  margin-bottom: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-.categories-title {
-  font-size: 1.2rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #fff;
-  margin-bottom: 24px;
-}
-.category-cards {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 25px;
-  width: 100%;
-}
-.movie-item-banner.category-card {
-  flex: 1 1 280px;
-  max-width: 350px;
-  position: relative;
-  border-radius: 16px;
-  overflow: hidden;
-  cursor: pointer;
-  border: 1px solid rgba(var(--color1), 0.5);
-  background: linear-gradient(135deg, var(--opacity02), var(--opacity01b));
-  backdrop-filter: blur(12px);
-  box-shadow: var(--glow03-soft);
-  transition: all 0.3s ease;
-}
-.movie-item-banner.category-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(var(--color3), 0.4);
-  box-shadow: var(--glow02);
-}
-.movie-item-banner.category-card img { width: 100%; height: 180px; object-fit: cover; }
-.movie-item-banner.category-card .category-card-link { display: block; }
-.movie-item-banner.category-card[data-category="movies"] .category-card-link--full { position: absolute; inset: 0; z-index: 1; }
-.movie-item-banner.category-card[data-category="movies"] .category-card-link--full .category-card-label,
-.movie-item-banner .category-card-label,
-.movie-item-banner p {
-  position: absolute; bottom: 0; left: 0; width: 100%; margin: 0;
-  padding: 16px;
-  background: linear-gradient(to top, rgba(var(--color2), 0.95) 0%, transparent 100%);
-  color: #fff; font-size: 1.05rem;
-}
+.episode-container { overflow: visible; }
 
 /* ── Category Nav Bar ──────────────────────────────────────────── */
 .category-nav-bar {
@@ -289,17 +110,6 @@ header img { vertical-align: middle; }
   font-size: 0.85rem; color: #eee; text-align: center; padding: 8px 4px;
   backdrop-filter: blur(4px);
 }
-
-/* ── Seasons Dropdown ──────────────────────────────────────────── */
-.seasons-dropdown {
-  display: flex; gap: 8px; overflow-x: auto; padding: 8px;
-  background: var(--opacity02a); border-radius: 10px; border: 1px solid rgba(var(--color1), 0.5);
-}
-.seasons-dropdown button {
-  padding: 6px 14px; border: none; border-radius: 6px;
-  background: var(--opacity01b); color: #eee; cursor: pointer; transition: background 0.2s;
-}
-.seasons-dropdown button.active { background: rgba(var(--color3), 0.3); color: #fff; border: 1px solid var(--color03); }
 
 /* ── Episode Modal ─────────────────────────────────────────────── */
 .episode-container {
@@ -349,10 +159,6 @@ iframe#videoPlayer { flex: 1; width: 100%; border: none; }
 .button.dubbed-toggle.active { background: rgba(var(--color4), 0.6); box-shadow: var(--glow02); }
 
 #downloadContainer { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 15px; }
-.changelog-container { background: var(--opacity02a); border: 1px solid rgba(var(--color1), 0.5); border-radius: 12px; padding: 14px; max-height: 250px; overflow-y: auto; margin-top: 40px; }
-.changelog-box { background: var(--opacity01c); padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(var(--color1), 0.3); }
-.changelog-box h3 { color: #fff; font-size: 0.95rem; }
-.changelog-box p { color: var(--text01); font-size: 0.85rem; }
 
 .fade-out { opacity: 0; transition: opacity 0.3s; }
 .fade-transition { opacity: 0; transition: opacity 0.3s; }
@@ -369,7 +175,12 @@ iframe#videoPlayer { flex: 1; width: 100%; border: none; }
 }
 #seasonSelector:hover, #seasonSelector:focus { border-color: var(--color03); outline: none; box-shadow: var(--glow01); }
 
-.player, .sidebar, .movie-item, .movie-item-banner, .button, .episode, #seasonSelector {
+.player,
+.sidebar,
+.movie-item,
+.button,
+.episode,
+#seasonSelector {
   opacity: 0; animation: fvui-appear 0.65s ease-out forwards;
 }
 
@@ -379,6 +190,23 @@ iframe#videoPlayer { flex: 1; width: 100%; border: none; }
   .sidebar { width: 100%; border-left: none; border-top: 1px solid rgba(var(--color1), 0.4); max-height: 180px; }
 }
 
-.site-title { cursor: pointer; text-align: center; }
-.site-title-icon-link { display: inline; text-decoration: none; }
-.site-title-icon { width: 60px; height: 60px; vertical-align: bottom; }
+/* ── Virowatch 3a home tokens (rail/header/hero — see virohome.css) ── */
+html[data-vw-theme][data-vw-theme] {
+    --vw-bg: rgb(9, 18, 24);
+    --vw-bg-rgb: 9, 18, 24;
+    --vw-panel: rgba(30, 40, 50, 0.9);
+    --vw-panel-2: rgb(6, 13, 18);
+    --vw-text: rgb(200, 205, 210);
+    --vw-text-strong: #ffffff;
+    --vw-icon: rgba(174, 174, 174, 0.85);
+    --vw-muted: rgb(130, 138, 145);
+    --vw-muted-2: rgb(107, 107, 107);
+    --vw-border: rgba(35, 120, 200, 0.18);
+    --vw-border-strong: rgba(35, 120, 200, 0.35);
+    --vw-active-border: rgb(35, 120, 200);
+    --vw-accent-bg: rgb(35, 120, 200);
+    --vw-accent-fg: #fff;
+    --vw-glow: rgba(35, 120, 200, 0.35);
+    --vw-glow-strong: rgba(35, 120, 200, 0.6);
+    --vw-input-border-focus: rgb(35, 120, 200);
+}
