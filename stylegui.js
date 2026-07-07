@@ -1,12 +1,13 @@
 /**
- * Virowatch Style GUI — v3.0 (Synced Integration)
- * Slides in from the right as a panel mirroring the left sidebar.
- * Add your "extra css/" files to STYLES below.
+ * Virowatch Style GUI — v4.0 (Settings popup integration)
+ * Renders the searchable style list into #sgGrid inside the #vwSettings
+ * popup (sidebar.js owns open/close). Add "extra css/" files to STYLES.
  */
 (function () {
   'use strict';
 
   var STYLES = [
+    { name: 'Auto', description: 'Follows your screen size — desktop or mobile dark.', file: 'auto' },
     { name: 'Desktop Dark', description: 'Default dark theme for widescreen.', file: 'virostyle.css' },
     { name: 'Desktop Light', description: 'Blindingly bright desktop theme.', file: 'virostyle-light.css' },
     { name: 'Mobile Dark', description: 'Mobile version', file: 'virostyle2.css' },
@@ -22,7 +23,7 @@
   ];
 
   /* ─────────────────────────────────────────────────────────────────
-     STATE (Unified with 'theme' local storage)
+     STATE (unified with the 'theme' localStorage key)
   ───────────────────────────────────────────────────────────────── */
   var keyToBuiltin = {
     'desktop-dark':  'virostyle.css',
@@ -30,111 +31,42 @@
     'mobile-dark':   'virostyle2.css',
     'mobile-light':  'virostyle2-light.css'
   };
+  var builtinToKey = {
+    'virostyle.css':        'desktop-dark',
+    'virostyle-light.css':  'desktop-light',
+    'virostyle2.css':       'mobile-dark',
+    'virostyle2-light.css': 'mobile-light'
+  };
 
-  var savedTheme = localStorage.getItem('theme') || 'auto';
-  var currentFile = null;
-  
-  if (savedTheme === 'auto') {
-     var w = window.innerWidth, h = window.innerHeight;
-     currentFile = (w <= 768 || (w / h) <= (9 / 16)) ? 'virostyle2.css' : 'virostyle.css';
-  } else {
-     currentFile = keyToBuiltin[savedTheme] || savedTheme;
-  }
-
+  var currentKey  = localStorage.getItem('theme') || 'auto';
   var hoverLink   = null;
   var hoverTimer  = null;
   var searchQuery = '';
+
+  function autoFile() {
+    var w = window.innerWidth, h = window.innerHeight;
+    return (w <= 768 || (w / h) <= (9 / 16)) ? 'virostyle2.css' : 'virostyle.css';
+  }
+  function resolveFile(file) { return file === 'auto' ? autoFile() : file; }
+  function isActive(style) {
+    if (style.file === 'auto') return currentKey === 'auto';
+    if (currentKey === 'auto') return false;
+    return (keyToBuiltin[currentKey] || currentKey) === style.file;
+  }
 
   /* ─────────────────────────────────────────────────────────────────
      BOOT
   ───────────────────────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
-    buildPanel();
-    bindEvents();
-    renderList();
-  });
-
-  /* ─────────────────────────────────────────────────────────────────
-     BUILD PANEL HTML
-  ───────────────────────────────────────────────────────────────── */
-  function buildPanel() {
-    var overlay = document.getElementById('styleGuiOverlay');
-    if (!overlay) return;
-
-    overlay.innerHTML =
-      '<div class="sg-modal">' +
-        '<div class="sg-header">' +
-          '<div class="sg-header-left">' +
-            '<span class="sg-header-icon">🎨</span>' +
-            '<span class="sg-header-title">Styles</span>' +
-          '</div>' +
-          '<button class="sg-close-btn" id="sgCloseBtn" aria-label="Close">×</button>' +
-        '</div>' +
-        '<div class="sg-toolbar">' +
-          '<div class="sg-search-wrap">' +
-            '<svg class="sg-search-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-              '<circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.6"/>' +
-              '<line x1="13" y1="13" x2="16.5" y2="16.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>' +
-            '</svg>' +
-            '<input type="text" id="sgSearch" class="sg-search" placeholder="Search styles…" autocomplete="off" spellcheck="false">' +
-          '</div>' +
-        '</div>' +
-        '<div class="sg-grid" id="sgGrid"></div>' +
-      '</div>';
-  }
-
-  /* ─────────────────────────────────────────────────────────────────
-     EVENTS
-  ───────────────────────────────────────────────────────────────── */
-  function bindEvents() {
-    var openBtn = document.getElementById('openStyleGuiBtn');
-    if (openBtn) openBtn.addEventListener('click', openPanel);
-
-    document.addEventListener('click', function (e) {
-      if (e.target.id === 'sgCloseBtn') { closePanel(); return; }
-      var overlay = document.getElementById('styleGuiOverlay');
-      if (!overlay || !overlay.classList.contains('sg-active')) return;
-      if (!overlay.contains(e.target) && e.target.id !== 'openStyleGuiBtn') {
-        closePanel();
-      }
-    });
-
-    document.addEventListener('input', function (e) {
-      if (e.target.id === 'sgSearch') {
-        searchQuery = e.target.value.toLowerCase().trim();
+    var search = document.getElementById('sgSearch');
+    if (search) {
+      search.addEventListener('input', function () {
+        searchQuery = search.value.toLowerCase().trim();
         renderList();
-      }
-    });
-
-    /* SYNC FROM SIDEBAR: If user uses the left sidebar dropdown */
-    var sel = document.getElementById('app-sidebar-theme-select');
-    if (sel) {
-      sel.addEventListener('change', function(e) {
-        var val = e.target.value;
-        if (val === 'auto') {
-           var w = window.innerWidth, h = window.innerHeight;
-           currentFile = (w <= 768 || (w / h) <= (9 / 16)) ? 'virostyle2.css' : 'virostyle.css';
-        } else {
-           currentFile = keyToBuiltin[val] || val;
-        }
-        document.querySelectorAll('.sg-card').forEach(function (c) {
-          c.classList.toggle('sg-card--active', c.dataset.file === currentFile);
-        });
       });
     }
-  }
-
-function openPanel(e) {
-  if (e) e.stopPropagation(); // Prevents the background from "stealing" the click
-  var overlay = document.getElementById('styleGuiOverlay');
-  if (overlay) overlay.classList.add('sg-active');
-}
-
-  function closePanel() {
-    var overlay = document.getElementById('styleGuiOverlay');
-    if (overlay) overlay.classList.remove('sg-active');
-    clearHover();
-  }
+    renderList();
+  });
 
   /* ─────────────────────────────────────────────────────────────────
      RENDER LIST
@@ -164,9 +96,8 @@ function openPanel(e) {
      BUILD CARD
   ───────────────────────────────────────────────────────────────── */
   function buildCard(style) {
-    var isActive = (currentFile === style.file);
     var card = document.createElement('div');
-    card.className = 'sg-card' + (isActive ? ' sg-card--active' : '');
+    card.className = 'sg-card' + (isActive(style) ? ' sg-card--active' : '');
     card.dataset.file = style.file;
 
     card.innerHTML =
@@ -174,16 +105,17 @@ function openPanel(e) {
         '<div class="sg-card-name">' + esc(style.name) + '</div>' +
         (style.description ? '<div class="sg-card-desc">' + esc(style.description) + '</div>' : '') +
         '<div class="sg-card-actions">' +
-          '<button class="sg-btn sg-btn-apply">Apply</button>' +
-          '<button class="sg-btn sg-btn-download">↓ CSS</button>' +
+          '<button class="sg-btn sg-btn-apply" type="button">Apply</button>' +
+          (style.file !== 'auto'
+            ? '<button class="sg-btn sg-btn-download" type="button">↓ CSS</button>'
+            : '') +
         '</div>' +
       '</div>';
 
     card.addEventListener('mouseenter', function () {
-      hoverTimer = setTimeout(function () { previewHover(style.file); }, 220);
+      hoverTimer = setTimeout(function () { previewHover(resolveFile(style.file)); }, 220);
     });
     card.addEventListener('mouseleave', function () {
-      clearTimeout(hoverTimer);
       clearHover();
     });
 
@@ -192,16 +124,19 @@ function openPanel(e) {
       applyStyle(style);
     });
 
-    card.querySelector('.sg-btn-download').addEventListener('click', function (e) {
-      e.stopPropagation();
-      downloadStyle(style);
-    });
+    var dl = card.querySelector('.sg-btn-download');
+    if (dl) {
+      dl.addEventListener('click', function (e) {
+        e.stopPropagation();
+        downloadStyle(style);
+      });
+    }
 
     return card;
   }
 
   /* ─────────────────────────────────────────────────────────────────
-     HOVER PREVIEW 
+     HOVER PREVIEW
   ───────────────────────────────────────────────────────────────── */
   function previewHover(file) {
     if (!hoverLink) {
@@ -222,44 +157,21 @@ function openPanel(e) {
   }
 
   /* ─────────────────────────────────────────────────────────────────
-     APPLY STYLE (And Sync with Sidebar)
+     APPLY STYLE
   ───────────────────────────────────────────────────────────────── */
   function applyStyle(style) {
+    var href = resolveFile(style.file);
     var themeLink = document.getElementById('themeStylesheet');
-    if (themeLink) themeLink.href = style.file;
+    if (themeLink) themeLink.href = href;
+    // Home UI (virohome.css) picks light/dark tokens from this attribute
+    document.documentElement.setAttribute('data-vw-theme', href);
 
-    var builtins = {
-      'virostyle.css':        'desktop-dark',
-      'virostyle-light.css':  'desktop-light',
-      'virostyle2.css':       'mobile-dark',
-      'virostyle2-light.css': 'mobile-light'
-    };
+    currentKey = style.file === 'auto'
+      ? 'auto'
+      : (builtinToKey[style.file] || style.file);
+    localStorage.setItem('theme', currentKey);
 
-    var themeVal = builtins[style.file] || style.file;
-    localStorage.setItem('theme', themeVal);
-    currentFile = style.file;
-
-    /* SYNC TO SIDEBAR */
-    var sel = document.getElementById('app-sidebar-theme-select');
-    if (sel) {
-      if (builtins[style.file]) {
-        sel.value = builtins[style.file];
-      } else {
-        // If it's a custom extra CSS file, dynamically add an option so the select box shows it properly.
-        var customOpt = Array.from(sel.options).find(function(o) { 
-          return !['auto','desktop-dark','desktop-light','mobile-dark','mobile-light'].includes(o.value); 
-        });
-        if (!customOpt) {
-          customOpt = document.createElement('option');
-          sel.appendChild(customOpt);
-        }
-        customOpt.value = style.file;
-        customOpt.textContent = style.name + ' (Custom)';
-        sel.value = style.file;
-      }
-    }
-
-    /* Update card states */
+    clearHover();
     document.querySelectorAll('.sg-card').forEach(function (c) {
       c.classList.toggle('sg-card--active', c.dataset.file === style.file);
     });
@@ -267,32 +179,31 @@ function openPanel(e) {
     toast('Applied: ' + style.name);
   }
 
-/* ─────────────────────────────────────────────────────────────────
-     DOWNLOAD STYLE (Enhanced Fallback)
+  /* ─────────────────────────────────────────────────────────────────
+     DOWNLOAD STYLE (scrapes the loaded sheet; needs it applied once)
   ───────────────────────────────────────────────────────────────── */
-function downloadStyle(style) {
-    let cssText = '';
+  function downloadStyle(style) {
+    var cssText = '';
 
     try {
-      // 1. Try to find the stylesheet in the document's loaded styles
-      const sheets = Array.from(document.styleSheets);
-      const targetSheet = sheets.find(s => s.href && s.href.includes(style.file));
-
+      var sheets = Array.prototype.slice.call(document.styleSheets);
+      var targetSheet = sheets.find(function (s) {
+        return s.href && s.href.includes(style.file);
+      });
       if (targetSheet && targetSheet.cssRules) {
-        cssText = Array.from(targetSheet.cssRules)
-          .map(rule => rule.cssText)
-          .join('\n');
+        cssText = Array.prototype.map.call(targetSheet.cssRules, function (rule) {
+          return rule.cssText;
+        }).join('\n');
       }
     } catch (e) {
-      console.warn("Could not scrape CSS rules due to browser security.");
+      console.warn('Could not scrape CSS rules due to browser security.');
     }
 
-    // 2. If we got the text, download it locally
     if (cssText) {
-      const blob = new Blob([cssText], { type: 'text/css' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
+      var blob = new Blob([cssText], { type: 'text/css' });
+      var url  = URL.createObjectURL(blob);
+      var a    = document.createElement('a');
+      a.href     = url;
       a.download = style.file.split('/').pop();
       document.body.appendChild(a);
       a.click();
@@ -300,22 +211,8 @@ function downloadStyle(style) {
       URL.revokeObjectURL(url);
       toast('Downloaded ' + a.download);
     } else {
-      // 3. Last resort: tell user to apply it first or use a server
       toast('Apply the style first to download, or use a local server.', true);
     }
-  }
-
-  function triggerDownload(text, filename) {
-    var blob = new Blob([text], { type: 'text/css' });
-    var url  = URL.createObjectURL(blob);
-    var a    = document.createElement('a');
-    a.href     = url;
-    a.download = filename.split('/').pop();
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast('Downloaded ' + a.download);
   }
 
   /* ─────────────────────────────────────────────────────────────────
@@ -341,10 +238,5 @@ function downloadStyle(style) {
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
-  }
-
-// Trigger the sync to the sidebar
-  if (window.syncThemeDropdown) {
-    window.syncThemeDropdown(STYLES);
   }
 })();
