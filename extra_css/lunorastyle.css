@@ -53,183 +53,42 @@ body {
 ::-webkit-scrollbar-thumb { background-color: var(--lunora-purple); border-radius: 4px; }
 ::-webkit-scrollbar-track { background-color: var(--lunora-bg-panel); }
 
-.container, .episode-container { overflow: visible; }
-.container { max-width: auto; margin: auto; padding: 20px; }
+.episode-container { overflow: visible; }
 
-/* ── Header ────────────────────────────────────────────────────── */
-header {
-  text-align: center;
-  margin-bottom: 20px;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: rgba(31, 41, 55, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  padding-top: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--lunora-border);
-  margin-left: -20px;
-  margin-right: -20px;
-  padding-left: 20px;
-  padding-right: 20px;
-}
-header h1 {
-  font-size: 2.5rem;
-  font-weight: 300;
-  color: white;
-}
-header img { vertical-align: middle; }
 
-/* ── Search ────────────────────────────────────────────────────── */
-.search-box {
-  display: flex;
-  justify-content: center;
-  margin-top: 10px;
-}
-.search-input-wrap {
-  position: relative;
-  width: 80%;
-  max-width: 500px;
-}
-.search-input-wrap input,
-.search-box input {
-  background-color: var(--lunora-bg-panel);
-  color: #fff;
-  border: 1px solid var(--lunora-bg-surface);
-  padding: 12px 36px 12px 20px;
-  border-radius: 8px;
-  width: 100%;
-  font-size: 1rem;
-  transition: all 0.25s;
-}
-.search-box input:focus {
-  border-color: var(--lunora-purple);
-  outline: none;
-  box-shadow: 0 0 8px var(--lunora-glow);
-}
-.search-clear-btn {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: var(--lunora-text-muted);
-  font-size: 1.3rem;
-  cursor: pointer;
-  display: none;
-}
 
-#hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 40px;
-  width: 100%;
-}
 
-/* ── Newest Added ──────────────────────────────────────────────── */
-.newest-added {
-  margin-bottom: 28px;
-  width: 100%;
-  max-width: 640px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.newest-added-title {
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--lunora-pink);
-  margin-bottom: 10px;
-}
-.newest-added-grid {
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-}
-.newest-added-item {
-  flex: 0 0 100px;
-  position: relative;
-  border-radius: 8px;
-  overflow: hidden;
-  cursor: pointer;
-  aspect-ratio: 2/3;
-  max-height: 150px;
-  border: 1px solid var(--lunora-border);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  transition: all 0.2s ease;
-}
-.newest-added-item:hover {
-  transform: scale(1.05);
-  border-color: var(--lunora-pink);
-  box-shadow: 0 0 10px var(--lunora-glow);
-}
-.newest-added-item img { width: 100%; height: 100%; object-fit: cover; }
-.newest-added-item span {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  padding: 12px 6px 6px;
-  background: linear-gradient(to top, rgba(17,24,39,0.95) 0%, transparent 100%);
-  color: #fff; font-size: 0.7rem;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
 
-/* ── Categories ────────────────────────────────────────────────── */
-.categories-section {
-  margin-bottom: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-.categories-title {
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #fff;
-  margin-bottom: 24px;
-}
-.category-cards {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 25px;
-  width: 100%;
-}
-.movie-item-banner.category-card {
-  flex: 1 1 280px;
-  max-width: 350px;
-  position: relative;
-  border-radius: 16px;
-  overflow: hidden;
-  cursor: pointer;
-  border: 1px solid var(--lunora-border);
-  background: var(--lunora-bg-panel);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-  transition: all 0.3s ease;
-}
-.movie-item-banner.category-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--lunora-purple);
-  box-shadow: 0 8px 24px rgba(124,58,237,0.25);
-}
-.movie-item-banner.category-card img { width: 100%; height: 200px; object-fit: cover; }
-.movie-item-banner.category-card .category-card-link { display: block; }
-.movie-item-banner.category-card[data-category="movies"] .category-card-link--full { position: absolute; inset: 0; z-index: 1; }
-.movie-item-banner.category-card[data-category="movies"] .category-card-link--full .category-card-label,
-.movie-item-banner .category-card-label,
-.movie-item-banner p {
-  position: absolute; bottom: 0; left: 0; width: 100%; margin: 0;
-  padding: 20px 16px;
-  background: linear-gradient(to top, rgba(17,24,39,0.95) 0%, transparent 100%);
-  color: #fff; font-size: 1.1rem; font-weight: 500;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* ── Category Nav Bar ──────────────────────────────────────────── */
 .category-nav-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -268,16 +127,10 @@ header img { vertical-align: middle; }
   backdrop-filter: blur(4px);
 }
 
-/* ── Seasons Dropdown ──────────────────────────────────────────── */
-.seasons-dropdown {
-  display: flex; gap: 10px; overflow-x: auto; padding: 8px 12px;
-  background: var(--lunora-bg-panel); border-radius: 8px; border: 1px solid var(--lunora-border);
-}
-.seasons-dropdown button {
-  padding: 8px 14px; border: none; border-radius: 6px;
-  background: var(--lunora-bg-surface); color: #eee; cursor: pointer; transition: background 0.2s;
-}
-.seasons-dropdown button.active { background: var(--lunora-purple); color: #fff; box-shadow: 0 0 8px var(--lunora-glow); }
+
+
+
+
 
 /* ── Modal Layout ──────────────────────────────────────────────── */
 .episode-container {
@@ -325,10 +178,10 @@ iframe#videoPlayer { flex: 1; width: 100%; border: none; }
 .button:hover { transform: translateY(-2px); box-shadow: 0 0 18px var(--lunora-glow), 0 6px 20px rgba(0,0,0,0.6); }
 
 #downloadContainer { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
-.changelog-container { background: var(--lunora-bg-panel); border: 1px solid var(--lunora-border); border-radius: 12px; padding: 15px; max-height: 250px; overflow-y: auto; margin-top: 40px; }
-.changelog-box { background: var(--lunora-bg-dark); padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--lunora-border); }
-.changelog-box h3 { color: #fff; font-size: 1rem; }
-.changelog-box p { color: var(--lunora-text-muted); font-size: 0.9rem; }
+
+
+
+
 
 .fade-out { opacity: 0; transition: opacity 0.3s; }
 .fade-transition { opacity: 0; transition: opacity 0.3s; }
@@ -343,7 +196,12 @@ iframe#videoPlayer { flex: 1; width: 100%; border: none; }
 }
 #seasonSelector:hover, #seasonSelector:focus { border-color: var(--lunora-purple); outline: none; }
 
-.player, .sidebar, .movie-item, .movie-item-banner, .button, .episode, #seasonSelector {
+.player,
+.sidebar,
+.movie-item,
+.button,
+.episode,
+#seasonSelector {
   opacity: 0; animation: simpleAppear 0.8s ease-out forwards;
 }
 
@@ -353,6 +211,23 @@ iframe#videoPlayer { flex: 1; width: 100%; border: none; }
   .sidebar { width: 100%; border-left: none; border-top: 1px solid var(--lunora-border); max-height: 180px; }
 }
 
-.site-title { cursor: pointer; text-align: center; }
-.site-title-icon-link { display: inline; text-decoration: none; }
-.site-title-icon { width: 60px; height: 60px; vertical-align: bottom; }
+/* ── Virowatch 3a home tokens (rail/header/hero — see virohome.css) ── */
+html[data-vw-theme][data-vw-theme] {
+    --vw-bg: #111827;
+    --vw-bg-rgb: 17, 24, 39;
+    --vw-panel: #1f2937;
+    --vw-panel-2: #0c111d;
+    --vw-text: #eaeaea;
+    --vw-text-strong: #ffffff;
+    --vw-icon: #9ca3af;
+    --vw-muted: #9ca3af;
+    --vw-muted-2: rgba(156, 163, 175, 0.8);
+    --vw-border: rgba(255, 255, 255, 0.08);
+    --vw-border-strong: rgba(124, 58, 237, 0.4);
+    --vw-active-border: #7c3aed;
+    --vw-accent-bg: #7c3aed;
+    --vw-accent-fg: #fff;
+    --vw-glow: rgba(124, 58, 237, 0.35);
+    --vw-glow-strong: rgba(124, 58, 237, 0.6);
+    --vw-input-border-focus: #7c3aed;
+}
