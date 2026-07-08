@@ -197,6 +197,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       JSON.stringify({ cat, mov, season, ep, dubbed }),
     );
     updateContinueWatching();
+    // Lets other modules (vidnest-loader.js) know what's actually playing
+    // without reaching into this closure's private state.
+    window.dispatchEvent(
+      new CustomEvent("vw-nowplaying", { detail: { cat, mov, season, ep, dubbed } }),
+    );
   }
 
   // Continue watching list (drives the rail section in virohome.js)
@@ -285,7 +290,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (navBar) {
       navBar.style.display = "flex";
       navBar.querySelectorAll(".cat-nav-btn").forEach((btn) => {
-        btn.classList.toggle("active", btn.dataset.cat === category);
+        // Vidnest movies live in the "movies" bucket (kept separate from
+        // "lunora" so a Lunora reload can't wipe injected entries), but
+        // visually belong on the same Movies tab.
+        btn.classList.toggle(
+          "active",
+          btn.dataset.cat === category ||
+            (category === "movies" && btn.dataset.cat === "lunora"),
+        );
       });
     }
     if (window.setRailActive) window.setRailActive(category);
@@ -449,8 +461,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     // PitSport's sports embeds spawn popup/redirect tabs. Sandbox them WITHOUT
     // allow-popups / allow-top-navigation so those windows can't open, while
     // still allowing scripts + same-origin so the player runs. Every other
-    // provider (MegaPlay etc.) detects a sandbox and refuses to play, so they
-    // stay unsandboxed.
+    // provider (MegaPlay, Vidnest) detects a sandbox and refuses to play, so
+    // they stay unsandboxed — Vidnest's own popup/redirect ads are instead
+    // mitigated by vidnest-loader.js's click-shield overlay.
     if (cat === "shows" && mov === "PITSORT") {
       iframe.setAttribute(
         "sandbox",
@@ -583,7 +596,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const clearBtn = document.getElementById("searchClear");
     if (clearBtn) clearBtn.style.display = e.target.value ? "block" : "none";
     clearTimeout(timer);
-    timer = setTimeout(() => {
+    timer = setTimeout(async () => {
       const q = e.target.value.trim().toLowerCase();
 
       // 1. If empty, go back to Categories
@@ -648,6 +661,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             open: () => window.openAnikotoById?.(a.id),
           });
         });
+      }
+
+      // Fold in Vidnest results (TMDB movies/shows + AniList anime) — a
+      // real search API on each, so this is a live network round trip
+      // rather than a prebuilt index like Anikoto's.
+      if (window.vidnestSearch) {
+        try {
+          (await window.vidnestSearch(q)).forEach((v) => scored.push(v));
+        } catch (_) {}
       }
 
       scored.sort((a, b) => b.score - a.score);
@@ -941,11 +963,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (heroSection) heroSection.style.display = "";
     if (categoryContainer) categoryContainer.style.display = "";
     localStorage.removeItem("lastState");
+    // Vidnest's browse-grid sections (vidnest-loader.js) key their own
+    // visibility off this — never reset here before, so anything that plays
+    // through the same cat value the grid checks (shows) stayed visible on
+    // the home page after Back.
+    window._vwlCurrentCat = "home";
     // Clear search on back
     const sInput = document.getElementById("searchInput");
     if (sInput) sInput.value = "";
     const vid = document.getElementById("videoPlayer");
-    if (vid) vid.src = ""; // Stop audio
+    // removeAttribute, not vid.src = "" — an empty string src resolves to the
+    // current document's own URL, which on file:// pages makes Chromium log
+    // "Unsafe attempt to load URL ... from frame with URL ..." (it blocks the
+    // load, so nothing actually breaks, but removeAttribute avoids the noise
+    // and skips the pointless resolve+block cycle entirely).
+    if (vid) vid.removeAttribute("src"); // Stop audio
+    // Force-stop any active Vidnest direct-play video synchronously — don't
+    // rely solely on it reacting to the src clear above (that path lost a
+    // race on a slower connection and left the video visible).
+    if (window.vwVidnestStopAll) window.vwVidnestStopAll();
     // Hide category nav bar and clear now-playing
     const navBar = document.getElementById("categoryNavBar");
     if (navBar) navBar.style.display = "none";
@@ -1075,6 +1111,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Anikoto entry not injected yet — fetch it (this also starts playback)
       if (typeof window.openAnikotoById !== "function") return false;
       const ok = await window.openAnikotoById(key.slice(4));
+      if (!ok) return false;
+    } else if (
+      typeof key === "string" &&
+      /^VD[MTA]_/.test(key) &&
+      !mediaData[catKey]?.[key]
+    ) {
+      if (typeof window.openVidnestById !== "function") return false;
+      const ok = await window.openVidnestById(key);
       if (!ok) return false;
     } else {
       if (
