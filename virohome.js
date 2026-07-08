@@ -17,7 +17,10 @@
 
   /* ── Rail active state (called by content.js on renderList/resetView) ── */
   window.setRailActive = function (name) {
-    if (name !== "watchlist") watchlistViewOpen = false;
+    if (name !== "watchlist") {
+      watchlistViewOpen = false;
+      hideWlToolbar();
+    }
     document.querySelectorAll(".rail-item").forEach(function (b) {
       b.classList.toggle(
         "active",
@@ -32,6 +35,79 @@
   }
 
   /* ── Watchlist view (grid in the main column) ───────────────────── */
+  var WL_PREFS_KEY = "vw_watchlist_prefs";
+  function getWlPrefs() {
+    var d = { sort: "recent", group: false };
+    try {
+      return Object.assign(d, JSON.parse(localStorage.getItem(WL_PREFS_KEY) || "{}"));
+    } catch (_) {
+      return d;
+    }
+  }
+  function saveWlPrefs(p) {
+    localStorage.setItem(WL_PREFS_KEY, JSON.stringify(p));
+  }
+
+  function wlBucket(item) {
+    if (item.cat === "anime") return "Anime";
+    if (item.cat === "shows") return "TV Shows";
+    return "Movies"; // "movies" (Vidnest) and "lunora" (native) both live here
+  }
+
+  function sortWlList(list, mode) {
+    var arr = list.slice();
+    if (mode === "az") {
+      arr.sort(function (a, b) {
+        return (a.title || a.key || "").localeCompare(b.title || b.key || "");
+      });
+    } else if (mode === "za") {
+      arr.sort(function (a, b) {
+        return (b.title || b.key || "").localeCompare(a.title || a.key || "");
+      });
+    }
+    // "recent" = keep vwlGet()'s order as-is (newest added first already)
+    return arr;
+  }
+
+  function buildWlCard(item) {
+    var div = document.createElement("div");
+    div.className = "movie-item";
+    if (item.aniId != null) div.dataset.aniId = String(item.aniId);
+    else {
+      div.dataset.movie = item.key;
+      div.dataset.cat = item.cat;
+    }
+    var img = document.createElement("img");
+    img.src = item.image || "https://via.placeholder.com/150";
+    img.loading = "lazy";
+    var p = document.createElement("p");
+    p.className = "kanit-extralight";
+    p.textContent = item.title || item.key;
+    div.appendChild(img);
+    div.appendChild(p);
+    div.addEventListener("click", function () {
+      var aniId =
+        item.aniId ||
+        (item.key && item.key.indexOf("ANI_") === 0
+          ? item.key.slice(4)
+          : null);
+      if (aniId && typeof window.openAnikotoById === "function") {
+        window.openAnikotoById(aniId);
+      } else if (
+        item.key &&
+        /^VD[MT]_/.test(item.key) &&
+        typeof window.openVidnestById === "function"
+      ) {
+        // Vidnest items are injected into mediaData on demand — viroPlay()
+        // below no-ops if the entry doesn't exist yet this session.
+        window.openVidnestById(item.key);
+      } else if (typeof window.viroPlay === "function") {
+        window.viroPlay(item.cat, item.key);
+      }
+    });
+    return div;
+  }
+
   function renderWatchlistView() {
     var ml = $("movieList");
     if (!ml) return;
@@ -43,36 +119,115 @@
         "Your watchlist is empty — hover a poster and press + to add titles.</p>";
       return;
     }
-    list.forEach(function (item) {
-      var div = document.createElement("div");
-      div.className = "movie-item";
-      if (item.aniId != null) div.dataset.aniId = String(item.aniId);
-      else {
-        div.dataset.movie = item.key;
-        div.dataset.cat = item.cat;
-      }
-      var img = document.createElement("img");
-      img.src = item.image || "https://via.placeholder.com/150";
-      img.loading = "lazy";
-      var p = document.createElement("p");
-      p.className = "kanit-extralight";
-      p.textContent = item.title || item.key;
-      div.appendChild(img);
-      div.appendChild(p);
-      div.addEventListener("click", function () {
-        var aniId =
-          item.aniId ||
-          (item.key && item.key.indexOf("ANI_") === 0
-            ? item.key.slice(4)
-            : null);
-        if (aniId && typeof window.openAnikotoById === "function") {
-          window.openAnikotoById(aniId);
-        } else if (typeof window.viroPlay === "function") {
-          window.viroPlay(item.cat, item.key);
-        }
+    var prefs = getWlPrefs();
+    if (!prefs.group) {
+      sortWlList(list, prefs.sort).forEach(function (item) {
+        ml.appendChild(buildWlCard(item));
       });
-      ml.appendChild(div);
+      return;
+    }
+    var groups = { Movies: [], "TV Shows": [], Anime: [] };
+    list.forEach(function (item) {
+      groups[wlBucket(item)].push(item);
     });
+    ["Movies", "TV Shows", "Anime"].forEach(function (name) {
+      if (!groups[name].length) return;
+      var head = document.createElement("div");
+      head.className = "wl-group-header";
+      head.textContent = name + " (" + groups[name].length + ")";
+      ml.appendChild(head);
+      sortWlList(groups[name], prefs.sort).forEach(function (item) {
+        ml.appendChild(buildWlCard(item));
+      });
+    });
+  }
+
+  /* ── Sort & group slide-out panel ────────────────────────────────── */
+  function ensureWlToolbar() {
+    if ($("wlToolbar")) return;
+    var wrapper = $("movieListWrapper");
+    if (!wrapper) return;
+
+    var bar = document.createElement("div");
+    bar.id = "wlToolbar";
+    bar.className = "wl-toolbar";
+
+    var toggle = document.createElement("button");
+    toggle.id = "wlSortToggle";
+    toggle.type = "button";
+    toggle.className = "wl-sort-toggle";
+    toggle.textContent = "⇅ Sort & Group";
+
+    var panel = document.createElement("div");
+    panel.id = "wlSortPanel";
+    panel.className = "wl-sort-panel";
+
+    var sortLabel = document.createElement("label");
+    sortLabel.textContent = "Sort by";
+    var sortSelect = document.createElement("select");
+    sortSelect.id = "wlSortSelect";
+    [
+      ["recent", "Recently added"],
+      ["az", "Title A → Z"],
+      ["za", "Title Z → A"],
+    ].forEach(function (pair) {
+      var o = document.createElement("option");
+      o.value = pair[0];
+      o.textContent = pair[1];
+      sortSelect.appendChild(o);
+    });
+    sortLabel.appendChild(sortSelect);
+
+    var groupLabel = document.createElement("label");
+    groupLabel.className = "wl-group-check";
+    var groupCheck = document.createElement("input");
+    groupCheck.type = "checkbox";
+    groupCheck.id = "wlGroupCheck";
+    groupLabel.appendChild(groupCheck);
+    groupLabel.appendChild(document.createTextNode("Separate Movies / TV Shows / Anime"));
+
+    panel.appendChild(sortLabel);
+    panel.appendChild(groupLabel);
+    bar.appendChild(toggle);
+    bar.appendChild(panel);
+    wrapper.insertAdjacentElement("beforebegin", bar);
+
+    var prefs = getWlPrefs();
+    sortSelect.value = prefs.sort;
+    groupCheck.checked = prefs.group;
+
+    toggle.addEventListener("click", function () {
+      panel.classList.toggle("wl-sort-open");
+    });
+    document.addEventListener("click", function (e) {
+      if (!bar.contains(e.target)) panel.classList.remove("wl-sort-open");
+    });
+    sortSelect.addEventListener("change", function () {
+      var p = getWlPrefs();
+      p.sort = sortSelect.value;
+      saveWlPrefs(p);
+      renderWatchlistView();
+    });
+    groupCheck.addEventListener("change", function () {
+      var p = getWlPrefs();
+      p.group = groupCheck.checked;
+      saveWlPrefs(p);
+      renderWatchlistView();
+    });
+  }
+
+  function showWlToolbar() {
+    ensureWlToolbar();
+    var bar = $("wlToolbar");
+    if (bar) bar.style.display = "flex";
+  }
+  function hideWlToolbar() {
+    var bar = $("wlToolbar");
+    if (bar) {
+      bar.style.display = "none";
+      var panel = $("wlSortPanel");
+      if (panel) panel.classList.remove("wl-sort-open");
+    }
   }
 
   function showWatchlist() {
@@ -83,6 +238,7 @@
     if (nav) nav.style.display = "none";
     if (wrapper) wrapper.style.display = "block";
     window._vwlCurrentCat = null; // keeps the Anikoto section hidden
+    showWlToolbar();
     renderWatchlistView();
     window.setRailActive("watchlist");
     watchlistViewOpen = true;
