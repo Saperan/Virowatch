@@ -1,0 +1,237 @@
+/* =====================================================
+   custom-player-ui.js styling — the video control bar
+   (play/pause, seek/buffered, volume, CC, fullscreen, the
+   ⋮ menu, and mobile double-tap seek zones). Theme-independent
+   on purpose: native players stay dark chrome regardless of the
+   site's light/dark theme, same as YouTube/Netflix do.
+   Loaded once, used by both megaplay-backup.js's Cloudflare
+   player and vidnest-loader.js's Vidnest player.
+   ===================================================== */
+
+.vw-player-root {
+    position: absolute;
+    inset: 0;
+    z-index: 4; /* above the <video>, below the spinner (#videoSpinner is z-index 10) */
+    font-family: "Kanit", sans-serif;
+}
+
+/* ── Tap zones + double-tap seek flash ─────────────────── */
+.vw-player-tap-zone {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    z-index: 2;
+    cursor: pointer;
+}
+.vw-player-tap-zone.left { left: 0; }
+.vw-player-tap-zone.right { right: 0; }
+
+.vw-player-seek-flash {
+    position: absolute;
+    top: 50%;
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.16);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 500;
+    gap: 2px;
+    transform: translateY(-50%) scale(0.5);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 3;
+}
+.vw-player-seek-flash.left { left: 8%; }
+.vw-player-seek-flash.right { right: 8%; }
+.vw-player-seek-flash svg { width: 22px; height: 22px; fill: currentColor; }
+.vw-player-seek-flash.pop {
+    transform: translateY(-50%) scale(1);
+    opacity: 1;
+    transition: transform 0.18s ease-out, opacity 0.1s ease-out;
+}
+.vw-player-seek-flash.fade {
+    transform: translateY(-50%) scale(1.25);
+    opacity: 0;
+    transition: transform 0.45s ease-in, opacity 0.45s ease-in;
+}
+
+/* ── Bottom control bar ─────────────────────────────────── */
+.vw-player-controls {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 6;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0) 100%);
+    padding: 28px 10px 8px;
+    opacity: 1;
+    transition: opacity 0.25s ease;
+}
+.vw-player-root.vw-player-controls-hidden .vw-player-controls {
+    opacity: 0;
+    pointer-events: none;
+}
+.vw-player-root.vw-player-controls-hidden { cursor: none; }
+
+.vw-player-seek-row { display: flex; align-items: center; gap: 8px; padding: 0 4px 4px; }
+.vw-player-time {
+    font-size: 0.72rem;
+    color: #eaeaea;
+    min-width: 36px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+.vw-player-seek {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    height: 3px;
+    border-radius: 99px;
+    /* played (white) → buffered (light gray) → unbuffered (dark gray) */
+    background: linear-gradient(
+        to right,
+        #fff var(--pct, 0%),
+        rgba(255, 255, 255, 0.45) var(--pct, 0%),
+        rgba(255, 255, 255, 0.45) var(--bufpct, 0%),
+        rgba(255, 255, 255, 0.22) var(--bufpct, 0%)
+    );
+    outline: none;
+    cursor: pointer;
+}
+.vw-player-seek::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    margin-top: -5px;
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3);
+    transition: box-shadow 0.15s ease;
+}
+.vw-player-seek:hover::-webkit-slider-thumb { box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.18); }
+
+.vw-player-btn-row { display: flex; align-items: center; gap: 2px; padding: 0 2px; }
+.vw-player-spacer { flex: 1; }
+
+.vw-player-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 6px;
+    flex-shrink: 0;
+    position: relative;
+    padding: 0;
+}
+.vw-player-icon-btn:hover { background: rgba(255, 255, 255, 0.12); }
+.vw-player-icon-btn svg { width: 19px; height: 19px; fill: currentColor; }
+
+.vw-player-vol-group { display: flex; align-items: center; }
+.vw-player-volume {
+    width: 0;
+    opacity: 0;
+    transition: width 0.18s ease, opacity 0.18s ease, margin 0.18s ease;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 3px;
+    border-radius: 99px;
+    background: linear-gradient(to right, #fff var(--volpct, 100%), rgba(255, 255, 255, 0.28) var(--volpct, 100%));
+    outline: none;
+    cursor: pointer;
+}
+.vw-player-vol-group:hover .vw-player-volume { width: 70px; opacity: 1; margin-left: 4px; }
+.vw-player-volume::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    margin-top: -4px;
+}
+
+/* ── ⋮ overflow menu — quality / subtitles / seek amount / downloads ── */
+.vw-player-menu-panel {
+    position: absolute;
+    bottom: 46px;
+    right: 8px;
+    min-width: 230px;
+    max-width: 280px;
+    background: rgba(24, 24, 24, 0.97);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.5);
+    font-size: 0.85rem;
+    overflow: hidden;
+    z-index: 8;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(6px) scale(0.98);
+    transition: opacity 0.16s ease, transform 0.16s ease, visibility 0s linear 0.16s;
+}
+.vw-player-menu-panel.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+    transition: opacity 0.16s ease, transform 0.16s ease;
+}
+.vw-player-menu-panel.enter-from-right { transform: translateX(16px) scale(1) !important; opacity: 0 !important; }
+.vw-player-menu-panel.enter-from-left { transform: translateX(-16px) scale(1) !important; opacity: 0 !important; }
+
+.vw-player-menu-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 11px 14px;
+    cursor: pointer;
+    color: #eaeaea;
+}
+.vw-player-menu-row:hover { background: rgba(255, 255, 255, 0.08); }
+.vw-player-menu-arrow { color: rgba(255, 255, 255, 0.5); font-size: 0.8rem; }
+.vw-player-menu-row.disabled { color: rgba(255, 255, 255, 0.4); cursor: default; }
+.vw-player-menu-row.disabled:hover { background: none; }
+.vw-player-menu-value { color: rgba(255, 255, 255, 0.5); font-size: 0.78rem; }
+
+.vw-player-menu-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 500;
+    color: #eaeaea;
+}
+.vw-player-back-btn { display: flex; cursor: pointer; color: #eaeaea; }
+.vw-player-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+.vw-player-menu-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    cursor: pointer;
+    color: #eaeaea;
+}
+.vw-player-menu-option:hover { background: rgba(255, 255, 255, 0.08); }
+.vw-player-check { width: 16px; height: 16px; fill: #fff; visibility: hidden; }
+.vw-player-menu-option.selected .vw-player-check { visibility: visible; }
+
+@media (max-width: 768px) {
+    .vw-player-controls { padding: 20px 6px 6px; }
+    .vw-player-icon-btn { width: 32px; height: 32px; }
+    .vw-player-menu-panel { min-width: 200px; font-size: 0.8rem; }
+}
