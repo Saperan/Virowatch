@@ -3,8 +3,10 @@
  *
  * When an Anikoto / MegaPlay episode is loaded into #videoPlayer (the iframe),
  * this module:
- *   - shows a "Backup ▶" button under the player,
- *   - after AUTO_DELAY ms auto-switches to a VPN-free backup stream,
+ *   - shows a "☁ Cloudflare API" button under the player,
+ *   - shows a one-time toast pointing at it (and the Vidnest API button)
+ *     instead of auto-switching — auto-switching used to race whichever
+ *     other source the user picked in the meantime,
  *   - resolves that stream through the Cloudflare Worker and plays it with
  *     hls.js inside a <video> element (no iframe, no VPN).
  *
@@ -31,14 +33,11 @@
 
   const HLS_CDN    = "https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js";
   const DL_CONC    = 6;      // parallel segment fetches while downloading
-  const AUTO_DELAY = 4000;   // ms before auto-fallback kicks in
   // MegaPlay embed: .../stream/s-3/<id>/<sub|dub>
   const MEGA_RE    = /megaplay\.buzz\/stream\/s-\d+\/(\d+)\/(sub|dub)/i;
 
   let mode          = "embed"; // "embed" | "backup"
   let preferBackup  = false;   // sticky once user chooses backup
-  let disableAuto   = false;   // set when user picks "Use embed" (VPN users)
-  let autoTid       = null;
   let hls           = null;
   let selfSetting   = false;    // guard our own iframe.src writes
   let lastEmbedSrc  = "";       // megaplay url to restore when leaving backup
@@ -49,6 +48,7 @@
   let userQuality   = null;     // null = use worker default; else "auto" or height
   let activeWorkerQuality = 720; // quality of the worker currently playing
   let captionTracks = [];        // subtitle tracks for the current episode
+  let playerUI      = null;      // window.VWPlayerUI.attach() result — the custom control bar
 
   // ── Load hls.js on demand ─────────────────────────────────────────
   function loadHls() {
@@ -68,40 +68,35 @@
   function iframe()  { return document.getElementById("videoPlayer"); }
   function spinner() { return document.getElementById("videoSpinner"); }
 
+  function frameEl() { return document.getElementById("viroBackupFrame"); }
+
   function backupVideo() {
     let v = document.getElementById("viroBackupPlayer");
     if (!v) {
+      // A dedicated positioning wrapper around just the video — .player is a
+      // flex column that also holds .player-controls (Prev/Next) below the
+      // video, so anchoring the control bar's `inset:0` to .player itself
+      // would stretch it down past the video into that row.
+      const frame = document.createElement("div");
+      frame.id = "viroBackupFrame";
+      frame.style.cssText = "flex:1;width:100%;min-width:0;min-height:200px;position:relative;display:none;";
+
       v = document.createElement("video");
       v.id = "viroBackupPlayer";
-      v.controls = true;
       v.playsInline = true;
       v.autoplay = true;
       v.crossOrigin = "anonymous"; // required for cross-origin <track> subtitles
-      // Kill the native ⋮ "Download" (it saves the useless "hls" MSE blob).
-      v.setAttribute("controlsList", "nodownload");
-      v.style.cssText =
-        "flex:1;width:100%;min-height:200px;background:#000;border:0;display:none;";
+      v.style.cssText = "width:100%;height:100%;display:block;background:#000;border:0;";
+      frame.appendChild(v);
+
       const f = iframe();
-      if (f && f.parentNode) f.parentNode.insertBefore(v, f.nextSibling);
+      if (f && f.parentNode) f.parentNode.insertBefore(frame, f.nextSibling);
+      if (window.VWPlayerUI) {
+        playerUI = window.VWPlayerUI.attach(v, frame);
+        playerUI.setDownloadHandler(downloadVideoHandler);
+      }
     }
     return v;
-  }
-
-  // Overlay on top of the video holding the quality picker + download.
-  function overlay() {
-    let o = document.getElementById("viroOverlay");
-    if (!o) {
-      o = document.createElement("div");
-      o.id = "viroOverlay";
-      o.style.display = "none";
-      const player = document.querySelector(".player");
-      if (player) player.appendChild(o);
-    }
-    return o;
-  }
-  function hideOverlay() {
-    const o = document.getElementById("viroOverlay");
-    if (o) o.style.display = "none";
   }
 
   function button() {
@@ -115,7 +110,7 @@
       b.addEventListener("click", (e) => {
         e.preventDefault();
         if (mode === "backup") useEmbed();
-        else { preferBackup = true; playBackup("manual"); }
+        else { preferBackup = true; playBackup(); }
       });
       const controls = document.querySelector(".player-controls");
       const nextBtn  = document.getElementById("nextEpisode");
@@ -124,24 +119,7 @@
     return b;
   }
 
-  // ── Quality dropdown (backup mode only) ───────────────────────────
-  function qualitySelect() {
-    let s = document.getElementById("viroQualityMenu");
-    if (!s) {
-      s = document.createElement("select");
-      s.id = "viroQualityMenu";
-      s.className = "button";
-      s.style.display = "none";
-      s.title = "Video quality";
-      s.addEventListener("change", () => {
-        userQuality = s.value === "auto" ? "auto" : Number(s.value);
-        applyQuality();
-      });
-      overlay().appendChild(s);
-    }
-    return s;
-  }
-
+  // ── Quality (backup mode only) — real hls.js ABR levels ───────────
   function levelIndexForCap(cap) {
     let idx = -1, best = -1;
     hls.levels.forEach((l, i) => {
@@ -163,43 +141,17 @@
   }
 
   function buildQualityMenu() {
-    const s = qualitySelect();
-    s.innerHTML = "";
-    const add = (v, t) => {
-      const o = document.createElement("option");
-      o.value = v; o.textContent = t; s.appendChild(o);
-    };
-    add("auto", "Auto");
-    [...new Set(hls.levels.map((l) => l.height))]
-      .sort((a, b) => b - a)
-      .forEach((h) => add(String(h), h + "p"));
+    if (!playerUI) return;
+    const options = [{ value: "auto", label: "Auto" }].concat(
+      [...new Set(hls.levels.map((l) => l.height))]
+        .sort((a, b) => b - a)
+        .map((h) => ({ value: String(h), label: h + "p" })),
+    );
     const cur = userQuality != null ? String(userQuality) : String(activeWorkerQuality);
-    s.value = [...s.options].some((o) => o.value === cur) ? cur : "auto";
-    s.style.display = "";
-    downloadBtn().style.display = "";
-    buildSubControl(); // add/refresh the Sub download button/dropdown
-    overlay().style.display = "flex"; // reveal picker + download over the video
-  }
-
-  // ── Download button (backup mode only) — remux HLS → .mp4 ─────────
-  let downloading = false;
-
-  function downloadBtn() {
-    let b = document.getElementById("viroDownloadBtn");
-    if (!b) {
-      b = document.createElement("a");
-      b.id = "viroDownloadBtn";
-      b.href = "#";
-      b.className = "button";
-      b.style.display = "none";
-      b.textContent = "⭳ Download";
-      b.addEventListener("click", (e) => {
-        e.preventDefault();
-        if (!downloading) startDownload(b);
-      });
-      overlay().appendChild(b);
-    }
-    return b;
+    playerUI.setQualityOptions(options, cur, (val) => {
+      userQuality = val === "auto" ? "auto" : Number(val);
+      applyQuality();
+    });
   }
 
   // Pick the child playlist URL (worker-proxied) matching a height cap.
@@ -270,110 +222,25 @@
     return out.join("\n");
   }
 
-  async function downloadSub(track) {
-    try {
-      toast("Downloading subtitles…");
-      const srt = vttToSrt(await (await fetch(track.file)).text());
-      if (!srt.trim()) { toast("Subtitle file was empty"); return; }
-      const lang = (track.label || "sub").replace(/[^\w]+/g, "") || "sub";
-      const url = URL.createObjectURL(
-        new Blob([srt], { type: "application/x-subrip" }),
-      );
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${fileBase()}.${lang}.srt`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
-    } catch (_) {
-      toast("Subtitle download failed");
-    }
-  }
-
-  // Build the "Sub" control: a button for one track, a dropdown for many.
-  function buildSubControl() {
-    const old = document.getElementById("viroSubDl");
-    if (old) old.remove();
-    const subs = captionTracks;
-    if (!subs.length) return;
-
-    let el;
-    if (subs.length === 1) {
-      el = document.createElement("a");
-      el.href = "#";
-      el.textContent = "⤓ Sub";
-      el.title = "Download subtitles (.srt)";
-      el.addEventListener("click", (e) => { e.preventDefault(); downloadSub(subs[0]); });
-    } else {
-      el = document.createElement("select");
-      el.title = "Download subtitles (.srt)";
-      const ph = document.createElement("option");
-      ph.value = ""; ph.textContent = "⤓ Sub";
-      el.appendChild(ph);
-      subs.forEach((t, i) => {
-        const o = document.createElement("option");
-        o.value = String(i);
-        o.textContent = t.label || `Sub ${i + 1}`;
-        el.appendChild(o);
-      });
-      el.addEventListener("change", () => {
-        const i = Number(el.value);
-        if (el.value !== "" && subs[i]) downloadSub(subs[i]);
-        el.selectedIndex = 0; // reset back to the "Sub" label
-      });
-    }
-    el.id = "viroSubDl";
-    el.className = "button";
-    overlay().appendChild(el);
-  }
-
-  async function startDownload(btn) {
-    if (!current || !WORKERS.length) return;
-    downloading = true;
-    const label = btn.textContent;
-    const setLbl = (t) => { btn.textContent = t; };
-    setLbl("Preparing…");
+  // Download handler passed to the shared player UI (setDownloadHandler) —
+  // it owns the "Preparing…/Downloading N%/✓ Saved/⚠ Failed" label and the
+  // actual blob-download trigger; this just resolves + assembles the file
+  // and returns it. Re-resolves fresh each time rather than reusing
+  // whatever's already loaded, same as the old implementation did.
+  async function downloadVideoHandler(setStatus) {
+    if (!current || !WORKERS.length) throw new Error("nothing playing");
     const w = WORKERS[workerIdx] || WORKERS[0];
     const cap = userQuality != null ? userQuality : activeWorkerQuality;
-    try {
-      // 1. resolve → master playlist (worker-proxied)
-      const rr = await fetch(
-        `${w.url}/resolve?id=${encodeURIComponent(current.id)}&type=${current.type}`,
-      );
-      const data = await rr.json();
-      if (!data || !data.ok || !data.file) throw new Error("resolve failed");
-      const masterText = await (await fetch(data.file)).text();
-
-      // 2. pick quality variant → its segment list
-      const childUrl = pickVariant(masterText, cap);
-      if (!childUrl) throw new Error("no variant found");
-      const segUrls = segUrlsFrom(await (await fetch(childUrl)).text());
-      if (!segUrls.length) throw new Error("no segments");
-
-      // 3. fetch all segments (concurrent) + concatenate untouched
-      const blob = await assembleTs(segUrls, (done, total) =>
-        setLbl(`Downloading ${Math.floor((done / total) * 100)}%`),
-      );
-
-      // 4. trigger browser download
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fileName();
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
-      setLbl("✓ Saved");
-      setTimeout(() => setLbl(label), 2500);
-    } catch (err) {
-      setLbl("⚠ Failed");
-      toast("Download failed — " + (err.message || "error"));
-      setTimeout(() => setLbl(label), 2500);
-    } finally {
-      downloading = false;
-    }
+    const rr = await fetch(`${w.url}/resolve?id=${encodeURIComponent(current.id)}&type=${current.type}`);
+    const data = await rr.json();
+    if (!data || !data.ok || !data.file) throw new Error("resolve failed");
+    const masterText = await (await fetch(data.file)).text();
+    const childUrl = pickVariant(masterText, cap);
+    if (!childUrl) throw new Error("no variant found");
+    const segUrls = segUrlsFrom(await (await fetch(childUrl)).text());
+    if (!segUrls.length) throw new Error("no segments");
+    const blob = await assembleTs(segUrls, (done, total) => setStatus(`${Math.floor((done / total) * 100)}%`));
+    return { blob, filename: fileName() };
   }
 
   // Concatenate the raw HLS segments untouched → one .ts file. No remux, so
@@ -398,14 +265,18 @@
     return new Blob(buffers, { type: "video/mp2t" });
   }
 
+  // Exposed for vidnest-loader.js — pure/stateless, safe to share without
+  // entangling this module's own mode/current/mutable state with Vidnest's.
+  window.vwHlsUtils = { pickVariant, segUrlsFrom, assembleTs, vttToSrt };
+
   function setButtonLabel() {
     const b = button();
     if (mode === "backup") {
       b.textContent = "⟲ Use embed";
       b.title = "Switch back to the original MegaPlay embed";
     } else {
-      b.textContent = "⚡ Backup (no VPN)";
-      b.title = "Play through the VPN-free backup stream";
+      b.textContent = "☁ Cloudflare API";
+      b.title = "Play through the VPN-free Cloudflare Worker backup stream";
     }
   }
 
@@ -430,23 +301,68 @@
   }
 
   function showEmbed() {
-    const v = backupVideo();
-    v.style.display = "none";
-    hideOverlay();
+    backupVideo(); // ensure frame/video exist
+    const fr = frameEl();
+    if (fr) fr.style.display = "none"; // hides root (its sibling inside frame) along with the video
     const f = iframe();
     if (f) f.style.display = "";
   }
   function showBackup() {
+    // An active Vidnest-anime-merge session (vidnest-loader.js's own frame)
+    // would otherwise stay visible underneath this one, stacking both video
+    // frames on top of each other — this direction of the switch (into the
+    // Cloudflare backup) never went through vidnest-loader.js's own
+    // suspend/cleanup path, unlike the reverse direction which already calls
+    // vwSuspendAutoBackup before switching to Vidnest. Must run BEFORE the
+    // iframe is hidden below: vidnestPlayer.stop()'s own cleanup re-shows
+    // the iframe as a side effect (its normal "went back to embed" case),
+    // which would otherwise undo the display:none set right after it.
+    if (window.vwVidnestStopAll) window.vwVidnestStopAll();
     const f = iframe();
     if (f) f.style.display = "none";
-    backupVideo().style.display = "";
+    backupVideo();
+    const fr = frameEl();
+    if (fr) fr.style.display = "";
   }
+
+  // Exposed for vidnest-loader.js: an already-active backup video would
+  // otherwise stack on top of Vidnest's when the user switches sources on
+  // the same episode. Deliberately does not set any sticky flag — the
+  // caller owns iframe visibility, and this should only affect the current
+  // episode.
+  //
+  // Also blanks the iframe unconditionally, not just when mode==="backup":
+  // a cross-origin iframe (the raw MegaPlay embed) keeps playing its own
+  // audio in the background when merely hidden (display:none doesn't stop
+  // it, and there's no JS access into it to pause it directly) — the only
+  // way to actually silence it is to navigate its src away. Bug this fixed:
+  // switching to Vidnest API straight from the plain embed (never having
+  // touched the Cloudflare backup) left the embed's audio playing hidden.
+  window.vwSuspendAutoBackup = function () {
+    playToken++; // cancel any in-flight resolve/failover regardless of mode
+    if (mode === "backup") {
+      mode = "embed";
+      stopHls();
+      const fr = frameEl();
+      if (fr) fr.style.display = "none";
+    }
+    const f = iframe();
+    if (f && f.getAttribute("src") && f.getAttribute("src") !== "about:blank") {
+      selfSetting = true;
+      f.src = "about:blank";
+      setTimeout(() => { selfSetting = false; }, 0);
+    }
+    setButtonLabel();
+  };
+
+  // Exposed for vidnest-loader.js's anime-merge "⟲ Use Anikoto" switch-back —
+  // same target state as this module's own "Use embed" button, so just
+  // reuse it rather than duplicating the lastEmbedSrc-restore logic.
+  window.vwUseEmbed = function () { useEmbed(); };
 
   function useEmbed() {
     preferBackup = false;
-    disableAuto = true; // user prefers the embed — stop auto-switching
     mode = "embed";
-    clearTimeout(autoTid);
     playToken++; // cancel any in-flight resolve / failover
     stopHls();
     showEmbed();
@@ -462,9 +378,8 @@
 
   let resumeTime = 0; // playback position carried across a worker failover
 
-  async function playBackup(reason) {
+  async function playBackup() {
     if (!current) return;
-    clearTimeout(autoTid);
     mode = "backup";
     setButtonLabel();
 
@@ -477,7 +392,6 @@
     }
     showBackup();
     if (spinner()) spinner().style.display = "block";
-    if (reason === "auto") toast("No VPN? Loading backup stream…");
 
     if (!WORKERS.length) {
       if (spinner()) spinner().style.display = "none";
@@ -510,7 +424,7 @@
         (t) => t && t.file && /captions|subtitle/i.test(t.kind || "captions"),
       );
       await startPlayback(data.file, w.quality, token);
-      addSubtitles(data.tracks);
+      if (playerUI) playerUI.setSubtitleTracks(captionTracks);
     } catch (err) {
       failover(token, err.message || "error");
     }
@@ -531,32 +445,6 @@
       if (spinner()) spinner().style.display = "none";
       toast("All backup servers unavailable — " + why);
     }
-  }
-
-  // Attach subtitle/caption tracks (already proxied by the Worker).
-  function addSubtitles(tracks) {
-    const v = backupVideo();
-    v.querySelectorAll("track").forEach((t) => t.remove());
-    if (!Array.isArray(tracks)) return;
-    const subs = tracks.filter(
-      (t) => t && t.file && /captions|subtitle/i.test(t.kind || "captions"),
-    );
-    subs.forEach((t, i) => {
-      const tr = document.createElement("track");
-      tr.kind = "subtitles";
-      tr.label = t.label || `Track ${i + 1}`;
-      tr.srclang = (t.label || "en").slice(0, 2).toLowerCase();
-      tr.src = t.file;
-      if (t.default || i === 0) tr.default = true;
-      v.appendChild(tr);
-    });
-    // Force-enable the default track (some browsers leave it "disabled").
-    setTimeout(() => {
-      const tt = v.textTracks;
-      for (let i = 0; i < tt.length; i++) {
-        tt[i].mode = i === 0 ? "showing" : "disabled";
-      }
-    }, 300);
   }
 
   async function startPlayback(fileUrl, quality, token) {
@@ -629,17 +517,20 @@
     return typeof window.vwPartyActive === "function" && window.vwPartyActive();
   }
 
-  // Party started mid-episode → move the current embed to the Backup player.
+  // Party started mid-episode → move the current embed to the Backup player,
+  // unless Vidnest API is already active (also a readable/seekable <video>,
+  // watchparty.js's syncTarget() recognizes it too — don't yank the user
+  // off a source they deliberately picked).
   window.addEventListener("vw-party-changed", (e) => {
-    if (e.detail && e.detail.active && current && mode === "embed") {
+    const onVidnest = window.vwVidnestAnimeActive && window.vwVidnestAnimeActive();
+    if (e.detail && e.detail.active && current && mode === "embed" && !onVidnest) {
       toast("Watch party — using the Backup player so time sync works");
-      playBackup("party");
+      playBackup();
     }
   });
 
   // Player closed / switched to a non-megaplay provider — stop backup.
   function teardown() {
-    clearTimeout(autoTid);
     playToken++; // cancel any in-flight resolve / failover
     stopHls();
     mode = "embed";
@@ -663,21 +554,18 @@
 
     const b = button();
     b.style.display = "";
-    clearTimeout(autoTid);
 
     if (preferBackup || partyOn()) {
       // Watch party: always go straight to the Backup player — it's the
       // only anime player both sides can read/seek, so time sync works.
-      playBackup(preferBackup ? "sticky" : "party");
+      playBackup();
     } else {
       mode = "embed";
       showEmbed();
       setButtonLabel();
-      if (!disableAuto) {
-        autoTid = setTimeout(() => {
-          if (mode === "embed") playBackup("auto");
-        }, AUTO_DELAY);
-      }
+      // No more auto-switching — it used to race whichever source the user
+      // picked manually in the meantime. Just point at the two options.
+      toast("Not playing? Try ☁ Cloudflare API or ◆ Vidnest API below");
     }
   }
 
@@ -696,19 +584,7 @@
     if (document.getElementById("viro-backup-css")) return;
     const s = document.createElement("style");
     s.id = "viro-backup-css";
-    s.textContent = `
-      #viroBackupBtn{cursor:pointer;}
-      #viroOverlay{position:absolute;top:10px;right:10px;z-index:6;
-        display:flex;gap:8px;align-items:center;}
-      /* Controls carry .button so each theme styles them like the rest of
-         the player bar — only size is trimmed to fit over the video. */
-      #viroOverlay .button{font-size:.85rem;padding:7px 14px;line-height:1.2;
-        white-space:nowrap;text-decoration:none;}
-      #viroOverlay select.button{appearance:none;-webkit-appearance:none;
-        text-align:center;}
-      @media(max-width:768px){#viroOverlay{top:6px;right:6px;gap:6px;}
-        #viroOverlay .button{font-size:.75rem;padding:6px 10px;}}
-    `;
+    s.textContent = `#viroBackupBtn{cursor:pointer;}`;
     document.head.appendChild(s);
   }
 
