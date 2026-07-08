@@ -5,10 +5,13 @@
  * one (public list, or a 6-char code for private). Whatever the host
  * watches, everyone in the party watches too. Full timestamp sync
  * (pause/seek) works where the page can read the player: the anime Backup
- * player (forced during parties by megaplay-backup.js) and Rumble content
- * (rumble-party.js swaps embeds to the Rumble JS-API player). Other
- * third-party embeds sync per episode only. A small draggable overlay
- * shows live chat without covering the player, with one-click Disconnect.
+ * player (forced during parties by megaplay-backup.js, unless Vidnest API is
+ * already active for that episode), Vidnest's own player (movies/shows are
+ * Vidnest-only, and the anime "Vidnest API" merge button — both use the same
+ * #vidnestDirectPlayer element), and Rumble content (rumble-party.js swaps
+ * embeds to the Rumble JS-API player). Other third-party embeds sync per
+ * episode only. A small draggable overlay shows live chat without covering
+ * the player, with one-click Disconnect.
  *
  * Requires an AniList login (vw_anilist) — chat/host names and avatars
  * come from the AniList profile. BETA: sync uses a public MQTT relay
@@ -267,31 +270,47 @@
   /* ── Timestamp sync ───────────────────────────────────────────
      Works on any player the page can read and seek:
        - the anime Backup player (#viroBackupPlayer, a native <video>) —
-         megaplay-backup.js forces it while a party is on,
+         megaplay-backup.js forces it while a party is on (unless Vidnest
+         API is already active for the episode, see below),
+       - Vidnest's player (#vidnestDirectPlayer, also a native <video>) —
+         covers both Vidnest movies/shows (the only source for those) and
+         the anime "Vidnest API" merge button,
        - Rumble content via rumble-party.js (Rumble JS-API player).
      Host publishes its clock; a viewer that drifts past the host gets
      snapped back (repeatedly, until the host moves on), pauses when the
      host pauses, and catches up when it falls far behind. Other embed
      iframes can't be read or seeked — those stay episode-level only. */
+  // Wraps a plain <video> (viroBackupPlayer or vidnestDirectPlayer — same
+  // shape, both readable/seekable native elements) into a sync target.
+  function videoTarget(v) {
+    return {
+      getTime: function () { return v.currentTime || 0; },
+      getDuration: function () { return v.duration || 0; },
+      getPaused: function () { return !!v.paused; },
+      seek: function (t) { try { v.currentTime = t; } catch (_) {} },
+      play: function () { var p = v.play(); if (p && p.catch) p.catch(function () {}); },
+      pause: function () { try { v.pause(); } catch (_) {} },
+      hookInstant: function (fn) {
+        if (v._wpHooked) return;
+        v._wpHooked = true;
+        ['pause', 'play', 'seeked'].forEach(function (ev) {
+          v.addEventListener(ev, fn);
+        });
+      },
+    };
+  }
+
   function syncTarget() {
+    // offsetParent (not style.display on the video itself) is the correct
+    // visibility check — both players are wrapped in their own positioning
+    // frame (#viroBackupFrame / #vidnestFrame) whose display is what
+    // actually toggles; the <video>'s own inline display stays put.
     var v = document.getElementById('viroBackupPlayer');
-    if (v && v.style.display !== 'none' && v.readyState >= 1) {
-      return {
-        getTime: function () { return v.currentTime || 0; },
-        getDuration: function () { return v.duration || 0; },
-        getPaused: function () { return !!v.paused; },
-        seek: function (t) { try { v.currentTime = t; } catch (_) {} },
-        play: function () { var p = v.play(); if (p && p.catch) p.catch(function () {}); },
-        pause: function () { try { v.pause(); } catch (_) {} },
-        hookInstant: function (fn) {
-          if (v._wpHooked) return;
-          v._wpHooked = true;
-          ['pause', 'play', 'seeked'].forEach(function (ev) {
-            v.addEventListener(ev, fn);
-          });
-        },
-      };
-    }
+    if (v && v.offsetParent !== null && v.readyState >= 1) return videoTarget(v);
+    // vidnestDirectPlayer covers both the anime-merge button and the
+    // movies/shows direct-play flow — same element either way.
+    var vn = document.getElementById('vidnestDirectPlayer');
+    if (vn && vn.offsetParent !== null && vn.readyState >= 1) return videoTarget(vn);
     var r = window.vwRumbleParty;
     if (r && typeof r.target === 'function') return r.target(); // null unless live
     return null;
@@ -858,9 +877,10 @@
     body.appendChild(el('div', 'anilist-hint wp-fineprint',
       'Beta: parties run over a public relay — chat is unencrypted, so keep it casual. ' +
       'Timestamp sync (pauses, seeking back to the host) works on anime (the Backup ' +
-      'player is used automatically during parties) and Rumble videos; other ' +
-      'third-party embeds only sync per episode. Press 📌 on the party ' +
-      'bar to keep chat visible in fullscreen.'));
+      'player is used automatically during parties, unless Vidnest API is already ' +
+      'active), Vidnest movies/shows, and Rumble videos; other third-party embeds ' +
+      'only sync per episode. Press 📌 on the party bar to keep chat visible in ' +
+      'fullscreen.'));
   }
 
   function renderPublicList() {
