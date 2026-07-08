@@ -153,6 +153,15 @@
       return;
     }
 
+    // Vidnest items (movies/shows/anime) are injected on demand too.
+    if (item.key && /^VD[MTA]_/.test(item.key) && typeof window.openVidnestById === 'function') {
+      showToast('Loading…');
+      window.openVidnestById(item.key).then(function (ok) {
+        if (!ok) showToast('Could not load — not available yet');
+      }).catch(function () { showToast('Failed to load item'); });
+      return;
+    }
+
     if (typeof window.viroPlay !== 'function') {
       showToast('Player not ready — try again');
       return;
@@ -333,13 +342,16 @@
 
   function observeMovieList() {
     observeContainer(document.getElementById('movieList'));
-    // The Anikoto grid is built a moment after load — wait for it.
-    var tries = 0;
-    (function waitGrid() {
-      var g = document.getElementById('anikoto-grid');
-      if (g) observeContainer(g);
-      else if (tries++ < 15) setTimeout(waitGrid, 700);
-    })();
+    // These grids are built a moment after load (Anikoto's own catalog
+    // index, Vidnest's TMDB-backed sections) — wait for each to appear.
+    ['anikoto-grid', 'vidnest-movies-grid', 'vidnest-shows-grid'].forEach(function (id) {
+      var tries = 0;
+      (function waitGrid() {
+        var g = document.getElementById(id);
+        if (g) observeContainer(g);
+        else if (tries++ < 15) setTimeout(waitGrid, 700);
+      })();
+    });
   }
 
   /* ─────────────────────────────────────────────────────
