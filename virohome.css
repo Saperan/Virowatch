@@ -73,12 +73,18 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    /* Rail is fixed/overlaid (not a flex sibling), so this reserves its
+       collapsed width instead — expanding the rail on hover then overlays
+       content rather than reflowing/pushing it (was causing motion
+       sickness for a user when the whole page shifted on every hover). */
+    margin-left: var(--rail-w);
 }
 
 /* ── Slim rail (hover to expand) ─────────────────────── */
 .rail {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
     height: 100vh;
     width: var(--rail-w);
     transition: width 0.32s var(--vw-ease);
@@ -807,6 +813,103 @@ html[data-vw-theme*="light"] .hero-art::after {
     margin-right: 32px;
 }
 
+/* ── Watchlist sort/group toolbar ─────────────────────── */
+.wl-toolbar {
+    display: none; /* shown only while the Watchlist view is open */
+    justify-content: flex-end;
+    position: relative;
+    padding: 14px 32px 0;
+}
+.wl-sort-toggle {
+    background: var(--vw-chip-bg);
+    border: 1px solid var(--vw-chip-border);
+    color: var(--vw-text);
+    font-family: "Kanit", sans-serif;
+    font-size: 0.82rem;
+    padding: 8px 16px;
+    border-radius: 99px;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease;
+}
+.wl-sort-toggle:hover {
+    background: var(--vw-hover-strong);
+    border-color: var(--vw-active-border);
+}
+.wl-sort-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 240px;
+    padding: 16px;
+    background: var(--vw-panel);
+    border: 1px solid var(--vw-border-strong);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    transition: opacity 0.2s var(--vw-ease), transform 0.2s var(--vw-ease);
+    z-index: 20;
+}
+.wl-sort-panel.wl-sort-open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+.wl-sort-panel label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-family: "Kanit", sans-serif;
+    font-size: 0.78rem;
+    color: var(--vw-muted);
+}
+.wl-sort-panel select {
+    background: var(--vw-input-bg);
+    border: 1px solid var(--vw-input-border);
+    color: var(--vw-text);
+    font-family: "Kanit", sans-serif;
+    font-size: 0.85rem;
+    padding: 8px 10px;
+    border-radius: 8px;
+}
+.wl-sort-panel select:focus {
+    outline: none;
+    border-color: var(--vw-input-border-focus);
+}
+.wl-group-check {
+    flex-direction: row !important;
+    align-items: center;
+    gap: 8px !important;
+    color: var(--vw-text) !important;
+    font-size: 0.85rem !important;
+    cursor: pointer;
+}
+.wl-group-check input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--vw-accent-bg);
+    cursor: pointer;
+}
+.wl-group-header {
+    grid-column: 1 / -1;
+    font-family: "Kanit", sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--vw-muted);
+    padding: 18px 2px 8px;
+    border-bottom: 1px solid var(--vw-border);
+    margin-bottom: 6px;
+}
+.wl-group-header:first-child {
+    padding-top: 2px;
+}
+
 /* ── Footer ──────────────────────────────────────────── */
 .main .footer {
     padding: 28px 32px 22px;
@@ -862,6 +965,9 @@ html[data-vw-theme*="light"] .hero-art::after {
 }
 
 @media (max-width: 560px) {
+    .main {
+        margin-left: 0; /* rail becomes a bottom bar below, not a left sidebar */
+    }
     .rail {
         position: fixed;
         bottom: 0;
