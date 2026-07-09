@@ -26,11 +26,37 @@
   function addItem(item) {
     var list = getList();
     if (list.some(function (i) { return i.key === item.key; })) return;
+    if (!item.status) item.status = 'planning'; // watching | planning | watched
     list.unshift(item);
     setList(list);
     refreshSidebar();
     if (window.vwAniListPush) window.vwAniListPush('add', item); // sync to AniList
   }
+
+  /* Status change from the watchlist view — pushes to AniList (anime) */
+  window.vwlSetStatus = function (key, status) {
+    var list = getList();
+    var it = null;
+    list.forEach(function (i) { if (i.key === key) it = i; });
+    if (!it || it.status === status) return;
+    it.status = status;
+    setList(list);
+    refreshSidebar();
+    if (window.vwAniListPush) window.vwAniListPush('status', it);
+  };
+
+  /* Bulk status update without AniList pushes — used by the pull-sync so
+     imported statuses don't echo back. byKey = { key: status } */
+  window.vwlBulkSetStatus = function (byKey) {
+    var list = getList();
+    var changed = 0;
+    list.forEach(function (i) {
+      var s = byKey && byKey[i.key];
+      if (s && i.status !== s) { i.status = s; changed++; }
+    });
+    if (changed) { setList(list); refreshSidebar(); }
+    return changed;
+  };
 
   function removeItem(key) {
     var removed = getList().find(function (i) { return i.key === key; });
@@ -47,6 +73,7 @@
     (items || []).forEach(function (it) {
       if (!it || !it.key) return;
       if (list.some(function (i) { return i.key === it.key; })) return;
+      if (!it.status) it.status = 'planning';
       list.push(it);
       added++;
     });
