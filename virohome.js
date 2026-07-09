@@ -36,8 +36,19 @@
 
   /* ── Watchlist view (grid in the main column) ───────────────────── */
   var WL_PREFS_KEY = "vw_watchlist_prefs";
+  var WL_STATUSES = [
+    ["watching", "Watching"],
+    ["planning", "Plan to watch"],
+    ["watched", "Watched"],
+  ];
+  function wlStatusLabel(s) {
+    for (var i = 0; i < WL_STATUSES.length; i++) {
+      if (WL_STATUSES[i][0] === s) return WL_STATUSES[i][1];
+    }
+    return "Plan to watch";
+  }
   function getWlPrefs() {
-    var d = { sort: "recent", group: false };
+    var d = { sort: "recent", group: false, show: "all" };
     try {
       return Object.assign(d, JSON.parse(localStorage.getItem(WL_PREFS_KEY) || "{}"));
     } catch (_) {
@@ -64,9 +75,80 @@
       arr.sort(function (a, b) {
         return (b.title || b.key || "").localeCompare(a.title || a.key || "");
       });
+    } else if (mode === "status") {
+      // Watching first, then plan-to-watch, watched last; stable sort
+      // keeps recently-added first inside each bucket
+      var ORD = { watching: 0, planning: 1, watched: 2 };
+      arr.sort(function (a, b) {
+        var oa = ORD[a.status] != null ? ORD[a.status] : 1;
+        var ob = ORD[b.status] != null ? ORD[b.status] : 1;
+        return oa - ob;
+      });
     }
     // "recent" = keep vwlGet()'s order as-is (newest added first already)
     return arr;
+  }
+
+  function filterWlList(list, show) {
+    if (!show || show === "all") return list;
+    return list.filter(function (i) {
+      return (i.status || "planning") === show;
+    });
+  }
+
+  /* ── Watch-status menu (one shared element, portaled to <body>) ── */
+  var wlMenu = null;
+  var wlMenuKey = null;
+
+  function ensureWlMenu() {
+    if (wlMenu) return;
+    wlMenu = document.createElement("div");
+    wlMenu.id = "wlStatusMenu";
+    wlMenu.className = "wl-status-menu";
+    var head = document.createElement("div");
+    head.className = "wl-status-menu-label";
+    head.textContent = "Watch status";
+    wlMenu.appendChild(head);
+    WL_STATUSES.forEach(function (pair) {
+      var opt = document.createElement("button");
+      opt.type = "button";
+      opt.className = "wl-status-opt";
+      opt.dataset.st = pair[0];
+      opt.textContent = pair[1];
+      opt.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var key = wlMenuKey;
+        closeWlMenu();
+        if (key && typeof window.vwlSetStatus === "function") {
+          window.vwlSetStatus(key, pair[0]);
+        }
+      });
+      wlMenu.appendChild(opt);
+    });
+    document.body.appendChild(wlMenu);
+  }
+
+  function openWlMenu(pill, item) {
+    ensureWlMenu();
+    wlMenuKey = item.key;
+    var cur = item.status || "planning";
+    wlMenu.querySelectorAll(".wl-status-opt").forEach(function (o) {
+      o.classList.toggle("active", o.dataset.st === cur);
+    });
+    // Anchored beside the pill on desktop; the mobile stylesheet turns
+    // this into a bottom sheet and overrides these coordinates
+    var r = pill.getBoundingClientRect();
+    var w = 160;
+    var x = Math.min(window.innerWidth - w - 8, Math.max(8, r.right - w));
+    var y = Math.min(window.innerHeight - 180, r.bottom + 8);
+    wlMenu.style.left = x + "px";
+    wlMenu.style.top = y + "px";
+    wlMenu.classList.add("open");
+  }
+
+  function closeWlMenu() {
+    if (wlMenu) wlMenu.classList.remove("open");
+    wlMenuKey = null;
   }
 
   function buildWlCard(item) {
@@ -85,6 +167,26 @@
     p.textContent = item.title || item.key;
     div.appendChild(img);
     div.appendChild(p);
+
+    // Status pill (top-right; the +/✓ button owns top-left). The menu is a
+    // single element portaled to <body> — .movie-item clips overflow, so an
+    // in-card dropdown would be cut off. vwlSetStatus fires vwl-updated,
+    // which re-renders this whole view with the new pill.
+    var status = item.status || "planning";
+    var pill = document.createElement("button");
+    pill.type = "button";
+    pill.className = "wl-status-pill wl-st-" + status;
+    pill.title = wlStatusLabel(status) + " — click to change";
+    pill.setAttribute("aria-label", "Watch status: " + wlStatusLabel(status));
+    pill.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (wlMenu && wlMenu.classList.contains("open") && wlMenuKey === item.key) {
+        closeWlMenu();
+      } else {
+        openWlMenu(pill, item);
+      }
+    });
+    div.appendChild(pill);
     div.addEventListener("click", function () {
       var aniId =
         item.aniId ||
@@ -120,6 +222,13 @@
       return;
     }
     var prefs = getWlPrefs();
+    list = filterWlList(list, prefs.show);
+    if (!list.length) {
+      ml.innerHTML =
+        '<p style="grid-column:1/-1;text-align:center;padding:40px 0;opacity:.55;">' +
+        "Nothing marked as “" + wlStatusLabel(prefs.show) + "” yet.</p>";
+      return;
+    }
     if (!prefs.group) {
       sortWlList(list, prefs.sort).forEach(function (item) {
         ml.appendChild(buildWlCard(item));
@@ -168,6 +277,7 @@
     sortSelect.id = "wlSortSelect";
     [
       ["recent", "Recently added"],
+      ["status", "Watching first"],
       ["az", "Title A → Z"],
       ["za", "Title Z → A"],
     ].forEach(function (pair) {
@@ -178,6 +288,18 @@
     });
     sortLabel.appendChild(sortSelect);
 
+    var showLabel = document.createElement("label");
+    showLabel.textContent = "Show";
+    var showSelect = document.createElement("select");
+    showSelect.id = "wlShowSelect";
+    [["all", "Everything"]].concat(WL_STATUSES).forEach(function (pair) {
+      var o = document.createElement("option");
+      o.value = pair[0];
+      o.textContent = pair[1];
+      showSelect.appendChild(o);
+    });
+    showLabel.appendChild(showSelect);
+
     var groupLabel = document.createElement("label");
     groupLabel.className = "wl-group-check";
     var groupCheck = document.createElement("input");
@@ -187,6 +309,7 @@
     groupLabel.appendChild(document.createTextNode("Separate Movies / TV Shows / Anime"));
 
     panel.appendChild(sortLabel);
+    panel.appendChild(showLabel);
     panel.appendChild(groupLabel);
     bar.appendChild(toggle);
     bar.appendChild(panel);
@@ -194,6 +317,7 @@
 
     var prefs = getWlPrefs();
     sortSelect.value = prefs.sort;
+    showSelect.value = prefs.show || "all";
     groupCheck.checked = prefs.group;
 
     toggle.addEventListener("click", function () {
@@ -205,6 +329,12 @@
     sortSelect.addEventListener("change", function () {
       var p = getWlPrefs();
       p.sort = sortSelect.value;
+      saveWlPrefs(p);
+      renderWatchlistView();
+    });
+    showSelect.addEventListener("change", function () {
+      var p = getWlPrefs();
+      p.show = showSelect.value;
       saveWlPrefs(p);
       renderWatchlistView();
     });
@@ -253,6 +383,12 @@
     }
   }
 
+  // How many entries the rail shows — user-set in Settings (sidebar.js)
+  function cwLimit() {
+    var n = parseInt(localStorage.getItem("vw_cw_count") || "3", 10);
+    return n >= 1 && n <= 15 ? n : 3;
+  }
+
   function renderCW() {
     var wrap = $("railCw"),
       holder = $("railCwItems");
@@ -264,7 +400,7 @@
     }
     wrap.style.display = "";
     holder.innerHTML = "";
-    list.slice(0, 3).forEach(function (it) {
+    list.slice(0, cwLimit()).forEach(function (it) {
       var btn = document.createElement("button");
       btn.className = "cw-item";
       btn.type = "button";
@@ -415,6 +551,18 @@
         if (si.value) watchlistViewOpen = false;
       });
     }
+
+    // Click/tap outside the status menu (or scrolling) closes it
+    document.addEventListener("mousedown", function (e) {
+      if (!wlMenu || !wlMenu.classList.contains("open")) return;
+      if (wlMenu.contains(e.target)) return;
+      if (e.target.closest && e.target.closest(".wl-status-pill")) return;
+      closeWlMenu();
+    });
+    window.addEventListener("scroll", closeWlMenu, {
+      passive: true,
+      capture: true,
+    });
 
     renderCW();
     renderSports();
