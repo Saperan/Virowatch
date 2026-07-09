@@ -27,14 +27,23 @@
   var Q_VIEWER = 'query{Viewer{id name avatar{medium}}}';
   var Q_LIST =
     'query($userId:Int){MediaListCollection(userId:$userId,type:ANIME,' +
-    'status_in:[CURRENT,PLANNING,PAUSED]){lists{entries{media{id ' +
+    'status_in:[CURRENT,PLANNING,PAUSED]){lists{entries{status media{id ' +
     'title{romaji english}coverImage{large}}}}}}';
   var Q_ENTRY = 'query($mediaId:Int,$userId:Int){MediaList(mediaId:$mediaId,userId:$userId){id}}';
   var Q_FIND =
     'query($q:String){Page(perPage:8){media(search:$q,type:ANIME){id format ' +
     'title{romaji english}synonyms}}}';
-  var M_SAVE  = 'mutation($mediaId:Int){SaveMediaListEntry(mediaId:$mediaId,status:PLANNING){id}}';
+  var M_SAVE =
+    'mutation($mediaId:Int,$status:MediaListStatus){' +
+    'SaveMediaListEntry(mediaId:$mediaId,status:$status){id}}';
   var M_DEL   = 'mutation($id:Int){DeleteMediaListEntry(id:$id){deleted}}';
+
+  /* Local watchlist statuses ↔ AniList list statuses */
+  var TO_ANILIST = { watching: 'CURRENT', planning: 'PLANNING', watched: 'COMPLETED' };
+  var FROM_ANILIST = { CURRENT: 'watching', REPEATING: 'watching', PLANNING: 'planning', PAUSED: 'planning', COMPLETED: 'watched' };
+  function aniStatusOf(item) {
+    return TO_ANILIST[item && item.status] || 'PLANNING';
+  }
 
   /* ─────────────────────────────────────────────────────
      Auth state
@@ -220,8 +229,11 @@
     if (!mediaId) return;
     try {
       if (op === 'add') {
-        await gql(M_SAVE, { mediaId: mediaId });
+        await gql(M_SAVE, { mediaId: mediaId, status: aniStatusOf(item) });
         toast('Added to AniList: ' + (item.title || ''));
+      } else if (op === 'status') {
+        await gql(M_SAVE, { mediaId: mediaId, status: aniStatusOf(item) });
+        toast('AniList: ' + (item.title || '') + ' → ' + aniStatusOf(item).toLowerCase());
       } else if (op === 'remove') {
         var d = await gql(Q_ENTRY, { mediaId: mediaId, userId: auth.userId });
         var entryId = d && d.MediaList && d.MediaList.id;
@@ -232,7 +244,7 @@
       }
     } catch (e) {
       // "Not Found" on remove = wasn't on the AniList list; stay quiet.
-      if (op === 'add') toast('AniList sync failed — try Sync now later', true);
+      if (op !== 'remove') toast('AniList sync failed — try Sync now later', true);
     }
   };
 
@@ -253,7 +265,9 @@
       var lists = (d && d.MediaListCollection && d.MediaListCollection.lists) || [];
       var entries = [];
       lists.forEach(function (l) {
-        (l.entries || []).forEach(function (e) { if (e.media) entries.push(e.media); });
+        (l.entries || []).forEach(function (e) {
+          if (e.media) entries.push({ media: e.media, status: e.status });
+        });
       });
 
       if (window.anikotoEnsureIndex) await window.anikotoEnsureIndex();
@@ -261,21 +275,27 @@
 
       var remoteIds = new Set();
       var toAdd = [];
+      var statusByKey = {}; // pull statuses onto items we already have
       var missing = 0;
-      entries.forEach(function (m) {
+      entries.forEach(function (en) {
+        var m = en.media;
         remoteIds.add(Number(m.id));
         if (!canMatch) return;
         var c = window.anikotoFindByAniList(m.id);
         if (!c) { missing++; return; }
+        var status = FROM_ANILIST[en.status] || 'planning';
+        statusByKey['ANI_' + c.id] = status;
         toAdd.push({
           key: 'ANI_' + c.id,
           title: c.title || (m.title && (m.title.english || m.title.romaji)) || '',
           image: c.poster || (m.coverImage && m.coverImage.large) || '',
           cat: 'anime',
           aniId: c.id,
+          status: status,
         });
       });
       var added = window.vwlBulkAdd ? window.vwlBulkAdd(toAdd) : 0;
+      if (window.vwlBulkSetStatus) window.vwlBulkSetStatus(statusByKey);
 
       /* 2. Push — local anime entries missing on AniList (as PLANNING).
          Anikoto entries map by id; native Virowatch anime match by title. */
@@ -289,7 +309,7 @@
         var mediaId = await resolveAniListId(local[i]);
         if (!mediaId || remoteIds.has(Number(mediaId))) continue;
         try {
-          await gql(M_SAVE, { mediaId: mediaId });
+          await gql(M_SAVE, { mediaId: mediaId, status: aniStatusOf(local[i]) });
           pushed++;
           await sleep(400); // stay well under AniList rate limits
         } catch (_) {}
