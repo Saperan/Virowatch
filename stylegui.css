@@ -195,6 +195,24 @@
   background: var(--vw-accent-fg, #111);
 }
 
+/* ─── Number field (e.g. Continue-watching count) ───────────────────── */
+.vws-num {
+  flex-shrink: 0;
+  width: 58px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--vw-input-bg, rgba(255, 255, 255, 0.07));
+  border: 1px solid var(--vw-border-strong, rgba(255, 255, 255, 0.15));
+  color: var(--vw-text-strong, rgba(255, 255, 255, 0.92));
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: center;
+}
+.vws-num:focus {
+  outline: none;
+  border-color: var(--vw-accent-bg, #e5e7eb);
+}
+
 /* ─── Style search ──────────────────────────────────────────────────── */
 .sg-search-wrap {
   position: relative;
