@@ -276,6 +276,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const div = document.createElement("div");
       div.className = "movie-item";
       div.dataset.movie = key;
+      div.dataset.cat = category; // hover-info.js keys off cat === "anime"
       div.innerHTML = `<img src="${info.image || "https://via.placeholder.com/150"}" loading="lazy"/><p class="kanit-extralight">${info.title || key}</p>`;
       const clean = div.cloneNode(true);
       clean.addEventListener("click", () => selectMovie(key));
@@ -610,6 +611,25 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
+      // 1b. Pasted IMDB id ("tt1234567") → resolve via TMDB and play it
+      if (/^tt\d{6,10}$/.test(q) && window.vidnestOpenByImdb) {
+        movieList.innerHTML =
+          '<p style="grid-column:1/-1;text-align:center;margin-top:20px;opacity:.6;">' +
+          "Looking up IMDB ID…</p>";
+        if (heroSection) heroSection.style.display = "none";
+        if (categoryContainer) categoryContainer.style.display = "none";
+        if (movieListWrapper) movieListWrapper.style.display = "block";
+        try {
+          const ok = await window.vidnestOpenByImdb(q);
+          if (!ok && e.target.value.trim().toLowerCase() === q) {
+            movieList.innerHTML =
+              '<p style="grid-column:1/-1;text-align:center;margin-top:20px;">' +
+              "No title found for that IMDB ID.</p>";
+          }
+        } catch (_) {}
+        return;
+      }
+
       // 2. If typing, Hide Categories & Show List Wrapper
       if (heroSection) heroSection.style.display = "none";
       if (categoryContainer) categoryContainer.style.display = "none";
@@ -658,6 +678,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             img: a.poster,
             title: a.title,
             aniId: a.id,
+            aniListId: a.aniListId,
             open: () => window.openAnikotoById?.(a.id),
           });
         });
@@ -674,45 +695,243 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       scored.sort((a, b) => b.score - a.score);
 
-      if (scored.length === 0) {
-        movieList.innerHTML =
-          '<p style="text-align:center; width:100%; margin-top:20px;">No results found.</p>';
-        return;
-      }
+      // Genre queries ("romance", "tag: action", "sports anime") also pull
+      // trending anime of that genre from AniList, mapped to playable
+      // anikoto entries. Hover-card genre chips land here via vwTagSearch.
+      let tagItems = null;
+      const tagGenre = detectGenre(q);
 
-      let shown = 0;
-      const PAGE = 10;
-      const renderChunk = () => {
-        movieList.querySelector(".search-load-more")?.remove();
-        scored.slice(shown, shown + PAGE).forEach((item) => {
-          const div = document.createElement("div");
-          div.className = "movie-item";
-          if (item.aniId != null) div.dataset.aniId = String(item.aniId);
-          else { div.dataset.movie = item.key; div.dataset.cat = item.catKey; }
-          div.innerHTML =
-            `<img src="${item.img || "https://via.placeholder.com/150"}" loading="lazy"/>` +
-            `<p class="kanit-extralight">${item.title}</p>`;
-          div.addEventListener("click", item.open);
-          movieList.appendChild(div);
+      // "movies" and "lunora" are both Movies; anikoto items count as anime
+      const typeOfItem = (it) =>
+        it.aniId != null || it.catKey === "anime"
+          ? "anime"
+          : it.catKey === "shows"
+            ? "shows"
+            : "movies";
+
+      const renderResults = () => {
+        movieList.innerHTML = "";
+
+        const bar = document.createElement("div");
+        bar.className = "search-filter-bar";
+        [
+          ["all", "All"],
+          ["anime", "Anime"],
+          ["movies", "Movies"],
+          ["shows", "TV shows"],
+        ].forEach(([val, label]) => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.textContent = label;
+          if (searchTypeFilter === val) b.classList.add("active");
+          b.addEventListener("click", () => {
+            searchTypeFilter = val;
+            renderResults();
+          });
+          bar.appendChild(b);
         });
-        shown += Math.min(PAGE, scored.length - shown);
-        if (shown < scored.length) {
-          const btn = document.createElement("button");
-          btn.className = "search-load-more";
-          btn.textContent = `Load more (${scored.length - shown})`;
-          btn.style.cssText =
-            "grid-column:1/-1;margin:16px auto;padding:9px 22px;border-radius:99px;" +
-            "background:var(--vw-chip-bg,rgba(255,255,255,.08));" +
-            "border:1px solid var(--vw-chip-border,rgba(255,255,255,.16));" +
-            "color:var(--vw-text,#eaeaea);font-size:.85rem;cursor:pointer;" +
-            "transition:background .18s ease,border-color .18s ease;";
-          btn.addEventListener("click", renderChunk);
-          movieList.appendChild(btn);
+        movieList.appendChild(bar);
+
+        // Tag matches lead; drop title-match dupes of the same anime
+        const tagIds = new Set((tagItems || []).map((t) => String(t.aniId)));
+        const f = searchTypeFilter;
+        let list = scored.filter(
+          (it) =>
+            (f === "all" || typeOfItem(it) === f) &&
+            !(it.aniId != null && tagIds.has(String(it.aniId))),
+        );
+        if (tagItems && (f === "all" || f === "anime"))
+          list = [...tagItems, ...list];
+
+        if (!list.length) {
+          const p = document.createElement("p");
+          p.style.cssText = "grid-column:1/-1;text-align:center;margin-top:20px;";
+          p.textContent = "No results found.";
+          movieList.appendChild(p);
+          return;
         }
+
+        let shown = 0;
+        const PAGE = 10;
+        const renderChunk = () => {
+          movieList.querySelector(".search-load-more")?.remove();
+          list.slice(shown, shown + PAGE).forEach((item) => {
+            const div = document.createElement("div");
+            div.className = "movie-item";
+            if (item.aniId != null) div.dataset.aniId = String(item.aniId);
+            else { div.dataset.movie = item.key; div.dataset.cat = item.catKey; }
+            if (item.aniListId) div.dataset.aniListId = String(item.aniListId);
+            div.innerHTML =
+              `<img src="${item.img || "https://via.placeholder.com/150"}" loading="lazy"/>` +
+              `<p class="kanit-extralight">${item.title}</p>`;
+            div.addEventListener("click", item.open);
+            movieList.appendChild(div);
+          });
+          shown += Math.min(PAGE, list.length - shown);
+          if (shown < list.length) {
+            const btn = document.createElement("button");
+            btn.className = "search-load-more";
+            btn.textContent = `Load more (${list.length - shown})`;
+            btn.style.cssText =
+              "grid-column:1/-1;margin:16px auto;padding:9px 22px;border-radius:99px;" +
+              "background:var(--vw-chip-bg,rgba(255,255,255,.08));" +
+              "border:1px solid var(--vw-chip-border,rgba(255,255,255,.16));" +
+              "color:var(--vw-text,#eaeaea);font-size:.85rem;cursor:pointer;" +
+              "transition:background .18s ease,border-color .18s ease;";
+            btn.addEventListener("click", renderChunk);
+            movieList.appendChild(btn);
+          }
+        };
+        renderChunk();
       };
-      renderChunk();
+      renderResults();
+
+      if (tagGenre) {
+        fetchGenreAnime(tagGenre).then((items) => {
+          // Query changed while the genre fetch was in flight — drop it
+          if (e.target.value.trim().toLowerCase() !== q) return;
+          if (!items.length) return;
+          tagItems = items;
+          renderResults();
+        });
+      }
     }, 300);
   });
+
+  // ── Genre / tag search ─────────────────────────────────────────────
+  const ANI_GENRES = [
+    "Action", "Adventure", "Comedy", "Drama", "Ecchi", "Fantasy",
+    "Horror", "Mahou Shoujo", "Mecha", "Music", "Mystery",
+    "Psychological", "Romance", "Sci-Fi", "Slice of Life", "Sports",
+    "Supernatural", "Thriller",
+  ];
+  function detectGenre(q) {
+    const n = q.replace(/^tag:\s*/, "").replace(/\s+anime$/, "").trim();
+    return ANI_GENRES.find((g) => g.toLowerCase() === n) || null;
+  }
+  let searchTypeFilter = "all";
+
+  // Trending anime for one AniList genre, mapped to playable anikoto
+  // entries (unmatched ones are dropped — no point listing dead cards).
+  async function fetchGenreAnime(genre) {
+    try {
+      const j = await aniListGql(
+        "query($g:String){Page(perPage:40){media(genre:$g,type:ANIME,sort:TRENDING_DESC){id title{romaji english} coverImage{large}}}}",
+        { g: genre },
+      );
+      const media = j?.data?.Page?.media || [];
+      if (!media.length) return [];
+      // Needs the anikoto catalog index (builds once, cached ~24h)
+      if (window.anikotoEnsureIndex) await window.anikotoEnsureIndex();
+      if (typeof window.anikotoFindByAniList !== "function") return [];
+      const out = [];
+      media.forEach((m) => {
+        const c = window.anikotoFindByAniList(m.id);
+        if (!c) return;
+        out.push({
+          score: 0,
+          aniId: c.id,
+          aniListId: m.id,
+          title: c.title || m.title?.english || m.title?.romaji || "",
+          img: c.poster || m.coverImage?.large || "",
+          open: () => window.openAnikotoById?.(c.id),
+        });
+      });
+      return out;
+    } catch (_) {
+      return [];
+    }
+  }
+
+  // Genre chip on the hover info card → run that tag as a search
+  window.vwTagSearch = function (genre) {
+    const si = document.getElementById("searchInput");
+    if (!si) return;
+    si.value = genre;
+    si.dispatchEvent(new Event("input"));
+  };
+
+  // ── AniList banner backdrops for the hero ─────────────────────────
+  // Public GraphQL endpoint — works without an AniList login. Results are
+  // cached a week in localStorage so a normal visit costs 0–1 requests.
+  // v2: value = bannerImage, falling back to coverImage.extraLarge for
+  // titles AniList has no banner for (beats stretching the tiny poster)
+  const BANNER_KEY = "vw_banner_cache_v2";
+  const BANNER_TTL = 7 * 24 * 3600 * 1000;
+  let bannerCache = {};
+  try {
+    const o = JSON.parse(localStorage.getItem(BANNER_KEY) || "null");
+    if (o && Date.now() - o.t < BANNER_TTL) bannerCache = o.d || {};
+  } catch (_) {}
+  const saveBannerCache = () => {
+    try {
+      localStorage.setItem(
+        BANNER_KEY,
+        JSON.stringify({ t: Date.now(), d: bannerCache }),
+      );
+    } catch (_) {}
+  };
+  // TV shows aren't on AniList — only anime items get a banner key
+  const bannerKeyOf = (item) =>
+    item.aniListId
+      ? "id:" + item.aniListId
+      : item.catKey === "anime" && item.info.title
+        ? "q:" + item.info.title.toLowerCase()
+        : null;
+  const bannerFor = (item) => {
+    const k = bannerKeyOf(item);
+    return (k && bannerCache[k]) || "";
+  };
+  const aniListGql = (query, variables) =>
+    fetch("https://graphql.anilist.co", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ query, variables }),
+    }).then((r) => r.json());
+
+  async function prefetchBanners(items, onBanner) {
+    // Anikoto rows carry the AniList media id — one batch query covers all
+    const idItems = items.filter(
+      (i) => i.aniListId && bannerCache["id:" + i.aniListId] == null,
+    );
+    if (idItems.length) {
+      try {
+        const j = await aniListGql(
+          "query($ids:[Int]){Page(perPage:25){media(id_in:$ids,type:ANIME){id bannerImage coverImage{extraLarge}}}}",
+          { ids: idItems.map((i) => i.aniListId) },
+        );
+        (j?.data?.Page?.media || []).forEach((m) => {
+          bannerCache["id:" + m.id] =
+            m.bannerImage || m.coverImage?.extraLarge || "";
+        });
+        // cache misses as "" too, so we don't re-ask every render
+        idItems.forEach((i) => {
+          if (bannerCache["id:" + i.aniListId] == null)
+            bannerCache["id:" + i.aniListId] = "";
+        });
+        saveBannerCache();
+        onBanner?.();
+      } catch (_) {}
+    }
+    // Native anime have no id — match by title (cached, so this costs a
+    // handful of requests once a week, not per visit)
+    for (const it of items) {
+      const k = bannerKeyOf(it);
+      if (!k || k[0] !== "q" || bannerCache[k] != null) continue;
+      try {
+        const j = await aniListGql(
+          "query($q:String){Media(search:$q,type:ANIME){bannerImage coverImage{extraLarge}}}",
+          { q: it.info.title },
+        );
+        const m = j?.data?.Media;
+        bannerCache[k] = m?.bannerImage || m?.coverImage?.extraLarge || "";
+        saveBannerCache();
+        onBanner?.();
+      } catch (_) {
+        break; // network trouble — poster fallback is fine
+      }
+    }
+  }
 
   // Newest added: hero (featured = #1) + poster grid — first 6 streaming
   // anime from Anikoto, then the native Virowatch anime + shows.
@@ -728,6 +947,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         catKey: "anime",
         key: "ANI_" + a.id,
         aniId: a.id,
+        aniListId: a.ani_id ? Number(a.ani_id) : null,
         info: { title: a.title || "", image: a.poster || "" },
       }));
     const animeFirst = Object.entries(mediaData.anime || {})
@@ -763,12 +983,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     const heroWatch = document.getElementById("heroWatchBtn");
     const heroWl = document.getElementById("heroWlBtn");
 
+    let heroItem = null;
     const setHero = (item) => {
       if (!item || !heroArt || !heroTitle) return;
+      heroItem = item;
       const { catKey, key, info } = item;
-      heroArt.style.backgroundImage = info.image
-        ? `url("${info.image}")`
-        : "";
+      // AniList banner (landscape) when we have it, poster otherwise
+      const art = bannerFor(item) || info.image;
+      heroArt.style.backgroundImage = art ? `url("${art}")` : "";
       heroTitle.textContent = info.title || key;
       if (heroTags) {
         heroTags.innerHTML = "";
@@ -845,6 +1067,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
       div.addEventListener("mouseleave", () => clearTimeout(heroTid));
       listEl.appendChild(div);
+    });
+
+    // Banners arrive async — re-apply the hero so the backdrop upgrades
+    // from poster to banner as soon as its image is known
+    prefetchBanners(items, () => {
+      if (heroItem) setHero(heroItem);
     });
   }
   renderNewestAdded();
