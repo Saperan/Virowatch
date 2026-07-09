@@ -27,7 +27,7 @@
   var Q_VIEWER = 'query{Viewer{id name avatar{medium}}}';
   var Q_LIST =
     'query($userId:Int){MediaListCollection(userId:$userId,type:ANIME,' +
-    'status_in:[CURRENT,PLANNING,PAUSED]){lists{entries{status media{id ' +
+    'status_in:[CURRENT,REPEATING,PLANNING,PAUSED,COMPLETED]){lists{entries{status media{id ' +
     'title{romaji english}coverImage{large}}}}}}';
   var Q_ENTRY = 'query($mediaId:Int,$userId:Int){MediaList(mediaId:$mediaId,userId:$userId){id}}';
   var Q_FIND =
