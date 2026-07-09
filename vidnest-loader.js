@@ -77,6 +77,8 @@
       return await r.json();
     } catch (_) { return null; }
   }
+  // hover-info.js uses this for movie/TV metadata (overview, genres, backdrop)
+  window.vidnestTmdb = tmdbJson;
 
   // ── Vidnest's resolver (new.vidnest.fun) + fake "encryption" ──────
   // The alphabet below is copied verbatim from Vidnest's own client JS
@@ -112,6 +114,12 @@
     try { return JSON.parse(decoded); } catch (_) { return decoded; }
   }
 
+  // NOTE: a failed resolve often shows up in the console as a CORS error —
+  // vidnest's error responses (502 = title not on their moviebox backend)
+  // carry no Access-Control-Allow-Origin header, so the browser blames CORS.
+  // Successful responses send ACAO:* (even for file://'s "null" origin,
+  // verified 2026-07-09), so there is nothing to proxy around here; the
+  // embed fallback in vidnestAutoPlay covers missing titles.
   async function vidnestApiFetch(path) {
     try {
       const r = await fetch(`https://new.vidnest.fun${path}`);
@@ -125,16 +133,34 @@
     return [...list].sort((a, b) => (RES_ORDER[b.resolution] || 0) - (RES_ORDER[a.resolution] || 0));
   }
 
+  // Second-chance source when moviebox 502s (title not on that backend):
+  // hollymoviehd decodes to {streams:[{type:'mp4'|'hls',url,language}]} —
+  // its mp4 links play plain (206 without Referer/CORS, verified 2026-07-09).
+  // Mapped into moviebox's {link,resolution} shape so playDirect just works.
+  async function resolveHollyFallback(pathTail) {
+    const data = await vidnestApiFetch(`/hollymoviehd/${pathTail}`);
+    const mp4s = (data?.streams || []).filter((s) => s.type === "mp4" && s.url);
+    if (!mp4s.length) return null;
+    // MAIN = original audio track; dubbed variants sort after it
+    mp4s.sort((a, b) => (b.language === "MAIN") - (a.language === "MAIN"));
+    return mp4s.map((s) => ({
+      link: s.url,
+      resolution: s.language === "MAIN" ? "Auto" : s.language,
+    }));
+  }
+
   // Resolves to a direct, unrestricted .mp4 — plays in a plain <video src>.
   async function resolveVidnestMovie(tmdbId) {
     const data = await vidnestApiFetch(`/moviebox/movie/${tmdbId}`);
     const list = data && Array.isArray(data.url) ? data.url : null;
-    return list && list.length ? bestFirst(list) : null;
+    if (list && list.length) return bestFirst(list);
+    return resolveHollyFallback(`movie/${tmdbId}`);
   }
   async function resolveVidnestTv(tmdbId, season, episode) {
     const data = await vidnestApiFetch(`/moviebox/tv/${tmdbId}/${season}/${episode}`);
     const list = data && Array.isArray(data.url) ? data.url : null;
-    return list && list.length ? bestFirst(list) : null;
+    if (list && list.length) return bestFirst(list);
+    return resolveHollyFallback(`tv/${tmdbId}/${season}/${episode}`);
   }
   // Resolves to an .m3u8 on cdn.mewstream.buzz — Referer-gated, needs the
   // Cloudflare Worker proxy (same one megaplay-backup.js uses for Anikoto).
@@ -234,6 +260,19 @@
     return true;
   }
   window.openVidnestById = openVidnestById;
+
+  // ── IMDB id ("tt1234567") → TMDB find → play ──────────────────────
+  // content.js calls this when a pasted search query looks like an IMDB
+  // id. Movies and TV (incl. anime series — they live in TMDB's tv
+  // bucket) resolve; returns false when TMDB knows nothing.
+  window.vidnestOpenByImdb = async function (imdbId) {
+    const d = await tmdbJson(`/find/${imdbId}`, { external_source: "imdb_id" });
+    const movie = d?.movie_results?.[0];
+    if (movie?.id) return openVidnestById("VDM_" + movie.id);
+    const tv = d?.tv_results?.[0];
+    if (tv?.id) return openVidnestById("VDT_" + tv.id);
+    return false;
+  };
 
   // ── Search (folded into content.js's unified search bar) ──────────
   window.vidnestSearch = async function (query) {
@@ -740,7 +779,7 @@
       if (myToken !== token) return; // a newer episode/title loaded (or the user left) meanwhile
       if (!result) {
         active = false;
-        toast("Vidnest resolve failed — falling back to the embed (check connection/ad-blocker)");
+        toast("No direct source for this title — trying Vidnest's own player (may have other servers)");
         const f = iframeEl();
         if (f) { bypassOnce = true; f.src = originalSrc; } // deliberate: real embed, ads and all
         return;
