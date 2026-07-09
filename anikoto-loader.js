@@ -211,6 +211,8 @@
     card.className     = "movie-item ani-card";
     card.dataset.aniId = String(item.id);
     card.dataset.done  = "0";
+    // AniList media id — hover-info.js reads this for the info card
+    if (item.ani_id) card.dataset.aniListId = String(item.ani_id);
 
     const img  = document.createElement("img");
     img.src     = item.poster || "";
@@ -411,7 +413,15 @@
     const res = [];
     for (const a of src) {
       const s = Math.max(scoreTitle(a.title, q), scoreTitle(a.alt || a.alternative, q));
-      if (s > 0) res.push({ id: a.id, title: a.title, poster: a.poster, score: s });
+      if (s > 0)
+        res.push({
+          id: a.id,
+          title: a.title,
+          poster: a.poster,
+          score: s,
+          // catalog entries have aniListId, browsed-cache items raw ani_id
+          aniListId: a.aniListId || (a.ani_id ? Number(a.ani_id) : null),
+        });
     }
     res.sort((x, y) => y.score - x.score);
     return res.slice(0, 60);
