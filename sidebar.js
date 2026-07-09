@@ -62,4 +62,23 @@
       }
     });
   }
+
+  /* ── Continue-watching count (virohome.js renderCW reads this) ── */
+  var cwCount = document.getElementById('cwCountInput');
+  if (cwCount) {
+    try {
+      cwCount.value = localStorage.getItem('vw_cw_count') || '3';
+    } catch (_) {}
+    cwCount.addEventListener('change', function () {
+      var n = parseInt(cwCount.value, 10);
+      if (!(n >= 1)) n = 3;
+      if (n > 15) n = 15;
+      cwCount.value = String(n);
+      try {
+        localStorage.setItem('vw_cw_count', String(n));
+      } catch (_) {}
+      // virohome.js listens for this and re-renders the rail immediately
+      window.dispatchEvent(new CustomEvent('vw-cw-updated'));
+    });
+  }
 })();
