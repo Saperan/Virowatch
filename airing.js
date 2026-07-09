@@ -14,18 +14,21 @@
   "use strict";
 
   var API = "https://graphql.anilist.co";
-  var LS_KEY = "vw_airing";
+  var LS_KEY = "vw_airing_v2"; // v2: items grew img + desc for the modal
   var CACHE_TTL = 10 * 60 * 1000; // refetch after 10 min
+  var MAX_ITEMS = 10; // strip shows this many; modal shows everything
+  var MODAL_MAX = 30;
   var LOOKBACK = 90 * 60; // include episodes aired in the last 90 min ("NEW")
-  var MAX_ITEMS = 10;
   var MIN_POPULARITY = 3000; // drop titles nobody tracks
   var SPEED = 24; // marquee px per second
 
   var QUERY =
     "query($from:Int){Page(perPage:50){airingSchedules(airingAt_greater:$from,sort:TIME){" +
-    "airingAt episode media{id isAdult popularity format title{english romaji}}}}}";
+    "airingAt episode media{id isAdult popularity format description " +
+    "coverImage{large} title{english romaji}}}}}";
 
-  var items = []; // [{id,title,ep,airingAt}]
+  var items = []; // [{id,title,ep,airingAt,img,desc}]
+  var stripItems = []; // first MAX_ITEMS of the above (marquee source)
   var strip, viewport, track;
   var marquee = { raf: 0, paused: false, resumeTimer: 0, last: 0 };
   var reducedMotion =
@@ -65,13 +68,15 @@
               (m.popularity || 0) >= MIN_POPULARITY
             );
           })
-          .slice(0, MAX_ITEMS)
+          .slice(0, MODAL_MAX)
           .map(function (s) {
             return {
               id: s.media.id,
               title: s.media.title.english || s.media.title.romaji,
               ep: s.episode,
               airingAt: s.airingAt,
+              img: (s.media.coverImage && s.media.coverImage.large) || "",
+              desc: cleanDesc(s.media.description),
             };
           });
         try {
@@ -82,6 +87,18 @@
         } catch (_) {}
         return list;
       });
+  }
+
+  // AniList descriptions arrive as loose HTML — flatten to one line of
+  // plain text (strip tags, then a <textarea> decodes the entities safely)
+  function cleanDesc(raw) {
+    var txt = (raw || "")
+      .replace(/<br\s*\/?>/gi, " ")
+      .replace(/<[^>]*>/g, "")
+      .replace(/\(Source:[^)]*\)\s*$/i, "");
+    var ta = document.createElement("textarea");
+    ta.innerHTML = txt;
+    return ta.value.replace(/\s+/g, " ").trim();
   }
 
   /* ── Local-time labels ────────────────────────────────────────── */
@@ -99,9 +116,20 @@
     return d.toLocaleDateString([], { weekday: "short" }) + " " + time;
   }
 
+  // Absolute local date for the modal rows ("Thu, Jul 10, 9:30 PM")
+  function fmtDate(ts) {
+    return new Date(ts * 1000).toLocaleString([], {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  }
+
   function refreshBadges() {
-    if (!strip) return;
-    strip.querySelectorAll(".sbadge[data-at]").forEach(function (b) {
+    // strip + modal rows both tag their badges with data-at
+    document.querySelectorAll(".sbadge[data-at]").forEach(function (b) {
       var label = fmtWhen(Number(b.dataset.at));
       if (b.textContent !== label) {
         b.textContent = label;
@@ -132,6 +160,94 @@
     } else {
       window.open("https://anilist.co/anime/" + aniListId, "_blank", "noopener");
     }
+  }
+
+  /* ── Full-schedule modal (click the "Airing soon" header) ─────── */
+  var modal = null;
+
+  function ensureModal() {
+    if (modal) return;
+    modal = document.createElement("div");
+    modal.id = "vwAiring";
+    modal.className = "vws-overlay"; // reuse the Settings modal shell look
+    modal.setAttribute("aria-hidden", "true");
+    modal.innerHTML =
+      '<div class="vws-modal vwair-modal" role="dialog" aria-modal="true" aria-label="Airing soon">' +
+      '<div class="vws-header"><span class="live-dot"></span>' +
+      '<div><div class="vws-title">Airing soon</div>' +
+      '<div class="vws-sub">AniList schedule · your local time</div></div>' +
+      '<button type="button" class="vws-close" aria-label="Close">×</button>' +
+      '</div><div class="vwair-list"></div></div>';
+    document.body.appendChild(modal);
+    modal.querySelector(".vws-close").addEventListener("click", closeModal);
+    modal.addEventListener("mousedown", function (e) {
+      if (e.target === modal) closeModal();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && modal.classList.contains("vws-open"))
+        closeModal();
+    });
+  }
+
+  function renderModalList() {
+    var list = modal.querySelector(".vwair-list");
+    list.innerHTML = "";
+    items.forEach(function (it) {
+      var row = document.createElement("button");
+      row.type = "button";
+      row.className = "vwair-row";
+
+      var img = document.createElement("img");
+      img.className = "vwair-img";
+      img.loading = "lazy";
+      img.alt = "";
+      if (it.img) img.src = it.img;
+
+      var info = document.createElement("span");
+      info.className = "vwair-info";
+      var t = document.createElement("span");
+      t.className = "vwair-title";
+      t.textContent = it.title;
+      var meta = document.createElement("span");
+      meta.className = "vwair-meta";
+      var label = fmtWhen(it.airingAt);
+      var badge = document.createElement("b");
+      badge.className = "sbadge " + (label === "NEW" ? "new" : "time");
+      badge.textContent = label;
+      badge.dataset.at = String(it.airingAt);
+      meta.appendChild(badge);
+      meta.appendChild(
+        document.createTextNode("EP " + it.ep + " · " + fmtDate(it.airingAt)),
+      );
+      var d = document.createElement("span");
+      d.className = "vwair-desc";
+      d.textContent = it.desc || "No description on AniList yet.";
+      info.appendChild(t);
+      info.appendChild(meta);
+      info.appendChild(d);
+
+      row.appendChild(img);
+      row.appendChild(info);
+      row.addEventListener("click", function () {
+        closeModal();
+        openItem(it.id); // plays via anikoto when mapped, AniList page otherwise
+      });
+      list.appendChild(row);
+    });
+  }
+
+  function openModal() {
+    ensureModal();
+    renderModalList();
+    if (window.vwSettingsClose) window.vwSettingsClose(); // one popup at a time
+    modal.classList.add("vws-open");
+    modal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeModal() {
+    if (!modal) return;
+    modal.classList.remove("vws-open");
+    modal.setAttribute("aria-hidden", "true");
   }
 
   /* ── Render ───────────────────────────────────────────────────── */
@@ -169,15 +285,19 @@
     strip.innerHTML = "";
 
     var head = document.createElement("div");
-    head.className = "sports-head";
-    head.innerHTML = '<span class="live-dot"></span><b>Airing soon</b>';
+    head.className = "sports-head air-head";
+    head.innerHTML =
+      '<span class="live-dot"></span><b>Airing soon</b><span class="air-all">all →</span>';
+    head.title = "See the full airing schedule";
+    head.addEventListener("click", openModal);
     strip.appendChild(head);
 
     viewport = document.createElement("div");
     viewport.className = "air-viewport";
     track = document.createElement("div");
     track.className = "air-track";
-    items.forEach(function (it) {
+    stripItems = items.slice(0, MAX_ITEMS);
+    stripItems.forEach(function (it) {
       track.appendChild(buildItem(it));
     });
     viewport.appendChild(track);
@@ -217,7 +337,7 @@
     Array.prototype.slice.call(track.children).forEach(function (n, i) {
       var c = n.cloneNode(true); // cloneNode drops listeners — re-attach
       c.addEventListener("click", function () {
-        openItem(items[i].id);
+        openItem(stripItems[i].id);
       });
       track.appendChild(c);
     });
@@ -242,7 +362,8 @@
 
     // Exact loop length = where the first clone starts (gap-safe, unlike scrollWidth/2)
     var half =
-      track.children[items.length].offsetLeft - track.children[0].offsetLeft;
+      track.children[stripItems.length].offsetLeft -
+      track.children[0].offsetLeft;
     if (half <= 0) half = track.scrollWidth / 2;
 
     // Manual scrolling (wheel/swipe) wraps around too, not just the ticker
