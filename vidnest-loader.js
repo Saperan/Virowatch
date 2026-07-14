@@ -849,6 +849,47 @@
   let currentAniListId = null;
   let currentEp = 0;
   let currentDub = false;
+  // Session opt-out for the "vidnest" default-API auto-switch (anime-api.js):
+  // once the user manually goes back to Anikoto, stop auto-switching until
+  // they re-pick Vidnest in settings (or reload).
+  let vidnestOptOut = false;
+  // Invalidates an in-flight resolve when a new episode loads or the user
+  // clicks again — a stale resolve must not silence/steal the new episode.
+  let animeSwitchToken = 0;
+  window.addEventListener("vw-anime-api-changed", (e) => {
+    if (e.detail && e.detail.api === "vidnest") vidnestOptOut = false;
+  });
+
+  // Switch the currently-playing Anikoto episode over to Vidnest. Shared by
+  // the manual "◆ Vidnest API" button and the default-API auto-switch.
+  async function activateVidnestAnime() {
+    if (!currentAniListId || vidnestAnimeActive) return;
+    const token = ++animeSwitchToken;
+    const b = animeSwitchBtn();
+    b.textContent = "Loading…";
+    window.vwSuspendAutoBackup?.(); // don't let its auto-timer fire mid-resolve
+    const result = await resolveVidnestAnime(
+      currentAniListId,
+      currentEp + 1,
+      currentDub ? "dub" : "sub",
+    );
+    if (token !== animeSwitchToken) return; // a newer episode/click took over
+    if (!result) {
+      toast("Vidnest doesn't have this episode");
+      // vwSuspendAutoBackup blanked the embed's iframe — bring it back so
+      // the user isn't left staring at a silent black player.
+      window.vwUseEmbed?.();
+      setAnimeSwitchLabel();
+      return;
+    }
+    window.vwSuspendAutoBackup?.(); // in case it fired during the fetch above
+    vidnestAnimeActive = true;
+    setAnimeSwitchLabel();
+    vidnestPlayer.playHls(
+      `${ANIKOTO_WORKER}/hls?u=${encodeURIComponent(result.file)}`,
+      result.tracks,
+    );
+  }
 
   // Exposed for megaplay-backup.js's watch-party auto-switch — don't force
   // the Cloudflare backup player when Vidnest API is already active for this
@@ -864,24 +905,19 @@
       b.href = "#";
       b.className = "button";
       b.style.display = "none";
-      b.addEventListener("click", async (e) => {
+      b.addEventListener("click", (e) => {
         e.preventDefault();
         if (!currentAniListId) return;
         if (vidnestAnimeActive) {
+          animeSwitchToken++; // cancel any in-flight activation
           vidnestAnimeActive = false;
+          vidnestOptOut = true; // stop auto-switching this session
           vidnestPlayer.stop();
-          window.vwUseEmbed?.(); // restore the megaplay iframe we silenced below
+          window.vwUseEmbed?.(); // restore the megaplay iframe we silenced
           setAnimeSwitchLabel();
           return;
         }
-        b.textContent = "Loading…";
-        window.vwSuspendAutoBackup?.(); // don't let its 4s auto-timer fire mid-resolve
-        const result = await resolveVidnestAnime(currentAniListId, currentEp + 1, currentDub ? "dub" : "sub");
-        if (!result) { toast("Vidnest doesn't have this episode"); setAnimeSwitchLabel(); return; }
-        window.vwSuspendAutoBackup?.(); // in case it fired during the fetch above
-        vidnestAnimeActive = true;
-        setAnimeSwitchLabel();
-        vidnestPlayer.playHls(`${ANIKOTO_WORKER}/hls?u=${encodeURIComponent(result.file)}`, result.tracks);
+        activateVidnestAnime();
       });
       // #downloadContainer (between #nextEpisode and everything after it) is
       // a full-width flex item even when empty, which forces anything
@@ -912,6 +948,7 @@
   window.addEventListener("vw-nowplaying", async (e) => {
     const d = (e && e.detail) || {};
     const btn = animeSwitchBtn();
+    const token = ++animeSwitchToken; // cancel any in-flight activation
     // A fresh episode/season/dub change always starts back on the normal
     // Anikoto embed — content.js's updateVideo already reset iframe.src to
     // it before this event fired, so tear down any active Vidnest playback.
@@ -929,10 +966,17 @@
     const anikotoId = d.mov.slice(4);
     let id = null;
     try { id = await window.anikotoGetAniListId(anikotoId); } catch (_) { id = null; }
+    if (token !== animeSwitchToken) return; // a newer episode took over
     currentAniListId = id || null;
     if (currentAniListId) {
       setAnimeSwitchLabel();
       btn.style.display = "";
+      // Vidnest picked as the default anime API (anime-api.js) — switch this
+      // episode over automatically, unless the user manually went back to
+      // Anikoto earlier this session.
+      if (!vidnestOptOut && localStorage.getItem("vw_anime_api") === "vidnest") {
+        activateVidnestAnime();
+      }
     }
   });
 
