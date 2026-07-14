@@ -19,7 +19,7 @@
         <meta name="twitter:image" content="https://i.ibb.co/FkdMbG4N/virowatch-new-icon-tihngy-cropped.png" />
         <link rel="icon" href="https://i.ibb.co/FkdMbG4N/virowatch-new-icon-tihngy-cropped.png" />
         <link id="themeStylesheet" rel="stylesheet" href="virostyle.css" />
-        <link rel="stylesheet" href="stylegui.css?v=6" />
+        <link rel="stylesheet" href="stylegui.css?v=8" />
         <script>
             (function () {
                 var link = document.getElementById("themeStylesheet");
@@ -164,6 +164,68 @@
                     </div>
                     <div class="vws-section">
                         <span class="app-sidebar-theme-label"
+                            >▶ Anime API</span
+                        >
+                        <div class="vws-api-hint">
+                            Which source anime episodes load with by default.
+                            You can still switch per-episode with the buttons
+                            under the player.
+                        </div>
+                        <div class="vws-api-list" id="vwApiList">
+                            <button
+                                type="button"
+                                class="vws-api-opt"
+                                data-api="anikoto"
+                            >
+                                <span class="vws-api-radio"></span>
+                                <span class="vws-api-text">
+                                    <span class="vws-api-name"
+                                        >Anikoto API</span
+                                    >
+                                    <span class="vws-api-desc"
+                                        >Fastest, though isn't available for
+                                        all regions/IPs.</span
+                                    >
+                                </span>
+                            </button>
+                            <button
+                                type="button"
+                                class="vws-api-opt"
+                                data-api="cloudflare"
+                            >
+                                <span class="vws-api-radio"></span>
+                                <span class="vws-api-text">
+                                    <span class="vws-api-name"
+                                        >Cloudflare API</span
+                                    >
+                                    <span class="vws-api-desc"
+                                        >Most reliable, though can be slow
+                                        sometimes and stop working if
+                                        overused.</span
+                                    >
+                                </span>
+                            </button>
+                            <button
+                                type="button"
+                                class="vws-api-opt"
+                                data-api="vidnest"
+                            >
+                                <span class="vws-api-radio"></span>
+                                <span class="vws-api-text">
+                                    <span class="vws-api-name"
+                                        >Vidnest API</span
+                                    >
+                                    <span class="vws-api-desc"
+                                        >Fast and somewhat reliable, though
+                                        doesn't have the same library as
+                                        Anikoto/Cloudflare.</span
+                                    >
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="vws-section">
+                        <span class="app-sidebar-theme-label"
                             >📡 Live sports</span
                         >
                         <label class="vws-toggle-row" for="pitsportAutoToggle">
@@ -245,6 +307,46 @@
                                 window.location.reload(true);
                             }
                         </script>
+                    </div>
+                    <div class="vws-section vws-legal">
+                        <span class="app-sidebar-theme-label"
+                            >⚖ Legal &amp; contact</span
+                        >
+                        <p class="vws-legal-text">
+                            Virowatch does not host, own, upload or store any
+                            of the content shown on this site. All media is
+                            provided and hosted by third-party services, and
+                            all metadata (titles, posters, descriptions) comes
+                            from public APIs such as AniList and TMDB.
+                            Virowatch has no control over, and assumes no
+                            responsibility for, content hosted by those
+                            third parties.
+                        </p>
+                        <p class="vws-legal-text">
+                            Copyright holders: if you believe content
+                            accessible through this site infringes your
+                            rights and want it removed (DMCA / takedown
+                            requests), or for any other legal inquiry,
+                            contact us and we will respond as soon as
+                            possible.
+                        </p>
+                        <a
+                            href="mailto:Virowatch19@inbox.lv?subject=Takedown%20request"
+                            class="app-sidebar-import-btn vws-legal-mail"
+                        >
+                            <span
+                                class="app-sidebar-btn-icon"
+                                aria-hidden="true"
+                                >✉</span
+                            >
+                            <span class="app-sidebar-btn-text"
+                                >Virowatch19@inbox.lv</span
+                            >
+                        </a>
+                        <div class="bottom-text">
+                            Takedown &amp; copyright contact — include the
+                            title and a link to the content in question.
+                        </div>
                     </div>
                     <!-- watchlist.js appends its Watchlist section here -->
                 </nav>
@@ -490,10 +592,11 @@
         <script src="content.js?v=9"></script>
         <script src="custom-player-ui.js?v=1"></script>
         <script src="anikoto-loader.js?v=8"></script>
-        <script src="vidnest-loader.js?v=4"></script>
-        <script src="megaplay-backup.js?v=19"></script>
+        <script src="vidnest-loader.js?v=5"></script>
+        <script src="megaplay-backup.js?v=20"></script>
         <script src="rumble-party.js?v=1"></script>
         <script src="sidebar.js?v=3"></script>
+        <script src="anime-api.js?v=1"></script>
         <script src="watchlist.js?v=4"></script>
         <script src="anilist.js?v=4"></script>
         <script src="virohome.js?v=5"></script>
