@@ -112,16 +112,138 @@
   border-radius: 2px;
 }
 .vws-section {
-  margin-bottom: 26px;
+  margin-bottom: 14px;
+  padding: 16px 16px 18px;
+  background: var(--vw-input-bg, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--vw-border, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+  transition: border-color 0.2s ease;
+}
+.vws-section:hover {
+  border-color: var(--vw-border-strong, rgba(255, 255, 255, 0.15));
 }
 .vws-section:last-child {
   margin-bottom: 0;
 }
-/* Watchlist section injected by watchlist.js */
+
+/* ─── Anime API picker (settings section + first-run popup) ─────────── */
+.vws-api-hint {
+  margin: 0 0 12px;
+  padding: 0 2px;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: var(--vw-muted, rgba(255, 255, 255, 0.5));
+}
+.vws-api-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.vws-api-opt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--vw-input-bg, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--vw-border, rgba(255, 255, 255, 0.1));
+  border-radius: 10px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.vws-api-opt:hover {
+  background: var(--vw-hover-strong, rgba(255, 255, 255, 0.1));
+  border-color: var(--vw-border-strong, rgba(255, 255, 255, 0.18));
+}
+.vws-api-radio {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--vw-muted-2, rgba(255, 255, 255, 0.35));
+  position: relative;
+  transition: border-color 0.15s ease;
+}
+.vws-api-opt.vws-api-active {
+  background: var(--vw-hover-strong, rgba(255, 255, 255, 0.1));
+  border-color: var(--vw-accent-bg, #e5e7eb);
+}
+.vws-api-opt.vws-api-active .vws-api-radio {
+  border-color: var(--vw-accent-bg, #e5e7eb);
+}
+.vws-api-opt.vws-api-active .vws-api-radio::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: var(--vw-accent-bg, #e5e7eb);
+}
+.vws-api-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.vws-api-name {
+  font-size: 0.85rem;
+  color: var(--vw-text-strong, rgba(255, 255, 255, 0.92));
+}
+.vws-api-desc {
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--vw-muted-2, rgba(255, 255, 255, 0.4));
+}
+/* First-run variant: narrower modal, borderless option cards sit on the
+   modal background directly (no .vws-section card around them). */
+.vws-api-modal {
+  width: min(480px, 100%);
+  max-height: min(88vh, 640px);
+}
+.vws-api-skip {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 9px 12px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: var(--vw-muted-2, rgba(255, 255, 255, 0.35));
+  font: inherit;
+  font-size: 0.74rem;
+  text-align: center;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.vws-api-skip:hover {
+  color: var(--vw-text, #eaeaea);
+}
+
+/* ─── Legal & contact section ───────────────────────────────────────── */
+.vws-legal-text {
+  margin: 0 0 10px;
+  font-size: 0.74rem;
+  line-height: 1.55;
+  color: var(--vw-muted, rgba(255, 255, 255, 0.5));
+}
+.vws-legal-mail {
+  text-decoration: none;
+}
+.vws-legal-mail .app-sidebar-btn-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+/* Watchlist section injected by watchlist.js — match the card look */
 .vws-body .app-sidebar-custom-section {
-  margin-top: 26px;
-  padding-top: 20px;
-  border-top: 1px solid var(--vw-border, rgba(255, 255, 255, 0.08));
+  margin-top: 14px;
+  padding: 16px 16px 18px;
+  background: var(--vw-input-bg, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--vw-border, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
 }
 
 /* ─── Section label (shared with the injected Watchlist section) ───── */
