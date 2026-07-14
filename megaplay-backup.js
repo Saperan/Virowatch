@@ -37,7 +37,13 @@
   const MEGA_RE    = /megaplay\.buzz\/stream\/s-\d+\/(\d+)\/(sub|dub)/i;
 
   let mode          = "embed"; // "embed" | "backup"
-  let preferBackup  = false;   // sticky once user chooses backup
+  // Sticky once the user chooses backup; starts on when the default anime
+  // API preference (anime-api.js) is "cloudflare". Manually switching back
+  // to the embed still clears it for the session.
+  let preferBackup  = localStorage.getItem("vw_anime_api") === "cloudflare";
+  window.addEventListener("vw-anime-api-changed", (e) => {
+    preferBackup = e.detail && e.detail.api === "cloudflare";
+  });
   let hls           = null;
   let selfSetting   = false;    // guard our own iframe.src writes
   let lastEmbedSrc  = "";       // megaplay url to restore when leaving backup
@@ -565,7 +571,11 @@
       setButtonLabel();
       // No more auto-switching — it used to race whichever source the user
       // picked manually in the meantime. Just point at the two options.
-      toast("Not playing? Try ☁ Cloudflare API or ◆ Vidnest API below");
+      // (Unless Vidnest is the default API: vidnest-loader.js is about to
+      // switch this episode over on its own — the hint would be noise.)
+      if (localStorage.getItem("vw_anime_api") !== "vidnest") {
+        toast("Not playing? Try ☁ Cloudflare API or ◆ Vidnest API below");
+      }
     }
   }
 
