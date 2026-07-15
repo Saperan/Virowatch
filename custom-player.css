@@ -218,6 +218,22 @@
 .vw-player-back-btn { display: flex; cursor: pointer; color: #eaeaea; }
 .vw-player-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
 
+/* long track lists (e.g. many subtitle languages) scroll instead of
+   overflowing the player — capped so it stays sane on tall monitors */
+.vw-player-option-list {
+    max-height: min(48vh, 340px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+.vw-player-option-list::-webkit-scrollbar { width: 6px; }
+.vw-player-option-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 3px;
+}
+.vw-player-option-list::-webkit-scrollbar-track { background: transparent; }
+
 .vw-player-menu-option {
     display: flex;
     align-items: center;
