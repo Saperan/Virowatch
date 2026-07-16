@@ -203,6 +203,13 @@
         // Vidnest items are injected into mediaData on demand — viroPlay()
         // below no-ops if the entry doesn't exist yet this session.
         window.openVidnestById(item.key);
+      } else if (
+        item.key &&
+        item.key.indexOf("IPTVCH_") === 0 &&
+        typeof window.openIptvChannel === "function"
+      ) {
+        // IPTV channel — iptv.js loads the playlist and jumps to it
+        window.openIptvChannel(item.key);
       } else if (typeof window.viroPlay === "function") {
         window.viroPlay(item.cat, item.key);
       }
@@ -407,7 +414,7 @@
 
       var metaBits = [];
       if (it.seasonLabel) metaBits.push(it.seasonLabel);
-      metaBits.push(it.total > 1 ? "E" + ((it.ep || 0) + 1) : "Movie");
+      metaBits.push(it.live ? "LIVE" : it.total > 1 ? "E" + ((it.ep || 0) + 1) : "Movie");
       var meta = metaBits.join(" · ");
       btn.title = (it.title || it.mov) + " — " + meta;
 
