@@ -198,6 +198,7 @@
     let downloadHandler = null;
     let downloading = false;
     let qualityOnChange = null;
+    let subOnChange = null; // callback subtitle mode (hls.js-managed tracks)
 
     function setSeekStep(v) {
       seekStep = v;
@@ -418,8 +419,14 @@
     function setActiveSub(index) {
       activeSubIndex = index;
       subValueLabel.textContent = index === -1 ? "Off" : (captionTracks[index].label || `Track ${index + 1}`);
-      const tt = video.textTracks;
-      for (let i = 0; i < tt.length; i++) tt[i].mode = i === index ? "showing" : "disabled";
+      if (subOnChange) {
+        // Callback mode: the source (hls.js) owns the text tracks — just
+        // tell it which one was picked, don't touch video.textTracks here.
+        subOnChange(index);
+      } else {
+        const tt = video.textTracks;
+        for (let i = 0; i < tt.length; i++) tt[i].mode = i === index ? "showing" : "disabled";
+      }
       ccBtn.style.color = index === -1 ? "" : "#6cf";
     }
     function buildSubtitlesMenu() {
@@ -442,7 +449,31 @@
       setActiveSub(activeSubIndex === -1 ? 0 : -1);
     });
 
+    /* Callback-mode subtitles: for sources whose tracks live inside the
+       stream (hls.js live subs / embedded captions) rather than standalone
+       VTT files. options = [{label}], onChange(index) with -1 = off.
+       Menu + CC button reuse the same UI; subtitle download is disabled
+       (no file to fetch). */
+    function setSubtitleOptions(options, currentIndex, onChange) {
+      subOnChange = typeof onChange === "function" ? onChange : null;
+      captionTracks = (Array.isArray(options) ? options : []).map((o, i) => ({
+        label: (o && o.label) || `Track ${i + 1}`,
+      }));
+      video.querySelectorAll("track").forEach((t) => t.remove());
+      revokeTrackBlobs();
+      activeSubIndex =
+        Number.isInteger(currentIndex) && currentIndex >= 0 && currentIndex < captionTracks.length
+          ? currentIndex
+          : -1;
+      buildSubtitlesMenu();
+      subValueLabel.textContent =
+        activeSubIndex === -1 ? "Off" : captionTracks[activeSubIndex].label;
+      ccBtn.style.color = activeSubIndex === -1 ? "" : "#6cf";
+      rowSubDownload.classList.add("disabled");
+    }
+
     async function setSubtitleTracks(tracks) {
+      subOnChange = null; // file-based mode — leave callback mode
       captionTracks = (Array.isArray(tracks) ? tracks : []).filter((t) => t && t.file);
       const myTracks = captionTracks;
       video.querySelectorAll("track").forEach((t) => t.remove());
@@ -473,7 +504,7 @@
 
     rowSubDownload.addEventListener("click", async (e) => {
       e.stopPropagation();
-      if (!captionTracks.length) return;
+      if (!captionTracks.length || subOnChange) return; // callback mode has no file to download
       const track = captionTracks[activeSubIndex === -1 ? 0 : activeSubIndex];
       try {
         const srt = vttToSrt(await (await fetch(track.file)).text());
@@ -521,7 +552,7 @@
       root.remove();
     }
 
-    return { setQualityOptions, setSubtitleTracks, setDownloadHandler, destroy };
+    return { setQualityOptions, setSubtitleTracks, setSubtitleOptions, setDownloadHandler, destroy };
   }
 
   window.VWPlayerUI = { attach };
