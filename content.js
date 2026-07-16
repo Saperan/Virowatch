@@ -229,6 +229,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         (season && season.indexOf("ANI_") !== 0 ? season : ""),
       t: Date.now(),
     };
+    // IPTV: the entry is the specific channel, not the "[BETA] IP TV" tile
+    if (mov === "IPTV") {
+      const sent = (data?.video || [])[ep];
+      const ch = window.vwIptvChannelInfo?.(sent);
+      if (!ch) return; // channel list not loaded — nothing meaningful to save
+      entry.title = ch.name;
+      entry.image = ch.logo || info.image || "";
+      entry.total = 1;
+      entry.seasonLabel = ch.group || "Live TV";
+      entry.live = true;
+    }
     let list = [];
     try {
       list = JSON.parse(localStorage.getItem(CW_KEY) || "[]");
@@ -357,6 +368,46 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
     }
+    // ── IPTV: channel list arrives async, handle loading state ────
+    if (key === "IPTV" && cat === "shows") {
+      const tvData = window.mediaData?.shows?.IPTV;
+      const hasVideos =
+        tvData &&
+        Object.keys(tvData).some(
+          (k) =>
+            !RESERVED_KEYS.includes(k) &&
+            typeof tvData[k] === "object" &&
+            tvData[k].video?.length,
+        );
+
+      if (!hasVideos) {
+        // Remember where the caller wanted to land (continue-watching /
+        // watchlist resume) — consumed by the iptvReady listener below.
+        iptvPend =
+          startSeason || Number.isInteger(startEp)
+            ? { season: startSeason, ep: startEp }
+            : null;
+        if (episodeContainer) {
+          episodeContainer.style.display = "flex";
+          document.body.classList.add("modal-open");
+        }
+        const listEl = document.getElementById("episodeListContainer");
+        if (listEl)
+          listEl.innerHTML =
+            '<div class="episode" style="opacity:0.6;cursor:default;">⏳ Loading channel list… (first load is a few MB)</div>';
+        seasonSelectorContainer.innerHTML = "";
+
+        if (
+          !window._iptvLoaded &&
+          !window._iptvLoading &&
+          typeof window.reloadIptv === "function"
+        ) {
+          window.reloadIptv();
+        }
+        // The iptvReady listener below finishes rendering once data arrives
+        return;
+      }
+    }
     // ── Normal path ───────────────────────────────────────────────
     updateSeasonSelector();
     updateEpisodeList();
@@ -383,6 +434,43 @@ document.addEventListener("DOMContentLoaded", async () => {
       updateSeasonSelector();
       updateEpisodeList();
       updateVideo(0);
+      updateDownloads();
+    }
+  });
+
+  // When the IPTV playlist finishes loading, refresh the player if open
+  let iptvPend = null; // { season, ep } requested before the list was loaded
+  window.addEventListener("iptvReady", () => {
+    if (cat === "shows" && mov === "IPTV") {
+      const tvData = window.mediaData?.shows?.IPTV;
+      const hasVideos =
+        tvData &&
+        Object.keys(tvData).some(
+          (k) =>
+            !RESERVED_KEYS.includes(k) &&
+            typeof tvData[k] === "object" &&
+            tvData[k].video?.length,
+        );
+      if (!hasVideos) {
+        const listEl = document.getElementById("episodeListContainer");
+        if (listEl)
+          listEl.innerHTML =
+            '<div class="episode" style="opacity:0.6;cursor:default;">⚠️ Channel list failed to load — close and retry</div>';
+        return;
+      }
+      season =
+        iptvPend?.season && tvData[iptvPend.season] ? iptvPend.season : null;
+      const startAt =
+        Number.isInteger(iptvPend?.ep) &&
+        iptvPend.ep > 0 &&
+        (season ? tvData[season].video?.[iptvPend.ep] : false)
+          ? iptvPend.ep
+          : 0;
+      iptvPend = null;
+      ep = 0;
+      updateSeasonSelector();
+      updateEpisodeList();
+      updateVideo(startAt);
       updateDownloads();
     }
   });
