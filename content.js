@@ -197,11 +197,36 @@ document.addEventListener("DOMContentLoaded", async () => {
       JSON.stringify({ cat, mov, season, ep, dubbed }),
     );
     updateContinueWatching();
+    syncUrlToState();
     // Lets other modules (vidnest-loader.js) know what's actually playing
     // without reaching into this closure's private state.
     window.dispatchEvent(
       new CustomEvent("vw-nowplaying", { detail: { cat, mov, season, ep, dubbed } }),
     );
+  }
+
+  // Keep the address bar in sync with what's playing, using the same
+  // ?play=/?sk=/?ep=/?dub= format deeplink.js reads — so copying the URL
+  // out of the bar works the same as a Discord bot "Watch in Virowatch"
+  // link, instead of only working the other way around.
+  function clearUrlParams() {
+    if (!location.search) return;
+    history.replaceState(null, "", location.pathname + location.hash);
+  }
+  function syncUrlToState() {
+    let params;
+    if (cat === "movies" && typeof mov === "string" && mov.indexOf("VDM_") === 0) {
+      params = "play=" + mov;
+    } else if (cat === "shows" && typeof mov === "string" && mov.indexOf("VDT_") === 0) {
+      params = "play=" + mov + "&sk=" + (season || "S1") + "&ep=" + (ep + 1);
+    } else if (cat === "anime" && typeof mov === "string" && mov.indexOf("ANI_") === 0) {
+      params = "play=" + mov + "&ep=" + (ep + 1);
+    } else {
+      // Lunora / IPTV / live-sports titles aren't in deeplink.js's vocabulary
+      return clearUrlParams();
+    }
+    if (dubbed) params += "&dub=1";
+    history.replaceState(null, "", location.pathname + "?" + params + location.hash);
   }
 
   // Continue watching list (drives the rail section in virohome.js)
@@ -1279,6 +1304,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (heroSection) heroSection.style.display = "";
     if (categoryContainer) categoryContainer.style.display = "";
     localStorage.removeItem("lastState");
+    clearUrlParams();
     // Vidnest's browse-grid sections (vidnest-loader.js) key their own
     // visibility off this — never reset here before, so anything that plays
     // through the same cat value the grid checks (shows) stayed visible on
