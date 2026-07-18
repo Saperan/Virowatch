@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "net.virowatch.app",
+      "sha256_cert_fingerprints": [
+        "6E:5C:24:85:38:EC:24:3D:0D:52:8B:43:E1:C1:26:4D:F9:18:35:A3:FC:32:F6:19:D0:31:86:F6:5F:BF:0E:C9"
+      ]
+    }
+  }
+]
