@@ -53,13 +53,6 @@
     }, 3200);
   }
 
-  // Drop the params so a refresh / back-navigation doesn't replay the open.
-  function clean() {
-    try {
-      history.replaceState(null, "", location.pathname + location.hash);
-    } catch (_) {}
-  }
-
   function waitFor(cond, cb, tries) {
     tries = tries == null ? 160 : tries; // ~40s at 250ms
     if (cond()) return cb();
@@ -75,8 +68,10 @@
   function resume(cat, key, seasonKey, index) {
     return Promise.resolve(window.viroResume(cat, key, seasonKey, index, dub))
       .then(function (ok) {
-        if (ok) clean();
-        else toast("That title isn't available on this source.");
+        // content.js's saveState() now keeps the address bar synced to
+        // whatever is playing, so nothing to clean up here on success —
+        // the ?play=... URL stays live and shareable/refreshable.
+        if (!ok) toast("That title isn't available on this source.");
         return ok;
       })
       .catch(function () {
