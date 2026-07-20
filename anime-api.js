@@ -19,7 +19,7 @@
   "use strict";
 
   const KEY = "vw_anime_api";
-  const VALID = ["anikoto", "cloudflare", "vidnest"];
+  const VALID = ["anikoto", "cloudflare", "vidnest", "vidwish"];
 
   function get() {
     const v = localStorage.getItem(KEY);
@@ -73,6 +73,11 @@
       api: "vidnest",
       name: "Vidnest API",
       desc: "Fast and somewhat reliable, though doesn't have the same library as Anikoto/Cloudflare.",
+    },
+    {
+      api: "vidwish",
+      name: "Anikoto — Vidwish mirror",
+      desc: "Same library as Anikoto, served through the Vidwish mirror. Use this if Anikoto won't load on your connection (error 232011).",
     },
   ];
 

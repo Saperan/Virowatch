@@ -171,20 +171,41 @@
     return { file, tracks: Array.isArray(data.tracks) ? data.tracks : [] };
   }
 
-  // Movies/shows subtitles come from a separate, unencrypted, CORS-open
-  // endpoint — the moviebox video resolve above carries no subtitle data.
+  // Cloudflare Worker (same one anikoto-loader/megaplay-backup use) — proxies
+  // the subtitle listing so we get CORS on every status code.
+  const SUB_WORKER = "https://anikoto-request.vmtgaming13.workers.dev";
+
+  // Movies/shows subtitles come from a separate, unencrypted endpoint. It
+  // sends `Access-Control-Allow-Origin: *` on a hit, but NOT on its 404
+  // "no subtitles found" response — so a direct fetch throws a noisy
+  // CORS/ERR_FAILED whenever an episode has no subs. Route through the Worker
+  // first (it adds CORS on every status); fall back to a direct fetch only if
+  // the Worker is unreachable. The .vtt files themselves (cache.vdrk.site)
+  // are already CORS-open, so those load into <track> untouched.
   async function resolveVidnestSubtitles(tmdbId, season, episode) {
+    const path = season != null && episode != null
+      ? `/v2/tv/${tmdbId}/${season}/${episode}`
+      : `/v2/movie/${tmdbId}`;
+    const target = `https://sub.vdrk.site${path}`;
+    const parse = (data) =>
+      Array.isArray(data)
+        ? data
+            .filter((t) => t && t.file)
+            .map((t) => ({ label: t.label || "Subtitle", file: t.file }))
+        : [];
+
     try {
-      const path = season != null && episode != null
-        ? `/v2/tv/${tmdbId}/${season}/${episode}`
-        : `/v2/movie/${tmdbId}`;
-      const r = await fetch(`https://sub.vdrk.site${path}`);
+      const r = await fetch(`${SUB_WORKER}/api?u=${encodeURIComponent(target)}`);
+      if (r.status === 404) return [];      // clean "no subtitles" — done
+      if (r.ok) return parse(await r.json());
+      // Any other status (e.g. Worker not yet redeployed → 403 host not
+      // allowed) falls through to the direct attempt below.
+    } catch (_) { /* Worker unreachable — try direct */ }
+
+    try {
+      const r = await fetch(target);
       if (!r.ok) return [];
-      const data = await r.json();
-      if (!Array.isArray(data)) return [];
-      return data
-        .filter((t) => t && t.file)
-        .map((t) => ({ label: t.label || "Subtitle", file: t.file }));
+      return parse(await r.json());
     } catch (_) { return []; }
   }
 
