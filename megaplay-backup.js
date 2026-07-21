@@ -501,6 +501,10 @@
     const Hls = await loadHls();
     if (token !== playToken) return;
 
+    // Real manifest URL for the seek-bar hover preview (the element's own
+    // src is an unreusable hls.js blob: URL)
+    v.dataset.vwPreviewSrc = fileUrl;
+
     if ((!Hls || !Hls.isSupported()) &&
         v.canPlayType("application/vnd.apple.mpegurl")) {
       stopHls();

@@ -393,7 +393,7 @@
   // How many entries the rail shows — user-set in Settings (sidebar.js)
   function cwLimit() {
     var n = parseInt(localStorage.getItem("vw_cw_count") || "3", 10);
-    return n >= 1 && n <= 15 ? n : 3;
+    return n >= 1 ? n : 3;
   }
 
   function renderCW() {

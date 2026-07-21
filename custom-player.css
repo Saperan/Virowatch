@@ -116,6 +116,98 @@
 }
 .vw-player-seek:hover::-webkit-slider-thumb { box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.18); }
 
+/* ── Seek-bar hover preview tooltip ─────────────────────── */
+.vw-player-preview {
+    position: absolute;
+    bottom: calc(100% - 16px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 178px;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s ease;
+    z-index: 7;
+}
+.vw-player-preview.show { opacity: 1; }
+.vw-player-preview video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    background: #000;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.6);
+}
+/* No frame source available (live/unsupported) — time pill only */
+.vw-player-preview.noframe { width: auto; }
+.vw-player-preview.noframe video { display: none; }
+/* Timestamp pill: width follows the text (max-content + nowrap), so
+   1:23:45 can never overflow it */
+.vw-player-preview-time {
+    display: inline-block;
+    width: max-content;
+    white-space: nowrap;
+    margin-top: 6px;
+    padding: 3px 11px;
+    border-radius: 99px;
+    font-size: 0.72rem;
+    line-height: 1.4;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* ── "Continue watching?" resume pill (center) ───────────── */
+.vw-player-resume {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0.92);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 99px;
+    background: rgba(16, 16, 22, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 8;
+    white-space: nowrap;
+}
+.vw-player-resume.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+}
+.vw-player-resume button {
+    border: none;
+    border-radius: 99px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    padding: 7px 15px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.vw-player-resume-btn {
+    background: #fff;
+    color: #111;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+.vw-player-resume-btn:hover { background: #e6e6e6; }
+.vw-player-resume-alt {
+    background: rgba(255, 255, 255, 0.1);
+    color: #eaeaea;
+}
+.vw-player-resume-alt:hover { background: rgba(255, 255, 255, 0.2); }
+
 .vw-player-btn-row { display: flex; align-items: center; gap: 2px; padding: 0 2px; }
 .vw-player-spacer { flex: 1; }
 

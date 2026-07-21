@@ -282,6 +282,201 @@
     video.addEventListener("progress", updateBuffered);
     video.addEventListener("timeupdate", updateBuffered);
 
+    // ── Resume position ("continue where you left off") ────────────
+    // content.js exposes window.vwCurrentEpisodeKey() (cat|mov|season|ep|dub).
+    // Position saved every few seconds; finishing an episode (>95%) clears
+    // it so a rewatch starts clean. Live streams (Infinity duration) skip.
+    const RESUME_KEY = "vw_resume_t";
+    function loadResumeMap() {
+      try { return JSON.parse(localStorage.getItem(RESUME_KEY) || "{}") || {}; }
+      catch (_) { return {}; }
+    }
+    function saveResumeMap(map) {
+      const keys = Object.keys(map);
+      if (keys.length > 500) {
+        keys.sort((a, b) => (map[a].ts || 0) - (map[b].ts || 0));
+        keys.slice(0, keys.length - 500).forEach((k) => delete map[k]);
+      }
+      try { localStorage.setItem(RESUME_KEY, JSON.stringify(map)); } catch (_) {}
+    }
+    // Position is tracked in a variable on EVERY timeupdate and flushed to
+    // storage on a 3s throttle PLUS immediately on pause / source teardown
+    // (back button, episode switch = "emptied") / tab hide / pagehide — so
+    // an abrupt exit never loses more than a frame.
+    let lastPos = null; // { key, t, d } from the most recent timeupdate
+    let lastFlushT = 0;
+    function flushResume() {
+      if (!lastPos) return;
+      const map = loadResumeMap();
+      if (lastPos.t > 10 && lastPos.t < lastPos.d * 0.95) {
+        map[lastPos.key] = { t: Math.floor(lastPos.t), d: Math.floor(lastPos.d), ts: Date.now() };
+        saveResumeMap(map);
+      } else if (lastPos.t >= lastPos.d * 0.95 && map[lastPos.key]) {
+        delete map[lastPos.key]; // finished — a rewatch starts clean
+        saveResumeMap(map);
+      }
+    }
+    video.addEventListener("timeupdate", () => {
+      if (!isFinite(video.duration) || !video.duration || video.currentTime <= 0) return;
+      const key = typeof window.vwCurrentEpisodeKey === "function" && window.vwCurrentEpisodeKey();
+      if (!key) return;
+      lastPos = { key, t: video.currentTime, d: video.duration };
+      const now = Date.now();
+      if (now - lastFlushT < 3000) return;
+      lastFlushT = now;
+      flushResume();
+    });
+    const onHidden = () => { if (document.visibilityState === "hidden") flushResume(); };
+    video.addEventListener("pause", flushResume);
+    video.addEventListener("emptied", flushResume);
+    window.addEventListener("pagehide", flushResume);
+    document.addEventListener("visibilitychange", onHidden);
+
+    // ── "Continue watching?" pill (center of the player) ───────────
+    // Shown instead of silently auto-seeking, so an accidental reopen
+    // doesn't yank the playhead around without asking.
+    const resumeBar = el("div", "vw-player-resume");
+    const resumeBtn = el("button", "vw-player-resume-btn");
+    resumeBtn.type = "button";
+    const restartBtn = el("button", "vw-player-resume-alt", "↺ Start over");
+    restartBtn.type = "button";
+    resumeBar.append(resumeBtn, restartBtn);
+    root.appendChild(resumeBar);
+    let resumeTid = null;
+    let promptKey = null; // episode the visible pill belongs to
+    function hideResumePill() {
+      resumeBar.classList.remove("show");
+      clearTimeout(resumeTid);
+    }
+    resumeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const t = Number(resumeBtn.dataset.t || 0);
+      if (t > 0) { try { video.currentTime = t; } catch (_) {} }
+      hideResumePill();
+    });
+    restartBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      // Starting over — drop the stale position so it doesn't re-prompt
+      if (promptKey) {
+        const map = loadResumeMap();
+        if (map[promptKey]) { delete map[promptKey]; saveResumeMap(map); }
+      }
+      hideResumePill();
+    });
+
+    // Offered on every fresh load (also after an automatic source/worker
+    // failover reloads the stream — the pill must survive that, never a
+    // silent auto-seek). The 400ms delay lets legitimate restore seeks
+    // (worker failover / quality swap keeping the playhead) land first;
+    // if the playhead is already mid-episode the prompt is moot.
+    let pillDelayTid = null;
+    video.addEventListener("loadedmetadata", () => {
+      // Source changed — bank the previous episode's position first
+      const key = typeof window.vwCurrentEpisodeKey === "function" && window.vwCurrentEpisodeKey();
+      if (lastPos && lastPos.key !== key) flushResume();
+      lastPos = null;
+      hideResumePill();
+      clearTimeout(pillDelayTid);
+      if (!isFinite(video.duration) || !video.duration || !key) return;
+      const saved = loadResumeMap()[key];
+      if (saved && saved.t > 10 && saved.t < video.duration * 0.95) {
+        pillDelayTid = setTimeout(() => {
+          if (video.currentTime >= 5) return; // already playing mid-episode
+          promptKey = key;
+          resumeBtn.textContent = "▶ Resume from " + fmtTime(saved.t);
+          resumeBtn.dataset.t = String(saved.t);
+          resumeBar.classList.add("show");
+          clearTimeout(resumeTid);
+          resumeTid = setTimeout(hideResumePill, 9000);
+        }, 400);
+      }
+    });
+    // Watching past the intro with the pill still up = they ignored it
+    video.addEventListener("timeupdate", () => {
+      if (resumeBar.classList.contains("show") && video.currentTime > 15) hideResumePill();
+    });
+
+    // ── Seek-bar hover preview thumbnail ───────────────────────────
+    // A second muted <video> in a tooltip above the bar, seeked to the
+    // hovered time. Direct URLs (mp4/m3u8) come from video.currentSrc;
+    // hls.js blob sources can't be reused, so the players stash the real
+    // manifest URL on video.dataset.vwPreviewSrc and we spin up a tiny
+    // lowest-quality Hls instance for the tooltip.
+    const tip = el("div", "vw-player-preview");
+    const pv = document.createElement("video");
+    pv.muted = true;
+    pv.preload = "metadata";
+    pv.playsInline = true;
+    pv.tabIndex = -1;
+    const tipTime = el("div", "vw-player-preview-time", "0:00");
+    tip.append(pv, tipTime);
+    controls.appendChild(tip);
+
+    let pvHls = null;
+    let pvSrc = null; // source the preview element is currently fed with
+    let pvSeekTid = null;
+    let pvWantT = null;
+
+    function teardownPreview() {
+      if (pvHls) { try { pvHls.destroy(); } catch (_) {} pvHls = null; }
+      pv.removeAttribute("src");
+      try { pv.load(); } catch (_) {}
+      pvSrc = null;
+    }
+    function ensurePreview() {
+      const direct =
+        video.currentSrc && video.currentSrc.indexOf("blob:") !== 0
+          ? video.currentSrc
+          : video.dataset.vwPreviewSrc || "";
+      if (!direct) return false;
+      if (pvSrc === direct) return true;
+      teardownPreview();
+      pvSrc = direct;
+      const isHls = /\.m3u8($|\?)/i.test(direct);
+      if (isHls && window.Hls && window.Hls.isSupported()) {
+        pvHls = new window.Hls({
+          startLevel: 0,
+          autoLevelEnabled: false,
+          maxBufferLength: 2,
+          maxMaxBufferLength: 4,
+          backBufferLength: 0,
+        });
+        pvHls.loadSource(direct);
+        pvHls.attachMedia(pv);
+      } else {
+        pv.src = direct;
+      }
+      return true;
+    }
+    function previewSeek(t) {
+      pvWantT = t;
+      if (pvSeekTid) return;
+      pvSeekTid = setTimeout(() => {
+        pvSeekTid = null;
+        if (pvWantT == null) return;
+        try { pv.currentTime = pvWantT; } catch (_) {}
+        pvWantT = null;
+      }, 180);
+    }
+    seek.addEventListener("mousemove", (e) => {
+      if (!video.duration || !isFinite(video.duration)) return;
+      const rect = seek.getBoundingClientRect();
+      const frac = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+      const t = frac * video.duration;
+      tipTime.textContent = fmtTime(t);
+      // Clamp so the tooltip never pokes outside the control bar
+      const cRect = controls.getBoundingClientRect();
+      const half = tip.offsetWidth / 2 || 90;
+      const x = Math.min(cRect.width - half - 6, Math.max(half + 6, e.clientX - cRect.left));
+      tip.style.left = x + "px";
+      tip.classList.add("show");
+      tip.classList.toggle("noframe", !ensurePreview());
+      if (pvSrc) previewSeek(t);
+    });
+    seek.addEventListener("mouseleave", () => tip.classList.remove("show"));
+    // New episode/source: rebuild the preview lazily on next hover
+    video.addEventListener("loadedmetadata", teardownPreview);
+
     // ── Volume ───────────────────────────────────────────────────
     function updateVolIcon() {
       const off = video.muted || video.volume === 0;
@@ -545,6 +740,10 @@
     setSeekStep(seekStep);
 
     function destroy() {
+      flushResume();
+      teardownPreview();
+      window.removeEventListener("pagehide", flushResume);
+      document.removeEventListener("visibilitychange", onHidden);
       document.removeEventListener("keydown", onKeydown);
       document.removeEventListener("click", onDocClick);
       document.removeEventListener("fullscreenchange", onFsChange);

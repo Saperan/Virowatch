@@ -229,6 +229,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     history.replaceState(null, "", location.pathname + "?" + params + location.hash);
   }
 
+  // custom-player-ui.js keys saved playback positions on this (resume
+  // "where you left off" + clearing it once an episode is finished)
+  window.vwCurrentEpisodeKey = function () {
+    if (!cat || !mov || mov === "PITSORT" || mov === "IPTV") return null;
+    return [cat, mov, season || "", ep || 0, dubbed ? 1 : 0].join("|");
+  };
+
   // Continue watching list (drives the rail section in virohome.js)
   const CW_KEY = "vw_continue";
   function updateContinueWatching() {
@@ -265,13 +272,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       entry.seasonLabel = ch.group || "Live TV";
       entry.live = true;
     }
+    // history.js keeps the full per-episode log (this list is per-title)
+    if (window.vwHistoryAdd) window.vwHistoryAdd(entry);
     let list = [];
     try {
       list = JSON.parse(localStorage.getItem(CW_KEY) || "[]");
     } catch (_) {}
     list = list.filter((i) => !(i.cat === cat && i.mov === mov));
     list.unshift(entry);
-    localStorage.setItem(CW_KEY, JSON.stringify(list.slice(0, 4)));
+    // 100 is a storage guard, not a display cap — the rail shows vw_cw_count
+    localStorage.setItem(CW_KEY, JSON.stringify(list.slice(0, 100)));
     window.dispatchEvent(new CustomEvent("vw-cw-updated"));
   }
 
@@ -530,24 +540,68 @@ document.addEventListener("DOMContentLoaded", async () => {
     seasonSelectorContainer.appendChild(select);
   }
 
-  // Update episode list
-  function updateEpisodeList() {
+  // Update episode list. Long series (One Piece etc.) render in chunks of
+  // 100 with a range dropdown ("1–100", "101–200", …) next to the season
+  // selector; every row also carries its absolute episode number on the
+  // right so titled episodes stay identifiable.
+  const EP_CHUNK = 100;
+  let epRangeStart = 0;
+
+  function updateEpisodeList(keepRange) {
     const container = document.getElementById("episodeListContainer");
     container.innerHTML = "";
+    document.getElementById("epRangeSelector")?.remove();
     const data = activeData();
     if (!data) return;
     const titles =
       dubbed && data.dubbedepisodetitle?.length
         ? data.dubbedepisodetitle
         : data.episodeTitles || [];
-    (data.video || []).forEach((_, i) => {
+    const vids = data.video || [];
+    let start = 0;
+    let end = vids.length;
+    if (vids.length > EP_CHUNK) {
+      // Default to the chunk holding the current episode (resume/deeplink)
+      if (!keepRange) epRangeStart = Math.floor((ep || 0) / EP_CHUNK) * EP_CHUNK;
+      if (epRangeStart >= vids.length || epRangeStart < 0) epRangeStart = 0;
+      start = epRangeStart;
+      end = Math.min(start + EP_CHUNK, vids.length);
+      const sel = document.createElement("select");
+      sel.id = "epRangeSelector";
+      sel.title = "Episode range";
+      for (let s = 0; s < vids.length; s += EP_CHUNK) {
+        const opt = document.createElement("option");
+        opt.value = String(s);
+        opt.textContent =
+          "Episodes " + (s + 1) + "–" + Math.min(s + EP_CHUNK, vids.length);
+        sel.appendChild(opt);
+      }
+      sel.value = String(start);
+      sel.addEventListener("change", () => {
+        epRangeStart = parseInt(sel.value, 10) || 0;
+        updateEpisodeList(true);
+      });
+      seasonSelectorContainer.appendChild(sel);
+    }
+    for (let i = start; i < end; i++) {
       const div = document.createElement("div");
       div.className = "episode";
-      div.textContent = titles[i] || `Episode ${i + 1}`;
+      const name = document.createElement("span");
+      name.className = "ep-name";
+      name.textContent = titles[i] || `Episode ${i + 1}`;
+      div.appendChild(name);
+      // Number badge only where a real title hides the episode number
+      if (titles[i]) {
+        const num = document.createElement("span");
+        num.className = "ep-num";
+        num.textContent = "#" + (i + 1);
+        div.appendChild(num);
+      }
       div.dataset.episodeIndex = i;
       div.addEventListener("click", () => updateVideo(i));
       container.appendChild(div);
-    });
+    }
+    highlightEpisode(ep);
   }
 
   // Update video player
@@ -597,14 +651,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     iframe.src = vids[index];
     ep = index;
     saveState();
+    // "Next episode" can cross a 100-episode chunk boundary — re-render
+    // the list around the new episode so it stays visible
+    if (vids.length > EP_CHUNK && (index < epRangeStart || index >= epRangeStart + EP_CHUNK)) {
+      updateEpisodeList();
+    }
     highlightEpisode(index);
   }
 
   // Show a "can't embed — open externally" panel over the player. Used when
   // PitSport has no live events (fallback) or hands back a pitsport.xyz page.
+  let pitsportHidIframe = false;
   function showPitsportFallback(url) {
     const iframe = document.getElementById("videoPlayer");
-    if (iframe) { iframe.src = "about:blank"; iframe.style.display = "none"; }
+    if (iframe) { iframe.src = "about:blank"; iframe.style.display = "none"; pitsportHidIframe = true; }
     if (spinner) spinner.style.display = "none";
     const player = document.querySelector(".player");
     if (!player) return;
@@ -637,8 +697,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   function clearPitsportFallback() {
     const box = document.getElementById("pitsportFallback");
     if (box) box.style.display = "none";
-    const iframe = document.getElementById("videoPlayer");
-    if (iframe) iframe.style.display = "";
+    // Only undo OUR hide — megaplay-backup.js also hides this iframe while
+    // its backup <video> plays, and blindly re-showing it here stacked the
+    // errored embed on top of the playing backup player.
+    if (pitsportHidIframe) {
+      const iframe = document.getElementById("videoPlayer");
+      if (iframe) iframe.style.display = "";
+      pitsportHidIframe = false;
+    }
   }
 
   function highlightEpisode(i) {
@@ -811,7 +877,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Genre queries ("romance", "tag: action", "sports anime") also pull
       // trending anime of that genre from AniList, mapped to playable
       // anikoto entries. Hover-card genre chips land here via vwTagSearch.
-      let tagItems = null;
+      let tagItems = null; // anime (AniList → anikoto)
+      let tagItemsTmdb = null; // movies/shows (TMDB → vidnest)
       const tagGenre = detectGenre(q);
 
       // "movies" and "lunora" are both Movies; anikoto items count as anime
@@ -845,16 +912,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
         movieList.appendChild(bar);
 
-        // Tag matches lead; drop title-match dupes of the same anime
+        // Tag matches lead; drop title-match dupes of the same title
         const tagIds = new Set((tagItems || []).map((t) => String(t.aniId)));
+        const tagKeys = new Set((tagItemsTmdb || []).map((t) => t.key));
         const f = searchTypeFilter;
         let list = scored.filter(
           (it) =>
             (f === "all" || typeOfItem(it) === f) &&
-            !(it.aniId != null && tagIds.has(String(it.aniId))),
+            !(it.aniId != null && tagIds.has(String(it.aniId))) &&
+            !(it.key && tagKeys.has(it.key)),
         );
-        if (tagItems && (f === "all" || f === "anime"))
-          list = [...tagItems, ...list];
+        const lead = [...(tagItems || []), ...(tagItemsTmdb || [])].filter(
+          (it) => f === "all" || typeOfItem(it) === f,
+        );
+        list = [...lead, ...list];
 
         if (!list.length) {
           const p = document.createElement("p");
@@ -907,30 +978,51 @@ document.addEventListener("DOMContentLoaded", async () => {
           tagItems = items;
           renderResults();
         });
+        fetchGenreTmdb(tagGenre).then((items) => {
+          if (e.target.value.trim().toLowerCase() !== q) return;
+          if (!items.length) return;
+          tagItemsTmdb = items;
+          renderResults();
+        });
       }
     }, 300);
   });
 
   // ── Genre / tag search ─────────────────────────────────────────────
+  // AniList genres not in the randomizer's table (it stays curated) but
+  // still typeable here.
   const ANI_GENRES = [
     "Action", "Adventure", "Comedy", "Drama", "Ecchi", "Fantasy",
     "Horror", "Mahou Shoujo", "Mecha", "Music", "Mystery",
     "Psychological", "Romance", "Sci-Fi", "Slice of Life", "Sports",
     "Supernatural", "Thriller",
   ];
+  // Returns { label, ani?, aniTag?, mv?, tv? } — the randomizer's genre
+  // table (randomizer.js window.vwRandGenres) is the primary source, so
+  // every chip in its panel is also a searchable word (incl. Isekai).
   function detectGenre(q) {
-    const n = q.replace(/^tag:\s*/, "").replace(/\s+anime$/, "").trim();
-    return ANI_GENRES.find((g) => g.toLowerCase() === n) || null;
+    const n = q
+      .replace(/^tag:\s*/, "")
+      .replace(/\s+(anime|movies?|tv|shows?)$/, "")
+      .trim();
+    const fromRand = (window.vwRandGenres || []).find(
+      (g) => g.label !== "Any" && g.label.toLowerCase() === n,
+    );
+    if (fromRand) return fromRand;
+    const ani = ANI_GENRES.find((g) => g.toLowerCase() === n);
+    return ani ? { label: ani, ani: ani } : null;
   }
   let searchTypeFilter = "all";
 
-  // Trending anime for one AniList genre, mapped to playable anikoto
-  // entries (unmatched ones are dropped — no point listing dead cards).
-  async function fetchGenreAnime(genre) {
+  // Trending anime for one AniList genre or tag (Isekai etc. are tags),
+  // mapped to playable anikoto entries (unmatched ones are dropped — no
+  // point listing dead cards).
+  async function fetchGenreAnime(g) {
+    if (!g.ani && !g.aniTag) return [];
     try {
       const j = await aniListGql(
-        "query($g:String){Page(perPage:40){media(genre:$g,type:ANIME,sort:TRENDING_DESC){id title{romaji english} coverImage{large}}}}",
-        { g: genre },
+        "query($g:String,$t:String){Page(perPage:40){media(genre:$g,tag:$t,type:ANIME,sort:TRENDING_DESC){id title{romaji english} coverImage{large}}}}",
+        { g: g.ani || undefined, t: g.aniTag || undefined },
       );
       const media = j?.data?.Page?.media || [];
       if (!media.length) return [];
@@ -954,6 +1046,39 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (_) {
       return [];
     }
+  }
+
+  // Popular TMDB movies/shows for one genre (Crime, Thriller, …) played
+  // through Vidnest — so genre words also surface non-anime results.
+  async function fetchGenreTmdb(g) {
+    if (!window.vidnestTmdb || !window.openVidnestById) return [];
+    const IMG = "https://image.tmdb.org/t/p/w342";
+    const out = [];
+    const grab = async (kind, genreId) => {
+      if (genreId == null) return;
+      const d = await window.vidnestTmdb(
+        kind === "movies" ? "/discover/movie" : "/discover/tv",
+        {
+          sort_by: "popularity.desc",
+          "vote_count.gte": kind === "movies" ? 200 : 100,
+          include_adult: "false",
+          with_genres: String(genreId),
+        },
+      );
+      (d?.results || []).slice(0, 20).forEach((r) => {
+        const key = (kind === "movies" ? "VDM_" : "VDT_") + r.id;
+        out.push({
+          score: 0,
+          catKey: kind,
+          key,
+          title: r.title || r.name || r.original_title || r.original_name || "",
+          img: r.poster_path ? IMG + r.poster_path : "",
+          open: () => window.openVidnestById(key),
+        });
+      });
+    };
+    await Promise.all([grab("movies", g.mv), grab("shows", g.tv)]);
+    return out;
   }
 
   // Genre chip on the hover info card → run that tag as a search

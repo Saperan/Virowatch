@@ -365,7 +365,7 @@ body {
     background: var(--vw-input-bg);
     border: 1px solid var(--vw-input-border);
     color: var(--vw-text-strong);
-    padding: 11px 40px 11px 42px;
+    padding: 11px 66px 11px 42px;
     border-radius: 99px;
     font-size: 14.5px;
     font-weight: 300;
@@ -393,7 +393,7 @@ body {
 .search-field .search-clear-btn {
     display: none; /* content.js switches to block while typing */
     position: absolute;
-    right: 14px;
+    right: 40px; /* dice button owns the corner */
     top: 50%;
     transform: translateY(-50%);
     color: var(--vw-faint);
@@ -406,6 +406,281 @@ body {
 }
 .search-field .search-clear-btn:hover {
     color: var(--vw-text-strong);
+}
+
+/* ── Episode rows: absolute episode-number badge on the right ──
+   (theme files style .episode itself; this only adds the layout) */
+.episode {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.episode .ep-name {
+    min-width: 0;
+}
+.episode .ep-num {
+    flex: 0 0 auto;
+    font-size: 0.72rem;
+    opacity: 0.55;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Randomizer (randomizer.js injects the button + panel) ── */
+.search-field .search-rand-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 3px;
+    border-radius: 50%;
+    filter: grayscale(1) opacity(0.6);
+    transition:
+        filter 0.18s ease,
+        transform 0.18s ease;
+}
+.search-field .search-rand-btn:hover {
+    filter: none;
+    transform: translateY(-50%) rotate(20deg);
+}
+.search-field .search-rand-btn.rolling {
+    filter: none;
+    animation: vwDiceThrowPill 0.72s cubic-bezier(0.3, 0.1, 0.4, 1) infinite;
+}
+/* Throw arc: toss up spinning, drop, squash on impact, small rebound.
+   Pill variant keeps its translateY(-50%) centering baked in. */
+@keyframes vwDiceThrowPill {
+    0% {
+        transform: translateY(-50%) rotate(0deg) scale(1);
+    }
+    28% {
+        transform: translateY(-105%) rotate(230deg) scale(1.15);
+    }
+    52% {
+        transform: translateY(-38%) rotate(360deg) scale(1.1, 0.8);
+    }
+    64% {
+        transform: translateY(-72%) rotate(430deg) scale(1);
+    }
+    82% {
+        transform: translateY(-44%) rotate(520deg) scale(1.05, 0.92);
+    }
+    100% {
+        transform: translateY(-50%) rotate(540deg) scale(1);
+    }
+}
+.rand-die {
+    display: inline-block;
+}
+.rand-die.rolling {
+    animation: vwDiceThrow 0.72s cubic-bezier(0.3, 0.1, 0.4, 1) infinite;
+}
+@keyframes vwDiceThrow {
+    0% {
+        transform: translateY(0) rotate(0deg) scale(1);
+    }
+    28% {
+        transform: translateY(-9px) rotate(230deg) scale(1.15);
+    }
+    52% {
+        transform: translateY(2px) rotate(360deg) scale(1.1, 0.8);
+    }
+    64% {
+        transform: translateY(-4px) rotate(430deg) scale(1);
+    }
+    82% {
+        transform: translateY(1px) rotate(520deg) scale(1.05, 0.92);
+    }
+    100% {
+        transform: translateY(0) rotate(540deg) scale(1);
+    }
+}
+/* Panel itself pops in like the source picker */
+.rand-panel.open {
+    transform-origin: top right;
+    animation: vwRandPanelIn 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.15);
+}
+@keyframes vwRandPanelIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.94);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+.rand-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: min(340px, 92vw);
+    z-index: 60;
+    background: var(--vw-panel-bg, var(--vw-bg, #16161c));
+    border: 1px solid var(--vw-input-border);
+    border-radius: 16px;
+    padding: 12px 14px 14px;
+    box-shadow: 0 14px 38px rgba(0, 0, 0, 0.45);
+}
+.rand-panel.open {
+    display: block;
+}
+.rand-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--vw-muted-2);
+    margin: 8px 0 6px;
+}
+.rand-label:first-child {
+    margin-top: 0;
+}
+.rand-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.rand-chips button {
+    padding: 5px 11px;
+    border-radius: 99px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    color: var(--vw-text, #eaeaea);
+    background: var(--vw-chip-bg, rgba(255, 255, 255, 0.08));
+    border: 1px solid var(--vw-chip-border, rgba(255, 255, 255, 0.16));
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+}
+.rand-chips button:hover {
+    border-color: var(--vw-input-border-focus);
+}
+.rand-chips button.active {
+    background: var(--vw-text-strong);
+    color: var(--vw-bg, #101014);
+    border-color: transparent;
+    font-weight: 600;
+}
+.rand-go {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 9px 0;
+    border-radius: 99px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--vw-bg, #101014);
+    background: var(--vw-text-strong);
+    border: none;
+    transition: opacity 0.15s ease;
+}
+.rand-go:hover {
+    opacity: 0.85;
+}
+.rand-go:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+.rand-age-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+.rand-age-val {
+    font-size: 0.76rem;
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--vw-text, #eaeaea);
+}
+.rand-age-val.nsfw {
+    color: #e5566a;
+    font-weight: 600;
+}
+/* Dual-thumb slider: two stacked native ranges over one styled track.
+   Inputs are click-through except their thumbs. */
+.rand-age {
+    position: relative;
+    height: 26px;
+}
+.rand-age-track {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 6px;
+    transform: translateY(-50%);
+    border-radius: 99px;
+    background: var(--vw-chip-bg, rgba(255, 255, 255, 0.08));
+    border: 1px solid var(--vw-chip-border, rgba(255, 255, 255, 0.16));
+}
+.rand-age-fill {
+    position: absolute;
+    top: 50%;
+    height: 6px;
+    transform: translateY(-50%);
+    border-radius: 99px;
+    background: var(--vw-text-strong);
+}
+.rand-age input[type="range"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    /* .search-field input's pill padding/border would shrink the thumb
+       travel — the panel lives inside .search-field, so undo them */
+    padding: 0;
+    border: none;
+    -webkit-appearance: none;
+    appearance: none;
+    background: none;
+    pointer-events: none;
+    outline: none;
+}
+.rand-age input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    pointer-events: auto;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--vw-text-strong);
+    border: 2px solid var(--vw-bg, #101014);
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.45);
+    cursor: grab;
+    transition: transform 0.12s ease;
+}
+.rand-age input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+}
+.rand-age input[type="range"]::-webkit-slider-thumb:active {
+    cursor: grabbing;
+}
+.rand-age input[type="range"]::-moz-range-thumb {
+    pointer-events: auto;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--vw-text-strong);
+    border: 2px solid var(--vw-bg, #101014);
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.45);
+    cursor: grab;
+}
+.rand-age input[type="range"]::-moz-range-track {
+    background: none;
+}
+.rand-error {
+    margin-top: 8px;
+    font-size: 0.78rem;
+    text-align: center;
+    color: var(--vw-muted-2);
 }
 
 /* ── Home container (#hero holds banner + newest + sports) */

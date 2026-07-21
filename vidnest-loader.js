@@ -699,6 +699,8 @@
       if (!v) return;
       mode = "hls";
       hlsMasterUrl = proxiedUrl;
+      // Real manifest URL for custom-player-ui.js's seek-bar hover preview
+      v.dataset.vwPreviewSrc = proxiedUrl;
       v.crossOrigin = "anonymous"; // needed for the subtitle tracks; our Worker sends CORS headers
       stopHls();
       show();

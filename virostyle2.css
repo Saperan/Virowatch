@@ -1,4 +1,4 @@
-/* === Virowatch Non Changelog now 0.16 === */
+﻿/* === Virowatch Non Changelog now 0.16 === */
 .bottom-text {
     margin-bottom: 20px;
     text-align: center;
@@ -383,7 +383,7 @@ h6 {
 }
 
 /* === Season Selector === */
-#seasonSelector {
+#seasonSelector, #epRangeSelector {
     background: #1a1a1a;
     color: #eaeaea;
     font-weight: 300;
@@ -400,8 +400,8 @@ h6 {
         transform 0.2s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
-#seasonSelector:hover,
-#seasonSelector:focus {
+#seasonSelector:hover, #epRangeSelector:hover,
+#seasonSelector:focus, #epRangeSelector:focus {
     background-color: #333;
     outline: none;
     transform: scale(1.02);
@@ -409,7 +409,7 @@ h6 {
 .movie-item,
 .button,
 .episode,
-#seasonSelector {
+#seasonSelector, #epRangeSelector {
     opacity: 0;
     animation: simpleAppear 0.8s ease-out forwards;
     transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
@@ -428,4 +428,5 @@ h6 {
    VIROWATCH CSS PATCH — add to ALL theme CSS files
    These replace the inline styles removed from the HTML
    ===================================================== */
+
 

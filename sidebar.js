@@ -72,7 +72,6 @@
     cwCount.addEventListener('change', function () {
       var n = parseInt(cwCount.value, 10);
       if (!(n >= 1)) n = 3;
-      if (n > 15) n = 15;
       cwCount.value = String(n);
       try {
         localStorage.setItem('vw_cw_count', String(n));
