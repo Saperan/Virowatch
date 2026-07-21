@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Custom player test — Medaka Box</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link
+  href="https://fonts.googleapis.com/css2?family=Kanit:wght@100;300;400;500;700&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --vw-bg: #121212;
+    --vw-panel-2: #0e0e0e;
+    --vw-text: #eaeaea;
+    --vw-muted: rgba(255, 255, 255, 0.5);
+    --vw-border: rgba(255, 255, 255, 0.1);
+    --vw-accent: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%; background: var(--vw-bg); color: var(--vw-text);
+    font-family: "Kanit", sans-serif;
+  }
+  body { display: flex; align-items: center; justify-content: center; padding: 24px; }
+
+  .demo-note {
+    position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+    font-size: 0.78rem; color: var(--vw-muted); text-align: center; z-index: 50;
+    background: rgba(0,0,0,.5); padding: 6px 14px; border-radius: 99px;
+    backdrop-filter: blur(6px);
+  }
+
+  /* ── Modal chrome (mirrors .episode-container/.modal-* on the real site) ── */
+  .episode-container {
+    width: min(1100px, 100%);
+    height: min(680px, 92vh);
+    background: var(--vw-panel-2);
+    border: 1px solid var(--vw-border);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 60px rgba(0,0,0,.5);
+  }
+  .modal-header {
+    display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+    background: rgba(26,26,26,.85); border-bottom: 1px solid var(--vw-border);
+    flex-shrink: 0; backdrop-filter: blur(8px);
+  }
+  .modal-back-btn {
+    flex-shrink: 0; padding: 7px 14px; border-radius: 8px;
+    background: #1a1a1a; border: 1px solid #333; color: #eee;
+    font-size: .88rem; text-decoration: none; cursor: default;
+  }
+  .modal-title { flex: 1; font-size: 1rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dub-toggle {
+    flex-shrink: 0; padding: 7px 16px; border-radius: 99px; cursor: pointer;
+    background: var(--vw-chip-bg, rgba(255,255,255,.08)); border: 1px solid rgba(255,255,255,.16);
+    color: #eee; font-family: "Kanit", sans-serif; font-size: .82rem;
+  }
+  .dub-toggle.active { background: #fff; color: #111; font-weight: 500; border-color: #fff; }
+  .modal-body { flex: 1; display: flex; overflow: hidden; min-height: 0; }
+
+  .sidebar { width: 240px; flex-shrink: 0; overflow-y: auto; background: #1c1c1c; border-left: 1px solid var(--vw-border); padding: 12px; }
+  .sidebar h4 { margin: 0 0 10px; font-size: .78rem; font-weight: 500; color: var(--vw-muted); text-transform: uppercase; letter-spacing: .06em; }
+  .episode {
+    padding: 9px 10px; border-radius: 8px; margin-bottom: 6px; background: #232323;
+    cursor: pointer; border: 1px solid transparent; font-size: .85rem; transition: background .18s ease;
+  }
+  .episode:hover { background: #2f2f2f; }
+  .episode.active { background: #3a3a3a; border-color: rgba(255,255,255,.2); font-weight: 500; }
+
+  .frame {
+    flex: 1;
+    min-width: 0;
+    background: #000;
+    overflow: hidden;
+    position: relative;
+  }
+  #video { width: 100%; height: 100%; display: block; object-fit: contain; background: #000; }
+
+  .spinner {
+    position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
+    width: 44px; height: 44px; border: 4px solid rgba(255,255,255,.25); border-top-color: #fff;
+    border-radius: 50%; animation: spin 0.9s linear infinite; display: none; z-index: 5;
+  }
+  @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+  /* Tap zones over the video: single tap = play/pause (native-player norm),
+     double tap = seek back/forward (mobile norm — YouTube/Netflix style). */
+  .tap-zone { position: absolute; top: 0; bottom: 0; width: 50%; z-index: 2; cursor: pointer; }
+  .tap-zone.left { left: 0; }
+  .tap-zone.right { right: 0; }
+
+  .seek-flash {
+    position: absolute; top: 50%; width: 88px; height: 88px; border-radius: 50%;
+    background: rgba(255,255,255,.16); display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: .85rem; font-weight: 500; font-family: "Kanit", sans-serif;
+    gap: 2px; transform: translateY(-50%) scale(.5); opacity: 0; pointer-events: none; z-index: 3;
+  }
+  .seek-flash.left { left: 8%; }
+  .seek-flash.right { right: 8%; }
+  .seek-flash svg { width: 22px; height: 22px; fill: currentColor; }
+  .seek-flash.pop {
+    transform: translateY(-50%) scale(1); opacity: 1;
+    transition: transform .18s ease-out, opacity .1s ease-out;
+  }
+  .seek-flash.fade {
+    transform: translateY(-50%) scale(1.25); opacity: 0;
+    transition: transform .45s ease-in, opacity .45s ease-in;
+  }
+
+  /* ── Native-Chrome-style bottom bar ──────────────────────────── */
+  .controls {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 6;
+    background: linear-gradient(to top, rgba(0,0,0,.75), rgba(0,0,0,0) 100%);
+    padding: 28px 10px 8px;
+    opacity: 1; transition: opacity .25s ease;
+  }
+  .frame.controls-hidden .controls { opacity: 0; pointer-events: none; }
+  .frame.controls-hidden { cursor: none; }
+
+  .seek-row { display: flex; align-items: center; gap: 8px; padding: 0 4px 4px; }
+  .seek-row .time { font-size: .72rem; color: var(--vw-text); min-width: 36px; text-align: center; font-variant-numeric: tabular-nums; }
+  #seek {
+    -webkit-appearance: none; appearance: none; flex: 1; height: 3px; border-radius: 99px;
+    /* played (white) → buffered (light gray) → unbuffered (dark gray), like every native player */
+    background: linear-gradient(to right,
+      #fff var(--pct, 0%),
+      rgba(255,255,255,.45) var(--pct, 0%),
+      rgba(255,255,255,.45) var(--bufpct, 0%),
+      rgba(255,255,255,.22) var(--bufpct, 0%)
+    );
+    outline: none; cursor: pointer;
+  }
+  #seek::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 13px; height: 13px; border-radius: 50%;
+    background: #fff; cursor: pointer; margin-top: -5px;
+    box-shadow: 0 0 0 0 rgba(255,255,255,.3); transition: box-shadow .15s ease;
+  }
+  #seek:hover::-webkit-slider-thumb { box-shadow: 0 0 0 6px rgba(255,255,255,.18); }
+
+  .btn-row { display: flex; align-items: center; gap: 2px; padding: 0 2px; }
+  .spacer { flex: 1; }
+
+  .icon-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border: none; background: transparent; color: #fff;
+    cursor: pointer; border-radius: 6px; flex-shrink: 0; position: relative;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,.12); }
+  .icon-btn svg { width: 19px; height: 19px; fill: currentColor; }
+
+  .vol-group { display: flex; align-items: center; }
+  .vol-group #volume {
+    width: 0; opacity: 0; transition: width .18s ease, opacity .18s ease, margin .18s ease;
+    -webkit-appearance: none; appearance: none; height: 3px; border-radius: 99px;
+    background: linear-gradient(to right, #fff var(--volpct, 100%), rgba(255,255,255,.28) var(--volpct, 100%));
+    outline: none; cursor: pointer;
+  }
+  .vol-group:hover #volume, .vol-group.active #volume { width: 70px; opacity: 1; margin-left: 4px; }
+  .vol-group #volume::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 11px; height: 11px; border-radius: 50%; background: #fff; cursor: pointer; margin-top: -4px;
+  }
+
+  /* ── Overflow "⋮" menu — quality / subtitles / downloads ─────── */
+  .menu-panel {
+    position: absolute; bottom: 46px; right: 8px;
+    min-width: 230px; max-width: 280px;
+    background: rgba(24,24,24,.97); border: 1px solid var(--vw-border);
+    border-radius: 10px; box-shadow: 0 10px 32px rgba(0,0,0,.5);
+    font-size: .85rem; overflow: hidden; z-index: 8;
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transform: translateY(6px) scale(.98);
+    transition: opacity .16s ease, transform .16s ease, visibility 0s linear .16s;
+  }
+  .menu-panel.open {
+    opacity: 1; visibility: visible; pointer-events: auto;
+    transform: translateY(0) scale(1);
+    transition: opacity .16s ease, transform .16s ease;
+  }
+  /* Drill-down between root ↔ submenu — set then cleared on the next frame
+     so the panel transitions FROM this offset back to its normal .open state. */
+  .menu-panel.enter-from-right { transform: translateX(16px) scale(1) !important; opacity: 0 !important; }
+  .menu-panel.enter-from-left { transform: translateX(-16px) scale(1) !important; opacity: 0 !important; }
+  .menu-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 11px 14px; cursor: pointer; color: var(--vw-text);
+  }
+  .menu-row:hover { background: rgba(255,255,255,.08); }
+  .menu-row .arrow { color: var(--vw-muted); font-size: .8rem; }
+  .menu-row.disabled { color: var(--vw-muted); cursor: default; }
+  .menu-row.disabled:hover { background: none; }
+  .menu-value { color: var(--vw-muted); font-size: .78rem; }
+
+  .menu-header {
+    display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+    border-bottom: 1px solid var(--vw-border); font-weight: 500;
+  }
+  .menu-header .back-btn { display: flex; cursor: pointer; color: var(--vw-text); }
+  .menu-header .back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+  .menu-option {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; cursor: pointer; color: var(--vw-text);
+  }
+  .menu-option:hover { background: rgba(255,255,255,.08); }
+  .menu-option .check { width: 16px; height: 16px; fill: #fff; visibility: hidden; }
+  .menu-option.selected .check { visibility: visible; }
+
+  .frame.busy .icon-btn.download-trigger { opacity: .5; pointer-events: none; }
+</style>
+</head>
+<body>
+  <div class="demo-note">Native-player-style controls, Virowatch-tinted — quality/subtitles/downloads live in the ⋮ menu</div>
+
+  <div class="episode-container">
+    <div class="modal-header">
+      <a href="#" class="modal-back-btn">← Back</a>
+      <span class="modal-title">Medaka Box</span>
+      <button class="dub-toggle" id="dubToggle" type="button">Dubbed</button>
+    </div>
+    <div class="modal-body">
+  <div class="frame" id="frame">
+    <div id="spinner" class="spinner"></div>
+    <video id="video" playsinline></video>
+    <div class="tap-zone left" id="tapLeft"></div>
+    <div class="tap-zone right" id="tapRight"></div>
+    <div class="seek-flash left" id="flashLeft">
+      <svg viewBox="0 0 24 24"><path d="M11.99 5V1l-5 5 5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6h-2c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+      <span id="flashLeftLabel">10s</span>
+    </div>
+    <div class="seek-flash right" id="flashRight">
+      <svg viewBox="0 0 24 24"><path d="M12.01 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z" transform="scale(-1,1) translate(-24,0)"/></svg>
+      <span id="flashRightLabel">10s</span>
+    </div>
+
+    <div class="controls" id="controls">
+      <div class="seek-row">
+        <span class="time" id="curTime">0:00</span>
+        <input type="range" id="seek" min="0" max="100" value="0" step="0.1" />
+        <span class="time" id="durTime">0:00</span>
+      </div>
+      <div class="btn-row">
+        <button class="icon-btn" id="playBtn" title="Play/Pause">
+          <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="pauseIcon" viewBox="0 0 24 24" style="display:none"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+        </button>
+
+        <div class="vol-group" id="volGroup">
+          <button class="icon-btn" id="muteBtn" title="Mute">
+            <svg id="volHighIcon" viewBox="0 0 24 24"><path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+            <svg id="volMuteIcon" viewBox="0 0 24 24" style="display:none"><path d="M16.5 12A4.5 4.5 0 0 0 14 7.97v1.79l2.48 2.48c.01-.08.02-.16.02-.24zM19 12c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3 3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06a8.99 8.99 0 0 0 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4l-1.88 1.88L12 7.76V4z"/></svg>
+          </button>
+          <input type="range" id="volume" min="0" max="1" value="1" step="0.01" />
+        </div>
+
+        <span style="font-size:.72rem;color:var(--vw-muted);padding:0 4px;" id="epLabel">Episode 1</span>
+
+        <div class="spacer"></div>
+
+        <button class="icon-btn" id="ccBtn" title="Captions">
+          <svg viewBox="0 0 24 24"><path d="M19 4H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 7H9.5v-.5h-2v3h2V13H11v1c0 .55-.45 1-1 1H7c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v1zm7 0h-1.5v-.5h-2v3h2V13H18v1c0 .55-.45 1-1 1h-3c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v1z"/></svg>
+        </button>
+        <button class="icon-btn" id="fsBtn" title="Fullscreen">
+          <svg id="fsEnterIcon" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+          <svg id="fsExitIcon" viewBox="0 0 24 24" style="display:none"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
+        </button>
+        <button class="icon-btn" id="moreBtn" title="More options">
+          <svg viewBox="0 0 24 24"><path d="M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Root menu -->
+    <div class="menu-panel" id="menuRoot">
+      <div class="menu-row" id="rowQuality">
+        <span>Quality</span>
+        <span><span class="menu-value" id="qualityValueLabel">Auto</span> <span class="arrow">›</span></span>
+      </div>
+      <div class="menu-row" id="rowSubtitles">
+        <span>Subtitles</span>
+        <span><span class="menu-value" id="subValueLabel">Off</span> <span class="arrow">›</span></span>
+      </div>
+      <div class="menu-row" id="rowSeekAmount">
+        <span>Seek amount</span>
+        <span><span class="menu-value" id="seekValueLabel">10s</span> <span class="arrow">›</span></span>
+      </div>
+      <div class="menu-row" id="rowSubDownload">
+        <span>Download subtitles</span>
+      </div>
+      <div class="menu-row" id="rowVidDownload">
+        <span>Download video</span>
+        <span class="menu-value" id="downloadStatusLabel"></span>
+      </div>
+    </div>
+
+    <!-- Quality submenu -->
+    <div class="menu-panel" id="menuQuality">
+      <div class="menu-header">
+        <span class="back-btn" data-back><svg viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></svg></span>
+        <span>Quality</span>
+      </div>
+      <div id="qualityOptionsList"></div>
+    </div>
+
+    <!-- Subtitles submenu -->
+    <div class="menu-panel" id="menuSubtitles">
+      <div class="menu-header">
+        <span class="back-btn" data-back><svg viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></svg></span>
+        <span>Subtitles</span>
+      </div>
+      <div id="subOptionsList"></div>
+    </div>
+
+    <!-- Seek amount submenu -->
+    <div class="menu-panel" id="menuSeek">
+      <div class="menu-header">
+        <span class="back-btn" data-back><svg viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></svg></span>
+        <span>Seek amount</span>
+      </div>
+      <div id="seekOptionsList"></div>
+    </div>
+  </div>
+
+      <div class="sidebar">
+        <h4>Episodes</h4>
+        <div id="episodeList"></div>
+      </div>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  // ── Vidnest resolve (same technique as vidnest-loader.js) ─────────
+  const VIDNEST_ALPHABET = "RB0fpH8ZEyVLkv7c2i6MAJ5u3IKFDxlS1NTsnGaqmXYdUrtzjwObCgQP94hoeW+/=";
+  function vidnestB64Decode(str, alphabet) {
+    const table = {};
+    for (let i = 0; i < alphabet.length; i++) table[alphabet[i]] = i;
+    const bytes = [];
+    for (let i = 0; i < str.length; i += 4) {
+      let chunk = str.slice(i, i + 4);
+      while (chunk.length < 4) chunk += "=";
+      const vals = [];
+      for (let j = 0; j < 4; j++) { const v = table[chunk[j]]; vals.push(v !== undefined ? v : 64); }
+      bytes.push((vals[0] << 2) | (vals[1] >> 4));
+      if (vals[2] !== 64) bytes.push(((vals[1] & 15) << 4) | (vals[2] >> 2));
+      if (vals[3] !== 64) bytes.push(((vals[2] & 3) << 6) | vals[3]);
+    }
+    return new TextDecoder().decode(new Uint8Array(bytes));
+  }
+  async function resolveAnime(anilistId, ep, subOrDub) {
+    try {
+      const r = await fetch(`https://new.vidnest.fun/hianime/anime/${anilistId}/${ep}/${subOrDub}`);
+      const json = await r.json();
+      const data = json.encrypted ? JSON.parse(vidnestB64Decode(json.data, VIDNEST_ALPHABET)) : json;
+      const file = data && data.sources && data.sources[0] && data.sources[0].file;
+      if (!file) return null;
+      return { file, tracks: Array.isArray(data.tracks) ? data.tracks : [] };
+    } catch (_) {
+      return null; // transient network hiccup — load() falls into its "not available" path
+    }
+  }
+
+  const WORKER = "https://anikoto-request.vmtgaming13.workers.dev";
+  const ANILIST_ID = 11761; // Medaka Box
+  const TOTAL_EPISODES = 12;
+  let EP = 1;
+  let dubbed = false;
+
+  // ── Elements ───────────────────────────────────────────────────
+  const frame = document.getElementById("frame");
+  const episodeList = document.getElementById("episodeList");
+  const dubToggle = document.getElementById("dubToggle");
+  const epLabel = document.getElementById("epLabel");
+  const video = document.getElementById("video");
+  const spinner = document.getElementById("spinner");
+  const tapLeft = document.getElementById("tapLeft");
+  const tapRight = document.getElementById("tapRight");
+  const flashLeft = document.getElementById("flashLeft");
+  const flashRight = document.getElementById("flashRight");
+  const flashLeftLabel = document.getElementById("flashLeftLabel");
+  const flashRightLabel = document.getElementById("flashRightLabel");
+  const controls = document.getElementById("controls");
+  const playBtn = document.getElementById("playBtn");
+  const playIcon = document.getElementById("playIcon");
+  const pauseIcon = document.getElementById("pauseIcon");
+  const seek = document.getElementById("seek");
+  const curTimeEl = document.getElementById("curTime");
+  const durTimeEl = document.getElementById("durTime");
+  const volGroup = document.getElementById("volGroup");
+  const muteBtn = document.getElementById("muteBtn");
+  const volHighIcon = document.getElementById("volHighIcon");
+  const volMuteIcon = document.getElementById("volMuteIcon");
+  const volume = document.getElementById("volume");
+  const ccBtn = document.getElementById("ccBtn");
+  const fsBtn = document.getElementById("fsBtn");
+  const fsEnterIcon = document.getElementById("fsEnterIcon");
+  const fsExitIcon = document.getElementById("fsExitIcon");
+  const moreBtn = document.getElementById("moreBtn");
+  const menuRoot = document.getElementById("menuRoot");
+  const menuQuality = document.getElementById("menuQuality");
+  const menuSubtitles = document.getElementById("menuSubtitles");
+  const menuSeek = document.getElementById("menuSeek");
+  const qualityOptionsList = document.getElementById("qualityOptionsList");
+  const subOptionsList = document.getElementById("subOptionsList");
+  const seekOptionsList = document.getElementById("seekOptionsList");
+  const qualityValueLabel = document.getElementById("qualityValueLabel");
+  const subValueLabel = document.getElementById("subValueLabel");
+  const seekValueLabel = document.getElementById("seekValueLabel");
+  const downloadStatusLabel = document.getElementById("downloadStatusLabel");
+  const rowQuality = document.getElementById("rowQuality");
+  const rowSubtitles = document.getElementById("rowSubtitles");
+  const rowSeekAmount = document.getElementById("rowSeekAmount");
+  const rowSubDownload = document.getElementById("rowSubDownload");
+  const rowVidDownload = document.getElementById("rowVidDownload");
+
+  let hls = null;
+  let captionTracks = [];
+  let trackEls = [];
+  let trackBlobUrls = [];
+  let activeSubIndex = -1; // -1 = off
+  let masterUrl = null;
+  let currentQuality = "auto";
+
+  // ── Seek amount (persisted — used by both keyboard arrows and the
+  // double-tap gesture below) ────────────────────────────────────────
+  const SEEK_STEP_KEY = "vw_test_seek_step";
+  let seekStep = Number(localStorage.getItem(SEEK_STEP_KEY)) || 10;
+  function setSeekStep(v) {
+    seekStep = v;
+    localStorage.setItem(SEEK_STEP_KEY, String(v));
+    seekValueLabel.textContent = v + "s";
+    flashLeftLabel.textContent = v + "s";
+    flashRightLabel.textContent = v + "s";
+  }
+  function buildSeekMenu() {
+    seekOptionsList.innerHTML = "";
+    [5, 10, 15].forEach((v) => {
+      const row = document.createElement("div");
+      row.className = "menu-option" + (v === seekStep ? " selected" : "");
+      row.innerHTML = `<span>${v} seconds</span>${CHECK_SVG}`;
+      row.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setSeekStep(v);
+        [...seekOptionsList.children].forEach((c) => c.classList.remove("selected"));
+        row.classList.add("selected");
+        menuSeek.classList.remove("open");
+      });
+      seekOptionsList.appendChild(row);
+    });
+  }
+
+  function fmtTime(s) {
+    if (!isFinite(s) || s < 0) s = 0;
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = Math.floor(s % 60);
+    return h > 0 ? `${h}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}` : `${m}:${String(sec).padStart(2, "0")}`;
+  }
+
+  // ── Play/Pause ───────────────────────────────────────────────────
+  function togglePlay() { if (video.paused) video.play(); else video.pause(); }
+  playBtn.addEventListener("click", (e) => { e.stopPropagation(); togglePlay(); });
+  video.addEventListener("play", () => { playIcon.style.display = "none"; pauseIcon.style.display = ""; });
+  video.addEventListener("pause", () => { playIcon.style.display = ""; pauseIcon.style.display = "none"; });
+
+  // ── Tap zones: single tap = play/pause, double tap = seek (mobile norm) ──
+  const DOUBLE_TAP_MS = 280;
+  const tapState = { left: { count: 0, tid: null }, right: { count: 0, tid: null } };
+
+  function flashSeek(side) {
+    const el = side === "left" ? flashLeft : flashRight;
+    el.classList.remove("fade");
+    // Force reflow so re-triggering on rapid repeated taps restarts the animation.
+    void el.offsetWidth;
+    el.classList.add("pop");
+    clearTimeout(el._fadeTid);
+    el._fadeTid = setTimeout(() => {
+      el.classList.remove("pop");
+      el.classList.add("fade");
+    }, 500);
+  }
+
+  function seekBy(delta) {
+    if (delta < 0) video.currentTime = Math.max(0, video.currentTime + delta);
+    else if (video.duration) video.currentTime = Math.min(video.duration, video.currentTime + delta);
+  }
+
+  function handleZoneTap(side) {
+    const st = tapState[side];
+    st.count++;
+    if (st.count === 1) {
+      st.tid = setTimeout(() => {
+        st.count = 0;
+        togglePlay(); // single tap, no follow-up — treat like clicking the video
+      }, DOUBLE_TAP_MS);
+    } else {
+      clearTimeout(st.tid);
+      st.count = 0;
+      seekBy(side === "left" ? -seekStep : seekStep);
+      flashSeek(side);
+      showControls();
+    }
+  }
+  tapLeft.addEventListener("click", () => handleZoneTap("left"));
+  tapRight.addEventListener("click", () => handleZoneTap("right"));
+
+  video.addEventListener("timeupdate", () => {
+    if (!video.duration) return;
+    const pct = (video.currentTime / video.duration) * 100;
+    seek.value = pct;
+    seek.style.setProperty("--pct", pct + "%");
+    curTimeEl.textContent = fmtTime(video.currentTime);
+  });
+  video.addEventListener("loadedmetadata", () => { durTimeEl.textContent = fmtTime(video.duration); });
+  seek.addEventListener("input", (e) => { e.stopPropagation(); if (video.duration) video.currentTime = (seek.value / 100) * video.duration; });
+  seek.addEventListener("click", (e) => e.stopPropagation());
+
+  // Buffered range (the lighter-gray segment ahead of playback) — hls.js
+  // appends to video.buffered as segments download, independent of playback.
+  function updateBuffered() {
+    if (!video.duration || !video.buffered.length) return;
+    // Find the buffered range containing (or nearest ahead of) currentTime.
+    let end = 0;
+    for (let i = 0; i < video.buffered.length; i++) {
+      if (video.buffered.start(i) <= video.currentTime + 0.5) end = Math.max(end, video.buffered.end(i));
+    }
+    seek.style.setProperty("--bufpct", (end / video.duration) * 100 + "%");
+  }
+  video.addEventListener("progress", updateBuffered);
+  video.addEventListener("timeupdate", updateBuffered);
+
+  // ── Volume ─────────────────────────────────────────────────────
+  function updateVolIcon() {
+    const off = video.muted || video.volume === 0;
+    volHighIcon.style.display = off ? "none" : "";
+    volMuteIcon.style.display = off ? "" : "none";
+    volume.style.setProperty("--volpct", (off ? 0 : video.volume * 100) + "%");
+  }
+  muteBtn.addEventListener("click", (e) => { e.stopPropagation(); video.muted = !video.muted; updateVolIcon(); });
+  volume.addEventListener("input", (e) => { e.stopPropagation(); video.volume = Number(volume.value); video.muted = false; updateVolIcon(); });
+  volume.addEventListener("click", (e) => e.stopPropagation());
+
+  // ── Buffering spinner — react to actual stalls, not just initial load ──
+  video.addEventListener("waiting", () => { spinner.style.display = "block"; });
+  video.addEventListener("playing", () => { spinner.style.display = "none"; });
+  video.addEventListener("canplay", () => { spinner.style.display = "none"; });
+  video.addEventListener("seeking", () => { spinner.style.display = "block"; });
+  video.addEventListener("seeked", () => { if (!video.paused) spinner.style.display = "none"; });
+
+  // ── Fullscreen ───────────────────────────────────────────────────
+  fsBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (document.fullscreenElement) document.exitFullscreen();
+    else frame.requestFullscreen().catch(() => {});
+  });
+  document.addEventListener("fullscreenchange", () => {
+    const on = !!document.fullscreenElement;
+    fsEnterIcon.style.display = on ? "none" : "";
+    fsExitIcon.style.display = on ? "" : "none";
+  });
+
+  // ── Auto-hide controls while playing + idle ─────────────────────
+  let idleTid;
+  function showControls() {
+    frame.classList.remove("controls-hidden");
+    clearTimeout(idleTid);
+    if (!video.paused) idleTid = setTimeout(() => { if (!anyMenuOpen()) frame.classList.add("controls-hidden"); }, 2600);
+  }
+  frame.addEventListener("mousemove", showControls);
+  frame.addEventListener("mouseleave", () => { if (!video.paused && !anyMenuOpen()) frame.classList.add("controls-hidden"); });
+  video.addEventListener("play", showControls);
+  showControls();
+
+  // ── Keyboard shortcuts (standard native/YouTube-style set) ──────
+  // Seek amount uses the same configurable `seekStep` as the double-tap
+  // gesture (set in the ⋮ menu → Seek amount).
+  const VOL_STEP = 0.05;  // 5%, arrow up/down
+  function setVolume(v) {
+    video.volume = Math.min(1, Math.max(0, v));
+    video.muted = false;
+    volume.value = video.volume;
+    updateVolIcon();
+  }
+  document.addEventListener("keydown", (e) => {
+    const tag = (document.activeElement && document.activeElement.tagName) || "";
+    if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return; // don't hijack menu/slider focus
+    let handled = true;
+    switch (e.key.toLowerCase()) {
+      case " ":
+      case "k":
+        togglePlay();
+        break;
+      case "f":
+        fsBtn.click();
+        break;
+      case "m":
+        video.muted = !video.muted;
+        updateVolIcon();
+        break;
+      case "c":
+        ccBtn.click();
+        break;
+      case "arrowleft":
+        video.currentTime = Math.max(0, video.currentTime - seekStep);
+        break;
+      case "arrowright":
+        if (video.duration) video.currentTime = Math.min(video.duration, video.currentTime + seekStep);
+        break;
+      case "arrowup":
+        setVolume(video.volume + VOL_STEP);
+        break;
+      case "arrowdown":
+        setVolume(video.volume - VOL_STEP);
+        break;
+      default:
+        handled = false;
+    }
+    if (handled) {
+      e.preventDefault(); // stop space/arrows from scrolling the page
+      showControls();
+    }
+  });
+
+  // ── ⋮ overflow menu (root + quality/subtitle submenus) ──────────
+  function anyMenuOpen() {
+    return menuRoot.classList.contains("open") || menuQuality.classList.contains("open") || menuSubtitles.classList.contains("open") || menuSeek.classList.contains("open");
+  }
+  function closeAllMenus() {
+    menuRoot.classList.remove("open");
+    menuQuality.classList.remove("open");
+    menuSubtitles.classList.remove("open");
+    menuSeek.classList.remove("open");
+  }
+  moreBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (anyMenuOpen()) closeAllMenus();
+    else { menuRoot.classList.add("open"); showControls(); }
+  });
+  document.addEventListener("click", (e) => {
+    if (!frame.contains(e.target) || (!e.target.closest(".menu-panel") && e.target !== moreBtn && !moreBtn.contains(e.target))) {
+      closeAllMenus();
+    }
+  });
+  // Drill-down navigation: the entering panel starts offset (enter-from-*)
+  // then, one frame later, that class is removed so its own transition
+  // carries it back to the normal .open position — a slide, not a snap.
+  function slideTo(fromPanel, toPanel, enterClass) {
+    fromPanel.classList.remove("open");
+    toPanel.classList.add(enterClass, "open");
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => toPanel.classList.remove(enterClass));
+    });
+  }
+  rowQuality.addEventListener("click", (e) => { e.stopPropagation(); slideTo(menuRoot, menuQuality, "enter-from-right"); });
+  rowSubtitles.addEventListener("click", (e) => { e.stopPropagation(); slideTo(menuRoot, menuSubtitles, "enter-from-right"); });
+  rowSeekAmount.addEventListener("click", (e) => { e.stopPropagation(); slideTo(menuRoot, menuSeek, "enter-from-right"); });
+  [menuQuality, menuSubtitles, menuSeek].forEach((panel) => {
+    panel.querySelector("[data-back]").addEventListener("click", (e) => {
+      e.stopPropagation();
+      slideTo(panel, menuRoot, "enter-from-left");
+    });
+  });
+
+  const CHECK_SVG = '<svg class="check" viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>';
+
+  // ── Quality picker (real hls.js ABR levels) ────────────────────
+  function levelIndexForCap(cap) {
+    let idx = -1, best = -1;
+    hls.levels.forEach((l, i) => { if (l.height <= cap && l.height > best) { best = l.height; idx = i; } });
+    if (idx === -1) idx = hls.levels.reduce((m, l, i, a) => (l.height < a[m].height ? i : m), 0);
+    return idx;
+  }
+  function applyQuality(val) {
+    currentQuality = val;
+    qualityValueLabel.textContent = val === "auto" ? "Auto" : val + "p";
+    if (!hls || !hls.levels.length) return;
+    if (val === "auto") { hls.autoLevelCapping = -1; hls.currentLevel = -1; return; }
+    const idx = levelIndexForCap(Number(val));
+    hls.autoLevelCapping = idx;
+    hls.currentLevel = idx;
+  }
+  function buildQualityMenu() {
+    qualityOptionsList.innerHTML = "";
+    const opts = ["auto", ...[...new Set(hls.levels.map((l) => l.height))].sort((a, b) => b - a).map(String)];
+    opts.forEach((val) => {
+      const row = document.createElement("div");
+      row.className = "menu-option" + (val === currentQuality ? " selected" : "");
+      row.innerHTML = `<span>${val === "auto" ? "Auto" : val + "p"}</span>${CHECK_SVG}`;
+      row.addEventListener("click", (e) => {
+        e.stopPropagation();
+        applyQuality(val);
+        [...qualityOptionsList.children].forEach((c) => c.classList.remove("selected"));
+        row.classList.add("selected");
+        menuQuality.classList.remove("open");
+      });
+      qualityOptionsList.appendChild(row);
+    });
+  }
+
+  // ── Subtitles (off / one per track) ─────────────────────────────
+  function setActiveSub(index) {
+    activeSubIndex = index;
+    subValueLabel.textContent = index === -1 ? "Off" : (captionTracks[index].label || `Track ${index + 1}`);
+    const tt = video.textTracks;
+    for (let i = 0; i < tt.length; i++) tt[i].mode = i === index ? "showing" : "disabled";
+    ccBtn.style.color = index === -1 ? "#fff" : "#6cf";
+  }
+  function buildSubtitlesMenu() {
+    subOptionsList.innerHTML = "";
+    const offRow = document.createElement("div");
+    offRow.className = "menu-option" + (activeSubIndex === -1 ? " selected" : "");
+    offRow.innerHTML = `<span>Off</span>${CHECK_SVG}`;
+    offRow.addEventListener("click", (e) => { e.stopPropagation(); setActiveSub(-1); refreshSubSelection(); menuSubtitles.classList.remove("open"); });
+    subOptionsList.appendChild(offRow);
+    captionTracks.forEach((t, i) => {
+      const row = document.createElement("div");
+      row.className = "menu-option" + (activeSubIndex === i ? " selected" : "");
+      row.innerHTML = `<span>${t.label || "Track " + (i + 1)}</span>${CHECK_SVG}`;
+      row.addEventListener("click", (e) => { e.stopPropagation(); setActiveSub(i); refreshSubSelection(); menuSubtitles.classList.remove("open"); });
+      subOptionsList.appendChild(row);
+    });
+  }
+  function refreshSubSelection() {
+    [...subOptionsList.children].forEach((c, i) => c.classList.toggle("selected", (i - 1) === activeSubIndex || (i === 0 && activeSubIndex === -1)));
+  }
+  ccBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (!captionTracks.length) return;
+    setActiveSub(activeSubIndex === -1 ? 0 : -1); // quick toggle; full picker is in the ⋮ menu
+  });
+
+  // ── Downloads (segment reassembly, same technique as megaplay-backup.js) ──
+  function pickVariant(masterText, cap) {
+    const lines = masterText.split(/\r?\n/);
+    const variants = [];
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].startsWith("#EXT-X-STREAM-INF")) {
+        const res = /RESOLUTION=\d+x(\d+)/.exec(lines[i]);
+        const url = (lines[i + 1] || "").trim();
+        if (url && !url.startsWith("#")) variants.push({ height: res ? Number(res[1]) : 0, url });
+      }
+    }
+    if (!variants.length) return null;
+    if (cap === "auto") return variants.reduce((m, v) => (v.height > m.height ? v : m)).url;
+    const c = Number(cap);
+    const under = variants.filter((v) => v.height <= c);
+    return (under.length ? under.reduce((m, v) => (v.height > m.height ? v : m)) : variants.reduce((m, v) => (v.height < m.height ? v : m))).url;
+  }
+  function segUrlsFrom(childText) {
+    return childText.split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
+  }
+  async function assembleTs(segUrls, onProgress) {
+    const total = segUrls.length;
+    const buffers = new Array(total);
+    let nextFetch = 0, done = 0;
+    async function pool() {
+      for (;;) {
+        const i = nextFetch++;
+        if (i >= total) return;
+        const r = await fetch(segUrls[i]);
+        buffers[i] = await r.arrayBuffer();
+        done++;
+        onProgress(done, total);
+      }
+    }
+    await Promise.all(Array.from({ length: 6 }, pool));
+    return new Blob(buffers, { type: "video/mp2t" });
+  }
+  function triggerBlobDownload(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  }
+  rowVidDownload.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    if (frame.classList.contains("busy")) return;
+    frame.classList.add("busy");
+    const setLbl = (t) => { downloadStatusLabel.textContent = t; };
+    try {
+      if (!masterUrl) throw new Error("nothing playing");
+      const masterText = await (await fetch(masterUrl)).text();
+      const childUrl = pickVariant(masterText, currentQuality);
+      if (!childUrl) throw new Error("no variant found");
+      const segUrls = segUrlsFrom(await (await fetch(childUrl)).text());
+      if (!segUrls.length) throw new Error("no segments");
+      const blob = await assembleTs(segUrls, (done, total) => setLbl(Math.floor((done / total) * 100) + "%"));
+      triggerBlobDownload(blob, `Medaka Box - Episode ${EP}.ts`);
+      setLbl("✓ Saved");
+    } catch (err) {
+      setLbl("Failed");
+      console.error("Download failed:", err);
+    } finally {
+      frame.classList.remove("busy");
+      setTimeout(() => setLbl(""), 2500);
+    }
+  });
+
+  function vttToSrt(vtt) {
+    const lines = vtt.replace(/\r/g, "").split("\n");
+    const norm = (t) => { t = t.replace(".", ","); return t.split(":").length === 2 ? "00:" + t : t; };
+    const out = [];
+    let idx = 1;
+    for (let i = 0; i < lines.length; i++) {
+      const m = lines[i].match(/((?:\d{2}:)?\d{2}:\d{2}[.,]\d{3})\s*-->\s*((?:\d{2}:)?\d{2}:\d{2}[.,]\d{3})/);
+      if (!m) continue;
+      const text = [];
+      i++;
+      while (i < lines.length && lines[i].trim() !== "") {
+        const s = lines[i].replace(/<[^>]+>/g, "");
+        if (s.trim() !== "") text.push(s);
+        i++;
+      }
+      out.push(String(idx++), `${norm(m[1])} --> ${norm(m[2])}`, text.join("\n"), "");
+    }
+    return out.join("\n");
+  }
+  rowSubDownload.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    if (!captionTracks.length) return;
+    const track = captionTracks[activeSubIndex === -1 ? 0 : activeSubIndex];
+    try {
+      const srt = vttToSrt(await (await fetch(track.file)).text());
+      triggerBlobDownload(new Blob([srt], { type: "application/x-subrip" }), `Medaka Box - Episode ${EP}.${(track.label||"sub").replace(/[^\w]/g,"")}.srt`);
+    } catch (_) { console.error("Subtitle download failed"); }
+    closeAllMenus();
+  });
+
+  // ── Subtitle tracks: blob-url workaround (file:// blocks cross-origin <track>) ──
+  function revokeTrackBlobs() {
+    trackBlobUrls.forEach((u) => { try { URL.revokeObjectURL(u); } catch (_) {} });
+    trackBlobUrls = [];
+  }
+  async function addTracks(tracks) {
+    captionTracks = (Array.isArray(tracks) ? tracks : []).filter((t) => t && t.file);
+    const myTracks = captionTracks;
+    video.querySelectorAll("track").forEach((t) => t.remove());
+    trackEls = [];
+    activeSubIndex = -1;
+    buildSubtitlesMenu();
+    subValueLabel.textContent = "Off";
+    rowSubDownload.classList.toggle("disabled", !myTracks.length);
+    if (!myTracks.length) return;
+    const results = await Promise.all(myTracks.map(async (t) => {
+      try { return URL.createObjectURL(new Blob([await (await fetch(t.file)).text()], { type: "text/vtt" })); }
+      catch (_) { return null; }
+    }));
+    if (captionTracks !== myTracks) return;
+    revokeTrackBlobs();
+    results.forEach((blobUrl, i) => {
+      if (!blobUrl) return;
+      trackBlobUrls.push(blobUrl);
+      const tr = document.createElement("track");
+      tr.kind = "subtitles"; tr.label = myTracks[i].label || `Track ${i+1}`;
+      tr.srclang = (myTracks[i].label || "en").slice(0, 2).toLowerCase();
+      tr.src = blobUrl;
+      video.appendChild(tr);
+      trackEls.push(tr);
+    });
+    // Off by default (matches native players) — texttracks start disabled.
+    const tt = video.textTracks;
+    for (let i = 0; i < tt.length; i++) tt[i].mode = "disabled";
+  }
+
+  // ── Episode sidebar ──────────────────────────────────────────────
+  function highlightEpisode() {
+    episodeList.querySelectorAll(".episode").forEach((el) => {
+      el.classList.toggle("active", Number(el.dataset.ep) === EP);
+    });
+  }
+  for (let i = 1; i <= TOTAL_EPISODES; i++) {
+    const div = document.createElement("div");
+    div.className = "episode";
+    div.dataset.ep = String(i);
+    div.textContent = `Episode ${i}`;
+    div.addEventListener("click", () => { EP = i; load(); });
+    episodeList.appendChild(div);
+  }
+
+  // ── Dubbed toggle ─────────────────────────────────────────────────
+  dubToggle.addEventListener("click", () => {
+    dubbed = !dubbed;
+    dubToggle.classList.toggle("active", dubbed);
+    load();
+  });
+
+  // ── Load + play ──────────────────────────────────────────────────
+  function stopHls() { if (hls) { try { hls.destroy(); } catch (_) {} hls = null; } }
+
+  let loadToken = 0;
+  async function load() {
+    const myToken = ++loadToken;
+    highlightEpisode();
+    epLabel.textContent = `Episode ${EP}`;
+    spinner.style.display = "block";
+    stopHls();
+    video.crossOrigin = "anonymous";
+    const result = await resolveAnime(ANILIST_ID, EP, dubbed ? "dub" : "sub");
+    if (myToken !== loadToken) return; // a newer episode/dub change happened meanwhile
+    if (!result) {
+      spinner.style.display = "none";
+      epLabel.textContent = `Episode ${EP} — not available${dubbed ? " (dub)" : ""}`;
+      return;
+    }
+    masterUrl = `${WORKER}/hls?u=${encodeURIComponent(result.file)}`;
+    addTracks(result.tracks);
+    hls = new Hls({ enableWorker: true, startLevel: -1 });
+    hls.loadSource(masterUrl);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      if (myToken !== loadToken) return;
+      spinner.style.display = "none";
+      buildQualityMenu();
+      video.play().catch(() => {}); // browser may still block autoplay without a prior click — expected
+    });
+    hls.on(Hls.Events.ERROR, (_e, d) => { if (d && d.fatal) console.error("hls fatal error", d); });
+  }
+
+  updateVolIcon();
+  buildSeekMenu();
+  setSeekStep(seekStep); // sync labels with the persisted value
+  load();
+})();
+</script>
+</body>
+</html>
