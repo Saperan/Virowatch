@@ -878,7 +878,21 @@
   // clicks again — a stale resolve must not silence/steal the new episode.
   let animeSwitchToken = 0;
   window.addEventListener("vw-anime-api-changed", (e) => {
-    if (e.detail && e.detail.api === "vidnest") vidnestOptOut = false;
+    const api = e.detail && e.detail.api;
+    if (api === "vidnest") {
+      vidnestOptOut = false;
+      // Picked mid-episode (source picker / Settings) — switch the playing
+      // episode over now, same as the default-API auto-switch does.
+      if (currentAniListId && !vidnestAnimeActive) activateVidnestAnime();
+    } else if (vidnestAnimeActive) {
+      // Switched away from Vidnest mid-episode. Stop our player first —
+      // megaplay-backup.js's listener runs after this one and restores the
+      // embed / starts the Cloudflare backup on a clean slate.
+      animeSwitchToken++;
+      vidnestAnimeActive = false;
+      vidnestPlayer.stop();
+      setAnimeSwitchLabel();
+    }
   });
 
   // Switch the currently-playing Anikoto episode over to Vidnest. Shared by
@@ -940,17 +954,8 @@
         }
         activateVidnestAnime();
       });
-      // #downloadContainer (between #nextEpisode and everything after it) is
-      // a full-width flex item even when empty, which forces anything
-      // appended after it onto its own wrapped line. Insert right after the
-      // Cloudflare button instead (same trick that button uses to land
-      // before the download container).
-      const controls = document.querySelector(".player-controls");
-      const cfBtn = document.getElementById("viroBackupBtn");
-      const nextBtn = document.getElementById("nextEpisode");
-      if (controls) {
-        controls.insertBefore(b, (cfBtn || nextBtn) ? (cfBtn || nextBtn).nextSibling : null);
-      }
+      // Superseded by anime-api.js's "⇄ Source" picker — never appended to
+      // the DOM. Kept detached so the label/display writes stay no-ops.
     }
     return b;
   }

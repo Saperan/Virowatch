@@ -3,10 +3,9 @@
  *
  * When an Anikoto / MegaPlay episode is loaded into #videoPlayer (the iframe),
  * this module:
- *   - shows a "☁ Cloudflare API" button under the player,
- *   - shows a one-time toast pointing at it (and the Vidnest API button)
- *     instead of auto-switching — auto-switching used to race whichever
- *     other source the user picked in the meantime,
+ *   - shows a toast pointing at anime-api.js's "⇄ Source" picker instead of
+ *     auto-switching — auto-switching used to race whichever other source
+ *     the user picked in the meantime,
  *   - resolves that stream through the Cloudflare Worker and plays it with
  *     hls.js inside a <video> element (no iframe, no VPN).
  *
@@ -45,9 +44,27 @@
   // to the embed still clears it for the session.
   let preferBackup  = localStorage.getItem("vw_anime_api") === "cloudflare";
   window.addEventListener("vw-anime-api-changed", (e) => {
-    preferBackup = e.detail && e.detail.api === "cloudflare";
-    // Switching the default to/from the Vidwish mirror only changes the embed
-    // host — re-run the src handler so the current episode swaps hosts live.
+    const api = e.detail && e.detail.api;
+    preferBackup = api === "cloudflare";
+    // Live-apply the pick to the episode that's already playing, not just
+    // future ones. Vidnest is vidnest-loader.js's job (its listener runs
+    // first — it loads earlier — so by the time we get here it has already
+    // stopped/started its own player as needed).
+    if (api === "cloudflare") {
+      if (current && mode === "embed") { playBackup(); return; }
+    } else if (api !== "vidnest") {
+      if (mode === "backup") {
+        useEmbed(); // back to the embed; the host swap below picks the right mirror
+      } else {
+        // Embed mode but the iframe may sit blanked (Vidnest had taken the
+        // episode over and vwSuspendAutoBackup navigated it away) — restore it.
+        const f = iframe();
+        const s = f && f.getAttribute("src");
+        if ((!s || s === "about:blank") && lastEmbedSrc) useEmbed();
+      }
+    }
+    // Megaplay ↔ Vidwish only changes the embed host — re-run the src handler
+    // so the current episode swaps hosts live.
     if (mode === "embed") {
       const f = iframe();
       const s = f && f.getAttribute("src");
@@ -136,9 +153,9 @@
         if (mode === "backup") useEmbed();
         else { preferBackup = true; playBackup(); }
       });
-      const controls = document.querySelector(".player-controls");
-      const nextBtn  = document.getElementById("nextEpisode");
-      if (controls) controls.insertBefore(b, nextBtn ? nextBtn.nextSibling : null);
+      // Superseded by anime-api.js's "⇄ Source" picker — never appended to
+      // the DOM. Kept as a detached element so the label/display writes all
+      // over this module stay no-ops instead of null derefs.
     }
     return b;
   }
@@ -562,6 +579,7 @@
     showEmbed();
     const b = button();
     b.style.display = "none";
+    window.dispatchEvent(new CustomEvent("vw-anime-embed", { detail: { active: false } }));
   }
 
   // ── vidwish mirror host resolution ────────────────────────────────
@@ -573,8 +591,14 @@
     return megaplayBlocked ? "vidwish.live" : "megaplay.buzz";
   }
 
+  // Vidwish dropped the /stream/s-3/ path (soft-404 error page since ~2026-07);
+  // its player now lives at /stream/s-2/. Megaplay still embeds at s-3. So a
+  // host swap must also swap the stream segment to the one that host serves.
   function swapHost(url, host) {
-    return url.replace(/(?:megaplay\.buzz|vidwish\.live)/i, host);
+    const seg = /vidwish/i.test(host) ? "s-2" : "s-3";
+    return url
+      .replace(/(?:megaplay\.buzz|vidwish\.live)/i, host)
+      .replace(/\/stream\/s-\d+\//i, `/stream/${seg}/`);
   }
 
   // One-time, from the USER's real IP: does Megaplay's CDN actually load here?
@@ -634,10 +658,12 @@
 
     // Point the embed at whichever host the current preference wants. Rewriting
     // here re-fires the observer, but the selfSetting guard skips it and we
-    // process the rewritten URL inline below.
+    // process the rewritten URL inline below. Compare full rewritten URLs, not
+    // just hosts — the hosts use different /stream/s-N/ segments, so a
+    // same-host URL can still need its path fixed.
     const want = targetAnimeHost();
-    if (m[1].toLowerCase() !== want) {
-      const rewritten = swapHost(src, want);
+    const rewritten = swapHost(src, want);
+    if (rewritten !== src) {
       const f0 = iframe();
       if (f0) {
         selfSetting = true;
@@ -657,6 +683,8 @@
 
     const b = button();
     b.style.display = "";
+    // Tell anime-api.js's source-picker button an anime episode is active.
+    window.dispatchEvent(new CustomEvent("vw-anime-embed", { detail: { active: true } }));
 
     if (preferBackup || partyOn()) {
       // Watch party: always go straight to the Backup player — it's the
@@ -667,11 +695,11 @@
       showEmbed();
       setButtonLabel();
       // No more auto-switching — it used to race whichever source the user
-      // picked manually in the meantime. Just point at the two options.
+      // picked manually in the meantime. Just point at the picker.
       // (Unless Vidnest is the default API: vidnest-loader.js is about to
       // switch this episode over on its own — the hint would be noise.)
       if (localStorage.getItem("vw_anime_api") !== "vidnest") {
-        toast("Not playing? Try ☁ Cloudflare API or ◆ Vidnest API below");
+        toast("Not playing? Switch with the ⇄ Source button below");
       }
     }
   }
