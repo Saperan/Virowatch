@@ -207,24 +207,24 @@
   // ── First-run popup ────────────────────────────────────────────────
   const OPTIONS = [
     {
-      api: "anikoto",
-      name: "Anikoto API",
-      desc: "Fastest, though isn't available for all regions/IPs.",
-    },
-    {
       api: "cloudflare",
       name: "Cloudflare API",
-      desc: "Most reliable, though can be slow sometimes and stop working if overused.",
+      desc: "Best pick — works on any network. Can slow down when busy.",
     },
     {
       api: "vidnest",
       name: "Vidnest API",
-      desc: "Fast and somewhat reliable, though doesn't have the same library as Anikoto/Cloudflare.",
+      desc: "Fast and ad-free, but its library misses some shows.",
+    },
+    {
+      api: "anikoto",
+      name: "Anikoto API",
+      desc: "Fastest when it works — blocked on some networks (error 232011).",
     },
     {
       api: "vidwish",
-      name: "Anikoto — Vidwish mirror",
-      desc: "Same library as Anikoto, served through the Vidwish mirror. Use this if Anikoto won't load on your connection (error 232011).",
+      name: "Vidwish",
+      desc: "Same shows as Anikoto on different servers. Last resort if the rest fail.",
     },
   ];
 
@@ -244,7 +244,7 @@
     const header = document.createElement("div");
     header.className = "vws-header";
     header.innerHTML =
-      '<img src="https://i.ibb.co/FkdMbG4N/virowatch-new-icon-tihngy-cropped.png" alt="" class="vws-logo">' +
+      '<img src="https://i.ibb.co/HfcvRBMD/virowatch-discord-icon-512.png" alt="" class="vws-logo">' +
       '<div><div class="vws-title">Choose your anime API</div>' +
       '<div class="vws-sub">Virowatch</div></div>';
 

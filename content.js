@@ -874,6 +874,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       scored.sort((a, b) => b.score - a.score);
 
+      // TMDB lists lots of anime as plain "TV shows", so Vidnest search
+      // returns a second Re:Zero/Mushoku Tensei next to the multi-host
+      // anime entry. When a non-Vidnest result already carries the same
+      // (normalized) title, drop Vidnest's copy — the anime entry can play
+      // through Vidnest anyway via the ⇄ Source picker.
+      const normTitle = (t) => (t || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+      const isVidnestItem = (it) => !!(it.key && /^VD[MT]_/.test(it.key));
+      const nonVidnestTitles = new Set(
+        scored.filter((it) => !isVidnestItem(it)).map((it) => normTitle(it.title)),
+      );
+      for (let i = scored.length - 1; i >= 0; i--) {
+        if (isVidnestItem(scored[i]) && nonVidnestTitles.has(normTitle(scored[i].title))) {
+          scored.splice(i, 1);
+        }
+      }
+
       // Genre queries ("romance", "tag: action", "sports anime") also pull
       // trending anime of that genre from AniList, mapped to playable
       // anikoto entries. Hover-card genre chips land here via vwTagSearch.
