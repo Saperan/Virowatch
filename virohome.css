@@ -942,7 +942,11 @@ html[data-vw-theme*="light"] .hero-art::before {
     align-items: center;
     gap: 18px;
     overflow-x: auto;
-    scrollbar-width: thin;
+    scrollbar-width: none; /* hidden, same as .air-viewport (Airing soon) */
+    -ms-overflow-style: none;
+}
+.sports::-webkit-scrollbar {
+    display: none;
 }
 .sports-head {
     display: flex;
