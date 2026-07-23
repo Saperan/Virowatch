@@ -21,6 +21,18 @@
   var POLL_MS = 2500;
   var MAX_INDENT = 4; // visual indent cap — deeper replies stop shifting right
 
+  // Monochrome stroke thumbs (currentColor) to match the sidebar rail icons.
+  var THUMB_UP =
+    '<svg class="vwcmt-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M7 10v11H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h3z"/>' +
+    '<path d="M7 10l5-8a2.2 2.2 0 0 1 3 3l-1.5 5H20a2 2 0 0 1 2 2.3l-1.3 6.4A2 2 0 0 1 18.7 21H7"/></svg>';
+  var THUMB_DOWN =
+    '<svg class="vwcmt-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M7 14V3H4a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3z"/>' +
+    '<path d="M7 14l5 8a2.2 2.2 0 0 0 3-3l-1.5-5H20a2 2 0 0 0 2-2.3l-1.3-6.4A2 2 0 0 0 18.7 3H7"/></svg>';
+
   var currentKey = null;
   var comments = [];
   var replyTo = null;        // comment id an open reply box belongs to
@@ -50,6 +62,33 @@
     var d = document.createElement("div");
     d.textContent = s == null ? "" : String(s);
     return d.innerHTML;
+  }
+
+  function clock(sec) {
+    sec = Math.max(0, Math.floor(sec || 0));
+    var h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    var mm = h ? (m < 10 ? "0" + m : m) : m;
+    return (h ? h + ":" : "") + mm + ":" + (s < 10 ? "0" + s : s);
+  }
+
+  // Rich comment body: clickable @M:SS timestamps (seek the player), inline
+  // GIF/image URLs, and plain links. Everything is escaped first.
+  function renderRich(text) {
+    var html = esc(text);
+    // Timestamps first. A URL almost never contains an "@M:SS", so doing this
+    // before the link pass is safe — and the URL regex's [^\s<] can't then
+    // reach into the <button> tags this produces.
+    html = html.replace(/@(\d{1,2}):(\d{2})(?::(\d{2}))?\b/g, function (_, a, b, c) {
+      var sec = c != null ? (+a) * 3600 + (+b) * 60 + (+c) : (+a) * 60 + (+b);
+      return '<button type="button" class="vwcmt-ts" data-sec="' + sec + '">▶ ' + clock(sec) + "</button>";
+    });
+    // URLs → inline image for gif/png/jpg/webp, else a plain link.
+    html = html.replace(/(https?:\/\/[^\s<]+)/g, function (u) {
+      return /\.(?:gif|png|jpe?g|webp)$/i.test(u)
+        ? '<img class="vwcmt-img" src="' + u + '" alt="" loading="lazy">'
+        : '<a href="' + u + '" target="_blank" rel="noopener">' + u + "</a>";
+    });
+    return html;
   }
 
   function timeAgo(ts) {
@@ -129,13 +168,24 @@
 .vwcmt-meta b{color:var(--vw-text-strong,#fff);font-weight:600;margin-right:6px;}
 .vwcmt-text{font-size:.85rem;color:var(--vw-text,#cfcfe0);line-height:1.45;
   white-space:pre-wrap;word-break:break-word;}
+.vwcmt-text a{color:#6f8cff;text-decoration:underline;word-break:break-all;}
+.vwcmt-img{display:block;max-width:240px;max-height:200px;border-radius:10px;margin:5px 0;
+  background:rgba(255,255,255,.05);}
+.vwcmt-ts{display:inline-flex;align-items:center;gap:3px;vertical-align:baseline;
+  padding:1px 8px;margin:0 1px;border-radius:99px;font-size:.78rem;font-weight:600;cursor:pointer;
+  color:#fff;background:#3d5afe;border:none;transition:filter .14s ease;}
+.vwcmt-ts:hover{filter:brightness(1.15);}
 .vwcmt-bar{display:flex;gap:13px;margin-top:5px;font-size:.75rem;align-items:center;}
 .vwcmt-act{background:none;border:none;padding:2px 0;cursor:pointer;
   color:var(--vw-muted-2,#9a9ab0);font-size:.75rem;
   transition:color .14s ease,transform .14s ease;}
 .vwcmt-act:hover{color:var(--vw-text-strong,#fff);}
 .vwcmt-act:active{transform:scale(.92);}
-.vwcmt-act.on{color:var(--vw-accent-bg,#e5e7eb);font-weight:600;}
+.vwcmt-act.on{color:var(--vw-text-strong,#fff);font-weight:600;}
+.vwcmt-vote{display:inline-flex;align-items:center;gap:5px;}
+.vwcmt-ico{width:15px;height:15px;display:block;}
+.vwcmt-vote.on .vwcmt-ico{color:#3d5afe;}
+.vwcmt-actn{font-size:.75rem;line-height:1;}
 .vwcmt-act.del:hover{color:#e5566a;}
 .vwcmt-fold{background:none;border:none;padding:2px 0;cursor:pointer;
   font-size:.73rem;color:var(--vw-faint,#888);transition:color .14s ease;}
@@ -358,6 +408,24 @@
     ta.dataset.draftKey = parent ? String(parent) : "root";
     var actions = document.createElement("div");
     actions.className = "vwcmt-actions";
+
+    // insert the current playhead as a clickable @M:SS timestamp token
+    var tsBtn = document.createElement("button");
+    tsBtn.className = "vwcmt-btn";
+    tsBtn.type = "button";
+    tsBtn.title = "Insert the current moment — viewers can click it to jump here";
+    tsBtn.textContent = "🕐 Timestamp";
+    tsBtn.addEventListener("click", function () {
+      var v = document.getElementById("viroBackupPlayer") || document.getElementById("vidnestDirectPlayer");
+      var sec = v && v.currentTime ? Math.floor(v.currentTime) : 0;
+      var token = "@" + clock(sec) + " ";
+      var start = ta.selectionStart || ta.value.length;
+      ta.value = ta.value.slice(0, start) + token + ta.value.slice(ta.selectionEnd || start);
+      ta.focus();
+      try { ta.setSelectionRange(start + token.length, start + token.length); } catch (_) {}
+    });
+    actions.appendChild(tsBtn);
+
     var send = document.createElement("button");
     send.className = "vwcmt-btn";
     send.textContent = parent ? "Reply" : "Comment";
@@ -394,17 +462,31 @@
       '<img src="' + esc(c.user.avatar) + '" alt="">' +
       '<div class="vwcmt-main">' +
       '<div class="vwcmt-meta"><b>' + esc(c.user.name) + "</b>" + timeAgo(c.ts) + "</div>" +
-      '<div class="vwcmt-text">' + esc(c.text) + "</div>" +
+      '<div class="vwcmt-text">' + renderRich(c.text) + "</div>" +
       '<div class="vwcmt-bar"></div>' +
       "</div>";
+
+    // clickable timestamps → seek the player to that moment in this episode
+    el.querySelectorAll(".vwcmt-ts").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var sec = Number(b.dataset.sec) || 0;
+        if (typeof window.vwPlayEpisodeAt === "function" && currentKey) {
+          closeModal();
+          window.vwPlayEpisodeAt(currentKey, sec);
+        } else if (typeof window.vwSeekTo === "function") {
+          closeModal();
+          window.vwSeekTo(sec);
+        }
+      });
+    });
 
     var bar = el.querySelector(".vwcmt-bar");
     var loggedIn = !!authUser();
 
-    function voteBtn(dir, glyph, count, on) {
+    function voteBtn(dir, icon, count, on) {
       var b = document.createElement("button");
-      b.className = "vwcmt-act" + (on ? " on" : "");
-      b.textContent = glyph + (count ? " " + count : "");
+      b.className = "vwcmt-act vwcmt-vote" + (on ? " on" : "");
+      b.innerHTML = icon + (count ? '<span class="vwcmt-actn">' + count + "</span>" : "");
       b.title = loggedIn ? "" : "Log in with AniList to vote";
       b.addEventListener("click", function () {
         if (!loggedIn) return;
@@ -412,8 +494,8 @@
       });
       return b;
     }
-    bar.appendChild(voteBtn(1, "👍", c.likes, c.myVote === 1));
-    bar.appendChild(voteBtn(-1, "👎", c.dislikes, c.myVote === -1));
+    bar.appendChild(voteBtn(1, THUMB_UP, c.likes, c.myVote === 1));
+    bar.appendChild(voteBtn(-1, THUMB_DOWN, c.dislikes, c.myVote === -1));
 
     if (loggedIn) {
       var rep = document.createElement("button");

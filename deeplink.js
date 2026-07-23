@@ -26,6 +26,7 @@
   var sk = p.get("sk"); // season key for shows, e.g. "S1"
   var epNum = parseInt(p.get("ep") || "1", 10);
   var dub = p.get("dub") === "1";
+  var seekT = parseInt(p.get("t") || "0", 10); // clip deep link → seek here
   if (!play && !anilist) return;
 
   var epIdx = Math.max(0, (isNaN(epNum) ? 1 : epNum) - 1); // video[] is 0-based
@@ -131,10 +132,14 @@
           // pop-out button can be clicked — viroResume() resolves as soon as
           // it *starts* loading the source, not once it's playable.
           setTimeout(function () {
-            toast("Now playing.", {
+            toast(seekT > 0 ? "Jumping to the shared moment…" : "Now playing.", {
               action: { label: "Pop out", onClick: popOutPlayer },
             });
           }, 500);
+          // clip deep link (?t=) → seek once a readable native player exists
+          if (seekT > 0 && typeof window.vwSeekTo === "function") {
+            setTimeout(function () { window.vwSeekTo(seekT); }, 900);
+          }
         }
         return ok;
       })
