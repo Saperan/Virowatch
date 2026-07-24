@@ -39,6 +39,7 @@
   var loading = false;
   var isAdmin = false;       // set from the worker's GET response
   var adminEligible = false; // id on ADMIN_IDS but mod key not entered yet
+  var reportsOpen = 0;       // open report count (admin badge)
   var sortMode = localStorage.getItem("vw_cmt_sort") || "new"; // new|old|top
   var collapsed = {};        // comment id → true (hidden replies), per session
   var lastJson = "";         // change detection for the poll loop
@@ -230,6 +231,7 @@
     comments = d && d.ok ? d.comments : [];
     isAdmin = !!(d && d.admin);
     adminEligible = !!(d && d.adminEligible);
+    reportsOpen = (d && d.reportsOpen) || 0;
     lastJson = JSON.stringify(comments);
   }
 
@@ -516,6 +518,14 @@
       });
       bar.appendChild(del);
     }
+    if (loggedIn && !c.mine) {
+      var rep = document.createElement("button");
+      rep.className = "vwcmt-act";
+      rep.textContent = "Report";
+      rep.title = "Flag this comment for the moderators";
+      rep.addEventListener("click", function () { reportComment(c); });
+      bar.appendChild(rep);
+    }
     if (isAdmin && !c.mine) {
       var ban = document.createElement("button");
       ban.className = "vwcmt-act del";
@@ -529,6 +539,18 @@
       bar.appendChild(ban);
     }
     return el;
+  }
+
+  function reportComment(c) {
+    var reason = prompt("Report this comment by " + c.user.name +
+      " to the moderators?\nOptional reason:", "");
+    if (reason === null) return; // cancelled
+    api("/report", { id: c.id, reason: reason })
+      .then(function (d) {
+        if (d && d.ok) alert(d.already ? "You already reported this — thanks." : "Reported. Moderators will review it.");
+        else alert((d && d.error) || "Report failed.");
+      })
+      .catch(function () { alert("Report failed."); });
   }
 
   function countReplies(childMap, id) {
@@ -612,7 +634,9 @@
     if (isAdmin || adminEligible) {
       var mod = document.createElement("button");
       mod.className = "vwcmt-btn";
-      mod.textContent = isAdmin ? "🛡 Moderation" : "🛡 Enter mod key";
+      mod.textContent = isAdmin
+        ? "🛡 Moderation" + (reportsOpen ? " (" + reportsOpen + ")" : "")
+        : "🛡 Enter mod key";
       mod.addEventListener("click", isAdmin ? openMod : function () {
         var k = prompt("Moderation key (ADMIN_KEY set on the worker):");
         if (!k) return;
@@ -706,14 +730,77 @@
   function loadModFeed() {
     var list = modModal.querySelector("#vwCmtModList");
     list.innerHTML = '<div class="vwcmt-empty">Loading…</div>';
-    api("/admin/comments").then(function (d) {
+    Promise.all([
+      api("/admin/comments"),
+      api("/admin/reports").catch(function () { return { ok: false, reports: [] }; }),
+    ]).then(function (res) {
+      var d = res[0];
+      var rd = res[1];
       if (!d || !d.ok) {
         list.innerHTML = '<div class="vwcmt-empty">' + esc((d && d.error) || "failed") + "</div>";
         return;
       }
+      var openReports = (rd && rd.ok && rd.reports) || [];
       modModal.querySelector("#vwCmtModSub").textContent =
-        d.comments.length + " recent comments · " + d.banned.length + " banned";
+        openReports.length + " reported · " + d.comments.length + " recent · " + d.banned.length + " banned";
       list.innerHTML = "";
+
+      // ── Reported comments (act on these first) ──
+      var rh = document.createElement("div");
+      rh.className = "vwcmt-mod-sect";
+      rh.textContent = "🚩 Reported (" + openReports.length + ")";
+      list.appendChild(rh);
+      if (!openReports.length) {
+        var re = document.createElement("div");
+        re.className = "vwcmt-empty";
+        re.textContent = "No open reports.";
+        list.appendChild(re);
+      }
+      openReports.forEach(function (r) {
+        var gone = !r.id; // comment was deleted; report kept for the record
+        var row = document.createElement("div");
+        row.className = "vwcmt-mod-row";
+        row.innerHTML =
+          '<img src="' + esc(r.user_avatar || "") + '" alt="">' +
+          '<div class="vwcmt-mod-main">' +
+          '<div class="vwcmt-mod-meta"><b>' + esc(r.user_name || "unknown") + "</b>" +
+          (gone ? "comment deleted" : (timeAgo(r.ts) + (r.parent ? " · reply" : ""))) + "</div>" +
+          '<div class="vwcmt-mod-ep">' + esc(gone ? "" : modKeyLabel(r.ckey)) +
+          ' · reported ' + timeAgo(r.report_ts) + " by " + esc(r.reporter_name || "someone") +
+          (r.reason ? ' · “' + esc(r.reason) + '”' : "") + "</div>" +
+          '<div class="vwcmt-mod-text">' + (gone ? "<i>(comment no longer exists)</i>" : esc(r.text)) + "</div></div>";
+        var acts = document.createElement("div");
+        acts.className = "vwcmt-mod-acts";
+        if (!gone) {
+          var del = document.createElement("button");
+          del.className = "vwcmt-act del";
+          del.textContent = "Delete";
+          del.addEventListener("click", function () {
+            api("/delete", { id: r.id }).then(loadModFeed).catch(function () {});
+          });
+          acts.appendChild(del);
+          var a0 = authUser();
+          if (!a0 || a0.userId !== r.user_id) {
+            var ban0 = document.createElement("button");
+            ban0.className = "vwcmt-act del";
+            ban0.textContent = "Ban";
+            ban0.addEventListener("click", function () {
+              if (!confirm("Ban " + r.user_name + " from commenting?")) return;
+              api("/admin/ban", { userId: r.user_id, name: r.user_name }).then(loadModFeed).catch(function () {});
+            });
+            acts.appendChild(ban0);
+          }
+        }
+        var dis = document.createElement("button");
+        dis.className = "vwcmt-act";
+        dis.textContent = "Dismiss";
+        dis.addEventListener("click", function () {
+          api("/admin/report/resolve", { reportId: r.report_id }).then(loadModFeed).catch(function () {});
+        });
+        acts.appendChild(dis);
+        row.appendChild(acts);
+        list.appendChild(row);
+      });
 
       if (d.banned.length) {
         var bh = document.createElement("div");

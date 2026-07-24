@@ -27,8 +27,11 @@
   var WORKER = "https://vw-social.uxlibrary.workers.dev";
   var GIPHY_KEY = "9f7K5hb1Q9Dpz7TvxOwHglQAsyIVyTi9"; // Virowatch Giphy app key
   var GIF_FAVS_KEY = "vw_gif_favs";
+  var HIDDEN_KEY = "vw_hidden_chats"; // chats the user X'd out of the list
+  var ORDER_KEY = "vw_chat_order";    // manual drag order of chats
   var POLL_OPEN_MS = 3000;   // conversation poll while the chat is open
   var POLL_IDLE_MS = 25000;  // background inbox poll for the unread badge
+  var GIF_PAGE = 24;         // GIFs fetched per infinite-scroll page
 
   /* ── state ──────────────────────────────────────────────────────── */
   var me = null;             // { id, name, avatar }
@@ -43,6 +46,28 @@
   var idleTimer = null;
   var pendingClip = null;    // clip staged by "🎬 Send clip", awaiting a target
   var replyingTo = null;     // message being replied to (composer reply bar)
+  var iAmMod = false;        // worker says this AniList account is a moderator
+  var modView = null;        // secret mod read-only conversation ({group,parties/members})
+  var reports = [];          // open reports (mod tab)
+
+  /* ── hidden chats + manual order (localStorage) ─────────────────── */
+  // chat keys: "u<userId>" for a DM, "g<groupId>" for a group chat.
+  function chatKey(isGroup, id) { return (isGroup ? "g" : "u") + id; }
+  function loadSet(k) {
+    try { return JSON.parse(localStorage.getItem(k) || "[]"); } catch (_) { return []; }
+  }
+  function hiddenChats() { return loadSet(HIDDEN_KEY); }
+  function isHidden(key) { return hiddenChats().indexOf(key) !== -1; }
+  function hideChat(key) {
+    var a = hiddenChats();
+    if (a.indexOf(key) === -1) { a.push(key); localStorage.setItem(HIDDEN_KEY, JSON.stringify(a)); }
+  }
+  function unhideChat(key) {
+    var a = hiddenChats().filter(function (k) { return k !== key; });
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify(a));
+  }
+  function chatOrder() { return loadSet(ORDER_KEY); }
+  function setChatOrder(a) { localStorage.setItem(ORDER_KEY, JSON.stringify(a)); }
 
   function authUser() {
     try { return JSON.parse(localStorage.getItem("vw_anilist") || "null"); }
@@ -424,12 +449,18 @@
   font:inherit;font-size:.84rem;color:var(--vw-text,#cfcfe0);transition:background .12s,color .12s;}
 .vwsoc-ctx-item:hover{background:var(--vw-hover-strong,rgba(255,255,255,.1));color:var(--vw-text-strong,#fff);}
 .vwsoc-ctx-item.danger:hover{color:#e5566a;}
-/* reply reference above a message */
-.vwsoc-replyref{align-self:flex-start;max-width:74%;font-size:.74rem;color:var(--vw-muted-2,#9a9ab0);
-  padding:2px 4px 0 12px;margin-bottom:-4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  border-left:2px solid var(--vw-chip-border,rgba(255,255,255,.25));border-radius:2px;}
+/* reply reference above a message (Discord-style caption, click to jump).
+   Uses --vw-text (tracks the surface) not --vw-muted, which flips dark on the
+   light theme and vanishes against the dark chat pane. */
+.vwsoc-replyref{align-self:flex-start;max-width:72%;display:flex;align-items:center;gap:5px;
+  font-size:.72rem;line-height:1.5;min-height:1.5em;color:var(--vw-text,#cfcfe0);cursor:pointer;
+  box-sizing:border-box;opacity:.7;padding:2px 8px 1px;margin:3px 6px 1px;
+  overflow:visible;transition:opacity .12s;}
+.vwsoc-replyref:hover{opacity:1;}
 .vwsoc-replyref.mine{align-self:flex-end;}
-.vwsoc-replyref-n{color:var(--vw-text-strong,#fff);font-weight:600;}
+.vwsoc-replyref-icon{opacity:.6;flex:0 0 auto;}
+.vwsoc-replyref-n{color:var(--vw-text-strong,#fff);font-weight:600;flex:0 0 auto;}
+.vwsoc-replyref-txt{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .vwsoc-replyref .vwsoc-tw{width:1em;height:1em;vertical-align:-0.15em;}
 /* composer reply bar */
 .vwsoc-replybar{display:flex;align-items:center;gap:8px;margin:0 14px 6px;padding:7px 8px 7px 12px;
@@ -441,6 +472,55 @@
 .vwsoc-replybar .vwsoc-tw{width:1em;height:1em;vertical-align:-0.15em;}
 .vwsoc-conv-empty{flex:1;display:flex;align-items:center;justify-content:center;
   color:var(--vw-muted-2,#9a9ab0);font-size:.85rem;text-align:center;padding:24px;line-height:1.6;}
+/* flash-highlight a message you jumped to */
+@keyframes vwsocFlash{0%{background:rgba(61,90,254,.45);}100%{background:transparent;}}
+.vwsoc-flash{animation:vwsocFlash 1.5s ease-out;border-radius:16px;}
+/* hide (✕) chat + drag-reorder affordances */
+.vwsoc-row{position:relative;}
+.vwsoc-hidechat{position:absolute;top:3px;right:4px;width:20px;height:20px;border-radius:50%;border:none;
+  cursor:pointer;background:var(--vw-panel,rgba(20,20,26,.9));color:var(--vw-muted-2,#9a9ab0);
+  font-size:.72rem;line-height:1;display:flex;align-items:center;justify-content:center;z-index:2;
+  opacity:0;transition:opacity .12s,color .12s,background .12s;}
+.vwsoc-row:hover .vwsoc-hidechat{opacity:1;}
+.vwsoc-hidechat:hover{color:#e5566a;background:var(--vw-hover-strong,rgba(255,255,255,.14));}
+.vwsoc-row[draggable]{cursor:grab;}
+.vwsoc-dragging{opacity:.45;}
+.vwsoc-drop-above{box-shadow:inset 0 2px 0 0 #3d5afe;}
+.vwsoc-drop-below{box-shadow:inset 0 -2px 0 0 #3d5afe;}
+/* ★ favorite on a received GIF bubble */
+.vwsoc-gifbub{position:relative;}
+.vwsoc-gifbub-fav{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;cursor:pointer;
+  border:none;background:rgba(0,0,0,.55);color:rgba(255,255,255,.6);font-size:.85rem;line-height:1;
+  display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .12s,color .12s;}
+.vwsoc-gifbub:hover .vwsoc-gifbub-fav{opacity:1;}
+.vwsoc-gifbub-fav.on{opacity:1;color:#ffcf3d;}
+/* profile popup */
+.vwsoc-prof{position:relative;width:min(360px,92vw);padding:26px 22px 22px;display:flex;
+  flex-direction:column;align-items:center;text-align:center;gap:6px;}
+.vwsoc-prof-av{width:88px;height:88px;border-radius:50%;object-fit:cover;background:rgba(255,255,255,.08);
+  border:2px solid var(--vw-chip-border,rgba(255,255,255,.18));}
+.vwsoc-prof-name{font-size:1.15rem;font-weight:700;color:var(--vw-text-strong,#fff);margin-top:4px;}
+.vwsoc-prof-link{font-size:.78rem;color:var(--vw-muted-2,#9a9ab0);text-decoration:none;}
+.vwsoc-prof-link:hover{color:var(--vw-text-strong,#fff);text-decoration:underline;}
+.vwsoc-prof-hint{font-size:.78rem;color:var(--vw-muted-2,#9a9ab0);margin-top:6px;}
+.vwsoc-prof-acts{display:flex;gap:8px;margin-top:14px;}
+.vwsoc-prof-acts .vwsoc-mini{padding:8px 16px;font-size:.82rem;}
+/* moderation panel */
+.vwsoc-modhead{display:flex;align-items:center;justify-content:space-between;padding:6px 8px 8px;
+  font-size:.82rem;font-weight:600;color:var(--vw-text-strong,#fff);}
+.vwsoc-report{padding:10px 11px;border-radius:12px;margin:0 2px 8px;
+  background:var(--vw-hover,rgba(255,255,255,.05));border:1px solid var(--vw-chip-border,rgba(255,255,255,.12));}
+.vwsoc-report-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.vwsoc-report-who{font-size:.84rem;font-weight:600;color:var(--vw-text-strong,#fff);}
+.vwsoc-report-time{font-size:.68rem;color:var(--vw-muted-2,#9a9ab0);flex:0 0 auto;}
+.vwsoc-banflag{background:#e5566a;color:#fff;font-size:.58rem;font-weight:700;padding:1px 5px;border-radius:5px;
+  vertical-align:middle;letter-spacing:.4px;}
+.vwsoc-report-snip{font-size:.82rem;color:var(--vw-text,#cfcfe0);margin:5px 0;word-break:break-word;
+  background:rgba(0,0,0,.2);padding:6px 9px;border-radius:8px;}
+.vwsoc-report-meta{font-size:.7rem;color:var(--vw-muted-2,#9a9ab0);line-height:1.4;word-break:break-word;}
+.vwsoc-report-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;}
+.vwsoc-modnote{padding:6px 16px 10px;font-size:.7rem;color:var(--vw-muted-2,#9a9ab0);text-align:center;
+  border-top:1px solid var(--vw-border,rgba(255,255,255,.06));}
 @media (max-width:720px){.vwsoc-side{width:100%;}.vwsoc-modal.show-conv .vwsoc-side{display:none;}
   .vwsoc-modal:not(.show-conv) .vwsoc-conv{display:none;}}
 `;
@@ -548,7 +628,13 @@
   /* ── data refresh ───────────────────────────────────────────────── */
   function refreshAll() {
     if (!loggedIn()) return;
-    api("/me").then(function (d) { if (d && d.ok) me = d.user; }).catch(function () {});
+    api("/me").then(function (d) {
+      if (d && d.ok) {
+        me = d.user; iAmMod = !!d.isMod;
+        if (modalOpen()) renderTabs();
+        if (iAmMod) loadReports(function () { if (tab === "mod" && modalOpen()) renderSide(); });
+      }
+    }).catch(function () {});
     Promise.all([
       api("/friends").catch(function () { return null; }),
       api("/threads").catch(function () { return null; }),
@@ -572,6 +658,7 @@
       ["requests", "Requests"],
       ["add", "Add People"],
     ];
+    if (iAmMod) defs.push(["mod", "🛡 Mod"]);
     defs.forEach(function (d) {
       var b = document.createElement("button");
       b.className = "vwsoc-tab" + (tab === d[0] ? " on" : "");
@@ -582,7 +669,16 @@
         dot.textContent = data.incoming.length;
         b.appendChild(dot);
       }
-      b.addEventListener("click", function () { tab = d[0]; renderTabs(); renderSide(); });
+      if (d[0] === "mod" && reports.length) {
+        var mdot = document.createElement("span");
+        mdot.className = "vwsoc-dot";
+        mdot.textContent = reports.length > 99 ? "99+" : reports.length;
+        b.appendChild(mdot);
+      }
+      b.addEventListener("click", function () {
+        tab = d[0]; renderTabs(); renderSide();
+        if (d[0] === "mod") loadReports(function () { if (tab === "mod") renderSide(); });
+      });
       wrap.appendChild(b);
     });
   }
@@ -620,6 +716,7 @@
     list.innerHTML = "";
 
     if (tab === "add") return renderAdd(list);
+    if (tab === "mod") return renderMod(list);
 
     if (tab === "requests") {
       if (!data.incoming.length && !data.outgoing.length) {
@@ -661,36 +758,111 @@
           { label: "Message", cls: "go", onClick: function () { openDm(u); } },
           { label: "Remove", cls: "danger", onClick: function () { if (confirm("Remove " + u.name + "?")) removeFriend(u.id); } },
         ]);
-        el.addEventListener("click", function () { openDm(u); });
+        // clicking the row opens the profile (where you can reopen a hidden chat)
+        el.addEventListener("click", function () { openProfile(u); });
         list.appendChild(el);
       });
       return;
     }
 
-    // chats — DMs and groups merged, newest first
+    // chats — DMs and groups merged. Hidden chats are filtered out; the rest
+    // follow the manual drag order, falling back to newest-first.
     var items = [];
-    threadList.forEach(function (t) { items.push({ group: false, target: t.user, lastTs: t.lastTs, last: t.last, unread: t.unread }); });
-    groupList.forEach(function (g) { items.push({ group: true, target: g, lastTs: g.lastTs, last: g.last, unread: g.unread }); });
-    items.sort(function (a, b) { return b.lastTs - a.lastTs; });
+    threadList.forEach(function (t) { items.push({ key: chatKey(false, t.user.id), group: false, target: t.user, lastTs: t.lastTs, last: t.last, unread: t.unread }); });
+    groupList.forEach(function (g) { items.push({ key: chatKey(true, g.id), group: true, target: g, lastTs: g.lastTs, last: g.last, unread: g.unread }); });
+    items = items.filter(function (it) { return !isHidden(it.key); });
+
+    var order = chatOrder();
+    items.sort(function (a, b) {
+      var ia = order.indexOf(a.key), ib = order.indexOf(b.key);
+      if (ia !== -1 && ib !== -1) return ia - ib;
+      if (ia !== -1) return -1;
+      if (ib !== -1) return 1;
+      return b.lastTs - a.lastTs;
+    });
 
     if (!items.length) {
-      list.innerHTML = '<div class="vwsoc-empty">No conversations yet.<br>Open a friend and say hi 👋 — or make a group in the Friends tab.</div>';
+      var anyHidden = hiddenChats().length;
+      list.innerHTML = '<div class="vwsoc-empty">No conversations yet.<br>Open a friend and say hi 👋 — or make a group in the Friends tab.' +
+        (anyHidden ? '<br><br>Hidden a chat? Open the person from <b>Friends</b> to bring it back.' : "") + "</div>";
       return;
     }
     items.forEach(function (it) {
       var preview = previewText(it.last);
+      var el;
       if (it.group) {
         var sub = it.target.members.length + " members" + (preview ? " · " + preview : "");
-        var el = row({ name: it.target.name, avatar: groupAvatarUrl(it.target) }, sub, null, it.unread);
+        el = row({ name: it.target.name, avatar: groupAvatarUrl(it.target) }, sub, null, it.unread);
         el.classList.add("vwsoc-grouprow");
         el.addEventListener("click", function () { openGroup(it.target); });
-        list.appendChild(el);
       } else {
-        var el2 = row(it.target, timeAgo(it.lastTs) + (preview ? " · " + preview : ""), null, it.unread);
-        el2.addEventListener("click", function () { openDm(it.target); });
-        list.appendChild(el2);
+        el = row(it.target, timeAgo(it.lastTs) + (preview ? " · " + preview : ""), null, it.unread);
+        el.addEventListener("click", function () { openDm(it.target); });
       }
+      addHideBtn(el, it.key);
+      makeDraggable(el, it.key, list);
+      list.appendChild(el);
     });
+  }
+
+  // hover ✕ that removes a chat from the list (kept on the server; reopen from
+  // the friend's profile or by opening the DM again).
+  function addHideBtn(el, key) {
+    var x = document.createElement("button");
+    x.className = "vwsoc-hidechat";
+    x.type = "button";
+    x.textContent = "✕";
+    x.title = "Hide this chat";
+    x.addEventListener("click", function (e) {
+      e.stopPropagation();
+      hideChat(key);
+      // also drop it from the manual order so it doesn't reappear pinned
+      setChatOrder(chatOrder().filter(function (k) { return k !== key; }));
+      renderSide();
+    });
+    el.appendChild(x);
+  }
+
+  // HTML5 drag-and-drop reorder of chat rows; persists to ORDER_KEY.
+  var dragKey = null;
+  function makeDraggable(el, key, list) {
+    el.setAttribute("draggable", "true");
+    el.dataset.chatKey = key;
+    el.addEventListener("dragstart", function (e) {
+      dragKey = key; el.classList.add("vwsoc-dragging");
+      try { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", key); } catch (_) {}
+    });
+    el.addEventListener("dragend", function () { dragKey = null; el.classList.remove("vwsoc-dragging"); clearDragOver(list); });
+    el.addEventListener("dragover", function (e) {
+      if (dragKey == null || dragKey === key) return;
+      e.preventDefault();
+      clearDragOver(list);
+      var r = el.getBoundingClientRect();
+      el.classList.add(e.clientY - r.top < r.height / 2 ? "vwsoc-drop-above" : "vwsoc-drop-below");
+    });
+    el.addEventListener("drop", function (e) {
+      if (dragKey == null || dragKey === key) return;
+      e.preventDefault();
+      var r = el.getBoundingClientRect();
+      var after = e.clientY - r.top >= r.height / 2;
+      commitOrder(list, dragKey, key, after);
+    });
+  }
+  function clearDragOver(list) {
+    list.querySelectorAll(".vwsoc-drop-above,.vwsoc-drop-below").forEach(function (n) {
+      n.classList.remove("vwsoc-drop-above", "vwsoc-drop-below");
+    });
+  }
+  // rebuild the full key order from the current DOM, moving `moved` next to `target`.
+  function commitOrder(list, moved, target, after) {
+    var keys = [].slice.call(list.querySelectorAll("[data-chat-key]"))
+      .map(function (n) { return n.dataset.chatKey; })
+      .filter(function (k) { return k !== moved; });
+    var idx = keys.indexOf(target);
+    if (idx === -1) idx = keys.length - 1;
+    keys.splice(after ? idx + 1 : idx, 0, moved);
+    setChatOrder(keys);
+    renderSide();
   }
 
   function htmlEl(h) { var d = document.createElement("div"); d.innerHTML = h; return d.firstChild; }
@@ -825,13 +997,43 @@
   /* ── conversation pane ──────────────────────────────────────────── */
   function openConversation(user) { openDm(user); } // back-compat alias
 
-  function openDm(user) { setActive(user); }
+  function openDm(user) { unhideChat(chatKey(false, user.id)); setActive(user); }
   function openGroup(group) {
+    unhideChat(chatKey(true, group.id));
     // clone so we can flag it without mutating the list entry
     setActive({ _group: true, id: group.id, name: group.name, ownerId: group.ownerId, members: group.members || [] });
   }
+
+  /* ── user profile popup (reopen a hidden chat, remove friend) ────── */
+  function openProfile(u) {
+    var hidden = isHidden(chatKey(false, u.id));
+    var friend = data.friends.some(function (f) { return f.id === u.id; });
+    var ov = document.createElement("div");
+    ov.className = "vws-overlay vws-open vwsoc-profov";
+    ov.innerHTML =
+      '<div class="vws-modal vwsoc-prof" role="dialog" aria-modal="true">' +
+      '<button type="button" class="vws-close" style="position:absolute;top:12px;right:14px;">×</button>' +
+      '<img class="vwsoc-prof-av" src="' + esc(u.avatar) + '" alt="">' +
+      '<div class="vwsoc-prof-name">' + esc(u.name) + "</div>" +
+      '<a class="vwsoc-prof-link" href="https://anilist.co/user/' + encodeURIComponent(u.name) + '/" target="_blank" rel="noopener">AniList profile ↗</a>' +
+      (hidden ? '<div class="vwsoc-prof-hint">💬 This chat is hidden — reopen it below.</div>' : "") +
+      '<div class="vwsoc-prof-acts">' +
+      '<button class="vwsoc-mini go" id="vwsocProfMsg">' + (hidden ? "Reopen chat" : "Message") + "</button>" +
+      (friend ? '<button class="vwsoc-mini danger" id="vwsocProfRemove">Remove friend</button>' : "") +
+      "</div></div>";
+    document.body.appendChild(ov);
+    function close() { ov.remove(); }
+    ov.querySelector(".vws-close").addEventListener("click", close);
+    ov.addEventListener("mousedown", function (e) { if (e.target === ov) close(); });
+    ov.querySelector("#vwsocProfMsg").addEventListener("click", function () { close(); openDm(u); });
+    var rm = ov.querySelector("#vwsocProfRemove");
+    if (rm) rm.addEventListener("click", function () {
+      if (confirm("Remove " + u.name + "?")) { close(); removeFriend(u.id); }
+    });
+  }
   function setActive(a) {
     active = a;
+    modView = null;
     tab = "chats";
     messages = [];
     lastMsgJson = "";
@@ -948,32 +1150,54 @@
       box.innerHTML = '<div class="vwsoc-conv-empty" style="flex:1;">No messages yet — say hi.</div>';
       return;
     }
-    var grp = !!(active && active._group);
+    var grp = !!(active && active._group) || !!(modView && modView.group);
+    var mv = !!modView;
+    var byId = {}; // message id → element, for reply jump
     messages.forEach(function (m, i) {
-      // in a group, tag received messages with the sender (once per run)
-      var showSender = grp && !m.mine &&
-        (i === 0 || messages[i - 1].from !== m.from || messages[i - 1].mine);
+      // in a group (or any mod view), tag messages with the sender once per run
+      var showSender = (grp || mv) && (mv || !m.mine) &&
+        (i === 0 || messages[i - 1].from !== m.from || (!mv && messages[i - 1].mine));
       if (showSender) {
         var hdr = document.createElement("div");
         hdr.className = "vwsoc-sender";
         hdr.innerHTML = '<img src="' + esc(m.fromAvatar) + '" alt=""><span>' + esc(m.fromName || "AniList user") + "</span>";
         box.appendChild(hdr);
       }
-      // "replying to …" reference line above the bubble
+      // "replying to …" reference line above the bubble (click to jump)
       if (m.replyTo) {
         var rr = document.createElement("div");
         rr.className = "vwsoc-replyref" + (m.mine ? " mine" : "");
-        rr.innerHTML = '<span class="vwsoc-replyref-n">' + esc(m.replyTo.fromName || "AniList user") + "</span> " +
-          twemojify(esc(replySnippet(m.replyTo)));
+        rr.innerHTML = '<span class="vwsoc-replyref-icon">↩</span><span class="vwsoc-replyref-n">' +
+          esc(m.replyTo.fromName || "AniList user") + "</span>" +
+          '<span class="vwsoc-replyref-txt">' + twemojify(esc(replySnippet(m.replyTo))) + "</span>";
+        (function (targetId) {
+          rr.addEventListener("click", function () { jumpToMessage(targetId); });
+        })(m.replyTo.id);
         box.appendChild(rr);
       }
       var el = (m.kind === "clip" && m.clip) ? clipCard(m)
              : (m.kind === "gif" && m.gif) ? gifBubble(m)
              : textBubble(m);
-      addMenu(el, m);
+      if (m.id) el.dataset.mid = m.id;
+      if (mv) addModActions(el, m); else addMenu(el, m);
+      if (m.id) byId[m.id] = el;
       box.appendChild(el);
     });
+    box._byId = byId;
     if (atBottom) box.scrollTop = box.scrollHeight;
+  }
+
+  // scroll to and briefly highlight the message a reply points at
+  function jumpToMessage(id) {
+    var box = modal && modal.querySelector("#vwsocMsgs");
+    if (!box) return;
+    var el = (box._byId && box._byId[id]) || box.querySelector('[data-mid="' + id + '"]');
+    if (!el) { toast("Original message isn't loaded here."); return; }
+    el.scrollIntoView({ block: "center", behavior: "smooth" });
+    el.classList.remove("vwsoc-flash");
+    void el.offsetWidth; // restart the animation
+    el.classList.add("vwsoc-flash");
+    setTimeout(function () { el.classList.remove("vwsoc-flash"); }, 1600);
   }
 
   function replySnippet(r) {
@@ -1021,6 +1245,13 @@
     rep.innerHTML = "↩ Reply";
     rep.addEventListener("click", function () { closeMsgMenu(); startReply(m); });
     menu.appendChild(rep);
+    if (!m.mine && m.id) {
+      var rep2 = document.createElement("button");
+      rep2.className = "vwsoc-ctx-item";
+      rep2.innerHTML = "🚩 Report";
+      rep2.addEventListener("click", function () { closeMsgMenu(); reportMessage(m); });
+      menu.appendChild(rep2);
+    }
     if (canDelete(m)) {
       var del = document.createElement("button");
       del.className = "vwsoc-ctx-item danger";
@@ -1068,6 +1299,258 @@
     api(path, { id: m.id })
       .then(function (d) { if (d && !d.ok) toast(d.error || "Delete failed", true); loadMessages(); refreshThreadsQuiet(); })
       .catch(function () { toast("Delete failed", true); });
+  }
+
+  /* ── report a message (any user) ────────────────────────────────── */
+  function reportMessage(m) {
+    if (!m.id) return;
+    var reason = prompt("Report this message to the moderators?\nOptional reason:", "");
+    if (reason === null) return; // cancelled
+    api("/report", { id: m.id, group: !!(active && active._group), reason: reason })
+      .then(function (d) {
+        if (d && d.ok) toast(d.already ? "Already reported — thanks." : "Reported. Mods will review it.");
+        else toast((d && d.error) || "Report failed", true);
+      })
+      .catch(function () { toast("Report failed", true); });
+  }
+
+  /* ── moderation panel (mods only) ───────────────────────────────── */
+  function loadReports(cb) {
+    if (!iAmMod) return;
+    api("/mod/reports").then(function (d) {
+      if (d && d.ok) { reports = d.reports || []; renderTabs(); if (cb) cb(); }
+    }).catch(function () {});
+  }
+
+  function renderMod(list) {
+    if (!iAmMod) { list.innerHTML = '<div class="vwsoc-empty">Not available.</div>'; return; }
+    var head = document.createElement("div");
+    head.className = "vwsoc-modhead";
+    head.innerHTML = '<span>🛡 Reported messages</span>';
+    var acts = document.createElement("div");
+    acts.className = "vwsoc-acts";
+    var bannedBtn = document.createElement("button");
+    bannedBtn.className = "vwsoc-mini";
+    bannedBtn.textContent = "🚫 Banned";
+    bannedBtn.title = "View / unban banned users";
+    bannedBtn.addEventListener("click", openBannedList);
+    var refresh = document.createElement("button");
+    refresh.className = "vwsoc-mini";
+    refresh.textContent = "↻ Refresh";
+    refresh.addEventListener("click", function () { loadReports(function () { renderSide(); }); });
+    acts.appendChild(bannedBtn);
+    acts.appendChild(refresh);
+    head.appendChild(acts);
+    list.appendChild(head);
+
+    if (!reports.length) {
+      list.appendChild(htmlEl('<div class="vwsoc-empty">No open reports. 🎉<br>Reports show up here privately — the reporter and author aren’t notified.</div>'));
+      return;
+    }
+
+    reports.forEach(function (r) {
+      var el = document.createElement("div");
+      el.className = "vwsoc-report";
+      var m = r.msg;
+      var snippet = m
+        ? (m.kind === "clip" ? "🎬 clip" : m.kind === "gif" ? "🖼 GIF" : esc((m.text || "").slice(0, 120)))
+        : "<i>message already deleted</i>";
+      var where = r.context
+        ? (r.context.group ? "in group “" + esc(r.context.name) + "”" : "in a DM")
+        : "";
+      el.innerHTML =
+        '<div class="vwsoc-report-top">' +
+        '<span class="vwsoc-report-who">' + esc(m ? m.fromName : "unknown") + (r.banned ? ' <span class="vwsoc-banflag">BANNED</span>' : "") + "</span>" +
+        '<span class="vwsoc-report-time">' + timeAgo(r.ts) + "</span></div>" +
+        '<div class="vwsoc-report-snip">' + snippet + "</div>" +
+        '<div class="vwsoc-report-meta">' + where +
+        (r.reason ? ' · reason: "' + esc(r.reason) + '"' : "") +
+        ' · reported by ' + esc(r.reporter.name) + "</div>" +
+        '<div class="vwsoc-report-acts">' +
+        '<button class="vwsoc-mini go" data-a="view">View chat</button>' +
+        (m ? '<button class="vwsoc-mini danger" data-a="del">Delete msg</button>' : "") +
+        (m ? '<button class="vwsoc-mini" data-a="ban">' + (r.banned ? "Unban" : "Ban") + "</button>" : "") +
+        '<button class="vwsoc-mini" data-a="dismiss">Dismiss</button>' +
+        "</div>";
+      el.querySelector('[data-a="view"]').addEventListener("click", function () { openModView(r); });
+      var dl = el.querySelector('[data-a="del"]');
+      if (dl) dl.addEventListener("click", function () {
+        modDelete(m.id, r.isGroup, function () { dismissReport(r.reportId, true); });
+      });
+      var bn = el.querySelector('[data-a="ban"]');
+      if (bn) bn.addEventListener("click", function () { modBan(m.from, m.fromName, r.banned); });
+      el.querySelector('[data-a="dismiss"]').addEventListener("click", function () { dismissReport(r.reportId); });
+      list.appendChild(el);
+    });
+  }
+
+  // overlay listing every banned user, each with an Unban button
+  function openBannedList() {
+    var ov = document.createElement("div");
+    ov.className = "vws-overlay vws-open vwsoc-pick";
+    ov.innerHTML =
+      '<div class="vws-modal" style="width:min(440px,92vw);max-height:72vh;display:flex;flex-direction:column;">' +
+      '<div class="vws-header"><div class="vws-title" style="font-size:1rem;">🚫 Banned users</div>' +
+      '<button type="button" class="vws-close">×</button></div>' +
+      '<div class="vwsoc-list" id="vwsocBanList" style="padding:8px 10px 12px;"></div></div>';
+    document.body.appendChild(ov);
+    function close() { ov.remove(); }
+    ov.querySelector(".vws-close").addEventListener("click", close);
+    ov.addEventListener("mousedown", function (e) { if (e.target === ov) close(); });
+    var listEl = ov.querySelector("#vwsocBanList");
+    function draw() {
+      listEl.innerHTML = '<div class="vwsoc-empty">Loading…</div>';
+      api("/mod/banned").then(function (d) {
+        listEl.innerHTML = "";
+        var b = (d && d.ok && d.banned) || [];
+        if (!b.length) { listEl.innerHTML = '<div class="vwsoc-empty">No banned users.</div>'; return; }
+        b.forEach(function (u) {
+          var el = row(u, "banned " + timeAgo(u.ts) + " ago" + (u.reason ? " · " + u.reason : ""), [
+            { label: "Unban", cls: "go", onClick: function () {
+              api("/mod/ban", { userId: u.id, ban: false }).then(function (r) {
+                if (r && r.ok) { toast("Unbanned " + u.name + "."); draw(); loadReports(function () { if (tab === "mod") renderSide(); }); }
+                else toast((r && r.error) || "Unban failed", true);
+              }).catch(function () { toast("Unban failed", true); });
+            } },
+          ]);
+          listEl.appendChild(el);
+        });
+      }).catch(function () { listEl.innerHTML = '<div class="vwsoc-empty">Couldn’t load.</div>'; });
+    }
+    draw();
+  }
+
+  function dismissReport(reportId, silent) {
+    reports = reports.filter(function (r) { return r.reportId !== reportId; });
+    renderTabs();
+    if (tab === "mod") renderSide();
+    api("/mod/report/resolve", { reportId: reportId }).catch(function () {});
+    if (!silent) toast("Report dismissed.");
+  }
+
+  function modDelete(id, isGroup, cb) {
+    if (!confirm("Delete this message for everyone? This can't be undone.")) return;
+    api("/mod/delete", { id: id, group: !!isGroup })
+      .then(function (d) {
+        if (d && d.ok) { toast("Message deleted."); if (cb) cb(); if (modView) loadModView(); }
+        else toast((d && d.error) || "Delete failed", true);
+      })
+      .catch(function () { toast("Delete failed", true); });
+  }
+
+  function modBan(userId, name, currentlyBanned) {
+    var ban = !currentlyBanned;
+    if (!confirm((ban ? "Ban " : "Unban ") + (name || "this user") + "?")) return;
+    api("/mod/ban", { userId: userId, ban: ban })
+      .then(function (d) {
+        if (d && d.ok) { toast((ban ? "Banned " : "Unbanned ") + (name || "user") + "."); loadReports(function () { if (tab === "mod") renderSide(); }); if (modView) loadModView(); }
+        else toast((d && d.error) || "Ban failed", true);
+      })
+      .catch(function () { toast("Ban failed", true); });
+  }
+
+  /* ── mod secret conversation view (read-only) ───────────────────── */
+  function openModView(r) {
+    if (!r.context) { toast("That message's chat is gone."); return; }
+    active = null;
+    modView = r.context.group
+      ? { group: true, groupId: r.context.groupId, name: r.context.name }
+      : { group: false, a: r.context.a, b: r.context.b };
+    messages = [];
+    lastMsgJson = "";
+    if (modal) modal.querySelector(".vwsoc-modal").classList.add("show-conv");
+    renderModConv();
+    loadModView();
+  }
+
+  function loadModView() {
+    if (!modView) return;
+    var path = modView.group
+      ? "/mod/group?groupId=" + modView.groupId
+      : "/mod/thread?a=" + modView.a + "&b=" + modView.b;
+    api(path).then(function (d) {
+      if (!modView || !d || !d.ok) return;
+      messages = d.messages || [];
+      if (d.parties) modView.parties = d.parties;
+      if (d.members) modView.members = d.members;
+      renderMessages();
+      renderModHeadActs();
+    }).catch(function () {});
+  }
+
+  function renderModConv() {
+    var pane = modal.querySelector("#vwsocConv");
+    var title = modView.group ? "🛡 " + esc(modView.name || "group chat")
+      : "🛡 Secret view";
+    var sub = modView.group ? "moderator view — read only"
+      : "moderator view — read only";
+    pane.innerHTML =
+      '<div class="vwsoc-conv-head">' +
+      '<button class="vwsoc-mini" id="vwsocModBack">‹ Reports</button>' +
+      '<div class="vwsoc-conv-titles"><div class="vwsoc-conv-name">' + title + "</div>" +
+      '<div class="vwsoc-conv-sub" id="vwsocModSub">' + sub + "</div></div>" +
+      '<div class="vwsoc-acts" id="vwsocModHeadActs"></div>' +
+      "</div>" +
+      '<div class="vwsoc-msgs" id="vwsocMsgs"></div>' +
+      '<div class="vwsoc-modnote">Deletions and bans here are silent — no one is notified.</div>';
+    pane.querySelector("#vwsocModBack").addEventListener("click", function () {
+      modView = null; tab = "mod"; renderTabs(); renderSide(); renderConv();
+    });
+    renderMessages();
+    renderModHeadActs();
+  }
+
+  // ban buttons for each party in the header (1:1) or per-sender is handled inline
+  function renderModHeadActs() {
+    var wrap = modal && modal.querySelector("#vwsocModHeadActs");
+    if (!wrap || !modView) return;
+    wrap.innerHTML = "";
+    var people = modView.group ? (modView.members || []) : (modView.parties || []);
+    people.forEach(function (p) {
+      if (p.id === (me && me.id)) return;
+      var b = document.createElement("button");
+      b.className = "vwsoc-mini";
+      b.textContent = (p.banned ? "Unban " : "Ban ") + (p.name || "").slice(0, 12);
+      b.addEventListener("click", function () { modBan(p.id, p.name, p.banned); });
+      wrap.appendChild(b);
+    });
+  }
+
+  // per-message mod controls (delete anyone's, ban the sender)
+  function addModActions(el, m) {
+    if (!m.id) return;
+    el.classList.add("vwsoc-canmenu");
+    var b = document.createElement("button");
+    b.className = "vwsoc-msgmenu";
+    b.type = "button";
+    b.innerHTML = "&#8942;";
+    b.title = "Mod actions";
+    b.addEventListener("click", function (e) {
+      e.stopPropagation();
+      closeMsgMenu();
+      var menu = document.createElement("div");
+      menu.className = "vwsoc-ctx";
+      menu.id = "vwsocCtx";
+      var del = document.createElement("button");
+      del.className = "vwsoc-ctx-item danger";
+      del.innerHTML = "🗑 Delete message";
+      del.addEventListener("click", function () { closeMsgMenu(); modDelete(m.id, modView && modView.group, function () { loadModView(); loadReports(); }); });
+      menu.appendChild(del);
+      if (m.from !== (me && me.id)) {
+        var ban = document.createElement("button");
+        ban.className = "vwsoc-ctx-item";
+        ban.innerHTML = "🚫 Ban " + esc((m.fromName || "user").slice(0, 16));
+        ban.addEventListener("click", function () { closeMsgMenu(); modBan(m.from, m.fromName, false); });
+        menu.appendChild(ban);
+      }
+      document.body.appendChild(menu);
+      var rct = b.getBoundingClientRect();
+      var w = 180;
+      menu.style.top = (rct.bottom + 4) + "px";
+      menu.style.left = Math.max(8, Math.min(rct.right - w, window.innerWidth - w - 8)) + "px";
+      setTimeout(function () { document.addEventListener("mousedown", outsideMenu, true); }, 0);
+    });
+    el.appendChild(b);
   }
 
   // Inline formatting on an already-escaped string: bold/italic/underline/
@@ -1135,9 +1618,23 @@
 
   function gifBubble(m) {
     var el = document.createElement("div");
-    el.className = "vwsoc-bub" + (m.mine ? " mine" : "");
+    el.className = "vwsoc-bub vwsoc-gifbub" + (m.mine ? " mine" : "");
     el.innerHTML = '<img class="gif" src="' + esc(m.gif) + '" alt="gif">' +
       '<div class="vwsoc-time">' + timeAgo(m.ts) + " ago</div>";
+    // ★ favorite the GIF straight from the message (works on anyone's GIF)
+    var star = document.createElement("button");
+    star.className = "vwsoc-gifbub-fav" + (isFav(m.gif) ? " on" : "");
+    star.type = "button";
+    star.textContent = "★";
+    star.title = "Save to your GIF favorites";
+    star.addEventListener("click", function (e) {
+      e.stopPropagation();
+      toggleFav(m.gif);
+      var on = isFav(m.gif);
+      star.classList.toggle("on", on);
+      toast(on ? "Saved to your GIF favorites ★" : "Removed from favorites");
+    });
+    el.appendChild(star);
     return el;
   }
 
@@ -1425,7 +1922,7 @@
     var pop = modal.querySelector("#vwsocGifPop");
     if (!pop) return;
     gifOpen = !gifOpen;
-    if (!gifOpen) { pop.innerHTML = ""; pop.className = ""; return; }
+    if (!gifOpen) { pop.innerHTML = ""; pop.className = ""; gifPager = null; return; }
     pop.className = "vwsoc-gifpop";
     pop.innerHTML =
       '<div class="vwsoc-giftabs">' +
@@ -1436,12 +1933,13 @@
       '<div class="vwsoc-gifgrid" id="vwsocGifGrid"></div>';
     var inp = pop.querySelector("#vwsocGifSearch");
     var grid = pop.querySelector("#vwsocGifGrid");
+    grid.addEventListener("scroll", onGifScroll);
     pop.querySelectorAll(".vwsoc-giftabs .vwsoc-tab").forEach(function (b) {
       b.addEventListener("click", function () {
         gifView = b.dataset.v;
         markGifTabs(pop);
         inp.style.display = gifView === "favs" ? "none" : "";
-        if (gifView === "favs") renderFavs(grid); else loadTrending(grid);
+        if (gifView === "favs") { gifPager = null; renderFavs(grid); } else loadTrending(grid);
       });
     });
     markGifTabs(pop);
@@ -1496,31 +1994,68 @@
     return tile;
   }
 
-  function loadTrending(grid) {
-    grid.innerHTML = '<div class="vwsoc-empty" style="grid-column:1/-1;">Loading…</div>';
-    fetch("https://api.giphy.com/v1/gifs/trending?api_key=" + GIPHY_KEY + "&limit=18&rating=pg-13")
-      .then(function (r) { return r.json(); }).then(function (j) { renderGifs(j, grid); })
-      .catch(function () { grid.innerHTML = '<div class="vwsoc-empty" style="grid-column:1/-1;">Can’t load GIFs — paste a GIF URL instead.</div>'; });
+  // Paged GIF feed — keeps fetching the next Giphy page as you scroll instead
+  // of stopping at one batch. One pager per open picker.
+  var gifPager = null;
+  function loadTrending(grid) { startGifFeed(grid, "trending", ""); }
+  function searchGifs(q, grid) { startGifFeed(grid, "search", q); }
+
+  function startGifFeed(grid, mode, q) {
+    gifPager = { grid: grid, mode: mode, q: q || "", offset: 0, loading: false, done: false, total: Infinity };
+    grid.innerHTML = '<div class="vwsoc-empty" style="grid-column:1/-1;">' + (mode === "search" ? "Searching…" : "Loading…") + "</div>";
+    gifPage(true);
   }
-  function searchGifs(q, grid) {
-    grid.innerHTML = '<div class="vwsoc-empty" style="grid-column:1/-1;">Searching…</div>';
-    fetch("https://api.giphy.com/v1/gifs/search?api_key=" + GIPHY_KEY + "&limit=18&rating=pg-13&q=" + encodeURIComponent(q))
-      .then(function (r) { return r.json(); }).then(function (j) { renderGifs(j, grid); })
-      .catch(function () { grid.innerHTML = '<div class="vwsoc-empty" style="grid-column:1/-1;">Search failed.</div>'; });
+
+  function gifEndpoint(p) {
+    var base = "https://api.giphy.com/v1/gifs/";
+    var common = "api_key=" + GIPHY_KEY + "&limit=" + GIF_PAGE + "&offset=" + p.offset + "&rating=pg-13";
+    return p.mode === "search"
+      ? base + "search?" + common + "&q=" + encodeURIComponent(p.q)
+      : base + "trending?" + common;
   }
-  function renderGifs(j, grid) {
-    var items = (j && j.data) || [];
-    grid.innerHTML = "";
-    if (!items.length) { grid.innerHTML = '<div class="vwsoc-empty" style="grid-column:1/-1;">No GIFs.</div>'; return; }
+
+  function gifPage(first) {
+    var p = gifPager;
+    if (!p || p.loading || p.done) return;
+    p.loading = true;
+    fetch(gifEndpoint(p)).then(function (r) { return r.json(); }).then(function (j) {
+      if (gifPager !== p) return; // picker changed under us
+      if (first) p.grid.innerHTML = "";
+      var items = (j && j.data) || [];
+      var pag = (j && j.pagination) || {};
+      if (typeof pag.total_count === "number") p.total = pag.total_count;
+      appendGifs(items, p.grid);
+      p.offset += items.length;
+      p.loading = false;
+      if (!items.length || p.offset >= p.total) p.done = true;
+      if (first && !items.length) {
+        p.grid.innerHTML = '<div class="vwsoc-empty" style="grid-column:1/-1;">No GIFs.</div>';
+      }
+      // if the first page didn't fill the scroll area, pull the next one
+      if (!p.done && p.grid.scrollHeight <= p.grid.clientHeight + 40) gifPage(false);
+    }).catch(function () {
+      if (gifPager !== p) return;
+      p.loading = false;
+      if (first) p.grid.innerHTML = '<div class="vwsoc-empty" style="grid-column:1/-1;">' +
+        (p.mode === "search" ? "Search failed." : "Can’t load GIFs — paste a GIF URL instead.") + "</div>";
+    });
+  }
+
+  function appendGifs(items, grid) {
     items.forEach(function (g) {
       var im = g.images || {};
       var url = im.fixed_height && im.fixed_height.url;
-      // display the wider fixed_width still so the masonry shows the real GIF
       var thumb = (im.fixed_width && im.fixed_width.url) || url;
       var w = im.fixed_width && Number(im.fixed_width.width);
       var h = im.fixed_width && Number(im.fixed_width.height);
       if (url) grid.appendChild(gifTile(url, thumb, w && h ? w + " / " + h : null));
     });
+  }
+
+  function onGifScroll(e) {
+    var grid = e.currentTarget;
+    if (!gifPager || gifPager.grid !== grid || gifView === "favs") return;
+    if (grid.scrollTop + grid.clientHeight >= grid.scrollHeight - 220) gifPage(false);
   }
   function renderFavs(grid) {
     var favs = gifFavs();

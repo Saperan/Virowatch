@@ -149,19 +149,56 @@
     }));
   }
 
-  // Resolves to a direct, unrestricted .mp4 — plays in a plain <video src>.
-  async function resolveVidnestMovie(tmdbId) {
-    const data = await vidnestApiFetch(`/moviebox/movie/${tmdbId}`);
-    const list = data && Array.isArray(data.url) ? data.url : null;
-    if (list && list.length) return bestFirst(list);
-    return resolveHollyFallback(`movie/${tmdbId}`);
+  // bcdn.hakunaymatata.com (moviebox/movies5f's CDN) went hostile 2026-07 — it
+  // blocks datacenter IPs (so a Worker proxy can't help) AND 428s any request
+  // carrying a browser User-Agent (which <video>/fetch always send and JS
+  // can't override) AND serves H.265. Its links simply never play in-browser,
+  // so we treat any link on that host as dead and never hand it to the player.
+  function isDeadHost(link) {
+    try { return /(^|\.)hakunaymatata\.com$/i.test(new URL(link).hostname); }
+    catch (_) { return false; }
   }
-  async function resolveVidnestTv(tmdbId, season, episode) {
-    const data = await vidnestApiFetch(`/moviebox/tv/${tmdbId}/${season}/${episode}`);
-    const list = data && Array.isArray(data.url) ? data.url : null;
-    if (list && list.length) return bestFirst(list);
-    return resolveHollyFallback(`tv/${tmdbId}/${season}/${episode}`);
+
+  // allmovies: HLS on lizer123.site — CORS-open (ACAO:*), plays straight
+  // through hls.js from the browser, no Worker/Referer needed.
+  async function resolveAllmovies(tail) {
+    const data = await vidnestApiFetch(`/allmovies/${tail}`);
+    const streams = data && Array.isArray(data.streams)
+      ? data.streams.filter((s) => s && s.type === "hls" && s.url && !isDeadHost(s.url))
+      : [];
+    if (!streams.length) return null;
+    // prefer the CORS-open host so hls.js can load it directly
+    streams.sort((a, b) => (/lizer123\.site/i.test(b.url) ? 1 : 0) - (/lizer123\.site/i.test(a.url) ? 1 : 0));
+    return { kind: "hls", file: streams[0].url, tracks: [] };
   }
+
+  // Resolve a movie/tv to a PLAYABLE source, in preference order:
+  //   1. hollymoviehd  — direct H.264 .mp4 (hlmv.tripplestream…), plain <video>
+  //   2. allmovies     — CORS-open HLS via hls.js
+  //   3. moviebox      — only if it hands back a NON-dead-host mp4 (now rare)
+  // Returns { kind:"direct", sources } | { kind:"hls", file, tracks }
+  //        | { kind:"unavailable", reason:"broken"|"missing" }.
+  // "broken" = the only source found lives on the dead CDN; "missing" = no
+  // source at all. Either way the player shows a message instead of spinning
+  // or loading Vidnest's ad page.
+  async function resolveSource(tail) {
+    const holly = await resolveHollyFallback(tail);
+    if (holly && holly.length) return { kind: "direct", sources: holly };
+
+    const am = await resolveAllmovies(tail);
+    if (am) return am;
+
+    const data = await vidnestApiFetch(`/moviebox/${tail}`);
+    const list = data && Array.isArray(data.url) ? data.url : null;
+    if (list && list.length) {
+      const good = bestFirst(list).filter((x) => !isDeadHost(x.link));
+      if (good.length) return { kind: "direct", sources: good };
+      return { kind: "unavailable", reason: "broken" }; // had links, all dead CDN
+    }
+    return { kind: "unavailable", reason: "missing" };
+  }
+  async function resolveVidnestMovie(tmdbId) { return resolveSource(`movie/${tmdbId}`); }
+  async function resolveVidnestTv(tmdbId, season, episode) { return resolveSource(`tv/${tmdbId}/${season}/${episode}`); }
   // Resolves to an .m3u8 on cdn.mewstream.buzz — Referer-gated, needs the
   // Cloudflare Worker proxy (same one megaplay-backup.js uses for Anikoto).
   async function resolveVidnestAnime(anilistId, episode, subOrDub) {
@@ -580,12 +617,40 @@
       if (hls) { try { hls.destroy(); } catch (_) {} hls = null; }
     }
 
+    let msgEl = null;
     function show() {
       const f = iframeEl();
       if (f) f.style.display = "none";
       ensureVideo();
+      if (msgEl) msgEl.style.display = "none";
+      if (video) video.style.display = "block";
       const fr = frameEl();
       if (fr) fr.style.display = ""; // root (video's sibling inside the frame) shows along with it
+    }
+
+    // In-player message (e.g. "no working source") shown in place of the video
+    // instead of loading Vidnest's ad page. `html` is trusted, caller-built.
+    function showMessage(html) {
+      ensureVideo();
+      const fr = frameEl();
+      if (!fr) return;
+      mode = "message";
+      stopHls();
+      if (video) { try { video.pause(); video.removeAttribute("src"); video.load(); } catch (_) {} video.style.display = "none"; }
+      const f = iframeEl(); if (f) f.style.display = "none";
+      if (spinnerEl()) spinnerEl().style.display = "none";
+      if (playerUI) playerUI.setSubtitleTracks([]);
+      if (!msgEl) {
+        msgEl = document.createElement("div");
+        msgEl.id = "vidnestMsg";
+        msgEl.style.cssText = "position:absolute;inset:0;display:flex;flex-direction:column;" +
+          "align-items:center;justify-content:center;gap:14px;text-align:center;padding:28px;" +
+          "background:#000;color:#cfcfe0;font-size:.95rem;line-height:1.5;z-index:2;";
+        fr.appendChild(msgEl);
+      }
+      msgEl.innerHTML = html;
+      msgEl.style.display = "flex";
+      fr.style.display = "";
     }
 
     function hide() {
@@ -602,7 +667,8 @@
       captionTracks = [];
       if (playerUI) playerUI.setSubtitleTracks([]);
       stopHls();
-      if (video) { try { video.pause(); video.removeAttribute("src"); video.load(); } catch (_) {} }
+      if (video) { try { video.pause(); video.removeAttribute("src"); video.load(); } catch (_) {} video.style.display = "block"; }
+      if (msgEl) msgEl.style.display = "none";
       hide();
       if (spinnerEl()) spinnerEl().style.display = "none";
     }
@@ -763,7 +829,7 @@
       throw new Error("nothing playing");
     }
 
-    return { playDirect, playHls, setDirectTracks, stop };
+    return { playDirect, playHls, setDirectTracks, showMessage, stop };
   })();
 
   // ── Movies/shows: automatic direct-play. Vidnest's page must NEVER
@@ -800,19 +866,51 @@
           : await resolveVidnestTv(mTv[2], mTv[3], mTv[4]);
       } catch (_) { result = null; }
       if (myToken !== token) return; // a newer episode/title loaded (or the user left) meanwhile
-      if (!result) {
+
+      // No playable source — don't spin or quietly load Vidnest's ad page;
+      // show a message (with an opt-in escape hatch to the real embed).
+      if (!result || result.kind === "unavailable") {
         active = false;
-        toast("No direct source for this title — trying Vidnest's own player (may have other servers)");
-        const f = iframeEl();
-        if (f) { bypassOnce = true; f.src = originalSrc; } // deliberate: real embed, ads and all
+        showUnavailable(result && result.reason, originalSrc, myToken);
         return;
       }
-      vidnestPlayer.playDirect(result);
+
+      // allmovies HLS (CORS-open) → hls.js; no subtitle side-channel here.
+      if (result.kind === "hls") {
+        vidnestPlayer.playHls(result.file, result.tracks || []);
+        return;
+      }
+
+      // hollymoviehd / moviebox direct mp4.
+      vidnestPlayer.playDirect(result.sources);
       // Subtitles come from a separate endpoint — don't block playback on it.
       const subArgs = mMovie ? [mMovie[2]] : [mTv[2], mTv[3], mTv[4]];
       resolveVidnestSubtitles(...subArgs).then((tracks) => {
         if (myToken === token) vidnestPlayer.setDirectTracks(tracks);
       });
+    }
+
+    // Message shown when nothing plays, with a button to load Vidnest's own
+    // (ad-laden) player as a manual last resort.
+    function showUnavailable(reason, originalSrc, myToken) {
+      var broken = reason === "broken";
+      var msg = broken
+        ? "This title is only on MovieBox, whose video CDN now blocks this player (they changed it on their end). It can’t be played here right now."
+        : "This title isn’t available from any working Vidnest source right now.";
+      var html =
+        '<div style="font-size:2.4rem;line-height:1;">🎬🚫</div>' +
+        '<div style="max-width:460px;">' + msg + "</div>" +
+        '<button data-embed style="padding:8px 16px;border-radius:10px;font:inherit;cursor:pointer;' +
+        'border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;">' +
+        "Try Vidnest’s own player (ads) →</button>";
+      vidnestPlayer.showMessage(html);
+      var btn = document.querySelector("#vidnestMsg [data-embed]");
+      if (btn) btn.onclick = function () {
+        if (myToken !== token) return;
+        vidnestPlayer.stop(); // hide the message frame, reveal the iframe
+        var f = iframeEl();
+        if (f) { bypassOnce = true; f.src = originalSrc; } // deliberate: real embed
+      };
     }
 
     function handleClear() {
