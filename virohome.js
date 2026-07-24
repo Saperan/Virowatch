@@ -462,10 +462,35 @@
     });
   }
 
-  /* ── Live sports strip (PitSport) ───────────────────────────────── */
+  /* ── Live sports strip (PitSport) — marquee, mirrors airing.js ───── */
+  var sportsMq = { raf: 0, paused: false, resumeTimer: 0, last: 0 };
+  var sportsReduced =
+    window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var SPORTS_SPEED = 24; // px/sec
+
+  function buildSportEl(it) {
+    var el = document.createElement("div");
+    el.className = "sport";
+    var badge = document.createElement("span");
+    badge.className = "sbadge " + it.badgeClass;
+    badge.textContent = it.badgeText;
+    var st = document.createElement("span");
+    st.className = "st";
+    st.textContent = it.title;
+    el.appendChild(badge);
+    el.appendChild(st);
+    el.addEventListener("click", function () {
+      if (typeof window.viroResume === "function") {
+        window.viroResume("shows", "PITSORT", it.seasonKey, it.index);
+      }
+    });
+    return el;
+  }
+
   function renderSports() {
     var strip = $("sportsStrip");
     if (!strip) return;
+    stopSportsMarquee();
     var d = window.shows && window.shows.PITSORT;
     var live = d && d.PSLiveNow,
       up = d && d.PSUpcoming;
@@ -474,47 +499,198 @@
       return;
     }
     strip.innerHTML = "";
+    strip.classList.add("airing"); // section clips; the viewport scrolls
 
     var head = document.createElement("div");
-    head.className = "sports-head";
-    head.innerHTML = '<span class="live-dot"></span><b>Live sports</b>';
+    head.className = "sports-head air-head";
+    head.style.cursor = "pointer";
+    head.title = "See all live & upcoming sports";
+    head.innerHTML =
+      '<span class="live-dot"></span><b>Live sports</b><span class="air-all">all →</span>';
+    head.addEventListener("click", openSportsModal);
     strip.appendChild(head);
 
-    function addItems(seasonKey, seasonData, badgeClass, badgeText, max) {
-      (seasonData.episodeTitles || [])
-        .slice(0, max)
-        .forEach(function (title, i) {
-          var el = document.createElement("div");
-          el.className = "sport";
-          var badge = document.createElement("span");
-          badge.className = "sbadge " + badgeClass;
-          badge.textContent = badgeText;
-          var st = document.createElement("span");
-          st.className = "st";
-          st.textContent = title;
-          el.appendChild(badge);
-          el.appendChild(st);
-          el.addEventListener("click", function () {
-            if (typeof window.viroResume === "function") {
-              window.viroResume("shows", "PITSORT", seasonKey, i);
-            }
-          });
-          strip.appendChild(el);
-        });
+    var stripItems = [];
+    function collect(seasonKey, seasonData, badgeClass, badgeText, max) {
+      if (!seasonData) return;
+      (seasonData.episodeTitles || []).slice(0, max).forEach(function (title, i) {
+        stripItems.push({ seasonKey: seasonKey, title: title, badgeClass: badgeClass, badgeText: badgeText, index: i });
+      });
     }
-    if (live) addItems("PSLiveNow", live, "live", "LIVE", 4);
-    if (up) addItems("PSUpcoming", up, "soon", "SOON", 3);
+    collect("PSLiveNow", live, "live", "LIVE", 8);
+    collect("PSUpcoming", up, "soon", "SOON", 6);
 
-    var more = document.createElement("span");
-    more.className = "more";
-    more.textContent = "all →";
-    more.addEventListener("click", function () {
-      if (typeof window.viroResume === "function") {
-        window.viroResume("shows", "PITSORT");
-      }
-    });
-    strip.appendChild(more);
+    var viewport = document.createElement("div");
+    viewport.className = "air-viewport";
+    var track = document.createElement("div");
+    track.className = "air-track";
+    stripItems.forEach(function (it) { track.appendChild(buildSportEl(it)); });
+    viewport.appendChild(track);
+    strip.appendChild(viewport);
     strip.style.display = "flex";
+
+    // wheel scrolls horizontally (vertical deltas count — most mice have no
+    // horizontal wheel); scrollbar hidden in CSS, touch swipes natively.
+    viewport.addEventListener("wheel", function (e) {
+      var dd = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (!dd || track.scrollWidth <= viewport.clientWidth) return;
+      e.preventDefault();
+      viewport.scrollLeft += dd;
+    }, { passive: false });
+
+    startSportsMarquee(viewport, track, stripItems);
+  }
+
+  function stopSportsMarquee() {
+    if (sportsMq.raf) cancelAnimationFrame(sportsMq.raf);
+    clearTimeout(sportsMq.resumeTimer);
+    sportsMq.raf = 0;
+  }
+
+  function startSportsMarquee(viewport, track, stripItems) {
+    if (sportsReduced || !viewport || !track) return;
+    if (track.scrollWidth <= viewport.clientWidth + 4) return; // no overflow → no loop
+
+    // duplicate items once for a seamless wrap-around (cloneNode drops the
+    // click listener, so re-attach it on each clone)
+    Array.prototype.slice.call(track.children).forEach(function (n, i) {
+      var c = n.cloneNode(true);
+      c.addEventListener("click", function () {
+        var it = stripItems[i];
+        if (it && typeof window.viroResume === "function") {
+          window.viroResume("shows", "PITSORT", it.seasonKey, it.index);
+        }
+      });
+      track.appendChild(c);
+    });
+    viewport.classList.add("scrolling");
+
+    var pause = function () { sportsMq.paused = true; clearTimeout(sportsMq.resumeTimer); };
+    var resumeSoon = function () {
+      clearTimeout(sportsMq.resumeTimer);
+      sportsMq.resumeTimer = setTimeout(function () { sportsMq.paused = false; sportsMq.last = 0; }, 2500);
+    };
+    viewport.addEventListener("pointerenter", pause);
+    viewport.addEventListener("pointerleave", resumeSoon);
+    viewport.addEventListener("touchstart", pause, { passive: true });
+    viewport.addEventListener("touchend", resumeSoon);
+    viewport.addEventListener("wheel", pause, { passive: true });
+
+    // exact loop length = where the first clone begins (gap-safe)
+    var half = track.children[stripItems.length].offsetLeft - track.children[0].offsetLeft;
+    if (half <= 0) half = track.scrollWidth / 2;
+    viewport.addEventListener("scroll", function () {
+      if (viewport.scrollLeft >= half) viewport.scrollLeft -= half;
+    });
+
+    var step = function (ts) {
+      var strip = $("sportsStrip");
+      if (!sportsMq.paused && strip && strip.style.display !== "none") {
+        if (sportsMq.last) {
+          viewport.scrollLeft += (SPORTS_SPEED * (ts - sportsMq.last)) / 1000;
+          if (viewport.scrollLeft >= half) viewport.scrollLeft -= half;
+        }
+        sportsMq.last = ts;
+      } else {
+        sportsMq.last = 0;
+      }
+      sportsMq.raf = requestAnimationFrame(step);
+    };
+    sportsMq.raf = requestAnimationFrame(step);
+  }
+
+  /* ── "View all" sports modal (mirrors airing.js's schedule modal) ── */
+  var sportsModal = null;
+
+  function ensureSportsModal() {
+    if (sportsModal) return;
+    sportsModal = document.createElement("div");
+    sportsModal.id = "vwSports";
+    sportsModal.className = "vws-overlay"; // reuse the shared modal shell
+    sportsModal.setAttribute("aria-hidden", "true");
+    sportsModal.innerHTML =
+      '<div class="vws-modal vwair-modal" role="dialog" aria-modal="true" aria-label="Live sports">' +
+      '<div class="vws-header"><span class="live-dot"></span>' +
+      '<div><div class="vws-title">Live sports</div>' +
+      '<div class="vws-sub">PitSport · live &amp; upcoming</div></div>' +
+      '<button type="button" class="vws-close" aria-label="Close">×</button>' +
+      '</div><div class="vwair-list" id="vwSportsList"></div></div>';
+    document.body.appendChild(sportsModal);
+    sportsModal.querySelector(".vws-close").addEventListener("click", closeSportsModal);
+    sportsModal.addEventListener("mousedown", function (e) {
+      if (e.target === sportsModal) closeSportsModal();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && sportsModal.classList.contains("vws-open")) closeSportsModal();
+    });
+  }
+
+  function renderSportsModalList() {
+    var d = window.shows && window.shows.PITSORT;
+    var list = sportsModal.querySelector("#vwSportsList");
+    list.innerHTML = "";
+    if (!d) return;
+    var logo = d.image || "";
+
+    function addRows(seasonKey, seasonData, badgeClass, badgeText) {
+      if (!seasonData) return;
+      (seasonData.episodeTitles || []).forEach(function (title, i) {
+        var row = document.createElement("button");
+        row.type = "button";
+        row.className = "vwair-row";
+
+        var img = document.createElement("img");
+        img.className = "vwair-img";
+        img.loading = "lazy";
+        img.alt = "";
+        if (logo) img.src = logo;
+
+        var info = document.createElement("span");
+        info.className = "vwair-info";
+        var t = document.createElement("span");
+        t.className = "vwair-title";
+        t.textContent = title;
+        var meta = document.createElement("span");
+        meta.className = "vwair-meta";
+        var badge = document.createElement("b");
+        badge.className = "sbadge " + badgeClass;
+        badge.textContent = badgeText;
+        meta.appendChild(badge);
+        info.appendChild(t);
+        info.appendChild(meta);
+
+        row.appendChild(img);
+        row.appendChild(info);
+        row.addEventListener("click", function () {
+          closeSportsModal();
+          if (typeof window.viroResume === "function") {
+            window.viroResume("shows", "PITSORT", seasonKey, i);
+          }
+        });
+        list.appendChild(row);
+      });
+    }
+
+    addRows("PSLiveNow", d.PSLiveNow, "live", "LIVE");
+    addRows("PSUpcoming", d.PSUpcoming, "soon", "SOON");
+
+    if (!list.children.length) {
+      list.innerHTML = '<div class="vwair-empty">No live or upcoming sports right now.</div>';
+    }
+  }
+
+  function openSportsModal() {
+    ensureSportsModal();
+    renderSportsModalList();
+    if (window.vwSettingsClose) window.vwSettingsClose(); // one popup at a time
+    sportsModal.classList.add("vws-open");
+    sportsModal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeSportsModal() {
+    if (!sportsModal) return;
+    sportsModal.classList.remove("vws-open");
+    sportsModal.setAttribute("aria-hidden", "true");
   }
 
   /* ── Watchlist state sync (hero + view) ─────────────────────────
