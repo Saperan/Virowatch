@@ -12,7 +12,11 @@
 (function () {
   'use strict';
 
-  const API        = 'https://api.pitsport.live/v1';
+  // API host moved from api.pitsport.live → api.pitsport.st (2026-07-24; the
+  // old subdomain's DNS was pulled → ERR_NAME_NOT_RESOLVED). Same /v1 shape,
+  // still CORS-open (Access-Control-Allow-Origin: *). Base is read from the
+  // live site's JS chunks — re-check there if it 404s/ENOTFOUND again.
+  const API        = 'https://api.pitsport.st/v1';
   const WATCH_BASE = 'https://pitsport.xyz/watch';
   const TIMEOUT    = 7000;
   // pitsport.xyz/favicon.ico stopped resolving — use the same logo as shows.js
