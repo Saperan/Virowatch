@@ -159,46 +159,68 @@
     catch (_) { return false; }
   }
 
-  // allmovies: HLS on lizer123.site — CORS-open (ACAO:*), plays straight
-  // through hls.js from the browser, no Worker/Referer needed.
-  async function resolveAllmovies(tail) {
-    const data = await vidnestApiFetch(`/allmovies/${tail}`);
-    const streams = data && Array.isArray(data.streams)
-      ? data.streams.filter((s) => s && s.type === "hls" && s.url && !isDeadHost(s.url))
-      : [];
-    if (!streams.length) return null;
-    // prefer the CORS-open host so hls.js can load it directly
-    streams.sort((a, b) => (/lizer123\.site/i.test(b.url) ? 1 : 0) - (/lizer123\.site/i.test(a.url) ? 1 : 0));
-    return { kind: "hls", file: streams[0].url, tracks: [] };
+  // The Worker-side backends (vidxyz / allmovies / videasy —
+  // "beta" / "lamda" / "catflix").
+  // These CANNOT be resolved here: their CDNs are Referer-gated and sign the
+  // stream URL against the IP that asked for it, so a link resolved in the
+  // browser 403s when anything else fetches it (and the browser can't set a
+  // Referer). The Worker resolves, verifies and proxies in one hop instead.
+  // allmovies used to work direct — it moved off lizer123.site in 2026-07
+  // and every link it hands the browser now 404s, which is what silently
+  // hollowed out the movie/TV library.
+  async function resolveViaWorker(tail, force) {
+    const [type, id, s, e] = tail.split("/");
+    const qs = new URLSearchParams({ type, id });
+    if (s) { qs.set("s", s); qs.set("e", e); }
+    if (force) qs.set("src", force);
+    try {
+      const r = await fetch(`${ANIKOTO_WORKER}/vd?${qs}`);
+      const d = await r.json();
+      if (!d || !d.ok || !d.file) return null;
+      return {
+        kind: d.kind === "mp4" ? "direct" : "hls",
+        // mp4 backends come back through the proxy as a single quality
+        sources: [{ link: d.file, resolution: "Auto" }],
+        file: d.file,
+        tracks: d.tracks || [],
+        source: d.source,
+      };
+    } catch (_) { return null; }
   }
 
   // Resolve a movie/tv to a PLAYABLE source, in preference order:
-  //   1. hollymoviehd  — direct H.264 .mp4 (hlmv.tripplestream…), plain <video>
-  //   2. allmovies     — CORS-open HLS via hls.js
-  //   3. moviebox      — only if it hands back a NON-dead-host mp4 (now rare)
+  //   1. hollymoviehd ("prime") — direct H.264 .mp4, plain <video>, no proxy
+  //   2. Worker /vd ("beta"/"lamda"/"catflix") — proxied + segment-verified
+  //   3. moviebox — only if it hands back a NON-dead-host mp4 (now rare)
+  // `force` (from the ⇄ Source picker) pins one backend instead.
   // Returns { kind:"direct", sources } | { kind:"hls", file, tracks }
   //        | { kind:"unavailable", reason:"broken"|"missing" }.
   // "broken" = the only source found lives on the dead CDN; "missing" = no
   // source at all. Either way the player shows a message instead of spinning
   // or loading Vidnest's ad page.
-  async function resolveSource(tail) {
-    const holly = await resolveHollyFallback(tail);
-    if (holly && holly.length) return { kind: "direct", sources: holly };
-
-    const am = await resolveAllmovies(tail);
-    if (am) return am;
+  async function resolveSource(tail, force) {
+    if (force === "prime" || !force) {
+      const holly = await resolveHollyFallback(tail);
+      if (holly && holly.length) return { kind: "direct", sources: holly, source: "prime" };
+      if (force) return { kind: "unavailable", reason: "missing" };
+    }
+    const wk = await resolveViaWorker(tail, force);
+    if (wk) return wk;
+    if (force) return { kind: "unavailable", reason: "missing" };
 
     const data = await vidnestApiFetch(`/moviebox/${tail}`);
     const list = data && Array.isArray(data.url) ? data.url : null;
     if (list && list.length) {
       const good = bestFirst(list).filter((x) => !isDeadHost(x.link));
-      if (good.length) return { kind: "direct", sources: good };
+      if (good.length) return { kind: "direct", sources: good, source: "moviebox" };
       return { kind: "unavailable", reason: "broken" }; // had links, all dead CDN
     }
     return { kind: "unavailable", reason: "missing" };
   }
-  async function resolveVidnestMovie(tmdbId) { return resolveSource(`movie/${tmdbId}`); }
-  async function resolveVidnestTv(tmdbId, season, episode) { return resolveSource(`tv/${tmdbId}/${season}/${episode}`); }
+  async function resolveVidnestMovie(tmdbId, force) { return resolveSource(`movie/${tmdbId}`, force); }
+  async function resolveVidnestTv(tmdbId, season, episode, force) {
+    return resolveSource(`tv/${tmdbId}/${season}/${episode}`, force);
+  }
   // Resolves to an .m3u8 on cdn.mewstream.buzz — Referer-gated, needs the
   // Cloudflare Worker proxy (same one megaplay-backup.js uses for Anikoto).
   async function resolveVidnestAnime(anilistId, episode, subOrDub) {
@@ -755,9 +777,13 @@
     // proxied through the same Cloudflare Worker already used for the video
     // stream, since that's a generic Referer-adding passthrough).
     function proxyTracks(tracks) {
-      return (Array.isArray(tracks) ? tracks : []).map((t) => (
-        t && t.file ? { ...t, file: `${ANIKOTO_WORKER}/hls?u=${encodeURIComponent(t.file)}` } : t
-      ));
+      return (Array.isArray(tracks) ? tracks : []).map((t) => {
+        if (!t || !t.file) return t;
+        // /vd hands back tracks already routed through the Worker (with the
+        // right Referer attached) — don't wrap them a second time.
+        if (t.file.indexOf(ANIKOTO_WORKER) === 0) return t;
+        return { ...t, file: `${ANIKOTO_WORKER}/hls?u=${encodeURIComponent(t.file)}` };
+      });
     }
 
     async function playHls(proxiedUrl, tracks) {
@@ -856,14 +882,21 @@
 
     function iframeEl() { return document.getElementById("videoPlayer"); }
 
-    async function handleMatch(mMovie, mTv, originalSrc) {
+    // What's on screen right now, so the ⇄ Source picker can re-resolve the
+    // same title against a different backend without a reload.
+    let current = null; // { mMovie, mTv, originalSrc }
+
+    async function handleMatch(mMovie, mTv, originalSrc, opts) {
       const myToken = ++token;
       active = true;
+      current = { mMovie, mTv, originalSrc };
+      const force = (opts && opts.force) || null;
+      const resumeAt = (opts && opts.resumeAt) || 0;
       let result = null;
       try {
         result = mMovie
-          ? await resolveVidnestMovie(mMovie[2])
-          : await resolveVidnestTv(mTv[2], mTv[3], mTv[4]);
+          ? await resolveVidnestMovie(mMovie[2], force)
+          : await resolveVidnestTv(mTv[2], mTv[3], mTv[4], force);
       } catch (_) { result = null; }
       if (myToken !== token) return; // a newer episode/title loaded (or the user left) meanwhile
 
@@ -871,11 +904,15 @@
       // show a message (with an opt-in escape hatch to the real embed).
       if (!result || result.kind === "unavailable") {
         active = false;
-        showUnavailable(result && result.reason, originalSrc, myToken);
+        showUnavailable(result && result.reason, originalSrc, myToken, !!force);
         return;
       }
 
-      // allmovies HLS (CORS-open) → hls.js; no subtitle side-channel here.
+      srcPicker.mark(result.source);
+      if (resumeAt) seekWhenReady(resumeAt);
+
+      // videasy (direct) or a Worker-proxied backend → hls.js. These carry
+      // their own subtitle list, so skip the sub.vdrk.site side-channel.
       if (result.kind === "hls") {
         vidnestPlayer.playHls(result.file, result.tracks || []);
         return;
@@ -890,11 +927,75 @@
       });
     }
 
+    // Switching source mid-film shouldn't restart it.
+    function seekWhenReady(t) {
+      const v = document.getElementById("vidnestDirectPlayer");
+      if (!v) return;
+      v.addEventListener("loadedmetadata", () => {
+        try { v.currentTime = t; } catch (_) {}
+      }, { once: true });
+    }
+
+    // ── "⇄ Source" picker (movies/TV) ──────────────────────────────
+    // Backends differ in language, quality and which titles they carry, so
+    // the auto pick isn't always the one you want. Mirrors the anime source
+    // picker in anime-api.js, but as a plain <select> — the movie/TV list is
+    // fixed and short.
+    const srcPicker = (function () {
+      const NAMES = { prime: "Prime", catflix: "Catflix", beta: "Beta", lamda: "Lamda", moviebox: "MovieBox" };
+      let sel = null;
+      function ensure() {
+        if (sel) return sel;
+        const controls = document.querySelector(".player-controls");
+        if (!controls) return null;
+        sel = document.createElement("select");
+        sel.id = "vwVdSrc";
+        // .button is themed by every stylesheet, so borrowing it keeps this
+        // in step with the other player-controls buttons for free. The two
+        // overrides just undo #seasonSelector's full-width block layout.
+        sel.className = "button";
+        sel.title = "Video source — switch if this one stutters or is the wrong language";
+        sel.style.cssText = "display:none;width:auto;margin:0;font-size:.9rem;padding:9px 12px;";
+        [["", "⇄ Source: Auto"]].concat(
+          Object.keys(NAMES).filter((k) => k !== "moviebox").map((k) => [k, "⇄ Source: " + NAMES[k]]),
+        ).forEach(([v, label]) => {
+          const o = document.createElement("option");
+          o.value = v;
+          o.textContent = label;
+          sel.appendChild(o);
+        });
+        sel.addEventListener("change", () => {
+          if (!current) return;
+          const v = document.getElementById("vidnestDirectPlayer");
+          handleMatch(current.mMovie, current.mTv, current.originalSrc, {
+            force: sel.value || null,
+            resumeAt: v && isFinite(v.currentTime) ? v.currentTime : 0,
+          });
+        });
+        const nextBtn = document.getElementById("nextEpisode");
+        controls.insertBefore(sel, nextBtn ? nextBtn.nextSibling : null);
+        return sel;
+      }
+      return {
+        show(on) { const s = ensure(); if (s) s.style.display = on ? "inline-block" : "none"; },
+        // On Auto, name the backend that actually won, so a stuttering
+        // source can be identified and swapped.
+        mark(source) {
+          const s = ensure();
+          if (!s || s.value) return;
+          s.options[0].textContent = "⇄ Source: Auto" + (NAMES[source] ? ` (${NAMES[source]})` : "");
+        },
+        reset() { const s = ensure(); if (s) { s.value = ""; s.options[0].textContent = "⇄ Source: Auto"; } },
+      };
+    })();
+
     // Message shown when nothing plays, with a button to load Vidnest's own
     // (ad-laden) player as a manual last resort.
-    function showUnavailable(reason, originalSrc, myToken) {
+    function showUnavailable(reason, originalSrc, myToken, forced) {
       var broken = reason === "broken";
-      var msg = broken
+      var msg = forced
+        ? "That source doesn’t have this title. Pick another one (or Auto) from the ⇄ Source list under the player."
+        : broken
         ? "This title is only on MovieBox, whose video CDN now blocks this player (they changed it on their end). It can’t be played here right now."
         : "This title isn’t available from any working Vidnest source right now.";
       var html =
@@ -915,6 +1016,7 @@
 
     function handleClear() {
       token++;
+      srcPicker.show(false);
       if (active) { active = false; vidnestPlayer.stop(); }
     }
 
@@ -932,9 +1034,12 @@
           const mTv = !mMovie && TV_RE.exec(value || "");
           if (mMovie || mTv) {
             desc.set.call(f, "about:blank"); // the real URL never reaches navigation
+            srcPicker.reset(); // a new title/episode starts back on Auto
+            srcPicker.show(true);
             handleMatch(mMovie, mTv, value);
             return;
           }
+          srcPicker.show(false);
           desc.set.call(f, value);
           if (!value) handleClear(); // resetView()'s vid.src = ""
         },
@@ -943,7 +1048,7 @@
         const src = f.getAttribute("src");
         const mMovie = MOVIE_RE.exec(src);
         const mTv = !mMovie && TV_RE.exec(src);
-        if (mMovie || mTv) handleMatch(mMovie, mTv, src);
+        if (mMovie || mTv) { srcPicker.show(true); handleMatch(mMovie, mTv, src); }
       }
       return true;
     }
@@ -952,6 +1057,8 @@
     // and suspenders on top of the now-synchronous interceptor above.
     function stopAll() {
       token++;
+      current = null;
+      srcPicker.show(false);
       if (active) { active = false; vidnestPlayer.stop(); }
     }
 

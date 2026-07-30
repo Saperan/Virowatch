@@ -76,7 +76,9 @@
     opacity: 0;
     pointer-events: none;
 }
-.vw-player-root.vw-player-controls-hidden { cursor: none; }
+/* Tap zones/controls set their own cursor:pointer, so hide it explicitly */
+.vw-player-root.vw-player-controls-hidden,
+.vw-player-root.vw-player-controls-hidden * { cursor: none; }
 
 .vw-player-seek-row { display: flex; align-items: center; gap: 8px; padding: 0 4px 4px; }
 .vw-player-time {

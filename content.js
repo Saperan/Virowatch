@@ -560,7 +560,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const vids = data.video || [];
     let start = 0;
     let end = vids.length;
-    if (vids.length > EP_CHUNK) {
+    // IPTV categories are channel lists, not episode runs — never chunk them
+    if (vids.length > EP_CHUNK && mov !== "IPTV") {
       // Default to the chunk holding the current episode (resume/deeplink)
       if (!keepRange) epRangeStart = Math.floor((ep || 0) / EP_CHUNK) * EP_CHUNK;
       if (epRangeStart >= vids.length || epRangeStart < 0) epRangeStart = 0;
@@ -653,7 +654,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     saveState();
     // "Next episode" can cross a 100-episode chunk boundary — re-render
     // the list around the new episode so it stays visible
-    if (vids.length > EP_CHUNK && (index < epRangeStart || index >= epRangeStart + EP_CHUNK)) {
+    if (vids.length > EP_CHUNK && mov !== "IPTV" && (index < epRangeStart || index >= epRangeStart + EP_CHUNK)) {
       updateEpisodeList();
     }
     highlightEpisode(index);

@@ -228,7 +228,10 @@
     video.addEventListener("play", () => { playIcon.style.display = "none"; pauseIcon.style.display = ""; });
     video.addEventListener("pause", () => { playIcon.style.display = ""; pauseIcon.style.display = "none"; });
 
-    // ── Tap zones: single tap = play/pause, double tap = seek ─────
+    // ── Tap zones: single tap/click = play/pause; double tap = seek
+    // on touch, double click = fullscreen on desktop (YouTube behaviour)
+    const isTouchDevice = () =>
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     const DOUBLE_TAP_MS = 280;
     const tapState = { left: { count: 0, tid: null }, right: { count: 0, tid: null } };
     function flashSeek(side) {
@@ -251,9 +254,13 @@
       } else {
         clearTimeout(st.tid);
         st.count = 0;
-        seekBy(side === "left" ? -seekStep : seekStep);
-        flashSeek(side);
-        showControls();
+        if (isTouchDevice()) {
+          seekBy(side === "left" ? -seekStep : seekStep);
+          flashSeek(side);
+          showControls();
+        } else {
+          fsBtn.click(); // desktop double-click = fullscreen, like YouTube
+        }
       }
     }
     tapLeft.addEventListener("click", () => handleZoneTap("left"));

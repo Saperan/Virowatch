@@ -114,6 +114,15 @@
     });
 
     Object.keys(chapterChannels).forEach((k) => delete chapterChannels[k]);
+
+    // "All" bucket first — every channel, categorised or not
+    chapterChannels.IPTVG_ALL = channels.map((c) => c.idx);
+    show.IPTVG_ALL = {
+      chapter      : `All Channels (${channels.length})`,
+      video        : channels.map((c) => 'about:blank#vwiptv-' + c.idx),
+      episodeTitles: channels.map((c) => c.name),
+    };
+
     names.forEach((g, gi) => {
       const list = groups.get(g);
       // Name-based key so continue-watching entries survive playlist churn
