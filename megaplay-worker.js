@@ -208,9 +208,10 @@ function vdDead(u) {
 
 // Each backend maps its own response shape onto
 // { file, referer, kind:"hls"|"mp4", tracks:[{label,file}] }.
+// `path`+`pick` = a Vidnest backend (one call, one decode); `resolve` = a
+// provider with its own multi-step flow.
 const VD_BACKENDS = [
   { id: "beta",  name: "Beta",  path: "vidxyz",    pick: pickStreams },
-  { id: "lamda", name: "Lamda", path: "allmovies", pick: pickStreams },
   // videasy answers with a bare {url}. It's CORS-open so it could be played
   // without this proxy, but its segments sit on the same flaky tiktok CDN as
   // moviesapi and 400 on a good share of titles — it only stays in the list
@@ -220,7 +221,61 @@ const VD_BACKENDS = [
       d && typeof d.url === "string" && !vdDead(d.url)
         ? { file: d.url, referer: null, kind: "hls", tracks: [] }
         : null },
+  { id: "xps", name: "2Embed", resolve: resolveXpass },
+  // Last: allmovies is the one that quietly went dead in 2026-07 and it still
+  // hands out links more often than it hands out working ones.
+  { id: "lamda", name: "Lamda", path: "allmovies", pick: pickStreams },
 ];
+
+// ── 2Embed ──────────────────────────────────────────────────────────
+// 2embed.cc is a *wrapper*, not a source: its three servers are `vnest`
+// (Vidnest — already resolved directly above, ad-free), `vcr`
+// (vidcore.net) and `xps`, which is the only one of the three that adds
+// anything. Its chain, all keyed by plain TMDB id:
+//   /e/movie/<id> | /e/tv/<id>/<season>/<ep>  -> HTML carrying var data={…}
+//   -> data.playlist (a relative playlist.json) -> sources[0].file (.m3u8)
+// The CDN (*.1x2.space) echoes an Access-Control-Allow-Origin of
+// play.xpass.top only, so the browser can't fetch it — it goes through
+// /hls with that Referer like the rest. Subtitles come from a separate,
+// generous listing (7-55 languages per title).
+const XPS = "https://play.xpass.top";
+const XPS_SUB = "https://sub.1x2.space";
+
+async function resolveXpass(tail) {
+  const page = await fetch(`${XPS}/e/${tail}`, {
+    headers: { "User-Agent": UA, Referer: "https://streamsrcs.2embed.cc/" },
+  });
+  if (!page.ok) return null;
+  // The embed page inlines a jwplayer config; the playlist path is all we want.
+  const m = (await page.text()).match(/"playlist":"([^"]+)"/);
+  if (!m) return null;
+
+  const listRes = await fetch(new URL(m[1], XPS).toString(), {
+    headers: { "User-Agent": UA, Referer: `${XPS}/e/${tail}` },
+  });
+  if (!listRes.ok) return null;
+  const list = await listRes.json().catch(() => null);
+  const file = list?.playlist?.[0]?.sources?.[0]?.file;
+  if (!file || vdDead(file)) return null;
+
+  return { file, referer: `${XPS}/`, kind: "hls", tracks: await xpassSubs(tail) };
+}
+
+async function xpassSubs(tail) {
+  try {
+    const r = await fetch(`${XPS_SUB}/api/${tail}`, { headers: { "User-Agent": UA } });
+    if (!r.ok) return [];
+    const subs = await r.json();
+    return (Array.isArray(subs) ? subs : [])
+      .filter((s) => s && s.url)
+      .map((s) => ({
+        label: s.label || s.language || "Subtitle",
+        file: new URL(s.url, XPS_SUB).toString(),
+      }));
+  } catch {
+    return [];
+  }
+}
 
 function pickStreams(data) {
   const list = (data && Array.isArray(data.streams) ? data.streams : []).filter(
@@ -306,8 +361,15 @@ async function vdResolve(url) {
   const catalog = VD_BACKENDS.map((b) => ({ id: b.id, name: b.name }));
 
   for (const b of list) {
-    const data = await vdApi(`${b.path}/${tail}`);
-    const pick = data && b.pick(data);
+    let pick = null;
+    try {
+      if (b.resolve) {
+        pick = await b.resolve(tail);
+      } else {
+        const data = await vdApi(`${b.path}/${tail}`);
+        pick = data && b.pick(data);
+      }
+    } catch { pick = null; } // one broken provider must not sink the chain
     if (!pick || !(await vdPlayable(pick))) continue;
 
     const proxy = (u) =>

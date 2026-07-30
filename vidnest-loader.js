@@ -942,7 +942,16 @@
     // picker in anime-api.js, but as a plain <select> — the movie/TV list is
     // fixed and short.
     const srcPicker = (function () {
-      const NAMES = { prime: "Prime", catflix: "Catflix", beta: "Beta", lamda: "Lamda", moviebox: "MovieBox" };
+      // Listed in the order the auto chain tries them. moviebox can win on
+      // Auto but isn't offerable — it's the dead-CDN last resort.
+      const NAMES = {
+        prime: "Prime",
+        beta: "Beta",
+        catflix: "Catflix",
+        xps: "2Embed",
+        lamda: "Lamda",
+        moviebox: "MovieBox",
+      };
       let sel = null;
       function ensure() {
         if (sel) return sel;
