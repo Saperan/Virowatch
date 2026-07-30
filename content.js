@@ -1439,6 +1439,40 @@ document.addEventListener("DOMContentLoaded", async () => {
       resetView();
     });
 
+  // ── Keep the screen awake while the player is open ─────────────────
+  // Phones dim and sleep mid-episode: the OS only holds the screen on for a
+  // <video> playing in the page itself, and most of our sources play inside
+  // a cross-origin iframe, which doesn't count. So take an explicit screen
+  // wake lock for as long as the player is open. body.modal-open is set from
+  // four different places and cleared in resetView() — observing the class
+  // covers all of them at once instead of five call sites.
+  let wakeLock = null;
+  async function holdWake(on) {
+    try {
+      if (on) {
+        if (wakeLock || !navigator.wakeLock) return;
+        wakeLock = await navigator.wakeLock.request("screen");
+        // The OS drops it whenever the tab is hidden; note that so the
+        // visibilitychange handler below knows to take a fresh one.
+        wakeLock.addEventListener("release", () => { wakeLock = null; });
+      } else if (wakeLock) {
+        const l = wakeLock;
+        wakeLock = null;
+        await l.release();
+      }
+    } catch (_) {
+      wakeLock = null; // unsupported, or denied (e.g. battery saver) — nothing to do
+    }
+  }
+  const playerOpen = () => document.body.classList.contains("modal-open");
+  new MutationObserver(() => holdWake(playerOpen())).observe(document.body, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && playerOpen()) holdWake(true);
+  });
+
   function resetView() {
     if (episodeContainer) episodeContainer.style.display = "none";
     document.body.classList.remove("modal-open");
