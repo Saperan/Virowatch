@@ -408,6 +408,9 @@
     wrap.style.display = "";
     holder.innerHTML = "";
     list.slice(0, cwLimit()).forEach(function (it) {
+      var row = document.createElement("div");
+      row.className = "cw-row";
+
       var btn = document.createElement("button");
       btn.className = "cw-item";
       btn.type = "button";
@@ -458,7 +461,43 @@
           window.viroResume(it.cat, it.mov, it.season, it.ep, it.dubbed);
         }
       });
-      holder.appendChild(btn);
+      row.appendChild(btn);
+
+      // Slick add-to-watchlist toggle — skips live IPTV channels
+      if (!it.live && it.mov) {
+        var wl = document.createElement("button");
+        wl.type = "button";
+        wl.className = "cw-wl";
+        wl.setAttribute("aria-label", "Watchlist");
+        var inList =
+          typeof window.vwlHas === "function" && window.vwlHas(it.mov);
+        wl.classList.toggle("vwl-checked", inList);
+        wl.innerHTML =
+          window.vwlIcons
+            ? inList ? window.vwlIcons.check : window.vwlIcons.plus
+            : inList ? "✓" : "+";
+        wl.title = inList ? "In watchlist" : "Add to watchlist";
+        wl.addEventListener("click", function (e) {
+          e.stopPropagation();
+          if (typeof window.vwlToggle !== "function") return;
+          var item = {
+            key: it.mov,
+            cat: it.cat,
+            title: it.title || it.mov,
+            image: it.image || "",
+          };
+          if (it.mov.indexOf("ANI_") === 0) item.aniId = Number(it.mov.slice(4));
+          var added = window.vwlToggle(item);
+          wl.classList.toggle("vwl-checked", added);
+          wl.innerHTML = window.vwlIcons
+            ? added ? window.vwlIcons.check : window.vwlIcons.plus
+            : added ? "✓" : "+";
+          wl.title = added ? "In watchlist" : "Add to watchlist";
+        });
+        row.appendChild(wl);
+      }
+
+      holder.appendChild(row);
     });
   }
 

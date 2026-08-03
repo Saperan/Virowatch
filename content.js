@@ -880,10 +880,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       // anime entry. When a non-Vidnest result already carries the same
       // (normalized) title, drop Vidnest's copy — the anime entry can play
       // through Vidnest anyway via the ⇄ Source picker.
+      // Exceptions: the native catalogs (anime.js, shows.js, lunora-loader)
+      // only carry embed-host copies, so they must NOT suppress Vidnest's
+      // direct streams — otherwise search pins you to the worse host.
       const normTitle = (t) => (t || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
       const isVidnestItem = (it) => !!(it.key && /^VD[MT]_/.test(it.key));
+      const DEDUPE_EXEMPT_CATS = new Set(["anime", "shows", "lunora"]);
       const nonVidnestTitles = new Set(
-        scored.filter((it) => !isVidnestItem(it)).map((it) => normTitle(it.title)),
+        scored
+          .filter(
+            (it) =>
+              !isVidnestItem(it) &&
+              !(it.catKey && DEDUPE_EXEMPT_CATS.has(it.catKey)),
+          )
+          .map((it) => normTitle(it.title)),
       );
       for (let i = scored.length - 1; i >= 0; i--) {
         if (isVidnestItem(scored[i]) && nonVidnestTitles.has(normTitle(scored[i].title))) {

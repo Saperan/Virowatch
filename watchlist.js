@@ -112,6 +112,9 @@
   var SVG_DL    = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;flex-shrink:0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
   var SVG_UL    = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;flex-shrink:0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 5 17 10"/><line x1="12" y1="5" x2="12" y2="17"/></svg>';
 
+  /* Shared icons for external modules (virohome.js continue-watching rows) */
+  window.vwlIcons = { plus: SVG_PLUS, check: SVG_CHECK };
+
   /* ─────────────────────────────────────────────────────
      Export / Import
   ───────────────────────────────────────────────────── */
@@ -353,6 +356,91 @@
   }
 
   /* ─────────────────────────────────────────────────────
+     "＋ Watchlist" button in the player controls (next to 💬 Community)
+  ───────────────────────────────────────────────────── */
+  var playerWlBtn = null;
+  var nowPlaying = null;
+
+  window.addEventListener("vw-nowplaying", function (e) {
+    nowPlaying = e.detail || null;
+    syncPlayerBtn();
+  });
+
+  function playerBtn() {
+    if (playerWlBtn) return playerWlBtn;
+    var controls = document.querySelector(".player-controls");
+    if (!controls) return null;
+    var b = document.createElement("button");
+    b.type = "button";
+    b.id = "vwPlayerWlBtn";
+    b.className = "button";
+    b.style.display = "none";
+    b.textContent = "＋ Watchlist";
+    b.addEventListener("click", function () {
+      if (!b._item) return;
+      var added = window.vwlToggle(b._item);
+      syncPlayerBtn();
+      showToast(added ? "Added to watchlist" : "Removed from watchlist");
+    });
+    controls.appendChild(b); // moved next to Community when it appears
+    playerWlBtn = b;
+    return b;
+  }
+
+  function syncPlayerBtn() {
+    var b = playerBtn();
+    if (!b) return;
+    var ok =
+      nowPlaying && nowPlaying.cat && nowPlaying.mov &&
+      nowPlaying.mov !== "PITSORT" && nowPlaying.mov !== "IPTV";
+    b.style.display = ok ? "" : "none";
+    if (!ok) return;
+    var key = nowPlaying.mov;
+    var info =
+      window.mediaData && window.mediaData[nowPlaying.cat] &&
+      window.mediaData[nowPlaying.cat][key];
+    b._item = {
+      key: key,
+      cat: nowPlaying.cat,
+      title: (info && info.title) || key,
+      image: (info && info.image) || "",
+    };
+    if (key.indexOf("ANI_") === 0) b._item.aniId = Number(key.slice(4));
+    var inList = isInList(key);
+    b.textContent = inList ? "✓ In watchlist" : "＋ Watchlist";
+    b.title = inList ? "In watchlist" : "Add to watchlist";
+  }
+
+  // comments.js creates its 💬 Community button lazily on first episode
+  // open — keep this button docked right next to it once it exists.
+  function placeNextToCommunity() {
+    if (!playerWlBtn) return;
+    var cm = document.getElementById("vwCommunityBtn");
+    if (!cm || cm.parentNode !== playerWlBtn.parentNode) return;
+    if (playerWlBtn.nextSibling === cm) return;
+    cm.parentNode.insertBefore(playerWlBtn, cm);
+  }
+
+  function watchPlayerControls() {
+    var controls = document.querySelector(".player-controls");
+    if (!controls) return;
+    new MutationObserver(placeNextToCommunity).observe(controls, {
+      childList: true,
+    });
+  }
+
+  // Page may restore a playing state before the first vw-nowplaying
+  // event reaches this listener (content.js's DOMContentLoaded runs first)
+  function initFromSaved() {
+    var last = null;
+    try { last = JSON.parse(localStorage.getItem("lastState") || "null"); } catch (_) {}
+    if (last && last.cat && last.mov) {
+      nowPlaying = last;
+      syncPlayerBtn();
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────
      Observe #movieList
   ───────────────────────────────────────────────────── */
   function observeContainer(el) {
@@ -441,6 +529,9 @@
     buildSidebarSection();
     trackCategory();
     observeMovieList();
+    watchPlayerControls();
+    initFromSaved();
+    window.addEventListener("vwl-updated", syncPlayerBtn);
   }
 
   if (document.readyState === 'loading') {

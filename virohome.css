@@ -234,14 +234,26 @@ body {
 .rail-cw-items::-webkit-scrollbar {
     display: none;
 }
-.cw-item {
+.cw-row {
     position: relative;
     width: 44px;
     height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     border-radius: 12px;
-    transition:
-        width 0.32s var(--vw-ease),
-        background 0.18s ease;
+    transition: width 0.32s var(--vw-ease);
+}
+.rail:hover .cw-row {
+    width: 100%;
+}
+.cw-item {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    height: 48px;
+    border-radius: 12px;
+    transition: background 0.18s ease;
     display: flex;
     align-items: center;
     padding: 0 4px;
@@ -251,11 +263,57 @@ body {
     /* buttons default to text-align:center — keeps title/meta left-flush */
     text-align: left;
 }
-.rail:hover .cw-item {
-    width: 100%;
-}
 .cw-item:hover {
     background: var(--vw-hover);
+}
+.cw-wl {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    margin-right: 5px;
+    padding: 0;
+    border: 1px solid var(--vw-border);
+    border-radius: 8px;
+    background: var(--vw-panel);
+    color: var(--vw-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0.8);
+    pointer-events: none;
+    transition:
+        opacity 0.18s ease,
+        transform 0.18s ease,
+        background 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease;
+}
+.cw-wl svg {
+    width: 13px;
+    height: 13px;
+    pointer-events: none;
+}
+.rail:hover .cw-wl {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+}
+.cw-wl:hover {
+    color: var(--vw-text-strong);
+    border-color: var(--vw-border-strong);
+    background: var(--vw-hover);
+}
+.cw-wl.vwl-checked {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.14);
+    border-color: transparent;
+}
+.cw-wl.vwl-checked:hover {
+    color: #fff;
+    background: rgba(200, 55, 55, 0.55);
+    border-color: transparent;
 }
 .cw-thumb {
     position: relative;
@@ -293,7 +351,9 @@ body {
     opacity: 0;
     transition: opacity 0.22s ease 0.06s;
     pointer-events: none;
-    max-width: calc(var(--rail-w-open) - 62px);
+    /* 62px = thumb area, 42px more for the watchlist toggle + gap, so the
+       title ellipsizes before it collides with the button */
+    max-width: calc(var(--rail-w-open) - 104px);
 }
 .rail:hover .cw-text {
     opacity: 1;

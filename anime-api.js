@@ -37,7 +37,7 @@
     );
   }
 
-  window.vwAnimeApi = { get, set };
+  window.vwAnimeApi = { get, set, label: (api) => SHORT[api] || api };
 
   // ── Settings popup radio cards ─────────────────────────────────────
   function syncSettingsUI() {
@@ -88,6 +88,8 @@
 .vw-src-open .vw-src-row:nth-child(2){animation-delay:.04s;}
 .vw-src-open .vw-src-row:nth-child(3){animation-delay:.08s;}
 .vw-src-open .vw-src-row:nth-child(4){animation-delay:.12s;}
+.vw-src-open .vw-src-row:nth-child(5){animation-delay:.16s;}
+.vw-src-open .vw-src-row:nth-child(6){animation-delay:.2s;}
 @keyframes vwSrcRowIn{from{opacity:0;transform:translateX(-6px);}
   to{opacity:1;transform:none;}}
 .vw-src-row{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;
@@ -101,37 +103,39 @@
 
   let popOutside = null; // active outside-click/Escape closers
 
+  // Default rows = the anime API preference. rumble-source.js overrides
+  // these per-episode (window.vwSrcShow) with category-aware source lists.
+  function animeRows() {
+    return OPTIONS.map((o) => ({
+      label: SHORT[o.api] || o.name,
+      active: get() === o.api,
+      onClick: () => { set(o.api); closePop(); },
+    }));
+  }
+
+  let currentRows = null;
+
   function srcPop() {
     let p = document.getElementById("vwSrcPop");
     if (!p) {
       p = document.createElement("div");
       p.id = "vwSrcPop";
-      OPTIONS.forEach((o) => {
-        const row = document.createElement("div");
-        row.className = "vw-src-row";
-        row.dataset.api = o.api;
-        row.title = o.desc;
-        const dot = document.createElement("span");
-        dot.className = "vw-src-dot";
-        const name = document.createElement("span");
-        name.textContent = SHORT[o.api] || o.name;
-        row.appendChild(dot);
-        row.appendChild(name);
-        row.addEventListener("click", () => { set(o.api); closePop(); });
-        p.appendChild(row);
-      });
       document.body.appendChild(p);
     }
+    p.innerHTML = "";
+    (currentRows || animeRows()).forEach((r) => {
+      const row = document.createElement("div");
+      row.className = "vw-src-row" + (r.active ? " vw-src-active" : "");
+      const dot = document.createElement("span");
+      dot.className = "vw-src-dot";
+      const name = document.createElement("span");
+      name.textContent = r.label;
+      row.appendChild(dot);
+      row.appendChild(name);
+      row.addEventListener("click", r.onClick);
+      p.appendChild(row);
+    });
     return p;
-  }
-
-  function syncPop() {
-    const cur = get();
-    const p = document.getElementById("vwSrcPop");
-    if (!p) return;
-    p.querySelectorAll(".vw-src-row").forEach((r) =>
-      r.classList.toggle("vw-src-active", r.dataset.api === cur),
-    );
   }
 
   function closePop() {
@@ -146,7 +150,6 @@
 
   function openPop(anchor) {
     const p = srcPop();
-    syncPop();
     p.classList.add("vw-src-open");
     // Anchor above the button, clamped to the viewport.
     const r = anchor.getBoundingClientRect();
@@ -189,7 +192,23 @@
     srcBtn().textContent = "⇄ Source: " + SHORT[get()];
   }
 
+  // ── Per-episode source list control (rumble-source.js) ──────────────
+  // Rows: [{ label, active, onClick }]. The popup is re-rendered from
+  // these on every open, so a stale active dot is impossible.
+  window.vwSrcShow = function (rows, label) {
+    currentRows = rows;
+    const b = srcBtn();
+    b.textContent = "⇄ Source: " + (label || "…");
+    b.style.display = "";
+  };
+  window.vwSrcHide = function () {
+    const b = document.getElementById("vwSrcBtn");
+    if (b) { b.style.display = "none"; closePop(); }
+  };
+  window.vwSrcClose = closePop;
+
   window.addEventListener("vw-anime-embed", (e) => {
+    if (window.vwRumbleSource) return; // rumble-source.js owns the picker now
     const b = srcBtn();
     if (e.detail && e.detail.active) {
       setSrcLabel();
@@ -200,8 +219,9 @@
     }
   });
   window.addEventListener("vw-anime-api-changed", () => {
+    if (window.vwRumbleSource) return;
     setSrcLabel();
-    syncPop();
+    if (document.getElementById("vwSrcPop")) srcPop(); // re-render active state
   });
 
   // ── First-run popup ────────────────────────────────────────────────
