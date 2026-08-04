@@ -80,4 +80,18 @@
       window.dispatchEvent(new CustomEvent('vw-cw-updated'));
     });
   }
+  /* ── Experimental: episode block grid (content.js reads this) ── */
+  var epGrid = document.getElementById('epGridToggle');
+  if (epGrid) {
+    try {
+      epGrid.checked = localStorage.getItem('vw_ep_grid') !== '0';
+    } catch (_) {}
+    epGrid.addEventListener('change', function () {
+      try {
+        localStorage.setItem('vw_ep_grid', epGrid.checked ? '1' : '0');
+      } catch (_) {}
+      // Re-render an open episode list immediately
+      window.dispatchEvent(new CustomEvent('vw-ep-grid-updated'));
+    });
+  }
 })();

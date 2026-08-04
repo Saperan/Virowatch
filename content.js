@@ -549,6 +549,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function updateEpisodeList(keepRange) {
     const container = document.getElementById("episodeListContainer");
+    if (!container) return;
     container.innerHTML = "";
     document.getElementById("epRangeSelector")?.remove();
     const data = activeData();
@@ -558,6 +559,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         ? data.dubbedepisodetitle
         : data.episodeTitles || [];
     const vids = data.video || [];
+    // Experimental block-grid mode (on by default): 30+ episodes render as #N blocks
+    let gridMode = true;
+    try {
+      gridMode = localStorage.getItem("vw_ep_grid") !== "0";
+    } catch (_) {}
+    gridMode = gridMode && vids.length >= 30;
+    container.classList.toggle("ep-block-grid", gridMode);
     let start = 0;
     let end = vids.length;
     // IPTV categories are channel lists, not episode runs — never chunk them
@@ -587,16 +595,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     for (let i = start; i < end; i++) {
       const div = document.createElement("div");
       div.className = "episode";
-      const name = document.createElement("span");
-      name.className = "ep-name";
-      name.textContent = titles[i] || `Episode ${i + 1}`;
-      div.appendChild(name);
-      // Number badge only where a real title hides the episode number
-      if (titles[i]) {
+      if (gridMode) {
+        // Block grid: just the number, name kept in the tooltip
         const num = document.createElement("span");
         num.className = "ep-num";
         num.textContent = "#" + (i + 1);
         div.appendChild(num);
+        div.title = titles[i] || "Episode " + (i + 1);
+      } else {
+        const name = document.createElement("span");
+        name.className = "ep-name";
+        name.textContent = titles[i] || `Episode ${i + 1}`;
+        div.appendChild(name);
+        // Number badge only where a real title hides the episode number
+        if (titles[i]) {
+          const num = document.createElement("span");
+          num.className = "ep-num";
+          num.textContent = "#" + (i + 1);
+          div.appendChild(num);
+        }
       }
       div.dataset.episodeIndex = i;
       div.addEventListener("click", () => updateVideo(i));
@@ -604,6 +621,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     highlightEpisode(ep);
   }
+
+  // Block-grid layout + live re-render when the experimental toggle flips
+  const EP_GRID_CSS = [
+    "#episodeListContainer.ep-block-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:6px;align-content:start;padding:4px 2px;}",
+    "#episodeListContainer.ep-block-grid .episode{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;margin:0;padding:0;text-align:center;font-weight:600;}",
+    "#episodeListContainer.ep-block-grid .episode:hover{transform:none;}",
+    "#episodeListContainer.ep-block-grid .ep-name{display:none;}",
+    "#episodeListContainer.ep-block-grid .ep-num{font-size:.78rem;}",
+  ].join("");
+  const epGridStyle = document.createElement("style");
+  epGridStyle.textContent = EP_GRID_CSS;
+  document.head.appendChild(epGridStyle);
+  window.addEventListener("vw-ep-grid-updated", () => {
+    if (document.getElementById("episodeListContainer")) {
+      updateEpisodeList(true);
+    }
+  });
 
   // Update video player
   function updateVideo(index) {

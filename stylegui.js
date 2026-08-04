@@ -19,6 +19,7 @@
     { name: 'Frutiger Aero', description: 'Based off Frutiger Aero Images (one of the first custom CSS created for Virowatch in an idea to add customizability)', file: 'extra_css/virostyle-frutiger-aero.css' },
     { name: 'Amoled PC', description: 'Extra dark version (theoretically should turn off your amoled screen pixels)', file: 'extra_css/virostyle-amoled.css' },
     { name: 'Amoled Mobile', description: 'Extra dark version (theoretically should turn off your amoled screen pixels)', file: 'extra_css/virostyle-mobile-amoled.css' },
+    { name: 'Kazoqueue (light)', description: 'KazoQueue-inspired light theme — #f5d299 yellow accents, Manrope + Newsreader fonts', file: 'extra_css/virostyle-kazoqueue-light.css' },
     /* ADD EXTRA CSS FILES HERE */
   ];
 
