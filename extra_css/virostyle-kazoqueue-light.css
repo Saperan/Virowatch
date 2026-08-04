@@ -1,0 +1,531 @@
+/* ================================================================
+   Virowatch — Kazoqueue Light Theme
+   KazoQueue-inspired (kazoqueue.kazoqueue.workers.dev) light mode
+   only. Warm paper background, white surfaces, #f5d299 yellow
+   accents, Manrope body + Newsreader display headings.
+   Load via Style GUI: extra_css/virostyle-kazoqueue-light.css
+   ================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap');
+
+:root {
+  --kql-bg: #fdf5e4;
+  --kql-surface: #ffffff;
+  --kql-surface-2: #f9fafb;
+  --kql-surface-3: #f3f4f6;
+  --kql-border: #e5e7eb;
+  --kql-border-soft: #f3f4f6;
+  --kql-text: #1f2937;
+  --kql-text-strong: #111827;
+  --kql-text-mid: #374151;
+  --kql-text-soft: #4b5563;
+  --kql-text-muted: #6b7280;
+  --kql-text-faint: #9ca3af;
+  --kql-accent: #f8e5bd;
+  --kql-accent-strong: #eed29a;
+  --kql-accent-soft: #fdf5e4;
+  --kql-accent-ink: #5c4308;
+  --kql-accent-glow: rgba(248, 229, 189, 0.35);
+  --kql-radius: 12px;
+  --kql-font: 'Manrope', system-ui, sans-serif;
+  --kql-font-display: 'Newsreader', Georgia, serif;
+  color-scheme: light;
+}
+
+.bottom-text {
+  margin-bottom: 20px;
+  text-align: center;
+  opacity: 0.8;
+  font-size: 14px;
+  color: var(--kql-text-muted);
+  font-weight: 600;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--kql-font);
+}
+
+body {
+  background-color: #fdf5e4;
+  color: var(--kql-text);
+  overflow-x: hidden;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--kql-accent);
+  color: var(--kql-accent-ink);
+}
+
+/* === Scrollbar === */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--kql-accent);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--kql-accent-strong);
+}
+::-webkit-scrollbar-track {
+  background: var(--kql-surface-3);
+}
+
+.episode-container {
+  overflow: visible;
+}
+
+/* === Category Nav Bar === */
+.category-nav-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.cat-nav-btn {
+  padding: 7px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--kql-border);
+  background: var(--kql-surface);
+  color: var(--kql-text-soft);
+  font-family: var(--kql-font);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  -webkit-tap-highlight-color: transparent;
+}
+.cat-nav-btn:hover {
+  border-color: var(--kql-accent);
+  color: var(--kql-text);
+  background: var(--kql-accent-soft);
+}
+.cat-nav-btn.active {
+  background: var(--kql-accent);
+  border-color: var(--kql-accent-strong);
+  color: var(--kql-accent-ink);
+  font-weight: 700;
+  box-shadow: 0 2px 8px var(--kql-accent-glow);
+}
+
+.movie-list-wrapper {
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.movie-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 16px;
+  padding: 5px 0;
+}
+
+.movie-item {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2/3;
+  background-color: var(--kql-surface);
+  border-radius: var(--kql-radius);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.25s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  border: 1px solid var(--kql-border-soft);
+}
+.movie-item:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  border-color: var(--kql-accent);
+}
+.movie-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--kql-radius);
+  transition: opacity 0.3s ease;
+}
+.movie-item p {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.92);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--kql-text-strong);
+  text-align: center;
+  padding: 6px 4px;
+  border-radius: 0 0 var(--kql-radius) var(--kql-radius);
+  backdrop-filter: blur(3px);
+  border-top: 1px solid var(--kql-border-soft);
+}
+
+/* === Episode Modal (fullscreen overlay) === */
+.episode-container {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--kql-bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+body.modal-open {
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 250, 0.85);
+  border-bottom: 1px solid var(--kql-border-soft);
+  flex-shrink: 0;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.modal-back-btn {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  border-radius: 8px;
+  background: var(--kql-surface);
+  border: 1px solid var(--kql-border);
+  color: var(--kql-text-soft);
+  font-family: var(--kql-font);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.modal-back-btn:hover {
+  border-color: var(--kql-accent);
+  color: var(--kql-accent-ink);
+  background: var(--kql-accent-soft);
+}
+.modal-title {
+  flex: 1;
+  font-family: var(--kql-font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--kql-text-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.modal-header-actions {
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+}
+.modal-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+}
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  background: var(--kql-surface-2);
+  border-left: 1px solid var(--kql-border-soft);
+  padding: 12px;
+}
+.episode {
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background: var(--kql-surface);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid var(--kql-border-soft);
+  color: var(--kql-text-soft);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+.episode:hover {
+  transform: translateX(2px);
+  background-color: var(--kql-accent-soft);
+  border-color: var(--kql-accent);
+  color: var(--kql-accent-ink);
+}
+.episode.active {
+  background: var(--kql-accent);
+  border-color: var(--kql-accent-strong);
+  color: var(--kql-accent-ink);
+  font-weight: 700;
+}
+
+/* === Player Container === */
+.player {
+  flex: 1;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  position: relative;
+}
+
+iframe#videoPlayer {
+  flex: 1;
+  width: 100%;
+  min-height: 200px;
+  border: none;
+  background-color: #000;
+  transition: opacity 0.3s ease;
+}
+
+.spinner {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  border: 6px solid var(--kql-surface-3);
+  border-top-color: var(--kql-accent-strong);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: none;
+  z-index: 10;
+}
+
+/* === Player Controls Bar === */
+.player-controls {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 250, 0.9);
+  border-top: 1px solid var(--kql-border-soft);
+  flex-wrap: wrap;
+}
+
+.button {
+  padding: 10px 20px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8ecd4 55%, #f3dfb8 100%);
+  color: var(--kql-text);
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid #ecd9b4;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 1px 0 #fff;
+}
+.button:hover {
+  transform: translateY(-2px);
+  border-color: var(--kql-accent-strong);
+  background: linear-gradient(180deg, #ffffff 0%, #f5e2bf 55%, #eed29a 100%);
+  color: var(--kql-accent-ink);
+  box-shadow: 0 6px 14px var(--kql-accent-glow), inset 0 1px 0 #fff;
+}
+.button.dubbed-toggle.active {
+  background: linear-gradient(180deg, #fbeecf 0%, #f5dca6 45%, #eac887 100%);
+  color: var(--kql-accent-ink);
+  font-weight: 800;
+  border-color: var(--kql-accent-strong);
+  box-shadow: 0 4px 12px var(--kql-accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+#downloadContainer {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+  width: 100%;
+}
+
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.fade-transition {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.fade-transition.show {
+  opacity: 1;
+}
+
+@keyframes spin {
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.section-animate {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+@media (max-width: 768px) {
+  .movie-list {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+  }
+  .modal-body {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--kql-border-soft);
+    max-height: 180px;
+    flex-shrink: 0;
+  }
+  .modal-header {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  .modal-title {
+    font-size: 1rem;
+  }
+  .modal-back-btn {
+    padding: 5px 10px;
+    font-size: 0.82rem;
+  }
+  .player-controls {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+p,
+span,
+label,
+button,
+input,
+textarea,
+div,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+#seasonSelector, #epRangeSelector {
+  background: var(--kql-surface);
+  color: var(--kql-text);
+  font-weight: 600;
+  border: 1px solid var(--kql-border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  width: 100%;
+  font-size: 1rem;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease, border-color 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+#seasonSelector:hover, #epRangeSelector:hover,
+#seasonSelector:focus, #epRangeSelector:focus {
+  background-color: var(--kql-accent-soft);
+  outline: none;
+  transform: scale(1.02);
+  border-color: var(--kql-accent);
+}
+
+/* full-screen modal — height constraints removed */
+.movie-item,
+.button,
+.episode,
+#seasonSelector, #epRangeSelector {
+  opacity: 0;
+  animation: simpleAppear 0.8s ease-out forwards;
+  transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+@keyframes simpleAppear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* === Virowatch 3a home tokens (rail/header/hero — see virohome.css) ===
+   Filename contains "light" so virohome.css light defaults apply;
+   this block re-tints them to the kazoqueue yellow. */
+html[data-vw-theme][data-vw-theme] {
+    --vw-bg: #fdf5e4;
+    --vw-bg-rgb: 253, 245, 228;
+    --vw-panel: rgba(255, 255, 255, 0.72);
+    --vw-panel-2: #f9e9cb;
+    --vw-text: #1f2937;
+    --vw-text-strong: #111827;
+    --vw-icon: #4b5563;
+    --vw-muted: #6b7280;
+    --vw-muted-2: rgba(107, 114, 128, 0.85);
+    --vw-border: rgba(0, 0, 0, 0.08);
+    --vw-border-strong: rgba(248, 229, 189, 0.6);
+    --vw-active-border: #eed29a;
+    --vw-hover: rgba(253, 245, 228, 0.8);
+    --vw-hover-strong: rgba(248, 229, 189, 0.4);
+    --vw-chip-bg: rgba(255, 255, 255, 0.8);
+    --vw-chip-border: rgba(238, 210, 154, 0.4);
+    --vw-input-bg: #ffffff;
+    --vw-input-border: #e5e7eb;
+    --vw-input-border-focus: #eed29a;
+    --vw-accent-bg: #f8e5bd;
+    --vw-accent-fg: #5c4308;
+    --vw-glow: rgba(248, 229, 189, 0.35);
+    --vw-glow-strong: rgba(248, 229, 189, 0.55);
+    --vw-faint: rgba(31, 41, 55, 0.4);
+}
+
+/* === Transparent glassy sidebar rail === */
+.rail {
+    background: rgba(253, 245, 228, 0.4) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-right: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* watchlist rail button + continue-watching +/✓ buttons: glassy to match */
+.rail-item.active {
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-color: rgba(255, 255, 255, 0.55);
+}
+.cw-wl {
+    background: rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+.cw-wl:hover {
+    background: rgba(255, 255, 255, 0.5) !important;
+}
