@@ -1,0 +1,477 @@
+/* vitv.css — Virowatch TV mode (remote-first) — Viro style.
+ * Activated by tv-nav.js adding .vw-tv to <body>. Only styles that help a
+ * remote user: a glowing focus ring, bigger type/hit targets, and the rail
+ * forced open (it's hover-expand on desktop). Design tokens come from the
+ * active theme via the existing --vw-* variables (virohome.css), so TV mode
+ * follows the current style choice automatically.
+ */
+.vw-tv {
+  /* Bigger hit targets for 3m-from-couch reading */
+  --vw-tv-scale: 1.06;
+}
+
+/* ── Focus ring (the remote cursor) ──────────────────────────────── */
+.vw-tv .vw-focus {
+  outline: 3px solid var(--vw-accent-bg, #ffffff) !important;
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 6px var(--vw-glow-strong, rgba(255, 255, 255, 0.3)),
+    0 10px 30px rgba(0, 0, 0, 0.55) !important;
+  z-index: 4;
+  border-radius: inherit;
+}
+
+/* ── First-run "are you on a TV?" popup ──────────────────────────── */
+/* Shows BEFORE TV mode is confirmed, so the ring here is standalone
+ * (not scoped under .vw-tv). */
+#vwTvAsk .vws-modal {
+  width: min(440px, 100%);
+}
+#vwTvAsk .vw-tv-ask-body {
+  padding: 20px 22px 24px;
+}
+#vwTvAsk .vw-tv-ask-text {
+  margin: 0 0 16px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--vw-text, #eaeaea);
+}
+#vwTvAsk .vw-tv-ask-btns {
+  display: flex;
+  gap: 12px;
+}
+#vwTvAsk .vw-tv-ask-btns button {
+  flex: 1;
+  padding: 14px 10px;
+  font-size: 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+}
+#vwTvAsk .vw-tv-ask-hint {
+  margin-top: 16px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--vw-muted, rgba(255, 255, 255, 0.45));
+}
+#vwTvAsk .vw-focus {
+  outline: 3px solid var(--vw-accent-bg, #ffffff) !important;
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 6px var(--vw-glow-strong, rgba(255, 255, 255, 0.3)),
+    0 10px 30px rgba(0, 0, 0, 0.55);
+  border-radius: inherit;
+}
+
+/* ── Rail: hover-expand is a mouse gesture a remote can't do, so on
+ * hover-less TVs force it open with labels. On desktop (hover: fine) the
+ * rail keeps the normal Viro collapsed look + animated hover expansion —
+ * forcing it open there just kills the animation. */
+@media (hover: none) {
+  .vw-tv .rail {
+    width: var(--rail-w-open, 216px) !important;
+  }
+  .vw-tv .rail .rail-label {
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+  }
+  /* Items must fill the opened rail (desktop CSS keeps them icon-wide
+   * until :hover — TV has no hover, so labels/buttons end up misaligned). */
+  .vw-tv .rail .rail-item {
+    width: 100%;
+  }
+  .vw-tv .rail-item .icon {
+    font-size: 1.3rem;
+  }
+  /* Continue-watching rows collapse to icon-only until hover — TV has no
+   * hover, so force the expanded look the whole time. */
+  .vw-tv .rail .cw-row,
+  .vw-tv .rail .cw-item {
+    width: 100%;
+  }
+  .vw-tv .rail .cw-text {
+    opacity: 1;
+  }
+  .vw-tv .rail-cw-head .collapsed-icon {
+    opacity: 0;
+  }
+}
+
+/* ── Rail on desktop TV mode: focus moves onto a rail element expand it
+ * exactly like mouse hover would — same width + label transitions, so the
+ * animation still runs (body gets .vw-rail-focus from tv-nav.js). ────── */
+.vw-tv.vw-rail-focus .rail {
+  width: var(--rail-w-open, 216px);
+}
+.vw-tv.vw-rail-focus .rail .rail-label {
+  opacity: 1;
+  pointer-events: auto;
+}
+.vw-tv.vw-rail-focus .rail .rail-item {
+  width: 100%;
+}
+.vw-tv.vw-rail-focus .rail-item .icon {
+  font-size: 1.3rem;
+}
+.vw-tv.vw-rail-focus .rail .cw-row,
+.vw-tv.vw-rail-focus .rail .cw-item {
+  width: 100%;
+}
+.vw-tv.vw-rail-focus .rail .cw-text {
+  opacity: 1;
+}
+.vw-tv.vw-rail-focus .rail-cw-head .collapsed-icon {
+  opacity: 0;
+}
+
+/* ── Content cards: bigger type, roomier grid ────────────────────── */
+.vw-tv .movie-list {
+  gap: 18px;
+}
+.vw-tv .movie-item p {
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+.vw-tv #newestAddedList.poster-grid {
+  gap: 18px;
+}
+.vw-tv .poster {
+  font-family: "Kanit", sans-serif;
+  font-weight: 400;
+}
+
+/* ── Player modal ────────────────────────────────────────────────── */
+.vw-tv .episode {
+  font-size: 0.95rem;
+  padding: 10px 12px;
+}
+.vw-tv #episodeListContainer.ep-block-grid {
+  grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+  gap: 8px;
+}
+.vw-tv #episodeListContainer.ep-block-grid .ep-num {
+  font-size: 0.9rem;
+}
+.vw-tv #seasonSelector,
+.vw-tv #epRangeSelector {
+  font-size: 0.95rem;
+  padding: 8px 10px;
+}
+.vw-tv .vw-player-icon-btn {
+  width: 46px;
+  height: 46px;
+}
+.vw-tv .vw-player-icon-btn svg {
+  width: 26px;
+  height: 26px;
+}
+.vw-tv .player-controls .button,
+.vw-tv .modal-header .button {
+  font-size: 0.95rem;
+  padding: 9px 16px;
+}
+
+/* ── Header / nav / hero ─────────────────────────────────────────── */
+.vw-tv #searchInput {
+  height: 46px;
+  font-size: 1.05rem;
+}
+.vw-tv .cat-nav-btn {
+  font-size: 1rem;
+  padding: 10px 22px;
+}
+.vw-tv .btn-primary,
+.vw-tv .btn-ghost {
+  font-size: 1.05rem;
+  padding: 14px 26px;
+}
+
+/* ── Modals: roomier rows for remote clicking ────────────────────── */
+.vw-tv .vws-modal .vws-section {
+  padding: 18px;
+}
+.vw-tv .vws-modal button,
+.vw-tv .vws-modal a[href] {
+  min-height: 44px;
+}
+
+/* ── Hover-only helpers aren't useful on a remote — keep them dim ── */
+.vw-tv .more {
+  font-size: 1rem;
+}
+
+/* ── TV player: YouTube-TV-style chrome — video-first, translucent
+ * overlays, the episode panel slides in over the video only when opened
+ * via the Episodes button in the custom player bar. The top header is
+ * hidden in TV mode. Everything stays the same DOM/content.js builds;
+ * only the skin changes. */
+.vw-tv .episode-container {
+  background: #000;
+}
+.vw-tv .modal-header {
+  display: none;
+}
+.vw-tv .modal-body {
+  position: relative;
+}
+.vw-tv .player {
+  background: #000;
+}
+
+/* ── TV shortcut row, built into the custom player bar ───────────── */
+.vw-player-tvbtns {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  margin: 0 4px;
+}
+.vw-tv .vw-player-tvbtns {
+  display: flex;
+}
+/* Compact: the row also carries play/volume/CC/fullscreen/⋮ — if the TV
+ * buttons are too wide the right-side icons get pushed off-screen. */
+.vw-tv .vw-player-tvbtn {
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.1);
+  color: #eaeaea;
+  font-family: "Kanit", sans-serif;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.vw-tv .vw-player-tvbtn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.vw-tv .vw-player-tvbtn.active {
+  background: var(--vw-accent-bg, #ffffff);
+  color: var(--vw-accent-fg, #111111);
+  font-weight: 600;
+}
+/* Safety net for narrow windows — let the row wrap instead of clipping
+ * the CC / fullscreen / ⋮ buttons off the right edge. */
+.vw-tv .vw-player-btn-row {
+  flex-wrap: wrap;
+}
+
+/* TV mode has no cursor, so the custom player's mousemove wake never
+ * fires — instead any key press brings the control bar back
+ * (custom-player-ui.js). The standard idle hide then applies normally. */
+/* The volume slider is width:0 until its group is hovered — TV has no
+ * hover, so it would never be focusable. Force it open. */
+.vw-tv .vw-player-volume {
+  width: 70px !important;
+  opacity: 1;
+  margin-left: 4px;
+}
+
+/* ── Content error: the video chrome steps back so the failure isn't
+ * buried, but navigation NEVER disappears — the static pill (Back / Title /
+ * Dubbed / Prev / Next) shows as the escape hatch even when the custom
+ * bar exists, so an error page can never trap the user. */
+.vw-tv.vw-tv-player-error .vw-player-controls {
+  opacity: 0.25;
+  pointer-events: none;
+}
+.vw-tv.vw-tv-player-error .player-controls {
+  display: flex !important;
+}
+
+/* ── Scrub mode (OK on the timeline) ──────────────────────────────── */
+/* Engaged timeline: thicker + glowing so selecting it is unmistakable. */
+.vw-tv .vw-player-seek.vw-scrubbing {
+  height: 6px;
+  box-shadow: 0 0 14px var(--vw-glow-strong, rgba(255, 255, 255, 0.3));
+}
+/* Selected volume slider: same glow language. */
+.vw-tv .vw-player-volume.vw-vol-selected {
+  height: 5px;
+  box-shadow: 0 0 14px var(--vw-glow-strong, rgba(255, 255, 255, 0.3));
+}
+#vwScrubHint {
+  display: none;
+  position: fixed;
+  left: 50%;
+  bottom: 96px;
+  transform: translateX(-50%);
+  z-index: 8;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(20, 20, 20, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: var(--vw-text, #eaeaea);
+  font-family: "Kanit", sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+body.vw-scrubbing #vwScrubHint {
+  display: block;
+}
+
+/* ── Static .player-controls pill — fallback for iframe-only sources,
+ * hidden when the custom player bar (with its own TV buttons) exists. */
+.vw-tv .player .player-controls {
+  position: absolute;
+  left: 50%;
+  bottom: 84px;
+  transform: translateX(-50%);
+  z-index: 7;
+  background: rgba(20, 20, 20, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 8px 14px;
+}
+.vw-tv.vw-tv-custom .player-controls {
+  display: none;
+}
+.vw-tv .player-controls #downloadContainer {
+  width: auto;
+  margin-top: 0;
+}
+.vw-tv .player-controls #nowPlayingTitle {
+  flex: none;
+  max-width: 32vw;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.vw-tv .player-controls .button,
+.vw-tv .player-controls .modal-back-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: none;
+}
+.vw-tv .player-controls .button:hover,
+.vw-tv .player-controls .modal-back-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: none;
+}
+/* Episode panel: hidden by default, slides in over the video when focus
+ * lands on it (body gets .vw-sidebar-open from tv-nav.js) */
+.vw-tv .sidebar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(320px, 34vw);
+  z-index: 5;
+  transform: translateX(105%);
+  transition: transform 0.28s var(--vw-ease, ease);
+  background: rgba(18, 18, 18, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+.vw-tv.vw-sidebar-open .sidebar {
+  transform: none;
+}
+.vw-tv .sidebar .episode {
+  margin-bottom: 8px;
+}
+
+/* ── On-screen keyboard (tv-nav.js #vwOsk) — Viro style ──────────── */
+/* Bottom sheet: centered horizontally, hugging the bottom edge, wide
+ * enough to feel like a real TV keyboard. */
+.vw-tv .vw-osk-panel {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(980px, 96vw);
+  padding: 18px 18px 24px;
+  background: var(--vw-panel, #1a1a1a);
+  border: 1px solid var(--vw-border-strong, rgba(255, 255, 255, 0.15));
+  border-bottom: none;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.55);
+  font-family: "Kanit", sans-serif;
+}
+.vw-tv .vw-osk-preview {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: var(--vw-input-bg, rgba(255, 255, 255, 0.07));
+  border: 1px solid var(--vw-input-border, rgba(255, 255, 255, 0.1));
+  color: var(--vw-text-strong, #fff);
+  font-size: 1.1rem;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.vw-tv .vw-osk-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* Traditional QWERTY stagger: each row is a full-width flex that grows to
+ * fill, with the A and Z rows nudged right like a real keyboard. Row 1 is
+ * the numbers/punctuation row. */
+.vw-tv .vw-osk-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+.vw-tv .vw-osk-row:nth-child(3) {
+  padding: 0 2.5%;
+}
+.vw-tv .vw-osk-row:nth-child(4) {
+  padding: 0 5%;
+}
+.vw-tv .vw-osk-key {
+  flex: 1 1 0;
+  min-width: 40px;
+  max-width: 78px;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid var(--vw-border-strong, rgba(255, 255, 255, 0.15));
+  background: var(--vw-chip-bg, rgba(255, 255, 255, 0.08));
+  color: var(--vw-text, #eaeaea);
+  font-family: inherit;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+/* The 21-key numbers row needs slim keys or they clip out of the panel */
+.vw-tv .vw-osk-row:nth-child(1) .vw-osk-key {
+  min-width: 24px;
+  max-width: 60px;
+  font-size: 0.95rem;
+}
+.vw-tv .vw-osk-key:hover {
+  background: var(--vw-hover-strong, rgba(255, 255, 255, 0.14));
+  color: var(--vw-text-strong, #fff);
+}
+.vw-tv .vw-osk-key[data-k="back"] {
+  max-width: 110px;
+}
+.vw-tv .vw-osk-key[data-k=" "] {
+  flex-grow: 2.2;
+  max-width: 260px;
+}
+.vw-tv .vw-osk-key[data-k="enter"] {
+  flex-grow: 1.6;
+  max-width: 180px;
+  background: var(--vw-accent-bg, #ffffff);
+  color: var(--vw-accent-fg, #111111);
+  font-weight: 600;
+}
+.vw-tv .vw-osk-hints {
+  text-align: center;
+  color: var(--vw-muted, rgba(255, 255, 255, 0.45));
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+}

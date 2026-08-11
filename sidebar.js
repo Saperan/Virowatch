@@ -8,6 +8,11 @@
     overlay.setAttribute('aria-hidden', 'false');
     var search = document.getElementById('sgSearch');
     if (search) search.value = '';
+    // TV mode can change from the first-run popup — re-sync the toggle
+    var tvT = document.getElementById('tvModeToggle');
+    if (tvT) {
+      try { tvT.checked = localStorage.getItem('vw_tv') === '1'; } catch (_) {}
+    }
   }
 
   function close() {
@@ -92,6 +97,16 @@
       } catch (_) {}
       // Re-render an open episode list immediately
       window.dispatchEvent(new CustomEvent('vw-ep-grid-updated'));
+    });
+  }
+  /* ── TV mode toggle (tv-nav.js vwTvSet owns state + persistence) ── */
+  var tvToggle = document.getElementById('tvModeToggle');
+  if (tvToggle) {
+    try {
+      tvToggle.checked = localStorage.getItem('vw_tv') === '1';
+    } catch (_) {}
+    tvToggle.addEventListener('change', function () {
+      if (typeof window.vwTvSet === 'function') window.vwTvSet(tvToggle.checked);
     });
   }
 })();

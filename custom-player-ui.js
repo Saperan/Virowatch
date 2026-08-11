@@ -144,6 +144,37 @@
     moreBtn.type = "button"; moreBtn.title = "More options";
 
     btnRow.append(playBtn, volGroup, spacer, ccBtn, fsBtn, moreBtn);
+
+    // ── TV-mode shortcut row: Back / Episodes / Prev / Dubbed / Next /
+    // Source — hidden unless .vw-tv is on <body> (vitv.css). Acts on the
+    // page's own buttons via window.vwTvInvoke (tv-nav.js) so every
+    // existing event handler keeps working — these are just remote-friendly
+    // duplicates. Sits AFTER play/volume, before the ⋮ group.
+    const tvBtns = el("div", "vw-player-tvbtns");
+    [
+      ["back", "← Back"],
+      ["episodes", "Episodes"],
+      ["prev", "Prev"],
+      ["dubbed", "Dubbed"],
+      ["source", "⇄ Source"],
+      ["next", "Next"],
+    ].forEach((pair) => {
+      const b = el("button", "vw-player-tvbtn", pair[1]);
+      b.type = "button";
+      b.dataset.tv = pair[0];
+      tvBtns.appendChild(b);
+    });
+    tvBtns.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-tv]");
+      if (b && window.vwTvInvoke) window.vwTvInvoke(b.dataset.tv);
+    });
+    // No source picker for this title (anime sources only) — drop the button
+    if (!document.getElementById("vwSrcBtn")) {
+      const srcBtn = tvBtns.querySelector('[data-tv="source"]');
+      if (srcBtn) srcBtn.style.display = "none";
+    }
+    btnRow.insertBefore(tvBtns, spacer);
+
     controls.append(seekRow, btnRow);
 
     // ── Menus ──────────────────────────────────────────────────────
@@ -533,6 +564,13 @@
     root.addEventListener("mousemove", showControls);
     root.addEventListener("mouseleave", () => { if (!video.paused && !anyMenuOpen()) root.classList.add("vw-player-controls-hidden"); });
     video.addEventListener("play", showControls);
+    // TV/remote: no mouse to wake the bar — any key press brings it back
+    // (and restarts the idle hide). Guarded by the play state inside
+    // showControls, so a paused video keeps its bar on screen.
+    document.addEventListener("keydown", showControls);
+    // Exposed for tv-nav.js: selection moves (gamepad, scope re-anchors)
+    // produce no keydown, so they wake the bar through this instead.
+    window.vwPlayerWake = showControls;
 
     // ── Keyboard shortcuts ─────────────────────────────────────────
     const VOL_STEP = 0.05;

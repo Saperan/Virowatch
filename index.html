@@ -72,6 +72,7 @@
         />
         <link rel="stylesheet" href="virohome.css?v=13" />
         <link rel="stylesheet" href="custom-player.css?v=4" />
+        <link rel="stylesheet" href="vitv.css" />
     </head>
     <body>
         <!-- ── Settings popup (replaces the old slide-in sidebar) ── -->
@@ -304,6 +305,28 @@
                             <input
                                 type="checkbox"
                                 id="epGridToggle"
+                                class="vws-switch"
+                            />
+                        </label>
+                    </div>
+                    <div class="vws-section">
+                        <span class="app-sidebar-theme-label"
+                            >📺 TV mode</span
+                        >
+                        <label class="vws-toggle-row" for="tvModeToggle">
+                            <span class="vws-toggle-text">
+                                <span class="vws-toggle-title"
+                                    >Remote navigation (TV / console)</span
+                                >
+                                <span class="vws-toggle-sub"
+                                    >Arrows move the highlight, OK selects.
+                                    Hold any button ~4 seconds to reset back
+                                    to the home page if you get stuck.</span
+                                >
+                            </span>
+                            <input
+                                type="checkbox"
+                                id="tvModeToggle"
                                 class="vws-switch"
                             />
                         </label>
@@ -634,7 +657,7 @@
         <script src="anime.js"></script>
         <script src="lunora-loader.js"></script>
         <script src="content.js?v=17"></script>
-        <script src="custom-player-ui.js?v=5"></script>
+        <script src="custom-player-ui.js?v=7"></script>
         <script src="anikoto-loader.js?v=8"></script>
         <script src="vidnest-loader.js?v=14"></script>
         <script src="megaplay-backup.js?v=25"></script>
@@ -642,7 +665,7 @@
         <script src="deeplink.js" defer></script>
         <script src="iptv.js?v=3"></script>
         <script src="rumble-party.js?v=1"></script>
-        <script src="sidebar.js?v=3"></script>
+        <script src="sidebar.js?v=4"></script>
         <script src="anime-api.js?v=5"></script>
         <script src="rumble-source.js?v=1"></script>
         <script src="watchlist.js?v=4"></script>
@@ -655,6 +678,7 @@
         <script src="watchparty.js?v=4"></script>
         <script src="comments.js?v=8"></script>
         <script src="social.js?v=17"></script>
+        <script src="tv-nav.js?v=6"></script>
     </body>
 </html>
 

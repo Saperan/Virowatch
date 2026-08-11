@@ -25,8 +25,11 @@
   var META_MAX = 400; // prune oldest entries beyond this many titles
   var BACKDROP = "https://image.tmdb.org/t/p/w780";
 
-  // Mobile / touch: no real hover and no space — stay out of the way
+  // Mobile / touch: no real hover and no space — stay out of the way.
+  // TV mode (tv-nav.js) forwards focus moves as synthetic mouseovers, so
+  // the cards stay alive there even though TVs report coarse/no-hover.
   function hoverUnavailable() {
+    if (document.body.classList.contains("vw-tv")) return false;
     return (
       window.innerWidth <= 768 ||
       window.matchMedia("(hover: none), (pointer: coarse)").matches

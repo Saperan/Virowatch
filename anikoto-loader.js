@@ -161,8 +161,9 @@
 
   // ── Load a series by id, then play it ─────────────────────────────
   // statusCb(state) optional: "loading" | "soon" | "error" | "ready".
+  // startEp (0-based, optional) opens playback at that episode instead of 0.
   // Returns true if playback started. Reused by grid cards + search results.
-  async function openAnikotoById(id, statusCb) {
+  async function openAnikotoById(id, statusCb, startEp) {
     const key = `ANI_${id}`;
     const say = (s) => { if (statusCb) statusCb(s); };
 
@@ -170,21 +171,34 @@
       if (!statusCb) toast("Loading episodes…");
       say("loading");
       const data = await apiFetch(`${BASE}/series/${id}`);
-      if (!data?.ok) { say("error"); toast("Could not load episodes — check connection"); return false; }
+      if (!data?.ok) {
+        say("error");
+        toast("Could not load episodes — check connection");
+        window.dispatchEvent?.(new CustomEvent("vw-player-error"));
+        return false;
+      }
       injectEntry(id, data.data?.anime || {}, data.data?.episodes || []);
     }
 
     const vids = (window.mediaData.anime[key]?.ANI_S1?.video || []).filter(Boolean);
-    if (!vids.length) { say("soon"); toast("No episodes released yet — check back after it airs"); return false; }
+    if (!vids.length) {
+      say("soon");
+      toast("No episodes released yet — check back after it airs");
+      window.dispatchEvent?.(new CustomEvent("vw-player-error"));
+      return false;
+    }
 
     // Probe the first episode so missing files show a message, not a 404 page.
     const s2Url = vids[0].replace("/stream/s-3/", "/stream/s-2/");
     if (!(await embedExists(s2Url))) {
-      say("soon"); toast("Not on MegaPlay yet — episode should appear soon"); return false;
+      say("soon");
+      toast("Not on MegaPlay yet — episode should appear soon");
+      window.dispatchEvent?.(new CustomEvent("vw-player-error"));
+      return false;
     }
 
     say("ready");
-    window.viroPlay?.("anime", key);
+    window.viroPlay?.("anime", key, startEp);
     return true;
   }
   window.openAnikotoById = openAnikotoById;

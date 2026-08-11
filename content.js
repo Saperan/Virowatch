@@ -1640,8 +1640,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Expose for watchlist (and any external module) to load content directly
-  window.viroPlay = async function (catKey, key) {
+  // Expose for watchlist (and any external module) to load content directly.
+  // startEp (0-based) lets callers open straight at a season's episode.
+  window.viroPlay = async function (catKey, key, startEp) {
     if (
       catKey === "lunora" &&
       window.lunoraLoader &&
@@ -1657,22 +1658,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!mediaData[catKey] || !mediaData[catKey][key]) return false;
     cat = catKey;
     renderList(catKey);
-    selectMovie(key);
+    selectMovie(key, null, startEp);
     return true;
   };
 
   // Resume a title at a specific season/episode (rail Continue watching +
   // the live-sports strip use this).
   window.viroResume = async function (catKey, key, seasonKey, epIndex, dub) {
+    var startEp =
+      Number.isInteger(epIndex) && epIndex > 0 ? epIndex : undefined;
     if (
       catKey === "anime" &&
       typeof key === "string" &&
       key.indexOf("ANI_") === 0 &&
       !mediaData.anime?.[key]
     ) {
-      // Anikoto entry not injected yet — fetch it (this also starts playback)
+      // Anikoto entry not injected yet — fetch it (this also starts
+      // playback, straight at the resume episode via viroPlay).
       if (typeof window.openAnikotoById !== "function") return false;
-      const ok = await window.openAnikotoById(key.slice(4));
+      const ok = await window.openAnikotoById(key.slice(4), null, startEp);
       if (!ok) return false;
     } else if (
       typeof key === "string" &&
@@ -1680,7 +1684,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       !mediaData[catKey]?.[key]
     ) {
       if (typeof window.openVidnestById !== "function") return false;
-      const ok = await window.openVidnestById(key);
+      const ok = await window.openVidnestById(key, null, startEp);
       if (!ok) return false;
     } else {
       if (
@@ -1698,6 +1702,23 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!mediaData[catKey] || !mediaData[catKey][key]) return false;
       cat = catKey;
       renderList(catKey);
+    }
+    // The anikoto/vidnest loaders already opened the player (viroPlay) —
+    // re-selecting here would open it a second time. Only the native-data
+    // path below goes through selectMovie.
+    var loaderOpened =
+      (catKey === "anime" && typeof key === "string" && key.indexOf("ANI_") === 0) ||
+      (typeof key === "string" && /^VD[MTA]_/.test(key));
+    if (loaderOpened) {
+      if (dub) {
+        dubbed = true;
+        document.querySelector(".dubbed-toggle")?.classList.add("active");
+        updateEpisodeList();
+        updateVideo(ep);
+        updateDownloads();
+        saveState();
+      }
+      return true;
     }
     cat = catKey;
     selectMovie(key, seasonKey, epIndex);

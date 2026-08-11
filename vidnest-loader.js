@@ -322,7 +322,8 @@
   // to viroPlay (content.js). Reused by browse cards, search results,
   // watchlist, and continue-watching resume. Movies/shows only — anime
   // plays through the Anikoto flow (see the merge button below).
-  async function openVidnestById(key, statusCb) {
+  // startEp (0-based, optional) opens a show at that episode instead of 0.
+  async function openVidnestById(key, statusCb, startEp) {
     const cat = bucketFor(key);
     if (!cat) return false;
     const say = (s) => { if (statusCb) statusCb(s); };
@@ -333,10 +334,15 @@
       try {
         ok = cat === "movies" ? await injectMovie(id) : await injectShow(id);
       } catch (_) { ok = null; }
-      if (!ok) { say("error"); toast("Could not load from Vidnest — check connection"); return false; }
+      if (!ok) {
+        say("error");
+        toast("Could not load from Vidnest — check connection");
+        window.dispatchEvent?.(new CustomEvent("vw-player-error"));
+        return false;
+      }
     }
     say("ready");
-    await window.viroPlay?.(cat, key);
+    await window.viroPlay?.(cat, key, startEp);
     return true;
   }
   window.openVidnestById = openVidnestById;
