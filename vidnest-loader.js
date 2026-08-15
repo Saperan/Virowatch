@@ -1033,7 +1033,21 @@
         if (myToken !== token) return;
         vidnestPlayer.stop(); // hide the message frame, reveal the iframe
         var f = iframeEl();
-        if (f) { bypassOnce = true; f.src = originalSrc; } // deliberate: real embed
+        if (!f) return;
+        // originalSrc can be stale/missing (raced resolve) — rebuild the
+        // embed URL from the parsed route as the source of truth, so the
+        // assignment can never be empty (an empty src on file:// loads the
+        // page into itself — the "Unsafe attempt to load URL" console
+        // error and a permanently stuck spinner).
+        var url = originalSrc;
+        if (!url && current) {
+          url = current.mMovie
+            ? VIDNEST + "/movie/" + current.mMovie[2]
+            : VIDNEST + "/tv/" + current.mTv[2] + "/" + current.mTv[3] + "/" + current.mTv[4];
+        }
+        if (!url) { toast("Embed URL missing — try another episode."); return; }
+        bypassOnce = true;
+        f.src = url; // deliberate: real embed
       };
     }
 
@@ -1063,8 +1077,13 @@
             return;
           }
           srcPicker.show(false);
+          // A falsy value must never reach navigation: the browser resolves
+          // "" to the document's own URL, and on file:// that loads the page
+          // into itself ("Unsafe attempt to load URL … from frame with URL
+          // …"), stuck spinner, no load event. handleClear() covers the
+          // teardown the empty assignment was meant to trigger.
+          if (!value) { handleClear(); return; }
           desc.set.call(f, value);
-          if (!value) handleClear(); // resetView()'s vid.src = ""
         },
       });
       if (f.getAttribute("src")) {
@@ -1090,6 +1109,12 @@
       token++;
       current = null;
       srcPicker.show(false);
+      // resetView() only removeAttribute's the src, which leaves the opt-in
+      // "Try Vidnest's own player" embed (bypassOnce) navigating in the
+      // background after ← Back — ads keep firing under the page. Kill it
+      // here, where every Back/source-switch path converges.
+      const f = iframeEl();
+      if (f) f.src = "about:blank";
       if (active) { active = false; vidnestPlayer.stop(); }
     }
 

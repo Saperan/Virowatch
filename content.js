@@ -1667,6 +1667,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.viroResume = async function (catKey, key, seasonKey, epIndex, dub) {
     var startEp =
       Number.isInteger(epIndex) && epIndex > 0 ? epIndex : undefined;
+    // True only when a loader actually opened the player below (viroPlay) —
+    // an already-injected ANI_/VDT_ key must still go through selectMovie,
+    // or a second resume (e.g. Continue watching after ← Back) silently
+    // no-ops: it's in mediaData, so the loader branch is skipped, yet the
+    // key-prefix check alone would skip selectMovie too.
+    var loaderOpened = false;
     if (
       catKey === "anime" &&
       typeof key === "string" &&
@@ -1678,6 +1684,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (typeof window.openAnikotoById !== "function") return false;
       const ok = await window.openAnikotoById(key.slice(4), null, startEp);
       if (!ok) return false;
+      loaderOpened = true;
     } else if (
       typeof key === "string" &&
       /^VD[MTA]_/.test(key) &&
@@ -1686,6 +1693,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (typeof window.openVidnestById !== "function") return false;
       const ok = await window.openVidnestById(key, null, startEp, seasonKey);
       if (!ok) return false;
+      loaderOpened = true;
     } else {
       if (
         catKey === "lunora" &&
@@ -1704,11 +1712,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       renderList(catKey);
     }
     // The anikoto/vidnest loaders already opened the player (viroPlay) —
-    // re-selecting here would open it a second time. Only the native-data
-    // path below goes through selectMovie.
-    var loaderOpened =
-      (catKey === "anime" && typeof key === "string" && key.indexOf("ANI_") === 0) ||
-      (typeof key === "string" && /^VD[MTA]_/.test(key));
+    // re-selecting here would open it a second time. Only the loader paths
+    // skip selectMovie; the native/injected path falls through to it.
     if (loaderOpened) {
       if (dub) {
         dubbed = true;
