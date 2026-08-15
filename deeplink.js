@@ -47,26 +47,9 @@
         '#vwl-toast.vwl-show{opacity:1;transform:translateX(-50%) translateY(0);}';
       document.head.appendChild(base);
     }
-    if (!document.getElementById("vw-deeplink-styles")) {
-      var s = document.createElement("style");
-      s.id = "vw-deeplink-styles";
-      s.textContent =
-        // action variant: wider, clickable, room for the pop-out button
-        '#vwl-toast.vw-dl-action{pointer-events:auto;white-space:normal;display:flex;align-items:center;gap:10px;padding:8px 10px 8px 18px;}' +
-        '.vw-dl-btn{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);color:#fff;font-family:"Kanit",sans-serif;font-size:.78rem;font-weight:500;padding:6px 12px;border-radius:14px;cursor:pointer;transition:background .18s,border-color .18s;}' +
-        '.vw-dl-btn:hover{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.3);}' +
-        '.vw-dl-btn:active{transform:scale(.96);}' +
-        '.vw-dl-btn svg{width:12px;height:12px;flex-shrink:0;}';
-      document.head.appendChild(s);
-    }
   }
 
-  var POPOUT_ICON =
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-    '<rect x="3" y="3" width="18" height="14" rx="2"/><rect x="12" y="9.5" width="8" height="6" rx="1" fill="currentColor" stroke="none"/></svg>';
-
-  // opts: { action: { label, onClick }, duration }
-  function toast(msg, opts) {
+  function toast(msg) {
     ensureToastStyles();
     var t = document.getElementById("vwl-toast");
     if (!t) {
@@ -74,37 +57,12 @@
       t.id = "vwl-toast";
       document.body.appendChild(t);
     }
-    t.innerHTML = "";
-    var span = document.createElement("span");
-    span.textContent = msg;
-    t.appendChild(span);
-    var hasAction = !!(opts && opts.action);
-    if (hasAction) {
-      var btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "vw-dl-btn";
-      btn.innerHTML = POPOUT_ICON + "<span>" + opts.action.label + "</span>";
-      btn.addEventListener("click", function (e) {
-        e.stopPropagation();
-        opts.action.onClick();
-      });
-      t.appendChild(btn);
-    }
-    t.className = "vwl-show" + (hasAction ? " vw-dl-action" : "");
+    t.textContent = msg;
+    t.className = "vwl-show";
     clearTimeout(t._tid);
-    t._tid = setTimeout(
-      function () {
-        t.className = "";
-      },
-      (opts && opts.duration) || (hasAction ? 8000 : 3200),
-    );
-  }
-
-  // Actual pop-out (native video PiP / Document PiP for iframe embeds) now
-  // lives in popout-player.js, shared with the always-visible ⧉ Pop out
-  // button next to the Dubbed toggle — this just calls it.
-  function popOutPlayer() {
-    if (typeof window.viroPopOut === "function") window.viroPopOut();
+    t._tid = setTimeout(function () {
+      t.className = "";
+    }, 3200);
   }
 
   function waitFor(cond, cb, tries) {
@@ -128,13 +86,11 @@
         if (!ok) {
           toast("That title isn't available on this source.");
         } else {
-          // Small delay so the iframe/video src is actually set before the
-          // pop-out button can be clicked — viroResume() resolves as soon as
+          // Small delay so the iframe/video src is actually set before any
+          // pop-out can be triggered — viroResume() resolves as soon as
           // it *starts* loading the source, not once it's playable.
           setTimeout(function () {
-            toast(seekT > 0 ? "Jumping to the shared moment…" : "Now playing.", {
-              action: { label: "Pop out", onClick: popOutPlayer },
-            });
+            toast(seekT > 0 ? "Jumping to the shared moment…" : "Now playing.");
           }, 500);
           // clip deep link (?t=) → seek once a readable native player exists
           if (seekT > 0 && typeof window.vwSeekTo === "function") {

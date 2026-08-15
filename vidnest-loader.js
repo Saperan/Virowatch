@@ -323,7 +323,7 @@
   // watchlist, and continue-watching resume. Movies/shows only — anime
   // plays through the Anikoto flow (see the merge button below).
   // startEp (0-based, optional) opens a show at that episode instead of 0.
-  async function openVidnestById(key, statusCb, startEp) {
+  async function openVidnestById(key, statusCb, startEp, seasonKey) {
     const cat = bucketFor(key);
     if (!cat) return false;
     const say = (s) => { if (statusCb) statusCb(s); };
@@ -342,7 +342,7 @@
       }
     }
     say("ready");
-    await window.viroPlay?.(cat, key, startEp);
+    await window.viroPlay?.(cat, key, startEp, seasonKey);
     return true;
   }
   window.openVidnestById = openVidnestById;
@@ -683,7 +683,15 @@
 
     function hide() {
       const f = iframeEl();
-      if (f) f.style.display = "";
+      if (f) {
+        f.style.display = "";
+        // updateVideo's load-event (which would clear .fade-out) never fires
+        // for srcs the interceptor blanked — on episode 2+ the iframe is
+        // already about:blank, so no navigation happens and the opacity:0
+        // class sticks. Without this, the "Try Vidnest's own player" embed
+        // loads into an invisible iframe.
+        f.classList.remove("fade-out");
+      }
       const fr = frameEl();
       if (fr) fr.style.display = "none";
     }
@@ -1063,7 +1071,15 @@
         const src = f.getAttribute("src");
         const mMovie = MOVIE_RE.exec(src);
         const mTv = !mMovie && TV_RE.exec(src);
-        if (mMovie || mTv) { srcPicker.show(true); handleMatch(mMovie, mTv, src); }
+        if (mMovie || mTv) {
+          // Install raced a src that's already navigating to the ad-laden
+          // embed — blank it like handleMatch would, or the embed keeps
+          // loading in the background under the direct player (two players
+          // + popup ads).
+          desc.set.call(f, "about:blank");
+          srcPicker.show(true);
+          handleMatch(mMovie, mTv, src);
+        }
       }
       return true;
     }

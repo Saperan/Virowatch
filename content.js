@@ -1642,7 +1642,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Expose for watchlist (and any external module) to load content directly.
   // startEp (0-based) lets callers open straight at a season's episode.
-  window.viroPlay = async function (catKey, key, startEp) {
+  window.viroPlay = async function (catKey, key, startEp, seasonKey) {
     if (
       catKey === "lunora" &&
       window.lunoraLoader &&
@@ -1658,7 +1658,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!mediaData[catKey] || !mediaData[catKey][key]) return false;
     cat = catKey;
     renderList(catKey);
-    selectMovie(key, null, startEp);
+    selectMovie(key, seasonKey, startEp);
     return true;
   };
 
@@ -1684,7 +1684,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       !mediaData[catKey]?.[key]
     ) {
       if (typeof window.openVidnestById !== "function") return false;
-      const ok = await window.openVidnestById(key, null, startEp);
+      const ok = await window.openVidnestById(key, null, startEp, seasonKey);
       if (!ok) return false;
     } else {
       if (
