@@ -188,12 +188,14 @@
     const rowQuality = menuRow("Quality", "Auto");
     const rowSubtitles = menuRow("Subtitles", "Off");
     const rowSeekAmount = menuRow("Seek amount", "10s");
+    const rowSpeed = menuRow("Playback speed", "1×");
     const rowSubDownload = el("div", "vw-player-menu-row", "<span>Download subtitles</span>");
     const rowVidDownload = el("div", "vw-player-menu-row", '<span>Download video</span><span class="vw-player-menu-value"></span>');
-    menuRoot_.append(rowQuality, rowSubtitles, rowSeekAmount, rowSubDownload, rowVidDownload);
+    menuRoot_.append(rowQuality, rowSubtitles, rowSeekAmount, rowSpeed, rowSubDownload, rowVidDownload);
     const qualityValueLabel = rowQuality.querySelector(".vw-player-menu-value");
     const subValueLabel = rowSubtitles.querySelector(".vw-player-menu-value");
     const seekValueLabel = rowSeekAmount.querySelector(".vw-player-menu-value");
+    const speedValueLabel = rowSpeed.querySelector(".vw-player-menu-value");
     const downloadStatusLabel = rowVidDownload.querySelector(".vw-player-menu-value");
 
     function submenu(title) {
@@ -208,10 +210,11 @@
     const quality = submenu("Quality");
     const subtitles = submenu("Subtitles");
     const seekMenu = submenu("Seek amount");
+    const speedMenu = submenu("Playback speed");
 
     root.append(
       tapLeft, tapRight, flashLeft, flashRight, controls,
-      menuRoot_, quality.panel, subtitles.panel, seekMenu.panel,
+      menuRoot_, quality.panel, subtitles.panel, seekMenu.panel, speedMenu.panel,
     );
     // playerEl is a small wrapper the caller creates around just the video
     // (not the whole .player column, which also holds the Prev/Next bar
@@ -251,6 +254,35 @@
         });
         seekMenu.list.appendChild(row);
       });
+    }
+
+    // ── Playback speed ───────────────────────────────────────────
+    const SPEED_KEY = "vw_player_speed";
+    const DEFAULT_SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+    let speedOptions = DEFAULT_SPEEDS;
+    function speedLabel(r) { return r + "×"; }
+    function setPlaybackRate(r) {
+      video.playbackRate = r;
+      speedValueLabel.textContent = speedLabel(r);
+      localStorage.setItem(SPEED_KEY, String(r));
+    }
+    function buildSpeedMenu() {
+      speedMenu.list.innerHTML = "";
+      const current = video.playbackRate || 1;
+      speedOptions.forEach((r) => {
+        const row = el("div", "vw-player-menu-option" + (r === current ? " selected" : ""), `<span>${speedLabel(r)}</span>${CHECK_SVG}`);
+        row.addEventListener("click", (e) => {
+          e.stopPropagation();
+          setPlaybackRate(r);
+          [...speedMenu.list.children].forEach((c) => c.classList.remove("selected"));
+          row.classList.add("selected");
+          closeAllMenus();
+        });
+        speedMenu.list.appendChild(row);
+      });
+    }
+    function setPlaybackRateOptions(options) {
+      speedOptions = Array.isArray(options) && options.length ? options : DEFAULT_SPEEDS;
     }
 
     // ── Play/Pause ───────────────────────────────────────────────
@@ -514,6 +546,10 @@
     seek.addEventListener("mouseleave", () => tip.classList.remove("show"));
     // New episode/source: rebuild the preview lazily on next hover
     video.addEventListener("loadedmetadata", teardownPreview);
+    // Sources (HLS swaps, reloads) can reset playbackRate — reapply the
+    // saved preference so the chosen speed survives a source change.
+    video.addEventListener("loadedmetadata", () =>
+      setPlaybackRate(Number(localStorage.getItem(SPEED_KEY)) || 1));
 
     // ── Volume ───────────────────────────────────────────────────
     function updateVolIcon() {
@@ -574,13 +610,37 @@
 
     // ── Keyboard shortcuts ─────────────────────────────────────────
     const VOL_STEP = 0.05;
+    // Hold Space = temporary 2× (YouTube-style); a quick tap still toggles
+    // play/pause. rate is restored on release and never persisted.
+    const SPACE_HOLD_MS = 250;
+    let spaceHoldTid = null;
+    let spaceHeld = false;
+    let spacePrevRate = 1;
+    function restorePlaybackRate() {
+      video.playbackRate = spacePrevRate;
+      speedValueLabel.textContent = speedLabel(spacePrevRate);
+      buildSpeedMenu();
+    }
     function onKeydown(e) {
       if (root.offsetParent === null) return; // hidden (ancestor display:none) — not the active player
       const tag = (document.activeElement && document.activeElement.tagName) || "";
       if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
+      if (e.code === "Space" || e.key === " ") {
+        e.preventDefault();
+        if (e.repeat || spaceHoldTid || spaceHeld) return; // ignore auto-repeat / while engaged
+        spaceHoldTid = setTimeout(() => {
+          spaceHoldTid = null;
+          spaceHeld = true;
+          spacePrevRate = video.playbackRate;
+          video.playbackRate = 2;
+          speedValueLabel.textContent = speedLabel(2);
+        }, SPACE_HOLD_MS);
+        showControls();
+        return;
+      }
       let handled = true;
       switch (e.key.toLowerCase()) {
-        case " ": case "k": togglePlay(); break;
+        case "k": togglePlay(); break;
         case "f": fsBtn.click(); break;
         case "m": video.muted = !video.muted; updateVolIcon(); break;
         case "c": ccBtn.click(); break;
@@ -592,18 +652,28 @@
       }
       if (handled) { e.preventDefault(); showControls(); }
     }
+    function onKeyup(e) {
+      if (e.code !== "Space" && e.key !== " ") return;
+      e.preventDefault();
+      if (spaceHoldTid) { clearTimeout(spaceHoldTid); spaceHoldTid = null; }
+      if (spaceHeld) { spaceHeld = false; restorePlaybackRate(); }
+      else { togglePlay(); } // quick tap = play/pause
+    }
     document.addEventListener("keydown", onKeydown);
+    document.addEventListener("keyup", onKeyup);
 
     // ── ⋮ overflow menu ────────────────────────────────────────────
     function anyMenuOpen() {
       return menuRoot_.classList.contains("open") || quality.panel.classList.contains("open") ||
-        subtitles.panel.classList.contains("open") || seekMenu.panel.classList.contains("open");
+        subtitles.panel.classList.contains("open") || seekMenu.panel.classList.contains("open") ||
+        speedMenu.panel.classList.contains("open");
     }
     function closeAllMenus() {
       menuRoot_.classList.remove("open");
       quality.panel.classList.remove("open");
       subtitles.panel.classList.remove("open");
       seekMenu.panel.classList.remove("open");
+      speedMenu.panel.classList.remove("open");
     }
     moreBtn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -622,7 +692,8 @@
     rowQuality.addEventListener("click", (e) => { e.stopPropagation(); slideTo(menuRoot_, quality.panel, "enter-from-right"); });
     rowSubtitles.addEventListener("click", (e) => { e.stopPropagation(); slideTo(menuRoot_, subtitles.panel, "enter-from-right"); });
     rowSeekAmount.addEventListener("click", (e) => { e.stopPropagation(); slideTo(menuRoot_, seekMenu.panel, "enter-from-right"); });
-    [quality, subtitles, seekMenu].forEach(({ panel }) => {
+    rowSpeed.addEventListener("click", (e) => { e.stopPropagation(); slideTo(menuRoot_, speedMenu.panel, "enter-from-right"); });
+    [quality, subtitles, seekMenu, speedMenu].forEach(({ panel }) => {
       panel.querySelector(".vw-player-back-btn").addEventListener("click", (e) => {
         e.stopPropagation();
         slideTo(panel, menuRoot_, "enter-from-left");
@@ -783,6 +854,8 @@
     updateVolIcon();
     buildSeekMenu();
     setSeekStep(seekStep);
+    buildSpeedMenu();
+    setPlaybackRate(Number(localStorage.getItem(SPEED_KEY)) || 1);
 
     function destroy() {
       flushResume();
@@ -790,13 +863,14 @@
       window.removeEventListener("pagehide", flushResume);
       document.removeEventListener("visibilitychange", onHidden);
       document.removeEventListener("keydown", onKeydown);
+      document.removeEventListener("keyup", onKeyup);
       document.removeEventListener("click", onDocClick);
       document.removeEventListener("fullscreenchange", onFsChange);
       revokeTrackBlobs();
       root.remove();
     }
 
-    return { setQualityOptions, setSubtitleTracks, setSubtitleOptions, setDownloadHandler, destroy };
+    return { setQualityOptions, setSubtitleTracks, setSubtitleOptions, setDownloadHandler, setPlaybackRateOptions, destroy };
   }
 
   window.VWPlayerUI = { attach };
