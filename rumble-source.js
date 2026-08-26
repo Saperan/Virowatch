@@ -174,6 +174,62 @@
   }
 
   var lastDetail = null;
+  var crossToken = 0;
+
+  // Cross-source rows (anime ⇄ TV), added async so the picker still opens
+  // instantly on the base rows:
+  //   VDT_ (Vidnest/IMDB TV) playing  → "Anikoto/MegaPlay" row if the show is
+  //                                      an anime in the anikoto catalog.
+  //   ANI_ (Anikoto/MegaPlay) playing → "Vidnest (IMDB)" row if the anime has
+  //                                      a TMDB TV counterpart.
+  // Season-aware: DBZ is one flat anikoto entry over 9 TMDB seasons; Kuroko's
+  // Basketball is a separate anikoto entry per season. Both map correctly.
+  function enrichCrossRows(d, rows, info) {
+    var key = d.mov;
+    if (!key) return;
+    var myToken = ++crossToken;
+    var title = (info && info.title) || d.mov;
+
+    if (key.indexOf("VDT_") === 0 && typeof window.anikotoTvToAnime === "function") {
+      var seasonNum =
+        parseInt(String(d.season || "S1").replace(/[^0-9]/g, ""), 10) || 1;
+      window.anikotoTvToAnime(key.slice(4), seasonNum, (d.ep || 0) + 1, title)
+        .then(function (hit) {
+          if (!hit || myToken !== crossToken || !window.vwSrcShow) return;
+          rows.push({
+            label: "Anikoto/MegaPlay",
+            active: false,
+            onClick: function () {
+              if (window.vwVidnestStopAll) window.vwVidnestStopAll();
+              if (window.vwSuspendAutoBackup) window.vwSuspendAutoBackup();
+              if (window.vwSrcClose) window.vwSrcClose();
+              if (window.openAnikotoById)
+                window.openAnikotoById(hit.id, null, hit.epIndex);
+            },
+          });
+          window.vwSrcShow(rows, currentLabel(d));
+        });
+    } else if (
+      key.indexOf("ANI_") === 0 &&
+      typeof window.vwAnimeToTv === "function"
+    ) {
+      window.vwAnimeToTv(title, d.ep || 0).then(function (hit) {
+        if (!hit || myToken !== crossToken || !window.vwSrcShow) return;
+        rows.push({
+          label: "Vidnest (IMDB)",
+          active: false,
+          onClick: function () {
+            if (window.vwVidnestStopAll) window.vwVidnestStopAll();
+            if (window.vwSuspendAutoBackup) window.vwSuspendAutoBackup();
+            if (window.vwSrcClose) window.vwSrcClose();
+            if (window.viroResume)
+              window.viroResume("shows", hit.key, hit.seasonKey, hit.epIndex, !!d.dubbed);
+          },
+        });
+        window.vwSrcShow(rows, currentLabel(d));
+      });
+    }
+  }
 
   function evalNow() {
     var d = lastDetail;
@@ -217,6 +273,8 @@
       return;
     }
     if (window.vwSrcShow) window.vwSrcShow(rows, currentLabel(d));
+    // Async cross-source row (anime ⇄ TV) appended after the base rows show.
+    enrichCrossRows(d, rows, info);
   }
 
   function onNowPlaying(d) {

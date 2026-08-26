@@ -459,6 +459,57 @@
     return e && e.aniListId ? e.aniListId : null;
   };
 
+  // ── Cross-source: TMDB TV show ⇄ Anikoto anime ───────────────────
+  // KazoQueue / Discord deep links carry a TMDB TV id ("?play=VDT_12971" =
+  // Dragon Ball Z). TMDB lists anime as plain TV shows, and anikoto keeps
+  // them as anime — with a wrinkle: a show can be ONE anikoto entry holding
+  // every season flat (DBZ, 291 eps across 9 TMDB seasons) OR split into one
+  // anikoto entry per season ("Kuroko's Basketball 2/3"). These helpers map
+  // between the two so the ⇄ Source picker + deeplinks can switch sources.
+  function normTitle(t) {
+    return (t || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+  }
+
+  // TMDB TV (id + 1-based season/episode) → anikoto { id, epIndex } or null.
+  window.anikotoTvToAnime = async function (tmdbId, seasonNum, epNum, tmdbName) {
+    await buildCatalog();
+    const base = normTitle(tmdbName);
+    const sn = parseInt(seasonNum, 10) || 1;
+    const en = parseInt(epNum, 10) || 1;
+    if (!base || !catalog.length) return null;
+
+    const cands = catalog.filter((a) => {
+      const t = normTitle(a.title);
+      const alt = normTitle(a.alt || "");
+      return t.indexOf(base) === 0 || alt.indexOf(base) === 0;
+    });
+    if (!cands.length) return null;
+
+    // Per-season anikoto entry wins when its title carries the season number
+    // ("Kuroko's Basketball 2" → TMDB season 2) — no episode offset needed.
+    const seasonEntry = cands.find(
+      (a) => (normTitle(a.title).match(/(\d+)$/) || [])[1] === String(sn),
+    ) || cands.find(
+      (a) => (normTitle(a.alt || "").match(/(\d+)$/) || [])[1] === String(sn),
+    );
+    if (seasonEntry) return { id: seasonEntry.id, epIndex: en - 1 };
+
+    // Flat single entry (DBZ): offset by cumulative episodes of prior seasons.
+    const exact = cands.find(
+      (a) => normTitle(a.title) === base || normTitle(a.alt || "") === base,
+    );
+    const entry = exact || cands[0];
+    let before = 0;
+    if (typeof window.vwTmdbSeasons === "function") {
+      const seasons = await window.vwTmdbSeasons(tmdbId);
+      for (const s of seasons) {
+        if (s.season_number >= sn) break;
+        before += s.episode_count;
+      }
+    }
+    return { id: entry.id, epIndex: before + en - 1 };
+  };
+
   // ── Toast ─────────────────────────────────────────────────────────
   function toast(msg) {
     let t = document.getElementById("vwl-toast");

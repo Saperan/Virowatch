@@ -396,6 +396,53 @@
     return out;
   };
 
+  // ── Cross-source: TMDB seasons + Anikoto anime ⇄ TMDB TV show ─────
+  // Reverse of anikoto-loader.js's anikotoTvToAnime. When the source picker
+  // is on an Anikoto (ANI_) title, this finds the matching Vidnest/IMDB TV
+  // show (VDT_) and the season/episode the current episode falls in — TMDB
+  // splits long anime into seasons, anikoto keeps them flat (or per-season).
+  window.vwTmdbSeasons = async function (tmdbId) {
+    const d = await tmdbJson(`/tv/${tmdbId}`, {});
+    return ((d && d.seasons) || [])
+      .filter((s) => s.season_number > 0 && s.episode_count > 0)
+      .sort((a, b) => a.season_number - b.season_number);
+  };
+
+  // Anikoto title + 0-based flat episode → { key:"VDT_<id>", seasonKey, epIndex }
+  // or null. A trailing number in the title ("Kuroko's Basketball 2") is that
+  // TMDB season; otherwise the episode walks across the show's seasons.
+  window.vwAnimeToTv = async function (title, epIndex) {
+    const normT = (t) => (t || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+    const res = await vidnestSearch(title);
+    const tv = (res || [])
+      .filter((r) => r.key && r.key.indexOf("VDT_") === 0)
+      .sort((a, b) => b.score - a.score);
+    if (!tv.length) return null;
+    const best = tv[0];
+    const tmdbId = best.key.slice(4);
+    const seasons = await window.vwTmdbSeasons(tmdbId);
+    if (!seasons.length) return null;
+
+    const m = normT(title).match(/(\d+)$/);
+    if (m) {
+      const sn = parseInt(m[1], 10);
+      const s = seasons.find((x) => x.season_number === sn);
+      if (s)
+        return {
+          key: best.key,
+          seasonKey: "S" + sn,
+          epIndex: Math.min(Math.max(0, epIndex || 0), s.episode_count - 1),
+        };
+    }
+    let ep = Math.max(0, epIndex || 0);
+    for (const s of seasons) {
+      if (ep < s.episode_count)
+        return { key: best.key, seasonKey: "S" + s.season_number, epIndex: ep };
+      ep -= s.episode_count;
+    }
+    return null;
+  };
+
   // ── Browse sections (Movies/lunora tab + TV Shows tab) ────────────
   // Same skeleton/pager pattern as anikoto-loader.js's anime section.
   const sections = {};

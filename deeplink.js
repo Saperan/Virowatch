@@ -104,6 +104,41 @@
       });
   }
 
+  // KazoQueue/TMDB deep links point at the Vidnest/IMDB TV version of an
+  // anime ("?play=VDT_12971&sk=S1" = Dragon Ball Z), which gets hidden from
+  // search because its Vidnest stream isn't guaranteed to work. When the
+  // title is also in the anikoto catalog, prefer that (MegaPlay) version and
+  // let the ⇄ Source picker switch back to Vidnest/IMDB — otherwise the link
+  // "works" but loads a broken player.
+  function resumeTvPrefersAnime(play, seasonKey, epIdx) {
+    var tmdbId = play.slice(4);
+    var seasonNum = parseInt(String(seasonKey || "S1").replace(/[^0-9]/g, ""), 10) || 1;
+    var tryAnime = function () {
+      if (typeof window.vidnestTmdb !== "function" ||
+          typeof window.anikotoTvToAnime !== "function") {
+        return Promise.resolve(null);
+      }
+      return window.vidnestTmdb("/tv/" + tmdbId, {})
+        .then(function (d) {
+          if (!d || !d.name) return null;
+          return window.anikotoTvToAnime(tmdbId, seasonNum, epIdx + 1, d.name);
+        })
+        .catch(function () { return null; });
+    };
+    return tryAnime().then(function (hit) {
+      if (hit) {
+        return resume("anime", "ANI_" + hit.id, "ANI_S1", hit.epIndex).then(
+          function (ok) {
+            // Anime source failed to open (no episodes yet / MegaPlay down) —
+            // fall back to the Vidnest/IMDB version so the link still plays.
+            return ok || resume("shows", play, seasonKey || "S1", epIdx);
+          },
+        );
+      }
+      return resume("shows", play, seasonKey || "S1", epIdx);
+    });
+  }
+
   waitFor(
     function () {
       return typeof window.viroResume === "function";
@@ -111,7 +146,7 @@
     function () {
       if (play) {
         if (play.indexOf("VDM_") === 0) return resume("movies", play);
-        if (play.indexOf("VDT_") === 0) return resume("shows", play, sk || "S1", epIdx);
+        if (play.indexOf("VDT_") === 0) return resumeTvPrefersAnime(play, sk || "S1", epIdx);
         if (play.indexOf("ANI_") === 0) return resume("anime", play, "ANI_S1", epIdx);
         return;
       }
