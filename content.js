@@ -353,15 +353,41 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (clContainer) clContainer.style.marginTop = "20px";
   }
 
+  // Last-watched spot for a title, from the continue-watching store that
+  // saveState keeps fresh. Live IPTV channels are skipped — their playlist
+  // indexes shift between sessions.
+  function savedSpot(key) {
+    if (localStorage.getItem("vw_auto_resume") === "0") return null;
+    try {
+      return (
+        JSON.parse(localStorage.getItem(CW_KEY) || "[]").find(
+          (i) => i.cat === cat && i.mov === key && !i.live,
+        ) || null
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
   // Select movie (Load Player) — optionally start at a season/episode
   function selectMovie(key, startSeason, startEp) {
     mov = key;
+    // Auto-resume: opening a title with no explicit target (search results,
+    // grids, hero, watchlist) jumps straight back to your last episode.
+    // Explicit resumes (rail/history/deeplink) pass season/ep and skip this.
+    const spot = startEp == null && !startSeason ? savedSpot(key) : null;
+    if (spot) {
+      if (!startSeason) startSeason = spot.season;
+      if (!Number.isInteger(startEp)) startEp = spot.ep;
+    }
     ep = 0;
     season =
       startSeason && mediaData[cat]?.[key]?.[startSeason] ? startSeason : null;
-    dubbed = false;
+    dubbed = !!(spot && spot.dubbed);
     saveState();
-    document.querySelector(".dubbed-toggle")?.classList.remove("active");
+    document
+      .querySelector(".dubbed-toggle")
+      ?.classList.toggle("active", dubbed);
     // Update now-playing title
     const npt = document.getElementById("nowPlayingTitle");
     if (npt) npt.textContent = mediaData[cat]?.[key]?.title || key;

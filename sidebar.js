@@ -99,6 +99,18 @@
       window.dispatchEvent(new CustomEvent('vw-ep-grid-updated'));
     });
   }
+  /* ── Auto-resume last episode (content.js selectMovie reads this) ── */
+  var autoRes = document.getElementById('autoResumeToggle');
+  if (autoRes) {
+    try {
+      autoRes.checked = localStorage.getItem('vw_auto_resume') !== '0';
+    } catch (_) {}
+    autoRes.addEventListener('change', function () {
+      try {
+        localStorage.setItem('vw_auto_resume', autoRes.checked ? '1' : '0');
+      } catch (_) {}
+    });
+  }
   /* ── TV mode toggle (tv-nav.js vwTvSet owns state + persistence) ── */
   var tvToggle = document.getElementById('tvModeToggle');
   if (tvToggle) {
