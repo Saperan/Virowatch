@@ -21,7 +21,7 @@
   "use strict";
 
   const KEY = "vw_anime_api";
-  const VALID = ["anikoto", "cloudflare", "vidnest", "vidwish"];
+  const VALID = ["anikoto", "cloudflare", "vidnest", "vidwish", "vidcore"];
 
   function get() {
     const v = localStorage.getItem(KEY);
@@ -69,6 +69,7 @@
     cloudflare: "Cloudflare",
     vidnest: "Vidnest",
     vidwish: "Vidwish",
+    vidcore: "VidCore",
   };
 
   function srcCSS() {
@@ -245,6 +246,11 @@
       api: "vidwish",
       name: "Vidwish",
       desc: "Same shows as Anikoto on different servers. Last resort if the rest fail.",
+    },
+    {
+      api: "vidcore",
+      name: "VidCore",
+      desc: "14+ servers, ad-free, built-in subtitles. Uses its own player.",
     },
   ];
 

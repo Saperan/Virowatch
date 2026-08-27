@@ -71,6 +71,7 @@
       if (s && MEGA_RE.test(s)) onEmbedSrc(s);
     }
   });
+
   // vidwish mirror failover. megaplayBlocked = the Megaplay CDN is unreachable
   // from this connection (the "Error Code: 232011" IP/region block). Sticky for
   // the session so we don't re-probe every episode. Set either by the one-time

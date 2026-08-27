@@ -199,24 +199,22 @@
   // source at all. Either way the player shows a message instead of spinning
   // or loading Vidnest's ad page.
   async function resolveSource(tail, force) {
-    if (force === "prime" || !force) {
+    if (force === "prime") {
       const holly = await resolveHollyFallback(tail);
       if (holly && holly.length) return { kind: "direct", sources: holly, source: "prime" };
-      if (force) return { kind: "unavailable", reason: "missing" };
     }
     const wk = await resolveViaWorker(tail, force);
     if (wk) return wk;
-    if (force) return { kind: "unavailable", reason: "missing" };
 
     const data = await vidnestApiFetch(`/moviebox/${tail}`);
     const list = data && Array.isArray(data.url) ? data.url : null;
     if (list && list.length) {
       const good = bestFirst(list).filter((x) => !isDeadHost(x.link));
       if (good.length) return { kind: "direct", sources: good, source: "moviebox" };
-      return { kind: "unavailable", reason: "broken" }; // had links, all dead CDN
     }
     return { kind: "unavailable", reason: "missing" };
   }
+
   async function resolveVidnestMovie(tmdbId, force) { return resolveSource(`movie/${tmdbId}`, force); }
   async function resolveVidnestTv(tmdbId, season, episode, force) {
     return resolveSource(`tv/${tmdbId}/${season}/${episode}`, force);
@@ -234,17 +232,14 @@
   // the subtitle listing so we get CORS on every status code.
   const SUB_WORKER = "https://anikoto-request.vmtgaming13.workers.dev";
 
-  // Movies/shows subtitles come from a separate, unencrypted endpoint. It
-  // sends `Access-Control-Allow-Origin: *` on a hit, but NOT on its 404
-  // "no subtitles found" response — so a direct fetch throws a noisy
-  // CORS/ERR_FAILED whenever an episode has no subs. Route through the Worker
-  // first (it adds CORS on every status); fall back to a direct fetch only if
-  // the Worker is unreachable. The .vtt files themselves (cache.vdrk.site)
-  // are already CORS-open, so those load into <track> untouched.
+  // Movies/shows subtitles come from two sources merged together:
+  //   1. sub.vdrk.site — Vidnest's subtitle listing (existing)
+  //   2. SubSource — larger catalog, multi-language (via Worker /subsource)
+  // Route vdrk through the Worker first (it adds CORS on every status);
+  // fall back to a direct fetch only if the Worker is unreachable.
   async function resolveVidnestSubtitles(tmdbId, season, episode) {
-    const path = season != null && episode != null
-      ? `/v2/tv/${tmdbId}/${season}/${episode}`
-      : `/v2/movie/${tmdbId}`;
+    const isTv = season != null && episode != null;
+    const path = isTv ? `/v2/tv/${tmdbId}/${season}/${episode}` : `/v2/movie/${tmdbId}`;
     const target = `https://sub.vdrk.site${path}`;
     const parse = (data) =>
       Array.isArray(data)
@@ -253,19 +248,49 @@
             .map((t) => ({ label: t.label || "Subtitle", file: t.file }))
         : [];
 
-    try {
-      const r = await fetch(`${SUB_WORKER}/api?u=${encodeURIComponent(target)}`);
-      if (r.status === 404) return [];      // clean "no subtitles" — done
-      if (r.ok) return parse(await r.json());
-      // Any other status (e.g. Worker not yet redeployed → 403 host not
-      // allowed) falls through to the direct attempt below.
-    } catch (_) { /* Worker unreachable — try direct */ }
+    // Fetch from both sources in parallel
+    const vdrkPromise = (async () => {
+      try {
+        const r = await fetch(`${SUB_WORKER}/api?u=${encodeURIComponent(target)}`);
+        if (r.status === 404) return [];
+        if (r.ok) return parse(await r.json());
+      } catch (_) {}
+      try {
+        const r = await fetch(target);
+        if (!r.ok) return [];
+        return parse(await r.json());
+      } catch (_) { return []; }
+    })();
 
-    try {
-      const r = await fetch(target);
-      if (!r.ok) return [];
-      return parse(await r.json());
-    } catch (_) { return []; }
+    const ssPromise = (async () => {
+      try {
+        // Need IMDB ID + title for SubSource — fetch from TMDB
+        const tmdbPath = isTv ? `/tv/${tmdbId}` : `/movie/${tmdbId}`;
+        const meta = await tmdbJson(tmdbPath, {});
+        if (!meta) return [];
+        const imdbId = meta.imdb_id || "";
+        const title = meta.title || meta.name || "";
+        const year = (meta.release_date || meta.first_air_date || "").slice(0, 4);
+        if (!imdbId && !title) return [];
+
+        const params = new URLSearchParams({ title, year, type: isTv ? "tv" : "movie" });
+        if (imdbId) params.set("imdbId", imdbId);
+        if (isTv) { params.set("s", season); params.set("e", episode); }
+
+        const r = await fetch(`${ANIKOTO_WORKER}/subsource?${params}`);
+        if (!r.ok) return [];
+        const d = await r.json();
+        return (d.subtitles || [])
+          .filter((t) => t && t.file)
+          .map((t) => ({ label: t.label || "Subtitle", file: t.file }));
+      } catch (_) { return []; }
+    })();
+
+    const [vdrk, ss] = await Promise.all([vdrkPromise, ssPromise]);
+    // vdrk first (proven reliable), then SubSource extras — dedupe by label
+    const seen = new Set(vdrk.map((t) => t.label));
+    const extra = ss.filter((t) => !seen.has(t.label));
+    return [...vdrk, ...extra];
   }
 
   // ── Bucket + embed URL helpers ────────────────────────────────────
@@ -916,7 +941,7 @@
       throw new Error("nothing playing");
     }
 
-    return { playDirect, playHls, setDirectTracks, showMessage, stop };
+    return { playDirect, playHls, setDirectTracks, showMessage, stop, ensureVideo };
   })();
 
   // ── Movies/shows: automatic direct-play. Vidnest's page must NEVER
@@ -953,16 +978,32 @@
       current = { mMovie, mTv, originalSrc };
       const force = (opts && opts.force) || null;
       const resumeAt = (opts && opts.resumeAt) || 0;
+      // Always clean up VidCore when switching sources
+      removeVidCoreFrame();
+      // VidCore — load its own iframe, skip all resolution
+      if (force === "vidcore") {
+        srcPicker.mark("vidcore");
+        if (resumeAt) seekWhenReady(resumeAt);
+        // Ensure frame exists, then clean up video state
+        vidnestPlayer.ensureVideo?.();
+        vidnestPlayer.stop();
+        // Re-show frame (stop/hide hid it) and add class to hide custom UI
+        const fr = document.getElementById("vidnestFrame");
+        if (fr) {
+          fr.style.display = "flex";
+          fr.classList.add("vidcore-active");
+        }
+        loadVidCoreFrame(mMovie, mTv);
+        return;
+      }
       let result = null;
       try {
         result = mMovie
           ? await resolveVidnestMovie(mMovie[2], force)
           : await resolveVidnestTv(mTv[2], mTv[3], mTv[4], force);
       } catch (_) { result = null; }
-      if (myToken !== token) return; // a newer episode/title loaded (or the user left) meanwhile
+      if (myToken !== token) return;
 
-      // No playable source — don't spin or quietly load Vidnest's ad page;
-      // show a message (with an opt-in escape hatch to the real embed).
       if (!result || result.kind === "unavailable") {
         active = false;
         showUnavailable(result && result.reason, originalSrc, myToken, !!force);
@@ -973,9 +1014,18 @@
       if (resumeAt) seekWhenReady(resumeAt);
 
       // videasy (direct) or a Worker-proxied backend → hls.js. These carry
-      // their own subtitle list, so skip the sub.vdrk.site side-channel.
+      // their own subtitle list, but we also merge SubSource subs.
       if (result.kind === "hls") {
         vidnestPlayer.playHls(result.file, result.tracks || []);
+        // Merge SubSource + vdrk.site subs on top of backend tracks
+        const subArgs = mMovie ? [mMovie[2]] : [mTv[2], mTv[3], mTv[4]];
+        resolveVidnestSubtitles(...subArgs).then((extra) => {
+          if (myToken !== token || !extra.length) return;
+          // Add extra subs that aren't already in the backend tracks
+          const existing = new Set((result.tracks || []).map((t) => t.label));
+          const merged = [...(result.tracks || []), ...extra.filter((t) => !existing.has(t.label))];
+          vidnestPlayer.setSubtitleTracks(merged);
+        });
         return;
       }
 
@@ -997,110 +1047,173 @@
       }, { once: true });
     }
 
-    // ── "⇄ Source" picker (movies/TV) ──────────────────────────────
-    // Backends differ in language, quality and which titles they carry, so
-    // the auto pick isn't always the one you want. Mirrors the anime source
-    // picker in anime-api.js, but as a plain <select> — the movie/TV list is
-    // fixed and short.
+    // ── "⇄ Source" picker (movies/TV) — button + popup style ────
     const srcPicker = (function () {
-      // Listed in the order the auto chain tries them. moviebox can win on
-      // Auto but isn't offerable — it's the dead-CDN last resort.
-      const NAMES = {
-        prime: "Prime",
-        beta: "Beta",
-        catflix: "Catflix",
-        xps: "2Embed",
-        lamda: "Lamda",
-        moviebox: "MovieBox",
-      };
-      let sel = null;
+      const SOURCES = [
+        { id: "prime", label: "Prime", desc: "Hollymoviehd — direct H.264 mp4." },
+        { id: "beta", label: "Beta", desc: "Vidnest vidxyz — proxied HLS." },
+        { id: "catflix", label: "Catflix", desc: "Videasy — proxied HLS." },
+        { id: "xps", label: "2Embed", desc: "Multiple servers via xpass." },
+        { id: "mega", label: "MegaEmbed", desc: "Inline stream URLs, no proxy needed." },
+        { id: "lamda", label: "Lamda", desc: "Allmovies — may be dead." },
+        { id: "vidcore", label: "VidCore", desc: "14+ servers, own player." },
+      ];
+      let btn = null, popup = null, activeVal = "", failedSet = new Set();
+
       function ensure() {
-        if (sel) return sel;
+        if (btn) return;
         const controls = document.querySelector(".player-controls");
-        if (!controls) return null;
-        sel = document.createElement("select");
-        sel.id = "vwVdSrc";
-        // .button is themed by every stylesheet, so borrowing it keeps this
-        // in step with the other player-controls buttons for free. The two
-        // overrides just undo #seasonSelector's full-width block layout.
-        sel.className = "button";
-        sel.title = "Video source — switch if this one stutters or is the wrong language";
-        sel.style.cssText = "display:none;width:auto;margin:0;font-size:.9rem;padding:9px 12px;";
-        [["", "⇄ Source: Auto"]].concat(
-          Object.keys(NAMES).filter((k) => k !== "moviebox").map((k) => [k, "⇄ Source: " + NAMES[k]]),
-        ).forEach(([v, label]) => {
-          const o = document.createElement("option");
-          o.value = v;
-          o.textContent = label;
-          sel.appendChild(o);
-        });
-        sel.addEventListener("change", () => {
-          if (!current) return;
-          const v = document.getElementById("vidnestDirectPlayer");
-          handleMatch(current.mMovie, current.mTv, current.originalSrc, {
-            force: sel.value || null,
-            resumeAt: v && isFinite(v.currentTime) ? v.currentTime : 0,
-          });
+        if (!controls) return;
+        btn = document.createElement("a");
+        btn.id = "vwVdSrc";
+        btn.href = "#";
+        btn.className = "button";
+        btn.title = "Video source";
+        btn.style.cssText = "display:none;width:auto;margin:0;";
+        btn.textContent = "⇄ Source";
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          if (popup && popup.classList.contains("vw-src-open")) { closePopup(); return; }
+          buildPopup();
+          openPopup();
         });
         const nextBtn = document.getElementById("nextEpisode");
-        controls.insertBefore(sel, nextBtn ? nextBtn.nextSibling : null);
-        return sel;
+        controls.insertBefore(btn, nextBtn ? nextBtn.nextSibling : null);
+
+        // Close on outside click
+        document.addEventListener("click", (e) => {
+          if (popup && !popup.contains(e.target) && e.target !== btn) closePopup();
+        });
       }
+
+      function buildPopup() {
+        if (popup) popup.remove();
+        popup = document.createElement("div");
+        popup.id = "vwVdSrcPop";
+        popup.style.cssText = "position:fixed;z-index:10050;display:none;min-width:200px;padding:6px;" +
+          "background:var(--vw-panel,#14141c);border:1px solid var(--vw-border-strong,#2b2b3a);" +
+          "border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.55);";
+        SOURCES.forEach((s) => {
+          const row = document.createElement("div");
+          row.style.cssText = "display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;" +
+            "cursor:pointer;font-size:13px;white-space:nowrap;user-select:none;" +
+            "color:" + (failedSet.has(s.id) ? "#555" : "var(--vw-text,#cfcfe0)") + ";" +
+            (failedSet.has(s.id) ? "font-style:italic;" : "");
+          if (s.id === activeVal) row.style.color = "var(--vw-text-strong,#fff)";
+          row.style.fontWeight = s.id === activeVal ? "600" : "400";
+
+          const dot = document.createElement("span");
+          dot.style.cssText = "width:8px;height:8px;border-radius:50%;flex:0 0 auto;" +
+            "border:1px solid " + (s.id === activeVal ? "var(--vw-accent-bg,#e5e7eb)" : "var(--vw-border,#5a5a70)") + ";" +
+            (s.id === activeVal ? "background:var(--vw-accent-bg,#e5e7eb);" : "");
+
+          const text = document.createElement("span");
+          text.textContent = s.label + (failedSet.has(s.id) ? " ✗" : s.id === activeVal && activeVal ? " ✓" : "");
+
+          row.appendChild(dot);
+          row.appendChild(text);
+          row.addEventListener("mouseenter", () => { if (!failedSet.has(s.id)) row.style.background = "var(--vw-hover-strong,rgba(255,255,255,.1))"; });
+          row.addEventListener("mouseleave", () => { row.style.background = ""; });
+          row.addEventListener("click", () => {
+            if (failedSet.has(s.id)) return;
+            closePopup();
+            activeVal = s.id;
+            btn.textContent = "⇄ Source: " + s.label;
+            if (current) {
+              const v = document.getElementById("vidnestDirectPlayer");
+              handleMatch(current.mMovie, current.mTv, current.originalSrc, {
+                force: s.id || null,
+                resumeAt: v && isFinite(v.currentTime) ? v.currentTime : 0,
+              });
+            }
+          });
+          popup.appendChild(row);
+        });
+        document.body.appendChild(popup);
+      }
+
+      function openPopup() {
+        if (!popup || !btn) return;
+        const r = btn.getBoundingClientRect();
+        popup.style.left = r.left + "px";
+        popup.style.bottom = (window.innerHeight - r.top + 6) + "px";
+        popup.style.top = "auto";
+        popup.style.display = "block";
+        popup.classList.add("vw-src-open");
+      }
+
+      function closePopup() {
+        if (popup) { popup.classList.remove("vw-src-open"); popup.style.display = "none"; }
+      }
+
       return {
-        show(on) { const s = ensure(); if (s) s.style.display = on ? "inline-block" : "none"; },
-        // On Auto, name the backend that actually won, so a stuttering
-        // source can be identified and swapped.
+        show(on) { ensure(); if (btn) btn.style.display = on ? "inline-block" : "none"; },
         mark(source) {
-          const s = ensure();
-          if (!s || s.value) return;
-          s.options[0].textContent = "⇄ Source: Auto" + (NAMES[source] ? ` (${NAMES[source]})` : "");
+          ensure();
+          if (!btn) return;
+          const s = SOURCES.find((s) => s.id === source);
+          if (s) btn.textContent = "⇄ Source: " + s.label;
         },
-        reset() { const s = ensure(); if (s) { s.value = ""; s.options[0].textContent = "⇄ Source: Auto"; } },
+        reset() { activeVal = ""; failedSet.clear(); if (btn) btn.textContent = "⇄ Source"; },
+        fail(source) { failedSet.add(source); },
+        clearFails() { failedSet.clear(); },
       };
     })();
 
-    // Message shown when nothing plays, with a button to load Vidnest's own
-    // (ad-laden) player as a manual last resort.
+    // ── VidCore iframe loader ─────────────────────────────────────
+    const VIDCORE = "https://vidcore.org";
+    let vidcoreFrame = null;
+
+    function removeVidCoreFrame() {
+      if (vidcoreFrame) { vidcoreFrame.remove(); vidcoreFrame = null; }
+      const fr = document.getElementById("vidnestFrame");
+      if (fr) fr.style.display = "";
+      const old = iframeEl();
+      if (old) old.style.display = "";
+    }
+
+    function loadVidCoreFrame(mMovie, mTv) {
+      const tmdbId = mMovie ? mMovie[2] : mTv ? mTv[2] : null;
+      if (!tmdbId) return;
+      removeVidCoreFrame();
+      const url = mTv
+        ? `${VIDCORE}/embed/tv/${tmdbId}/${mTv[3]}/${mTv[4]}`
+        : `${VIDCORE}/embed/movie/${tmdbId}`;
+      // Hide both the vidnestFrame and the old iframe
+      const fr = document.getElementById("vidnestFrame");
+      if (fr) fr.style.display = "none";
+      const old = iframeEl();
+      if (old) old.style.display = "none";
+      // Insert VidCore iframe in the same parent
+      const parent = (fr || old) && (fr || old).parentNode;
+      if (!parent) return;
+      vidcoreFrame = document.createElement("iframe");
+      vidcoreFrame.id = "vidcoreFrame";
+      vidcoreFrame.style.cssText = "flex:1;width:100%;border:0;";
+      vidcoreFrame.allow = "autoplay; fullscreen; encrypted-media; picture-in-picture";
+      vidcoreFrame.allowFullscreen = true;
+      vidcoreFrame.src = url;
+      parent.insertBefore(vidcoreFrame, fr || old);
+    }
+
+    // ── Message shown when nothing plays ────────────────────────
     function showUnavailable(reason, originalSrc, myToken, forced) {
       var broken = reason === "broken";
       var msg = forced
-        ? "That source doesn’t have this title. Pick another one (or Auto) from the ⇄ Source list under the player."
+        ? "That source doesn't have this title. Pick another one (or Auto) from the ⇄ Source list under the player."
         : broken
-        ? "This title is only on MovieBox, whose video CDN now blocks this player (they changed it on their end). It can’t be played here right now."
-        : "This title isn’t available from any working Vidnest source right now.";
+        ? "This title is only on MovieBox, whose video CDN now blocks this player (they changed it on their end). It can't be played here right now."
+        : "This title isn't available from any working source right now. Try a different source from the ⇄ Source list.";
       var html =
         '<div style="font-size:2.4rem;line-height:1;">🎬🚫</div>' +
-        '<div style="max-width:460px;">' + msg + "</div>" +
-        '<button data-embed style="padding:8px 16px;border-radius:10px;font:inherit;cursor:pointer;' +
-        'border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;">' +
-        "Try Vidnest’s own player (ads) →</button>";
+        '<div style="max-width:460px;">' + msg + "</div>";
       vidnestPlayer.showMessage(html);
-      var btn = document.querySelector("#vidnestMsg [data-embed]");
-      if (btn) btn.onclick = function () {
-        if (myToken !== token) return;
-        vidnestPlayer.stop(); // hide the message frame, reveal the iframe
-        var f = iframeEl();
-        if (!f) return;
-        // originalSrc can be stale/missing (raced resolve) — rebuild the
-        // embed URL from the parsed route as the source of truth, so the
-        // assignment can never be empty (an empty src on file:// loads the
-        // page into itself — the "Unsafe attempt to load URL" console
-        // error and a permanently stuck spinner).
-        var url = originalSrc;
-        if (!url && current) {
-          url = current.mMovie
-            ? VIDNEST + "/movie/" + current.mMovie[2]
-            : VIDNEST + "/tv/" + current.mTv[2] + "/" + current.mTv[3] + "/" + current.mTv[4];
-        }
-        if (!url) { toast("Embed URL missing — try another episode."); return; }
-        bypassOnce = true;
-        f.src = url; // deliberate: real embed
-      };
     }
 
     function handleClear() {
       token++;
       srcPicker.show(false);
+      removeVidCoreFrame();
       if (active) { active = false; vidnestPlayer.stop(); }
     }
 
@@ -1389,12 +1502,6 @@
       movieSection();
       showSection();
       vidnestShield();
-      // vidnestAutoPlay()'s own stopAll only knows about the movies/shows
-      // auto-play flow (its "active" flag) — it stayed false whenever the
-      // anime-merge button (a separate flag, vidnestAnimeActive) was what
-      // actually started playback, so content.js's resetView() calling this
-      // on Back didn't stop it: the anime video kept playing hidden.
-      // vidnestPlayer.stop() is safe to call even when nothing is active.
       const rawStopAll = vidnestAutoPlay().stopAll;
       window.vwVidnestStopAll = function () {
         rawStopAll();
