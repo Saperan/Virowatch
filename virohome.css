@@ -872,8 +872,8 @@ html[data-vw-theme*="light"] .hero-art::before {
 }
 
 /* ── Home sections ───────────────────────────────────── */
-.home-toggle{display:flex;gap:28px;padding:0 32px;margin:14px 0 0;border-bottom:1px solid rgba(255,255,255,.08);align-items:center;}
-.home-tab{position:relative;padding:10px 0 12px;background:none;border:none;border-bottom:2px solid transparent;color:rgba(255,255,255,.38);font-family:"Kanit",sans-serif;font-size:.92rem;font-weight:500;cursor:pointer;transition:color .2s,border-color .2s;white-space:nowrap;display:flex;align-items:center;gap:4px;}
+.home-toggle{display:flex;gap:32px;padding:0 32px;margin:14px 0 0;border-bottom:1px solid rgba(255,255,255,.08);align-items:center;}
+.home-tab{position:relative;padding:8px 0 6px;background:none;border:none;border-bottom:2px solid transparent;color:rgba(255,255,255,.38);font-family:"Kanit",sans-serif;font-size:1.04rem;font-weight:600;cursor:pointer;transition:color .2s,border-color .2s;white-space:nowrap;display:flex;align-items:center;gap:6px;}
 .home-tab.active{color:#fff;border-bottom-color:#fff;}
 .home-tab.active #recRefreshToggle{color:#fff !important;opacity:1 !important;border-color:rgba(255,255,255,.22) !important;background:rgba(255,255,255,.10) !important;}
 .home-tab:not(.active):hover{color:rgba(255,255,255,.65);}

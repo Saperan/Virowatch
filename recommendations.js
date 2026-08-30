@@ -190,36 +190,34 @@
   }
 
   async function fetchAnimeByTag(tag, page) {
-    // AniList genres are Title Case — profile tags are lowercased, capitalize for query
     var gTag = tag ? tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase() : tag;
-    // handle sci-fi special case
     if (gTag && gTag.toLowerCase() === "sci-fi") gTag = "Sci-Fi";
-    var query = "query($p:Int,$g:String){Page(page:$p,perPage:12){media(type:ANIME,sort:POPULARITY_DESC,genre:$g){id title{romaji english} coverImage{large} bannerImage}}}";
-    try {
-      var j = await fetch("https://graphql.anilist.co", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ query: query, variables: { p: page || 1, g: gTag } }),
-      }).then(function(r){return r.json();});
-      if (j.errors) throw new Error(j.errors[0].message);
-      var media = j && j.data && j.data.Page && j.data.Page.media;
-      if (media && media.length) return media.map(function(m){
-        return { id: m.id, title: (m.title && (m.title.english || m.title.romaji)) || "", image: (m.coverImage && m.coverImage.large) || m.bannerImage || "", banner: m.bannerImage || "", ani_id: m.id };
-      });
-    } catch (_) {}
-    // fallback without genre if tag invalid
-    try {
-      var q2 = "query($p:Int){Page(page:$p,perPage:12){media(type:ANIME,sort:POPULARITY_DESC){id title{romaji english} coverImage{large} bannerImage}}}";
-      var j2 = await fetch("https://graphql.anilist.co", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ query: q2, variables: { p: page || 1 } }),
-      }).then(function(r){return r.json();});
-      var media2 = j2 && j2.data && j2.data.Page && j2.data.Page.media;
-      if (media2 && media2.length) return media2.map(function(m){
-        return { id: m.id, title: (m.title && (m.title.english || m.title.romaji)) || "", image: (m.coverImage && m.coverImage.large) || m.bannerImage || "", banner: m.bannerImage || "", ani_id: m.id };
-      });
-    } catch (_) {}
+    if (gTag && gTag.toLowerCase() === "science fiction") gTag = "Sci-Fi";
+    // try with genre first, then without
+    var queries = [
+      "query($p:Int,$g:String){Page(page:$p,perPage:12){media(type:ANIME,sort:POPULARITY_DESC,genre:$g){id title{romaji english} coverImage{large} bannerImage}}}",
+      "query($p:Int){Page(page:$p,perPage:12){media(type:ANIME,sort:POPULARITY_DESC){id title{romaji english} coverImage{large} bannerImage}}}"
+    ];
+    for (var qi=0; qi<queries.length; qi++) {
+      try {
+        var q = queries[qi];
+        var vars = qi===0 ? { p: page || 1, g: gTag } : { p: page || 1 };
+        // skip first query if tag is generic like action/adventure that may be too broad and cause 400 for some tags
+        var j = await fetch("https://graphql.anilist.co", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({ query: q, variables: vars }),
+        }).then(function(r){ if (!r.ok) throw new Error("http "+r.status); return r.json();});
+        if (j.errors) throw new Error(j.errors[0].message);
+        var media = j && j.data && j.data.Page && j.data.Page.media;
+        if (media && media.length) return media.map(function(m){
+          return { id: m.id, title: (m.title && (m.title.english || m.title.romaji)) || "", image: (m.coverImage && m.coverImage.large) || m.bannerImage || "", banner: m.bannerImage || "", ani_id: m.id };
+        });
+      } catch (e) {
+        // 400 on genre → try next query
+        if (qi===0) continue;
+      }
+    }
     return [];
   }
 
@@ -257,6 +255,18 @@
     img.src = item.image || "https://via.placeholder.com/150";
     img.loading = "lazy";
     img.alt = "";
+    img.onerror = function(){
+      // Brave image proxy 502 — fallback to direct Anilist or placeholder
+      var src = this.src || "";
+      if (src.indexOf("imgs.search.brave.com") !== -1 || src.indexOf("brave.com") !== -1) {
+        // try direct Anilist URL if available, else placeholder
+        var direct = item.image && item.image.indexOf("anilist.co") !== -1 ? item.image : "";
+        if (direct && direct !== src) { this.src = direct; return; }
+      }
+      if (this.src.indexOf("via.placeholder.com") === -1) {
+        this.src = "https://via.placeholder.com/150?text=No+Image";
+      }
+    };
     var badge = document.createElement("span");
     badge.className = "badge";
     badge.textContent = item.catKey === "movies" ? "MOVIE" : item.catKey === "shows" ? "TV" : "ANIME";
@@ -268,7 +278,28 @@
     div.appendChild(title);
     if (window.vwlAttachButton) window.vwlAttachButton(div);
     div.addEventListener("click", function(){
-      if (item.ani_id && window.openAnikotoById) window.openAnikotoById(item.ani_id);
+      if (item.ani_id && window.openAnikotoById) {
+        // item.ani_id is the AniList id — openAnikotoById wants the ANIKOTO id.
+        var openAnime = function(anikotoId){
+          if (anikotoId) window.openAnikotoById(anikotoId).catch(function(){});
+        };
+        var resolve = function(){
+          var c = (window.anikotoFindByAniList && window.anikotoFindByAniList(item.ani_id)) || null;
+          if (c) { openAnime(c.id); return; }
+          var t = item.title || "";
+          if (t && window.anikotoSearch) {
+            var res = window.anikotoSearch(t);
+            if (res && res.length) { openAnime(res[0].id); return; }
+          }
+          openAnime(item.ani_id);
+        };
+        if (window.anikotoEnsureIndex) window.anikotoEnsureIndex().then(resolve).catch(resolve);
+        else resolve();
+      }
+      else if (item.key && item.key.indexOf("ANI_") === 0 && window.openAnikotoById) {
+        // anikoto-catalog pool item: key is the anikoto id directly
+        window.openAnikotoById(item.key.slice(4)).catch(function(){});
+      }
       else if (item.key && (item.key.indexOf("VDM_")===0 || item.key.indexOf("VDT_")===0) && window.openVidnestById) window.openVidnestById(item.key);
       else if (window.viroPlay) window.viroPlay(div.dataset.cat, item.key);
     });
@@ -369,155 +400,229 @@
     return null;
   }
 
-  async function loadRecommendations(count, isInitial) {
+  var POOL_KEY = "vw_recs_pool_v1";
+  var POOL_TTL = 6 * 3600 * 1000;
+
+  // Session-only set of every title/key already suggested this page load
+  // (across ↻ refreshes and infinite-scroll loads) so nothing repeats.
+  // Lives in memory only — a full website reload resets it, making previously
+  // suggested titles eligible again.
+  var seenEverKeys = new Set();
+  var seenEverTitles = new Set();
+
+  function getPool() {
+    try {
+      var o = JSON.parse(localStorage.getItem(POOL_KEY) || "null");
+      if (o && o.t && Date.now() - o.t < POOL_TTL && o.p) {
+        // invalidate empty pools (e.g. leftover from an earlier 429/build)
+        var total = (o.p.anime||[]).length + (o.p.movies||[]).length + (o.p.shows||[]).length;
+        if (total > 0) return o.p;
+        localStorage.removeItem(POOL_KEY);
+      }
+    } catch (_) {}
+    return null;
+  }
+  function savePool(p) {
+    try { localStorage.setItem(POOL_KEY, JSON.stringify({ t: Date.now(), p: p })); } catch (_) {}
+  }
+  function dedupeItems(items) {
+    var seenK = new Set(), seenT = new Set();
+    return (items||[]).filter(function(it){
+      var k = it.key, tl = (it.title||"").toLowerCase().trim();
+      if (k && seenK.has(k)) return false;
+      if (tl && seenT.has(tl)) return false;
+      if (k) seenK.add(k);
+      if (tl) seenT.add(tl);
+      return true;
+    });
+  }
+
+  // Build a deep pool per type. Anime draws from the already-loaded anikoto
+  // catalog (playable, instant, ZERO network) — AniList is only touched if the
+  // catalog is empty, and then only 1 page to avoid 429 rate-limits.
+  // Movies/TV fetch 1 TMDB page each. Cached 6h, reshuffled from memory on
+  // every refresh.
+  async function ensurePool() {
+    var pool = getPool();
+    if (pool) return pool;
+    var out = { anime: [], movies: [], shows: [] };
+    var jobs = ["anime","movies","shows"].map(function(t){
+      if (t !== "anime") {
+        return fetchTmdbByTag(t, "", 1).then(function(raw){
+          out[t] = dedupeItems((raw||[]).map(function(a){
+            return { catKey:t, key:(t==="movies"?"VDM_":"VDT_")+a.id, title:a.title, image:a.image, banner:a.backdrop || a.banner || "", tag:"" };
+          }));
+        }).catch(function(){ out[t] = []; });
+      }
+      // anime: anikoto catalog (already in memory) — no network
+      var items = [];
+      try {
+        var cat = (window.anikotoRecent && window.anikotoRecent()) || [];
+        cat.forEach(function(a){
+          if (a && a.id != null)
+            items.push({ catKey:"anime", key:"ANI_"+a.id, ani_id:a.ani_id ? Number(a.ani_id) : null, title:a.title||"", image:a.poster||a.background_image||"", banner:"", tag:"" });
+        });
+      } catch(_){}
+      if (items.length >= 12) {
+        out.anime = dedupeItems(items);
+        return Promise.resolve();
+      }
+      // catalog too small — top up with ONE AniList page (avoid 429)
+      return fetchAnimeByTag("", 1).then(function(raw){
+        (raw||[]).forEach(function(a){
+          items.push({ catKey:"anime", key:"ANI_"+a.id, ani_id:a.id, title:a.title, image:a.image, banner:a.banner||a.bannerImage||"", tag:"" });
+        });
+        out.anime = dedupeItems(items);
+      }).catch(function(){ out.anime = dedupeItems(items); });
+    });
+    await Promise.all(jobs);
+    savePool(out);
+    return out;
+  }
+
+  async function loadRecommendations(count, isInitial, force) {
     if (busy) return;
     busy = true;
     var grid = document.getElementById("recommendedList");
     if (!grid) { busy = false; return; }
-    if (isInitial) {
-      var cached = loadRecCache();
-      if (cached && cached.length) {
-        grid.innerHTML = "";
-        cached.slice(0, PAGE_SIZE).forEach(function(it){ renderCard(it, grid); });
-        currentRecs = cached.slice();
-        loaded = cached.length;
-        busy = false;
-        // still refresh in background after 2s if stale
-        if (Date.now() - JSON.parse(localStorage.getItem(REC_CACHE_KEY)||"{}").t > 30*60*1000) {
-          setTimeout(function(){ if (!busy) loadRecommendations(0,false); }, 2000);
-        }
-        return;
-      }
-      grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:20px;opacity:.5;">Loading recommendations…</p>'; currentRecs = [];
-    }
     var profile = buildProfile();
     var need = count || PAGE_SIZE;
-    var newItems = [];
-    // decide type distribution
-    var types = [];
     var totalNeed = need;
-    // build a pool of tags: 70% topTags, 30% rare/random
-    var allTags = profile.topTags.slice();
-    // add some rare tags for variety
-    if (profile.rareTags.length) {
-      // inject 2-3 rare
-      for (var i=0;i<Math.min(3, profile.rareTags.length);i++) {
-        if (Math.random() < 0.5) allTags.push(profile.rareTags[i]);
-      }
-    }
-    // if still no tags, use default
-    if (!allTags.length) allTags = ["action","adventure","comedy","drama"];
 
-    // deterministic type split for watchlist-heavy case: allocate counts, not per-iteration random
-    var typeOrder = [];
-    if (totalNeed > 0) {
-      var w = profile.typeWeights;
-      var counts = { anime: Math.round(w.anime * totalNeed), movies: Math.round(w.movies * totalNeed), shows: Math.round(w.shows * totalNeed) };
-      var sum = counts.anime + counts.movies + counts.shows;
-      // adjust rounding
-      while (sum < totalNeed) { if (w.anime >= w.movies && w.anime >= w.shows) counts.anime++; else if (w.movies >= w.shows) counts.movies++; else counts.shows++; sum++; }
-      while (sum > totalNeed) { if (counts.anime >= counts.movies && counts.anime >= counts.shows && counts.anime>0) counts.anime--; else if (counts.movies >= counts.shows && counts.movies>0) counts.movies--; else if (counts.shows>0) counts.shows--; sum--; }
-      ["anime","movies","shows"].forEach(function(t){ for(var i=0;i<counts[t];i++) typeOrder.push(t); });
-      // shuffle to avoid blocks, but keep weighted
-      for (var i=typeOrder.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var tmp=typeOrder[i]; typeOrder[i]=typeOrder[j]; typeOrder[j]=tmp; }
+    var pool = null;
+    if (!force) pool = getPool();
+    var poolFresh = !!pool;
+    if (!pool) {
+      grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:20px;opacity:.5;">Loading recommendations…</p>';
+      // freeze current grid in place (keep last recs visible) while pool builds
+      pool = await ensurePool();
     }
+
+    // weighted type split
+    var w = profile.typeWeights;
+    var counts = { anime: Math.round(w.anime * totalNeed), movies: Math.round(w.movies * totalNeed), shows: Math.round(w.shows * totalNeed) };
+    var sum = counts.anime + counts.movies + counts.shows;
+    while (sum < totalNeed) { if (w.anime >= w.movies && w.anime >= w.shows) counts.anime++; else if (w.movies >= w.shows) counts.movies++; else counts.shows++; sum++; }
+    while (sum > totalNeed) { if (counts.anime >= counts.movies && counts.anime >= counts.shows && counts.anime>0) counts.anime--; else if (counts.movies >= counts.shows && counts.movies>0) counts.movies--; else if (counts.shows>0) counts.shows--; sum--; }
+    var typeOrder = [];
+    ["anime","movies","shows"].forEach(function(t){ for(var i=0;i<counts[t];i++) typeOrder.push(t); });
+    for (var i=typeOrder.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var tmp=typeOrder[i]; typeOrder[i]=typeOrder[j]; typeOrder[j]=tmp; }
+
     var wl = getWatchlist();
     var wlSet = new Set(wl.map(function(x){ return x.key; }));
     var wlTitles = new Set(wl.map(function(x){ return (x.title||"").toLowerCase().trim(); }).filter(Boolean));
     var seenRecKeys = new Set(currentRecs.map(function(x){ return x.key; }));
     var seenRecTitles = new Set(currentRecs.map(function(x){ return (x.title||"").toLowerCase().trim(); }).filter(Boolean));
-    // Batched parallel for speed: one fetch per type, not 12 separate
-    var counts = { anime:0, movies:0, shows:0 };
-    typeOrder.forEach(function(t){ counts[t] = (counts[t]||0)+1; });
-    var batchTasks = [];
-    ["anime","movies","shows"].forEach(function(t){
-      if (!counts[t]) return;
-      // pick 1-2 tags to cover variety, fetch once per type — request more than needed for dedupe
-      var tagPool = [];
-      if (profile.topTags.length) tagPool = profile.topTags.slice(0,3);
-      if (profile.rareTags.length && Math.random()<0.4) tagPool.push(profile.rareTags[Math.floor(Math.random()*profile.rareTags.length)]);
-      var tag = tagPool.length ? tagPool[Math.floor(Math.random()*tagPool.length)] : allTags[Math.floor(Math.random()*allTags.length)];
-      var page = 1 + Math.floor(Math.random()*2);
-      if (t==="anime") {
-        batchTasks.push(fetchAnimeByTag(tag, page).then(function(items){
-          return { type:t, items: (items||[]).map(function(a){ return { catKey:"anime", key:"ANI_"+a.id, ani_id:a.id, title:a.title, image:a.image, banner:a.bannerImage || "", tag:tag }; }) };
-        }));
-      } else {
-        batchTasks.push(fetchTmdbByTag(t, tag, page).then(function(items){
-          return { type:t, items: (items||[]).map(function(m){ return { catKey:t, key:(t==="movies"?"VDM_":"VDT_")+m.id, title:m.title, image:m.image, banner:m.backdrop || "", tag:tag }; }) };
-        }));
-      }
-    });
-    var batches = await Promise.all(batchTasks);
-    var poolByType = {};
-    batches.forEach(function(b){ if(b) poolByType[b.type]=b.items; });
-    // now pick from pools without extra network
-    for (var n=0; n<totalNeed; n++) {
-      var type = typeOrder[n] || pickTypeByWeight(profile.typeWeights);
-      var pool = poolByType[type] || [];
-      if (!pool.length) {
-        // fallback: try any pool
-        var allPooled = [].concat(poolByType.anime||[], poolByType.movies||[], poolByType.shows||[]);
-        pool = allPooled;
-      }
-      if (!pool.length) continue;
-      // filter by watchlist/title/avgAge
-      var avg = profile.avgAge;
-      var filtered = pool.filter(function(it){
-        if (wlSet.has(it.key)) return false;
-        if (wlTitles.has((it.title||"").toLowerCase().trim())) return false;
-        if (avg != null && window.vwAgeStore) {
-          var aStr = window.vwAgeStore[it.key] || "";
-          if (!aStr) return true;
-          var n2 = (function(s){
-            if (!s) return 13;
-            var t = String(s).trim().toUpperCase();
-            if (t[0]==="+") { var v=parseInt(t.slice(1),10); return isNaN(v)?13:v; }
-            if (t==="G"||t==="TV-G") return 0;
-            if (t==="PG"||t==="TV-PG") return 7;
-            if (t==="PG-13"||t==="TV-14") return 13;
-            if (t==="R"||t==="TV-MA") return 16;
-            if (t==="18+") return 18;
-            return 13;
-          })(aStr);
-          return Math.abs(n2 - avg) <= 6;
-        }
-        return true;
-      });
-      var usePool = filtered.length ? filtered : pool.filter(function(it){ return !wlSet.has(it.key) && !wlTitles.has((it.title||"").toLowerCase().trim()); });
-      if (!usePool.length) usePool = pool;
-      if (!usePool.length) continue;
-      var pickOne = usePool[Math.floor(Math.random()*usePool.length)];
-      var exists = grid.querySelector('[data-movie="'+pickOne.key+'"]') || grid.querySelector('[data-ani-id="'+(pickOne.ani_id||"")+'"]') || wlSet.has(pickOne.key) || wlTitles.has((pickOne.title||"").toLowerCase().trim()) || seenRecKeys.has(pickOne.key) || seenRecTitles.has((pickOne.title||"").toLowerCase().trim());
-      if (!exists) {
-        newItems.push(pickOne);
+    var avg = profile.avgAge;
+
+    function pickFromPool(pool, want) {
+      var picked = [];
+      var poolCopy = pool.slice();
+      for (var w2=0; w2<want && poolCopy.length; w2++) {
+        var filtered = poolCopy.filter(function(it){
+          if (wlSet.has(it.key)) return false;
+          if (wlTitles.has((it.title||"").toLowerCase().trim())) return false;
+          if (seenRecKeys.has(it.key)) return false;
+          if (seenRecTitles.has((it.title||"").toLowerCase().trim())) return false;
+          if (seenEverKeys.has(it.key)) return false;
+          if (seenEverTitles.has((it.title||"").toLowerCase().trim())) return false;
+          if (avg != null && window.vwAgeStore) {
+            var aStr = window.vwAgeStore[it.key] || "";
+            if (!aStr) return true;
+            var n2 = (function(s){
+              if (!s) return 13;
+              var t = String(s).trim().toUpperCase();
+              if (t[0]==="+") { var v=parseInt(t.slice(1),10); return isNaN(v)?13:v; }
+              if (t==="G"||t==="TV-G") return 0;
+              if (t==="PG"||t==="TV-PG") return 7;
+              if (t==="PG-13"||t==="TV-14") return 13;
+              if (t==="R"||t==="TV-MA") return 16;
+              if (t==="18+") return 18;
+              return 13;
+            })(aStr);
+            return Math.abs(n2 - avg) <= 6;
+          }
+          return true;
+        });
+        var usePool = filtered;
+        // strict: never fall back to already-seen items — return fewer instead
+        if (!usePool.length) break;
+        var pi = Math.floor(Math.random()*usePool.length);
+        var pickOne = usePool[pi];
+        picked.push(pickOne);
         seenRecKeys.add(pickOne.key);
         seenRecTitles.add((pickOne.title||"").toLowerCase().trim());
-        // remove from pool to avoid duplicate picks
-        var idx = pool.indexOf(pickOne);
-        if (idx!==-1) pool.splice(idx,1);
-      } else {
-        // try another from same pool not seen
-        var alt = usePool.filter(function(x){ return !wlSet.has(x.key) && !wlTitles.has((x.title||"").toLowerCase().trim()) && !seenRecKeys.has(x.key) && !seenRecTitles.has((x.title||"").toLowerCase().trim()); });
-        if (alt.length) {
-          var altPick = alt[Math.floor(Math.random()*alt.length)];
-          newItems.push(altPick);
-          seenRecKeys.add(altPick.key);
-          seenRecTitles.add((altPick.title||"").toLowerCase().trim());
-          var idx2 = pool.indexOf(altPick);
-          if (idx2!==-1) pool.splice(idx2,1);
-        }
+        var idx = poolCopy.indexOf(pickOne);
+        if (idx!==-1) poolCopy.splice(idx,1);
       }
+      return picked;
     }
 
-    if (isInitial) grid.innerHTML = "";
-    newItems.forEach(function(it){ renderCard(it, grid); currentRecs.push(it); });
+    // Pick per-type from the pool — instant, no network
+    var allPicked = [];
+    typeOrder.forEach(function(t){
+      var picks = pickFromPool(pool[t] || [], 1);
+      allPicked = allPicked.concat(picks);
+    });
+    // top up from pooled leftovers if types underfilled
+    var needExtra = totalNeed - allPicked.length;
+    if (needExtra > 0) {
+      var allPooled = [].concat(pool.anime||[], pool.movies||[], pool.shows||[]);
+      var extra = pickFromPool(allPooled, needExtra);
+      allPicked = allPicked.concat(extra);
+    }
+    // pool exhausted (everything already seen) — refetch a fresh pool once and re-pick
+    if (allPicked.length < totalNeed) {
+      try { localStorage.removeItem(POOL_KEY); } catch(_){}
+      var fresh = await ensurePool();
+      var missing = totalNeed - allPicked.length;
+      var freshPicks = pickFromPool([].concat(fresh.anime||[], fresh.movies||[], fresh.shows||[]), missing);
+      allPicked = allPicked.concat(freshPicks);
+    }
+    // still short and pool truly consumed by the persistent seen-set — reset it
+    // once so recommendations show instead of "Not enough data"
+    if (allPicked.length < totalNeed) {
+      seenEverKeys.clear(); seenEverTitles.clear();
+      var resetMissing = totalNeed - allPicked.length;
+      var resetPicks = pickFromPool([].concat(pool.anime||[], pool.movies||[], pool.shows||[]), resetMissing);
+      allPicked = allPicked.concat(resetPicks);
+    }
+
+    // hard dedupe by key AND title before render — guards against pool duplicates
+    var finalKeys = new Set();
+    var finalTitles = new Set();
+    var unique = [];
+    allPicked.forEach(function(it){
+      var k = it && it.key;
+      var tl = it && it.title ? it.title.toLowerCase().trim() : "";
+      if (k && finalKeys.has(k)) return;
+      if (tl && finalTitles.has(tl)) return;
+      if (k) finalKeys.add(k);
+      if (tl) finalTitles.add(tl);
+      unique.push(it);
+    });
+
+    // replace grid content
+    if (isInitial || force) {
+      grid.innerHTML = "";
+      currentRecs = [];
+      seenRecKeys.clear(); seenRecTitles.clear();
+    }
+    unique.forEach(function(it){
+      renderCard(it, grid); currentRecs.push(it);
+      if (it.key) seenEverKeys.add(it.key);
+      if (it.title) seenEverTitles.add(it.title.toLowerCase().trim());
+    });
     if (currentRecs.length) saveRecCache(currentRecs);
-    if (!newItems.length && isInitial) {
+    if (isInitial && !currentRecs.length) {
       grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:40px 0;opacity:.45;">Not enough data yet — add some movies/shows/anime to your watchlist and watch a few things, then refresh.</p>';
     }
-    loaded += newItems.length;
+    loaded = currentRecs.length;
     busy = false;
+    // background: refresh pool so next refresh has fresh candidates (non-blocking)
+    if (poolFresh && isInitial) {
+      setTimeout(function(){ try { localStorage.removeItem(POOL_KEY); ensurePool(); } catch(_){} }, 3000);
+    }
   }
 
   function setupInfiniteScroll() {
@@ -600,10 +705,15 @@
           var slider = document.getElementById("homeSlider");
           if (slider) slider.setAttribute("data-active","recommended");
           document.querySelectorAll("#homeToggle .home-tab").forEach(function(b){ b.classList.toggle("active", b.getAttribute("data-tab")==="recommended"); });
-          try { localStorage.removeItem(REC_CACHE_KEY); } catch(_){}
-          loaded=0;
-          currentRecs=[];
-          loadRecommendations(PAGE_SIZE,true);
+          // instant: show cached recs immediately, then fetch fresh in background
+          var grid = document.getElementById("recommendedList");
+          var cached = loadRecCache();
+          if (grid && cached && cached.length && !currentRecs.length) {
+            grid.innerHTML = "";
+            cached.slice(0, PAGE_SIZE).forEach(function(it){ renderCard(it, grid); });
+            currentRecs = cached.slice();
+          }
+          loadRecommendations(PAGE_SIZE, true, true);
         });
       }
     }
@@ -616,7 +726,7 @@
       btn.title = "Refresh recommendations";
       btn.textContent = "↻";
       btn.style.cssText = "margin-left:10px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#fff;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;";
-      btn.addEventListener("click", function(){ try{localStorage.removeItem(REC_CACHE_KEY);}catch(_){} loaded = 0; currentRecs=[]; loadRecommendations(PAGE_SIZE, true); });
+      btn.addEventListener("click", function(){ loadRecommendations(PAGE_SIZE, true, true); });
       var h2 = head.querySelector("h2");
       if (h2) { h2.appendChild(document.createTextNode(" ")); h2.appendChild(btn); }
       else head.appendChild(btn);
@@ -628,18 +738,19 @@
     if (!grid) return;
     setupRefresh();
     setupInfiniteScroll();
-    // initial load
-    loadRecommendations(PAGE_SIZE, true);
+    // no pool fetch at page init — wait until the Recommended tab actually opens
     // reload when watchlist/history changes — also invalidate profile cache
-    window.addEventListener("vwl-updated", function(){ try{localStorage.removeItem(PROFILE_KEY);}catch(_){} try{localStorage.removeItem(REC_CACHE_KEY);}catch(_){} loaded=0; currentRecs=[]; loadRecommendations(PAGE_SIZE,true); });
+    window.addEventListener("vwl-updated", function(){ try{localStorage.removeItem(PROFILE_KEY);}catch(_){} try{localStorage.removeItem(REC_CACHE_KEY);}catch(_){} loaded=0; currentRecs=[]; });
     window.addEventListener("vw-cw-updated", function(){ try{localStorage.removeItem(PROFILE_KEY);}catch(_){} loaded=0; });
-    // when tab becomes active, ensure loaded
+    // when tab becomes active, load (deferred so AniList isn't hammered on init)
     var slider = document.getElementById("homeSlider");
     if (slider) {
       new MutationObserver(function(){
         if (slider.getAttribute("data-active") === "recommended" && loaded === 0) loadRecommendations(PAGE_SIZE,true);
       }).observe(slider, { attributes:true, attributeFilter:["data-active"] });
     }
+    // if Recommended already active at load, load now
+    if (slider && slider.getAttribute("data-active") === "recommended") loadRecommendations(PAGE_SIZE, true);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

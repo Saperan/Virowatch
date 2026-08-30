@@ -709,7 +709,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (spinner) spinner.style.display = "none";
         iframe.classList.remove("fade-out");
       }, 200);
-    iframe.src = vids[index];
+    // never let an empty src resolve to the file:// page (Unsafe attempt noise)
+    iframe.src = vids[index] || "about:blank";
     ep = index;
     saveState();
     // "Next episode" can cross a 100-episode chunk boundary — re-render
