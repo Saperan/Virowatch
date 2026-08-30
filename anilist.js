@@ -67,9 +67,19 @@
       method: 'POST',
       headers: headers,
       body: JSON.stringify({ query: query, variables: variables || {} }),
-    }).then(function (r) { return r.json(); }).then(function (j) {
+    }).then(function (r) {
+      if (r.status === 429) throw new Error('Rate limited — try again in a minute');
+      return r.json();
+    }).then(function (j) {
       if (j.errors && j.errors.length) {
-        throw new Error(j.errors[0].message || 'AniList error');
+        var msg = j.errors[0].message || 'AniList error';
+        if (/invalid token|unauthorized/i.test(msg)) {
+          saveAuth(null);
+          updateRail();
+          renderModal();
+          throw new Error('AniList token expired — please log in again');
+        }
+        throw new Error(msg);
       }
       return j.data;
     });
@@ -315,12 +325,13 @@
         } catch (_) {}
       }
 
+      try { localStorage.setItem('vw_anilist_last_sync', String(Date.now())); } catch (_) {}
       toast(
         'Synced — pulled ' + added + ', pushed ' + pushed +
         (missing ? ' (' + missing + ' not on Anikoto)' : '')
       );
-    } catch (_) {
-      toast('AniList sync failed — check connection', true);
+    } catch (e) {
+      toast(e && e.message ? e.message : 'AniList sync failed — check connection', true);
     } finally {
       syncing = false;
       renderModal();
@@ -470,10 +481,35 @@
     var status = el('div', 'anl-status');
     body.appendChild(status);
 
+    // Direct login helper for APK and web — native code calls this with the token
+    window.vwAnilistSetToken = async function (tok) {
+      if (!tok || checking) return;
+      tok = String(tok).trim().replace(/^Bearer\s+/i, '');
+      if (!/^eyJ/.test(tok) || tok.length < 100) return;
+      checking = true;
+      status.textContent = 'Checking…';
+      input.value = tok;
+      input.disabled = true;
+      var ok = await loginWithToken(tok);
+      checking = false;
+      input.disabled = false;
+      if (ok) {
+        updateRail();
+        renderModal();
+        toast('Logged in as ' + auth.name);
+        syncNow();
+      } else {
+        status.textContent = 'That code didn’t work — try again.';
+      }
+    };
+
     goBtn.addEventListener('click', function () {
       if (CLIENT_ID) {
+        // Try direct in-app flow first (APK will intercept and auto-capture)
+        // For web, open in new tab and let user paste — but also check for token in URL
         window.open(AUTH_URL + encodeURIComponent(CLIENT_ID), '_blank', 'noopener');
-        status.textContent = 'Waiting for the code from the AniList tab…';
+        status.textContent = 'After Authorize, copy the code from AniList and paste below — or if you are on the APK, it will log in automatically.';
+        // For APK WebView, the native code will auto-capture the pin page token and call vwAnilistSetToken
       } else {
         hint.innerHTML =
           'This site isn’t registered with AniList yet — open ' +
@@ -484,6 +520,22 @@
       }
       input.focus();
     });
+
+    // Auto-capture token if page was redirected back with access_token in URL (web direct flow)
+    (function checkUrlToken() {
+      try {
+        var hash = location.hash || location.search || '';
+        var m = hash.match(/access_token=([^&]+)/);
+        if (m) {
+          var tok = decodeURIComponent(m[1]);
+          if (/^eyJ/.test(tok) && tok.length > 100) {
+            setTimeout(function () { window.vwAnilistSetToken(tok); }, 300);
+            // clean URL
+            try { history.replaceState(null, '', location.pathname); } catch (_) {}
+          }
+        }
+      } catch (_) {}
+    })();
 
     /* Auto-login: as soon as a plausible token lands in the field.
        Real AniList access tokens are long JWTs starting with "eyJ" —
@@ -541,6 +593,12 @@
     var btn = document.getElementById('railAniListBtn');
     if (btn) btn.addEventListener('click', toggleModal);
     updateRail();
+    if (auth && auth.userId) {
+      var last = parseInt(localStorage.getItem('vw_anilist_last_sync') || '0', 10);
+      if (Date.now() - last > 30 * 60 * 1000) {
+        setTimeout(function () { syncNow().catch(function () {}); }, 2500);
+      }
+    }
   }
 
   if (document.readyState === 'loading') {

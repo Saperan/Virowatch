@@ -1196,13 +1196,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
     } catch (_) {}
   };
-  // TV shows aren't on AniList — only anime items get a banner key
-  const bannerKeyOf = (item) =>
-    item.aniListId
-      ? "id:" + item.aniListId
-      : item.catKey === "anime" && item.info.title
-        ? "q:" + item.info.title.toLowerCase()
-        : null;
+  // Anime → AniList, Movies/TV → TMDB backdrop
+  const bannerKeyOf = (item) => {
+    if (item.aniListId) return "id:" + item.aniListId;
+    if (item.catKey === "anime" && item.info.title) return "q:" + item.info.title.toLowerCase();
+    if (item.key && item.key.indexOf("VDM_") === 0) return "tmdb:movie:" + item.key.slice(4);
+    if (item.key && item.key.indexOf("VDT_") === 0) return "tmdb:tv:" + item.key.slice(4);
+    if (item.catKey === "movies" && item.key && item.key.indexOf("VDM_") === 0) return "tmdb:movie:" + item.key.slice(4);
+    if (item.catKey === "shows" && item.key && item.key.indexOf("VDT_") === 0) return "tmdb:tv:" + item.key.slice(4);
+    return null;
+  };
   const bannerFor = (item) => {
     const k = bannerKeyOf(item);
     return (k && bannerCache[k]) || "";
@@ -1256,11 +1259,32 @@ document.addEventListener("DOMContentLoaded", async () => {
         break; // network trouble — poster fallback is fine
       }
     }
+    // Movies / TV — TMDB backdrop via vidnestTmdb (cached)
+    const tmdbItems = items.filter((i) => {
+      const k = bannerKeyOf(i);
+      return k && k.indexOf("tmdb:") === 0 && bannerCache[k] == null;
+    });
+    for (const it of tmdbItems) {
+      const k = bannerKeyOf(it);
+      const isTv = k.indexOf("tmdb:tv:") === 0;
+      const id = k.split(":")[2];
+      try {
+        const d = window.vidnestTmdb ? await window.vidnestTmdb((isTv ? "/tv/" : "/movie/") + id, {}) : null;
+        const p = d && (d.backdrop_path || d.poster_path);
+        bannerCache[k] = p ? "https://image.tmdb.org/t/p/w780" + p : "";
+        saveBannerCache();
+        onBanner?.();
+      } catch (_) {
+        bannerCache[k] = "";
+        saveBannerCache();
+      }
+    }
   }
 
   // Newest added: hero (featured = #1) + poster grid — first 6 streaming
-  // anime from Anikoto, then the native Virowatch anime + shows.
-  function renderNewestAdded() {
+  // anime from Anikoto, then newest Movies + TV Shows from TMDB (Vidnest)
+  // instead of the static Virowatch anime.js / shows.js lists.
+  async function renderNewestAdded() {
     const listEl = document.getElementById("newestAddedList");
     if (!listEl) return;
     listEl.innerHTML = "";
@@ -1275,22 +1299,47 @@ document.addEventListener("DOMContentLoaded", async () => {
         aniListId: a.ani_id ? Number(a.ani_id) : null,
         info: { title: a.title || "", image: a.poster || "" },
       }));
-    const animeFirst = Object.entries(mediaData.anime || {})
-      .filter(([, v]) => !v._hidden)
-      .slice(0, 4);
-    const showsFirst = Object.entries(mediaData.shows || {})
-      .filter(([k]) => k !== "PITSORT")
-      .slice(0, 4);
-    const items = [
-      ...aniRecent,
-      ...animeFirst.map(([k, v]) => ({ catKey: "anime", key: k, info: v })),
-      ...showsFirst.map(([k, v]) => ({ catKey: "shows", key: k, info: v })),
-    ];
+    // TMDB newest Movies / TV (Vidnest) — replaces static anime.js / shows.js
+    const TMDB_KEY = "77d678406118b130512ab8affd953fa9";
+    const IMG_W342 = "https://image.tmdb.org/t/p/w342";
+    const tmdbFetch = window.vidnestTmdb || (async (path, params) => {
+      const qs = new URLSearchParams({ api_key: TMDB_KEY, ...(params || {}) });
+      try { const r = await fetch(`https://api.themoviedb.org/3${path}?${qs}`); if (!r.ok) return null; return await r.json(); } catch (_) { return null; }
+    });
+    let movieItems = [];
+    let tvItems = [];
+    try {
+      const [movRes, tvRes] = await Promise.all([
+        tmdbFetch("/trending/movie/week", { page: 1 }),
+        tmdbFetch("/trending/tv/week", { page: 1 }),
+      ]);
+      movieItems = (movRes?.results || []).slice(0, 4).map((r) => ({
+        catKey: "movies",
+        key: "VDM_" + r.id,
+        info: { title: r.title || r.original_title || "", image: r.poster_path ? IMG_W342 + r.poster_path : "" },
+      }));
+      tvItems = (tvRes?.results || []).slice(0, 4).map((r) => ({
+        catKey: "shows",
+        key: "VDT_" + r.id,
+        info: { title: r.name || r.original_name || "", image: r.poster_path ? IMG_W342 + r.poster_path : "" },
+      }));
+    } catch (_) {}
+    // Fallback to static lists if TMDB fails (offline)
+    if (!movieItems.length) {
+      movieItems = Object.entries(mediaData.anime || {}).filter(([, v]) => !v._hidden).slice(0, 4).map(([k, v]) => ({ catKey: "anime", key: k, info: v }));
+    }
+    if (!tvItems.length) {
+      tvItems = Object.entries(mediaData.shows || {}).filter(([k]) => k !== "PITSORT").slice(0, 4).map(([k, v]) => ({ catKey: "shows", key: k, info: v }));
+    }
+    const items = [...aniRecent, ...movieItems, ...tvItems];
 
     const playItem = (item) => {
       if (item.aniId) {
-        // Anikoto title — fetch + inject episodes, then viroPlay takes over
         window.openAnikotoById?.(item.aniId);
+        return;
+      }
+      if (item.key && (item.key.indexOf("VDM_") === 0 || item.key.indexOf("VDT_") === 0)) {
+        window.openVidnestById?.(item.key);
         return;
       }
       if (heroSection) heroSection.style.display = "none";
@@ -1319,7 +1368,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       heroTitle.textContent = info.title || key;
       if (heroTags) {
         heroTags.innerHTML = "";
-        const labels = [catKey === "anime" ? "Anime" : "TV Show"];
+        const labels = [catKey === "anime" ? "Anime" : catKey === "movies" ? "Movie" : "TV Show"];
         if (item === featured) labels.push("New");
         labels.forEach((label) => {
           const tag = document.createElement("span");
@@ -1372,7 +1421,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const badge = document.createElement("span");
       badge.className = "badge";
       badge.textContent =
-        idx === 0 ? "NEW" : catKey === "anime" ? "ANIME" : "TV";
+        idx === 0 ? "NEW" : catKey === "anime" ? "ANIME" : catKey === "movies" ? "MOVIE" : "TV";
 
       const title = document.createElement("span");
       title.className = "title";

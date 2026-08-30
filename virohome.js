@@ -756,6 +756,41 @@
     var wlBtn = $("railWatchlistBtn");
     if (wlBtn) wlBtn.addEventListener("click", showWatchlist);
 
+    // Home toggle: Newest ↔ Recommended — slide, grayed unfocused, white line on active
+    (function () {
+      var slider = $("homeSlider");
+      var tabs = document.querySelectorAll("#homeToggle .home-tab");
+      var seeAll = $("newestSeeAll");
+      if (!slider || !tabs.length) return;
+      function updateSeeAll(tab) {
+        if (!seeAll) return;
+        seeAll.style.display = tab === "newest" ? "" : "none";
+        seeAll.style.opacity = tab === "newest" ? "" : "0";
+        seeAll.style.pointerEvents = tab === "newest" ? "" : "none";
+      }
+      slider.setAttribute("data-active", "newest");
+      updateSeeAll("newest");
+      tabs.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var tab = btn.getAttribute("data-tab");
+          if (!tab || slider.getAttribute("data-active") === tab) return;
+          // slide: old panel goes behind sidebar (30% left), new comes from right
+          slider.setAttribute("data-active", tab);
+          tabs.forEach(function (b) { b.classList.toggle("active", b.getAttribute("data-tab") === tab); });
+          updateSeeAll(tab);
+          try { localStorage.setItem("vw_home_tab", tab); } catch (_) {}
+        });
+      });
+      try {
+        var saved = localStorage.getItem("vw_home_tab");
+        if (saved === "recommended" || saved === "newest") {
+          slider.setAttribute("data-active", saved);
+          tabs.forEach(function (b) { b.classList.toggle("active", b.getAttribute("data-tab") === saved); });
+          updateSeeAll(saved);
+        }
+      } catch (_) {}
+    })();
+
     // "see all →" under Newest added → open the Anime catalog
     var seeAll = $("newestSeeAll");
     if (seeAll) {

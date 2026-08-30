@@ -118,6 +118,7 @@
       _hidden : true,
       ANI_S1  : season,
     };
+    if (window.vwEnsureAge) window.vwEnsureAge(`ANI_${id}`, "ani-id", String(anime.ani_id || id), anime.title || "");
   }
 
   // ── Hover-prefetch so clicking feels instant ──────────────────────

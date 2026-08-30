@@ -27,6 +27,22 @@
     var list = getList();
     if (list.some(function (i) { return i.key === item.key; })) return;
     if (!item.status) item.status = 'planning'; // watching | planning | watched
+    // fetch age rating for every added item so randomizer can filter
+    (function () {
+      var kind = null, id = null;
+      if (item.key && item.key.indexOf("VDM_") === 0) { kind = "movie-id"; id = item.key.slice(4); }
+      else if (item.key && item.key.indexOf("VDT_") === 0) { kind = "tv-id"; id = item.key.slice(4); }
+      else if (item.aniId) { kind = "ani-id"; id = String(item.aniId); }
+      else if (item.key && item.key.indexOf("ANI_") === 0) { kind = "ani-id"; id = item.key.slice(4); }
+      else if (item.cat === "anime") kind = "ani-q";
+      else if (item.cat === "movies") kind = "movie-q";
+      else if (item.cat === "shows") kind = "tv-q";
+      if (kind && window.vwGetAgeRating) {
+        window.vwGetAgeRating(kind, id, item.title || "").then(function (r) {
+          if (r) { item.age = r; var lst = getList(); var f = lst.find(function (x) { return x.key === item.key; }); if (f && !f.age) { f.age = r; setList(lst); refreshSidebar(); } }
+        });
+      }
+    })();
     list.unshift(item);
     setList(list);
     refreshSidebar();
@@ -231,6 +247,14 @@
       img.className = 'vwl-item-img';
       img.src = item.image; img.alt = ''; img.loading = 'lazy';
 
+      var ageBadge = null;
+      if (item.age) {
+        ageBadge = document.createElement('span');
+        ageBadge.className = 'vwl-age-badge';
+        ageBadge.textContent = window.vwAgeToPlus ? window.vwAgeToPlus(item.age) : item.age;
+        ageBadge.style.cssText = 'font-size:.62rem;font-weight:700;padding:2px 5px;border-radius:5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;white-space:nowrap;flex-shrink:0;';
+      }
+
       var name = document.createElement('span');
       name.className = 'vwl-item-title';
       name.textContent = item.title;
@@ -241,9 +265,33 @@
       del.innerHTML = SVG_TRASH;
       del.addEventListener('click', function (e) { e.stopPropagation(); removeItem(item.key); });
 
-      row.appendChild(img); row.appendChild(name); row.appendChild(del);
+      row.appendChild(img); row.appendChild(name); if (ageBadge) row.appendChild(ageBadge); row.appendChild(del);
       row.addEventListener('click', function () { loadItem(item); });
       container.appendChild(row);
+      if (!item.age && window.vwGetAgeRating) {
+        (function (it, badgeRow) {
+          var k2 = null, id2 = null;
+          if (it.key && it.key.indexOf("VDM_") === 0) { k2 = "movie-id"; id2 = it.key.slice(4); }
+          else if (it.key && it.key.indexOf("VDT_") === 0) { k2 = "tv-id"; id2 = it.key.slice(4); }
+          else if (it.aniId) { k2 = "ani-id"; id2 = String(it.aniId); }
+          else if (it.key && it.key.indexOf("ANI_") === 0) { k2 = "ani-id"; id2 = it.key.slice(4); }
+          if (!k2) return;
+          window.vwGetAgeRating(k2, id2, it.title || "").then(function (r) {
+            if (r && !it.age) {
+              it.age = r;
+              var lst = getList(); var f = lst.find(function (x) { return x.key === it.key; });
+              if (f && !f.age) { f.age = r; setList(lst); }
+              if (!badgeRow.querySelector(".vwl-age-badge")) {
+                var nb = document.createElement("span");
+                nb.className = "vwl-age-badge";
+                nb.textContent = window.vwAgeToPlus ? window.vwAgeToPlus(r) : r;
+                nb.style.cssText = 'font-size:.62rem;font-weight:700;padding:2px 5px;border-radius:5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;white-space:nowrap;flex-shrink:0;';
+                badgeRow.insertBefore(nb, badgeRow.querySelector(".vwl-item-remove"));
+              }
+            }
+          });
+        })(item, row);
+      }
     });
   }
 
@@ -532,6 +580,30 @@
     watchPlayerControls();
     initFromSaved();
     window.addEventListener("vwl-updated", syncPlayerBtn);
+    // backfill missing age ratings for existing watchlist so randomizer can filter
+    setTimeout(function () {
+      var list = getList();
+      var needs = list.filter(function (it) { return !it.age; });
+      if (!needs.length || !window.vwGetAgeRating) return;
+      needs.slice(0, 12).forEach(function (it) {
+        var kind = null, id = null;
+        if (it.key && it.key.indexOf("VDM_") === 0) { kind = "movie-id"; id = it.key.slice(4); }
+        else if (it.key && it.key.indexOf("VDT_") === 0) { kind = "tv-id"; id = it.key.slice(4); }
+        else if (it.aniId) { kind = "ani-id"; id = String(it.aniId); }
+        else if (it.key && it.key.indexOf("ANI_") === 0) { kind = "ani-id"; id = it.key.slice(4); }
+        else if (it.cat === "anime") kind = "ani-q";
+        else if (it.cat === "movies") kind = "movie-q";
+        else if (it.cat === "shows") kind = "tv-q";
+        if (!kind) return;
+        window.vwGetAgeRating(kind, id, it.title || "").then(function (r) {
+          if (r) {
+            var lst = getList();
+            var f = lst.find(function (x) { return x.key === it.key; });
+            if (f && !f.age) { f.age = r; setList(lst); }
+          }
+        });
+      });
+    }, 1500);
   }
 
   if (document.readyState === 'loading') {

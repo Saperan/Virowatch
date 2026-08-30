@@ -570,13 +570,23 @@
                     </div>
                 </section>
 
-                <section class="home-section newest-section">
-                    <div class="section-head">
-                        <h2>Newest added</h2>
-                        <a class="more" id="newestSeeAll">see all →</a>
-                    </div>
-                    <div id="newestAddedList" class="poster-grid"></div>
-                </section>
+                <div class="home-toggle" id="homeToggle">
+                    <button type="button" class="home-tab active" data-tab="newest">Newest added</button>
+                    <button type="button" class="home-tab" data-tab="recommended">Recommended</button>
+                </div>
+                <div class="home-slider" id="homeSlider">
+                    <section class="home-section newest-section" data-panel="newest">
+                        <div id="newestAddedList" class="poster-grid"></div>
+                    </section>
+                    <section class="home-section recommended-section" data-panel="recommended">
+                        <div id="recommendedList" class="poster-grid">
+                            <p style="grid-column:1/-1;text-align:center;padding:40px 0;opacity:.45;">Recommendation engine coming next — your watchlist + history will power it.</p>
+                        </div>
+                    </section>
+                </div>
+                <div style="display:flex;justify-content:flex-end;padding:8px 32px 0;">
+                    <a class="more" id="newestSeeAll" style="font-size:12px;color:var(--vw-muted);cursor:pointer;">see all →</a>
+                </div>
 
                 <!-- Airing soon strip (filled by airing.js from AniList) -->
                 <section
@@ -639,7 +649,7 @@
                         <div id="videoSpinner" class="spinner"></div>
                         <iframe
                             id="videoPlayer"
-                            src=""
+                            src="about:blank"
                             allowfullscreen
                             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                             class="fade-out"
@@ -674,6 +684,7 @@
         <script src="shows.js"></script>
         <script src="anime.js"></script>
         <script src="lunora-loader.js"></script>
+        <script src="recommendations.js?v=1"></script>
         <script src="content.js?v=18"></script>
         <script src="custom-player-ui.js?v=7"></script>
         <script src="anikoto-loader.js?v=9"></script>
