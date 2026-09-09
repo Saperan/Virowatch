@@ -139,7 +139,12 @@
   }
 
   /* ── Click-through ────────────────────────────────────────────── */
-  function openItem(aniListId) {
+  function openItem(aniListId, anikotoId) {
+    // ponytail: direct anikoto id first (fallback items), else AniList mapping
+    if (anikotoId && typeof window.openAnikotoById === "function") {
+      window.openAnikotoById(anikotoId);
+      return;
+    }
     function tryCatalog() {
       var hit =
         typeof window.anikotoFindByAniList === "function" &&
@@ -217,11 +222,11 @@
       badge.dataset.at = String(it.airingAt);
       meta.appendChild(badge);
       meta.appendChild(
-        document.createTextNode("EP " + it.ep + " · " + fmtDate(it.airingAt)),
+        document.createTextNode(it.ep ? "EP " + it.ep + " · " + fmtDate(it.airingAt) : "Recently added · tap to stream"),
       );
       var d = document.createElement("span");
       d.className = "vwair-desc";
-      d.textContent = it.desc || "No description on AniList yet.";
+      d.textContent = it.desc || (it.anikotoId ? "Tap to stream." : "No description on AniList yet.");
       info.appendChild(t);
       info.appendChild(meta);
       info.appendChild(d);
@@ -230,7 +235,7 @@
       row.appendChild(info);
       row.addEventListener("click", function () {
         closeModal();
-        openItem(it.id); // plays via anikoto when mapped, AniList page otherwise
+        openItem(it.id, it.anikotoId); // plays via anikoto when mapped, AniList page otherwise
       });
       list.appendChild(row);
     });
@@ -259,18 +264,18 @@
     badge.className = "sbadge " + (label === "NEW" ? "new" : "time");
     badge.textContent = label;
     badge.dataset.at = String(it.airingAt);
-    badge.title = new Date(it.airingAt * 1000).toLocaleString();
+    badge.title = it.airingAt ? new Date(it.airingAt * 1000).toLocaleString() : "Recently added";
     var st = document.createElement("span");
     st.className = "st";
     st.textContent = it.title;
     var ep = document.createElement("span");
     ep.className = "ep";
-    ep.textContent = "EP " + it.ep;
+    ep.textContent = it.ep ? "EP " + it.ep : "NEW";
     el.appendChild(badge);
     el.appendChild(st);
     el.appendChild(ep);
     el.addEventListener("click", function () {
-      openItem(it.id);
+      openItem(it.id, it.anikotoId);
     });
     return el;
   }
@@ -337,7 +342,7 @@
     Array.prototype.slice.call(track.children).forEach(function (n, i) {
       var c = n.cloneNode(true); // cloneNode drops listeners — re-attach
       c.addEventListener("click", function () {
-        openItem(stripItems[i].id);
+        openItem(stripItems[i].id, stripItems[i].anikotoId);
       });
       track.appendChild(c);
     });
@@ -385,6 +390,33 @@
     marquee.raf = requestAnimationFrame(step);
   }
 
+  /* ── Fallback: Anikoto recent when AniList is blocked ────────── */
+  // AniList manually blocks Cloudflare Worker IPs (403 "principal's
+  // office") and at times browser ranges too — the strip must not die
+  // with it. Anikoto recent is already in memory via the Worker /api
+  // (different host, not blocked). No countdown, but tap-to-stream works.
+  var usingFallback = false;
+  function fallbackRecent() {
+    try {
+      var rec = window.anikotoRecent ? window.anikotoRecent() : [];
+      if (!rec.length) return false;
+      items = rec.slice(0, MODAL_MAX).map(function (a) {
+        return {
+          id: a.ani_id ? Number(a.ani_id) : 0,
+          anikotoId: a.id,
+          title: a.title || "",
+          ep: 0,
+          airingAt: 0,
+          img: a.poster || "",
+          desc: "",
+        };
+      });
+      usingFallback = true;
+      render();
+      return true;
+    } catch (_) { return false; }
+  }
+
   /* ── Init ─────────────────────────────────────────────────────── */
   function load(force) {
     var cache = readCache();
@@ -392,21 +424,24 @@
       return it.airingAt * 1000 > Date.now() - LOOKBACK * 1000;
     });
     if (!force && cache && Date.now() - cache.t < CACHE_TTL && nextUp.length) {
+      usingFallback = false;
       items = nextUp;
       render();
       return;
     }
     fetchSchedule()
       .then(function (list) {
+        usingFallback = false;
         items = list;
         render();
       })
       .catch(function () {
-        // network/rate-limit hiccup: fall back to stale cache if usable
+        // network/rate-limit/block hiccup: stale cache, else live Anikoto recent
         if (nextUp && nextUp.length) {
+          usingFallback = false;
           items = nextUp;
           render();
-        } else if (strip) {
+        } else if (!fallbackRecent() && strip) {
           strip.style.display = "none";
         }
       });
@@ -416,6 +451,10 @@
     strip = document.getElementById("airingStrip");
     if (!strip) return;
     load(false);
+    // Anikoto page 1 lands after us — fill/upgrade the strip when it does
+    window.addEventListener("anikoto-recent", function () {
+      if (usingFallback || !items.length) fallbackRecent();
+    });
     setInterval(refreshBadges, 60 * 1000);
     setInterval(function () {
       load(true);

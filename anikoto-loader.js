@@ -27,7 +27,15 @@
     window.fetch = function (u, o) {
       const url = typeof u === "string" ? u : (u && u.url) || "";
       if (typeof u === "string" && url.indexOf("https://graphql.anilist.co") === 0) {
-        return _f(u, o).catch(function () { return _f(WORKER + "/anilist", o); });
+        return _f(u, o).catch(function (e1) {
+          return _f(WORKER + "/anilist", o).then(function (r) {
+            // surface upstream body once so console shows WHY (403 challenge vs rate limit)
+            if (!r.ok) r.clone().text().then(function (t) {
+              console.warn("[ani] proxy " + r.status + ": " + String(t || "").slice(0, 300));
+            }).catch(function () {});
+            return r;
+          }, function (e2) { throw e1; });
+        });
       }
       return _f(u, o);
     };
