@@ -20,6 +20,19 @@
   // proxies below stay as fallback. Set to "" to disable.
   const WORKER = "https://anikoto-request.vmtgaming13.workers.dev";
 
+  // ponytail: direct AniList first (fast), Worker /anilist fallback on CORS/network block — one patch covers all callers
+  if (WORKER && !window._vwAniPatched) {
+    window._vwAniPatched = true;
+    const _f = window.fetch.bind(window);
+    window.fetch = function (u, o) {
+      const url = typeof u === "string" ? u : (u && u.url) || "";
+      if (typeof u === "string" && url.indexOf("https://graphql.anilist.co") === 0) {
+        return _f(u, o).catch(function () { return _f(WORKER + "/anilist", o); });
+      }
+      return _f(u, o);
+    };
+  }
+
   // ── Proxy list ────────────────────────────────────────────────────
   const PROXIES = [
     ...(WORKER ? [{
