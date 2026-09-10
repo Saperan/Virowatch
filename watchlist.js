@@ -27,6 +27,7 @@
     var list = getList();
     if (list.some(function (i) { return i.key === item.key; })) return;
     if (!item.status) item.status = 'planning'; // watching | planning | watched
+    item.updatedAt = Date.now(); // recency for two-way syncs
     // fetch age rating for every added item so randomizer can filter
     (function () {
       var kind = null, id = null;
@@ -63,6 +64,7 @@
     list.forEach(function (i) { if (i.key === key) it = i; });
     if (!it || it.status === status) return;
     it.status = status;
+    it.updatedAt = Date.now();
     if (status === 'watching' && !it.startedAt) it.startedAt = todayIso();
     if (status === 'watched') {
       if (!it.completedAt) it.completedAt = todayIso();
@@ -81,8 +83,10 @@
     list.forEach(function (i) {
       var d = byKey && byKey[i.key];
       if (!d) return;
-      if (d.startedAt && i.startedAt !== d.startedAt) { i.startedAt = d.startedAt; changed++; }
-      if (d.completedAt && i.completedAt !== d.completedAt) { i.completedAt = d.completedAt; changed++; }
+      var touched = false;
+      if (d.startedAt && i.startedAt !== d.startedAt) { i.startedAt = d.startedAt; changed++; touched = true; }
+      if (d.completedAt && i.completedAt !== d.completedAt) { i.completedAt = d.completedAt; changed++; touched = true; }
+      if (touched) i.updatedAt = Date.now();
     });
     if (changed) { setList(list); refreshSidebar(); }
     return changed;
@@ -98,6 +102,7 @@
     if (!it) return false;
     if (rating == null || rating <= 0) delete it.rating;
     else it.rating = Math.min(5, Math.round(rating * 2) / 2);
+    it.updatedAt = Date.now();
     setList(list);
     window.dispatchEvent(new CustomEvent('vwl-updated'));
     return true;
@@ -124,7 +129,7 @@
       var r = byKey && byKey[i.key];
       if (r == null) return;
       r = Math.min(5, Math.round(r * 2) / 2);
-      if (i.rating !== r) { i.rating = r; changed++; }
+      if (i.rating !== r) { i.rating = r; i.updatedAt = Date.now(); changed++; }
     });
     if (changed) setList(list);
     return changed;
@@ -137,7 +142,7 @@
     var changed = 0;
     list.forEach(function (i) {
       var s = byKey && byKey[i.key];
-      if (s && i.status !== s) { i.status = s; changed++; }
+      if (s && i.status !== s) { i.status = s; i.updatedAt = Date.now(); changed++; }
     });
     if (changed) { setList(list); refreshSidebar(); }
     return changed;

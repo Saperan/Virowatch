@@ -296,9 +296,30 @@
     return drop;
   }
 
-  // Local-first dedup: resolve everything once; a KQ entry whose TMDB id
-      // is already watchlisted (e.g. a tv entry that's here as anime) must
-      // not come back as a VDT_ duplicate.
+  // Merge a KQ entry onto its already-watchlisted local twin (same TMDB id,
+  // e.g. a tv entry that's here as anime). Edited side wins by updatedAt; a
+  // KQ entry that was never edited only fills blanks, never overwrites.
+  // Returns { status, dates, rating } to apply (keys present = apply).
+  function coveredUpdates(k, v, li) {
+    var out = {};
+    if (!li) return out;
+    if ((k.updatedAt || 0) > 0 && (k.updatedAt || 0) >= (li.updatedAt || 0)) {
+      out.status = v.status;
+      if (v.startedAt || v.completedAt) {
+        out.dates = {};
+        if (v.startedAt) out.dates.startedAt = v.startedAt;
+        if (v.completedAt) out.dates.completedAt = v.completedAt;
+      }
+      if (v.rating) out.rating = v.rating;
+    } else {
+      if (v.rating && !li.rating) out.rating = v.rating;
+      if (v.startedAt && !li.startedAt) { out.dates = out.dates || {}; out.dates.startedAt = v.startedAt; }
+      if (v.completedAt && !li.completedAt) { out.dates = out.dates || {}; out.dates.completedAt = v.completedAt; }
+    }
+    return out;
+  }
+      // Local-first dedup: a KQ entry whose TMDB id is already watchlisted
+      // must not come back as a duplicate; covered twins still merge below.
       var pushable0 = await pushableP;
       // Cleanup: drop local entries shadowed by a same-TMDB sibling (VDT_
       // dupes imported before the guard existed). Silent — runs under the
@@ -314,14 +335,30 @@
         }
       }
       var covered = {};
-      pushable0.forEach(function (p) { covered[p.t.id + '-' + p.t.mediaType] = true; });
+      var localKeyByTmdb = {}, localByKey = {};
+      pushable0.forEach(function (p) {
+        var id = p.t.id + '-' + p.t.mediaType;
+        covered[id] = true;
+        localKeyByTmdb[id] = p.item.key;
+        localByKey[p.item.key] = p.item;
+      });
 
       // Pull: remote → local (bulk ops don't echo back)
       var toAdd = [], statusByKey = {}, datesByKey = {}, ratingsByKey = {};
       remote.forEach(function (k) {
         var v = kqToVw(k);
         if (!v) return;
-        if (covered[(k.tmdbId) + '-' + (k.mediaType === 'tv' ? 'tv' : 'movie')]) return;
+        var tkey = (k.tmdbId) + '-' + (k.mediaType === 'tv' ? 'tv' : 'movie');
+        if (covered[tkey]) {
+          // Already watchlisted (e.g. as anime) — no new card, but its
+          // status/rating/dates still merge onto the local twin.
+          var lk = localKeyByTmdb[tkey];
+          var up = coveredUpdates(k, v, lk && localByKey[lk]);
+          if (up.status) statusByKey[lk] = up.status;
+          if (up.dates) datesByKey[lk] = up.dates;
+          if (up.rating) ratingsByKey[lk] = up.rating;
+          return;
+        }
         toAdd.push(v);
         statusByKey[v.key] = v.status;
         if (v.startedAt || v.completedAt) {
