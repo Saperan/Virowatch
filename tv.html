@@ -1,20 +1,20 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta name="referrer" content="no-referrer" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Virowatch</title>
+        <title>Virowatch TV</title>
         <meta name="description" content="Watch anime, movies, and shows free — no signup. Stream everything in one place." />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Virowatch" />
-        <meta property="og:title" content="Virowatch" />
+        <meta property="og:title" content="Virowatch TV" />
         <meta property="og:description" content="Watch anime, movies, and shows free — no signup. Stream everything in one place." />
         <meta property="og:image" content="https://i.ibb.co/HfcvRBMD/virowatch-discord-icon-512.png" />
-        <meta property="og:url" content="https://YOUR-USERNAME.github.io/YOUR-REPO/" />
+        <meta property="og:url" content="https://virowatch.ddns.net/" />
         <meta name="theme-color" content="#121212" />
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content="Virowatch" />
+        <meta name="twitter:title" content="Virowatch TV" />
         <meta name="twitter:description" content="Watch anime, movies, and shows free — no signup. Stream everything in one place." />
         <meta name="twitter:image" content="https://i.ibb.co/HfcvRBMD/virowatch-discord-icon-512.png" />
         <link rel="icon" href="https://i.ibb.co/HfcvRBMD/virowatch-discord-icon-512.png" />
@@ -24,24 +24,17 @@
             (function () {
                 var link = document.getElementById("themeStylesheet");
                 if (!link) return;
+                // TV build: desktop styles only — mobile variants make no sense
+                // on a TV, and "auto" must never pick the mobile stylesheet.
                 var THEME_HREF = {
                     auto: null,
                     "desktop-dark": "virostyle.css",
                     "desktop-light": "virostyle-light.css",
-                    "mobile-dark": "virostyle2.css",
-                    "mobile-light": "virostyle2-light.css",
+                    "mobile-dark": "virostyle.css",
+                    "mobile-light": "virostyle-light.css",
                 };
-                function isMobileViewport() {
-                    var w = window.innerWidth,
-                        h = window.innerHeight;
-                    return w <= 768 || w / h <= 9 / 16;
-                }
                 function resolveHref(key) {
-                    if (key === "auto") {
-                        return isMobileViewport()
-                            ? "virostyle2.css"
-                            : "virostyle.css";
-                    }
+                    if (key === "auto") return "virostyle.css";
                     // If it's a built-in key, map it to the file. Otherwise, treat it as a custom file path from the Style GUI.
                     return THEME_HREF[key] !== undefined
                         ? THEME_HREF[key]
@@ -49,7 +42,6 @@
                 }
                 var saved = localStorage.getItem("theme");
                 if (!saved) {
-                    // Removed the strict check so custom GUI paths are allowed
                     saved = "auto";
                     localStorage.setItem("theme", saved);
                 }
@@ -59,6 +51,9 @@
                     "data-vw-theme",
                     link.getAttribute("href") || "",
                 );
+                // TV build: remote navigation is the only mode — no detection
+                // popup, no session-only auto-detection. tv-nav.js reads this.
+                localStorage.setItem("vw_tv", "1");
             })();
         </script>
         <link
@@ -74,7 +69,7 @@
         <link rel="stylesheet" href="custom-player.css?v=4" />
         <link rel="stylesheet" href="vitv.css" />
     </head>
-    <body>
+    <body class="vw-tv">
         <!-- ── Settings popup (replaces the old slide-in sidebar) ── -->
         <div id="vwSettings" class="vws-overlay" aria-hidden="true">
             <div
@@ -398,7 +393,7 @@
                             <span
                                 class="app-sidebar-btn-icon"
                                 aria-hidden="true"
-                                >✉</span
+                            >✉</span
                             >
                             <span class="app-sidebar-btn-text"
                                 >Virowatch19@inbox.lv</span
@@ -504,7 +499,7 @@
         <div class="main">
             <!-- ── Sticky header ── -->
             <header class="header">
-                <span class="brand" id="headerBrand">Virowatch</span>
+                <span class="brand" id="headerBrand">Virowatch TV</span>
                 <div class="search-area">
                     <div class="search-field">
                         <span class="glass">⌕</span>
@@ -671,15 +666,15 @@
         <script src="content.js?v=18"></script>
         <script src="custom-player-ui.js?v=7"></script>
         <script src="anikoto-loader.js?v=10"></script>
-        <script src="vidnest-loader.js?v=15"></script>
+        <script src="vidnest-loader.js?v=14"></script>
         <script src="megaplay-backup.js?v=25"></script>
         <script src="popout-player.js?v=1"></script>
-        <script src="deeplink.js?v=2" defer></script>
+        <script src="deeplink.js" defer></script>
         <script src="iptv.js?v=3"></script>
         <script src="rumble-party.js?v=1"></script>
         <script src="sidebar.js?v=5"></script>
         <script src="anime-api.js?v=5"></script>
-        <script src="rumble-source.js?v=2"></script>
+        <script src="rumble-source.js?v=1"></script>
         <script src="watchlist.js?v=4"></script>
         <script src="anilist.js?v=4"></script>
         <script src="virohome.js?v=7"></script>
@@ -693,6 +688,3 @@
         <script src="tv-nav.js?v=6"></script>
     </body>
 </html>
-
-
-

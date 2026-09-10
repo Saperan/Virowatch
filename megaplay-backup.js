@@ -32,9 +32,7 @@
 
   const HLS_CDN    = "https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js";
   const DL_CONC    = 6;      // parallel segment fetches while downloading
-  // MegaPlay embed: .../stream/s-3/<id>/<sub|dub>. vidwish.live is a 1:1 mirror
-  // of the same player (same path scheme, same anikoto embed ids) — match both
-  // so backup/Cloudflare features keep working when playing off the mirror.
+  // MegaPlay embed: .../stream/s-3/<id>/<sub|dub>.
   // Groups: 1 = host, 2 = id, 3 = sub|dub.
   const MEGA_RE    = /(megaplay\.buzz|vidwish\.live)\/stream\/s-\d+\/(\d+)\/(sub|dub)/i;
 
@@ -63,22 +61,13 @@
         if ((!s || s === "about:blank") && lastEmbedSrc) useEmbed();
       }
     }
-    // Megaplay ↔ Vidwish only changes the embed host — re-run the src handler
-    // so the current episode swaps hosts live.
+    // Re-run the src handler so a raw s-2 URL normalizes to s-3 live.
     if (mode === "embed") {
       const f = iframe();
       const s = f && f.getAttribute("src");
       if (s && MEGA_RE.test(s)) onEmbedSrc(s);
     }
   });
-
-  // vidwish mirror failover. megaplayBlocked = the Megaplay CDN is unreachable
-  // from this connection (the "Error Code: 232011" IP/region block). Sticky for
-  // the session so we don't re-probe every episode. Set either by the one-time
-  // reachability probe or by the user picking the mirror in Settings.
-  let megaplayBlocked = false;
-  try { megaplayBlocked = sessionStorage.getItem("vw_megaplay_blocked") === "1"; } catch (_) {}
-  let megaProbed = false;       // reachability probe runs at most once/session
 
   let hls           = null;
   let selfSetting   = false;    // guard our own iframe.src writes
@@ -587,68 +576,16 @@
     window.dispatchEvent(new CustomEvent("vw-anime-embed", { detail: { active: false } }));
   }
 
-  // ── vidwish mirror host resolution ────────────────────────────────
-  // Which host anime embeds should load from right now: the Vidwish mirror when
-  // the user picked it in Settings, or when the probe found Megaplay blocked;
-  // otherwise Megaplay.
+  // Anime embeds always play off megaplay.buzz at /stream/s-3/ (the Anikoto
+  // API now hands out s-2 URLs, so normalize the segment on the way in).
   function targetAnimeHost() {
-    if (localStorage.getItem("vw_anime_api") === "vidwish") return "vidwish.live";
-    return megaplayBlocked ? "vidwish.live" : "megaplay.buzz";
+    return "megaplay.buzz";
   }
 
-  // Vidwish dropped the /stream/s-3/ path (soft-404 error page since ~2026-07);
-  // its player now lives at /stream/s-2/. Megaplay still embeds at s-3. So a
-  // host swap must also swap the stream segment to the one that host serves.
   function swapHost(url, host) {
-    const seg = /vidwish/i.test(host) ? "s-2" : "s-3";
     return url
       .replace(/(?:megaplay\.buzz|vidwish\.live)/i, host)
-      .replace(/\/stream\/s-\d+\//i, `/stream/${seg}/`);
-  }
-
-  // One-time, from the USER's real IP: does Megaplay's CDN actually load here?
-  // We can't read the cross-origin embed (no postMessage, sandboxed), so we
-  // replicate what its player would fetch: resolve the episode's master.m3u8
-  // through the Worker, then fetch that CDN URL from the browser. A reachable
-  // CDN — even a 403 referer-gate — resolves the opaque no-cors fetch; only a
-  // network-level block (the 232011 case) rejects. On a block we flip to the
-  // Vidwish mirror for the rest of the session.
-  async function probeMegaplayReachable(id, type) {
-    if (megaProbed || megaplayBlocked || !WORKERS.length) return;
-    megaProbed = true;
-
-    let fileUrl = "";
-    try {
-      const r = await fetch(
-        `${WORKERS[0].url}/resolve?id=${encodeURIComponent(id)}&type=${type}`,
-      );
-      const d = await r.json();
-      if (!d || !d.ok || !d.file) return; // resolve trouble — not a verdict
-      fileUrl = d.file;
-    } catch (_) {
-      return; // Worker/network issue on our side — don't blame Megaplay
-    }
-
-    const ctrl = new AbortController();
-    const tid = setTimeout(() => ctrl.abort(), 12000);
-    try {
-      await fetch(fileUrl, { mode: "no-cors", cache: "no-store", signal: ctrl.signal });
-      clearTimeout(tid);
-    } catch (_) {
-      clearTimeout(tid);
-      if (ctrl.signal.aborted) return; // slow, not blocked — inconclusive
-      megaplayBlocked = true;
-      try { sessionStorage.setItem("vw_megaplay_blocked", "1"); } catch (_) {}
-      toast("Anikoto/Megaplay unreachable here — switching to the Vidwish mirror");
-      const f = iframe();
-      const s = f && f.getAttribute("src");
-      if (f && s && /megaplay\.buzz/i.test(s)) {
-        selfSetting = true;
-        f.src = swapHost(s, "vidwish.live");
-        lastEmbedSrc = f.src;
-        setTimeout(() => { selfSetting = false; }, 0);
-      }
-    }
+      .replace(/\/stream\/s-\d+\//i, "/stream/s-3/");
   }
 
   // ── React to a new episode loading in the iframe ──────────────────
@@ -681,10 +618,6 @@
 
     current = { id: m[2], type: m[3].toLowerCase() };
     lastEmbedSrc = src;
-
-    // On Megaplay, kick the one-time reachability probe so a blocked IP falls
-    // over to the mirror on its own.
-    if (want === "megaplay.buzz") probeMegaplayReachable(current.id, current.type);
 
     const b = button();
     b.style.display = "";

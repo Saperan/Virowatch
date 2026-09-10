@@ -21,7 +21,7 @@
   "use strict";
 
   const KEY = "vw_anime_api";
-  const VALID = ["anikoto", "cloudflare", "vidnest", "vidwish", "vidcore"];
+  const VALID = ["anikoto", "cloudflare", "vidnest", "vidcore"];
 
   function get() {
     const v = localStorage.getItem(KEY);
@@ -68,7 +68,6 @@
     anikoto: "Anikoto",
     cloudflare: "Cloudflare",
     vidnest: "Vidnest",
-    vidwish: "Vidwish",
     vidcore: "VidCore",
   };
 
@@ -241,11 +240,6 @@
       api: "anikoto",
       name: "Anikoto API",
       desc: "Fastest when it works — blocked on some networks (error 232011).",
-    },
-    {
-      api: "vidwish",
-      name: "Vidwish",
-      desc: "Same shows as Anikoto on different servers. Last resort if the rest fail.",
     },
     {
       api: "vidcore",

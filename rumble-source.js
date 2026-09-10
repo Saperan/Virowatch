@@ -29,7 +29,7 @@
     dubbedcustomdownloads: 1,
   };
   var EXCLUDE_KEYS = { PITSORT: 1, IPTV: 1 };
-  var ANIME_APIS = ["anikoto", "cloudflare", "vidnest", "vidwish"];
+  var ANIME_APIS = ["anikoto", "cloudflare", "vidnest"];
 
   function normTitle(t) {
     return (t || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
