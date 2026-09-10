@@ -406,9 +406,9 @@
         icon.textContent = '◍';
       }
     } else {
-      label.textContent = 'AniList';
+      label.textContent = 'Account';
       icon.textContent = '◍';
-      if (btn) btn.title = 'AniList account';
+      if (btn) btn.title = 'Account';
     }
   }
 

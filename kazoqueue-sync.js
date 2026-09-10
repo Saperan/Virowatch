@@ -151,8 +151,6 @@
       localStorage.setItem(TMDB_CACHE_KEY, JSON.stringify(m));
     } catch (_) {}
   }
-  function sleep(ms) { return new Promise(function (res) { setTimeout(res, ms); }); }
-
   // Every watchlist item → TMDB {id, mediaType}, anime included (AniList
   // entries sync here too — KQ gets them as TV). VD keys are direct;
   // everything else resolves via Vidnest's TMDB search, then cached.
@@ -179,17 +177,25 @@
     } catch (_) { return null; }
   }
 
-  // All pushable local items with their TMDB ids (searches run sequential +
-  // polite; cached after the first sync).
+  // All pushable local items with their TMDB ids. Resolutions run 5-wide
+  // (cached after the first sync, so repeat syncs skip search entirely).
   async function localPushable() {
     var list = typeof window.vwlGet === 'function' ? window.vwlGet() : [];
-    var out = [];
-    for (var i = 0; i < list.length; i++) {
-      var t = await resolveTmdb(list[i]);
-      if (t) out.push({ item: list[i], t: t });
-      if (!tmdbOf(list[i])) await sleep(250);
+    var out = new Array(list.length);
+    var next = 0;
+    async function worker() {
+      while (true) {
+        var i = next++;
+        if (i >= list.length) return;
+        var t = await resolveTmdb(list[i]);
+        if (t) out[i] = { item: list[i], t: t };
+      }
     }
-    return out;
+    var workers = [];
+    var n = Math.min(5, list.length);
+    for (var w = 0; w < n; w++) workers.push(worker());
+    await Promise.all(workers);
+    return out.filter(Boolean);
   }
   function kqToVw(k) {
     if (!k || !k.tmdbId) return null;
@@ -251,7 +257,10 @@
     changed();
     try {
       toast('Syncing with KazoQueue…');
-      var remote = await fsLoad();
+      // Firestore fetch + local TMDB resolution are independent — overlap them.
+      var remoteP = fsLoad();
+      var pushableP = localPushable();
+      var remote = await remoteP;
       lastRemote = remote;
 
       // Avatar: custom KQ upload first, Google picture fallback.
@@ -265,10 +274,45 @@
         }
       }
 
-      // Local-first dedup: resolve everything once; a KQ entry whose TMDB id
+      // Group local items by TMDB id; within a group keep one entry so the same
+  // content never shows twice (anime wins over its tv shadow, direct VD keys
+  // win over native title entries). Returns [watchlist key] to drop.
+  function findShadowed(pushable) {
+    var byId = {};
+    pushable.forEach(function (p) {
+      var id = p.t.id + '-' + p.t.mediaType;
+      (byId[id] = byId[id] || []).push(p);
+    });
+    function prio(p) {
+      if (p.item.cat === 'anime') return 0;
+      if (/^(VDM_|VDT_)/.test(p.item.key)) return 1;
+      return 2;
+    }
+    var drop = [];
+    Object.keys(byId).forEach(function (id) {
+      var g = byId[id].slice().sort(function (a, b) { return prio(a) - prio(b); });
+      for (var i = 1; i < g.length; i++) drop.push(g[i].item.key);
+    });
+    return drop;
+  }
+
+  // Local-first dedup: resolve everything once; a KQ entry whose TMDB id
       // is already watchlisted (e.g. a tv entry that's here as anime) must
       // not come back as a VDT_ duplicate.
-      var pushable0 = await localPushable();
+      var pushable0 = await pushableP;
+      // Cleanup: drop local entries shadowed by a same-TMDB sibling (VDT_
+      // dupes imported before the guard existed). Silent — runs under the
+      // syncing flag so nothing echoes back out.
+      var shadowed = findShadowed(pushable0);
+      var cleaned = 0;
+      if (shadowed.length && window.vwlRemoveSilent) {
+        cleaned = window.vwlRemoveSilent(shadowed);
+        if (cleaned) {
+          var dropSet = {};
+          shadowed.forEach(function (k) { dropSet[k] = true; });
+          pushable0 = pushable0.filter(function (p) { return !dropSet[p.item.key]; });
+        }
+      }
       var covered = {};
       pushable0.forEach(function (p) { covered[p.t.id + '-' + p.t.mediaType] = true; });
 
@@ -307,7 +351,8 @@
         lastRemote = merged;
       }
       try { localStorage.setItem('vw_kq_last_sync', String(Date.now())); } catch (_) {}
-      toast('Synced — pulled ' + added + ', pushed ' + pushed);
+      toast('Synced — pulled ' + added + ', pushed ' + pushed +
+        (cleaned ? ', cleaned ' + cleaned + ' duplicate' + (cleaned !== 1 ? 's' : '') : ''));
     } catch (e) {
       toast((e && e.message) || 'KazoQueue sync failed', true);
     } finally {

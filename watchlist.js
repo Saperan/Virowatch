@@ -103,6 +103,19 @@
     return true;
   };
 
+  /* Bulk remove without AniList/KQ pushes — sync dedup cleanup. keys = [key] */
+  window.vwlRemoveSilent = function (keys) {
+    if (!keys || !keys.length) return 0;
+    var drop = {};
+    keys.forEach(function (k) { drop[k] = true; });
+    var list = getList();
+    var next = list.filter(function (i) { return !drop[i.key]; });
+    if (next.length === list.length) return 0;
+    setList(next);
+    refreshSidebar();
+    return list.length - next.length;
+  };
+
   /* Bulk rating apply without pushes — pull-sync companion. byKey = { key: stars } */
   window.vwlBulkSetRatings = function (byKey) {
     var list = getList();

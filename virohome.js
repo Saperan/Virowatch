@@ -96,6 +96,33 @@
     });
   }
 
+  /* Hide TV-show entries shadowed by a same-named anime entry (KQ imports
+     the TV version of anime that's already watchlisted). View-only —
+     nothing is deleted, the entry is just not shown under TV Shows. */
+  function normTitle(t) {
+    return (t || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+  }
+  function hideShadowed(list) {
+    var anime = {};
+    list.forEach(function (i) {
+      if (wlBucket(i) === "Anime") anime[normTitle(i.title || i.key)] = true;
+    });
+    var names = Object.keys(anime);
+    if (!names.length) return list;
+    return list.filter(function (i) {
+      if (wlBucket(i) !== "TV Shows") return true;
+      var t = normTitle(i.title || i.key);
+      if (!t) return true;
+      if (anime[t]) return false;
+      for (var k = 0; k < names.length; k++) {
+        var a = names[k];
+        var short = t.length < a.length ? t : a;
+        if (short.length >= 6 && (t.indexOf(a) !== -1 || a.indexOf(t) !== -1)) return false;
+      }
+      return true;
+    });
+  }
+
   /* ── Watch-status menu (one shared element, portaled to <body>) ── */
   var wlMenu = null;
   var wlMenuKey = null;
@@ -230,6 +257,7 @@
     }
     var prefs = getWlPrefs();
     list = filterWlList(list, prefs.show);
+    list = hideShadowed(list);
     if (!list.length) {
       ml.innerHTML =
         '<p style="grid-column:1/-1;text-align:center;padding:40px 0;opacity:.55;">' +

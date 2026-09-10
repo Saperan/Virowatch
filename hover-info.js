@@ -121,12 +121,32 @@
     return meta;
   }
 
-  function aniById(id) {
+  // TMDB fallback for anime cards when AniList comes back empty or errors
+  // (rate limits, no match, blocked network) — TV search, top hit details.
+  function tmdbAnimeFallback(title) {
+    if (!title) return Promise.resolve(emptyMeta("tmdb"));
+    return tmdb("/search/tv", { query: title }).then(function (res) {
+      var first = res && res.results && res.results[0];
+      if (!first) return emptyMeta("tmdb");
+      return tmdb("/tv/" + first.id, {}).then(function (d) {
+        var meta = metaFromTmdb(d, true);
+        return meta.ti ? meta : emptyMeta("tmdb");
+      });
+    }).catch(function () { return emptyMeta("tmdb"); });
+  }
+
+  function aniById(id, fallbackTitle) {
     return getMeta("id:" + id, function () {
       return gql(
         "query($id:Int){Media(id:$id,type:ANIME){" + ANI_FIELDS + "}}",
         { id: Number(id) },
-      ).then(function (j) { return metaFromAniList(j && j.data && j.data.Media); });
+      ).then(function (j) { return metaFromAniList(j && j.data && j.data.Media); }).then(
+        function (meta) {
+          if (meta && meta.ti) return meta;
+          return tmdbAnimeFallback(fallbackTitle);
+        },
+        function () { return tmdbAnimeFallback(fallbackTitle); },
+      );
     });
   }
 
@@ -135,7 +155,13 @@
       return gql(
         "query($q:String){Media(search:$q,type:ANIME){" + ANI_FIELDS + "}}",
         { q: title },
-      ).then(function (j) { return metaFromAniList(j && j.data && j.data.Media); });
+      ).then(function (j) { return metaFromAniList(j && j.data && j.data.Media); }).then(
+        function (meta) {
+          if (meta && meta.ti) return meta;
+          return tmdbAnimeFallback(title);
+        },
+        function () { return tmdbAnimeFallback(title); },
+      );
     });
   }
 
@@ -727,7 +753,7 @@
   function metaFor(el) {
     var kind = kindOf(el);
     if (!kind) return Promise.resolve(null);
-    if (kind === "ani-id") return aniById(el.dataset.aniListId);
+    if (kind === "ani-id") return aniById(el.dataset.aniListId, titleOf(el));
     if (kind === "movie-id")
       return tmdbById(el.dataset.movie.slice(4), false);
     if (kind === "tv-id") return tmdbById(el.dataset.movie.slice(4), true);
