@@ -451,7 +451,7 @@
       .vw-rate-label{ font-family:"Kanit",sans-serif; font-size:.78rem; color:var(--vw-muted,rgba(255,255,255,.6)); min-width:104px; }
       .vw-rate-stars{ position:relative; display:inline-block; line-height:1; cursor:pointer; }
       .vw-rate-base{ color:rgba(255,255,255,.22); font-size:1.6rem; letter-spacing:3px; }
-      .vw-rate-fill{ position:absolute; left:0; top:0; overflow:hidden; white-space:nowrap; width:0; color:#ffcf40; font-size:1.6rem; letter-spacing:3px; transition:width .16s ease; pointer-events:none; text-shadow:0 0 12px rgba(255,207,64,.45); }
+      .vw-rate-fill{ position:absolute; left:0; top:0; overflow:hidden; white-space:nowrap; width:0; color:#fff; font-size:1.6rem; letter-spacing:3px; transition:width .16s ease; pointer-events:none; text-shadow:0 0 12px rgba(255,255,255,.35); }
       .vw-rate-hit{ position:absolute; inset:0; display:flex; }
       .vw-rate-hit button{ flex:1; background:none; border:none; padding:0; margin:0; cursor:pointer; transition:transform .12s ease; }
       .vw-rate-hit button:hover{ transform:scale(1.3); }

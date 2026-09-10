@@ -38,6 +38,7 @@
     idToken = null;
     if (s) { try { localStorage.setItem(LS_KEY, JSON.stringify(s)); } catch (_) {} }
     else { try { localStorage.removeItem(LS_KEY); } catch (_) {} }
+    changed();
   }
 
   /* ── Token (securetoken REST — no origin check) ── */
@@ -50,7 +51,7 @@
       body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(sess.refreshToken),
     });
     if (!r.ok) {
-      if (r.status === 400) { saveSess(null); updateRail(); renderModal(); throw new Error('Login expired — connect again'); }
+      if (r.status === 400) { saveSess(null); throw new Error('Login expired — connect again'); }
       throw new Error('token refresh failed');
     }
     var j = await r.json();
@@ -90,6 +91,14 @@
   }
 
   var FS = 'https://firestore.googleapis.com/v1/projects/' + PROJECT + '/databases/(default)/documents';
+  // Google picture claim out of the ID token (fallback avatar).
+  function idPicture() {
+    try {
+      var pay = idToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (pay.length % 4) pay += '=';
+      return JSON.parse(atob(pay)).picture || null;
+    } catch (_) { return null; }
+  }
   async function fsReq(method, path, body, retry) {
     var t = await token(false);
     var r = await fetch(FS + path + (path.indexOf('?') === -1 ? '?' : '&') + 'key=' + API_KEY, {
@@ -102,9 +111,12 @@
     if (!r.ok) throw new Error('sync failed (' + r.status + ')');
     return r.json();
   }
+  var lastProfile = null; // KQ profile block from the same users/{uid} doc (avatar)
   async function fsLoad() {
     var d = await fsReq('GET', '/users/' + encodeURIComponent(sess.uid));
+    lastProfile = null;
     if (!d || !d.fields || !d.fields.watchlist) return [];
+    if (d.fields.profile) { try { lastProfile = dec(d.fields.profile); } catch (_) {} }
     var w = dec(d.fields.watchlist);
     return Array.isArray(w) ? w : [];
   }
@@ -236,17 +248,36 @@
   async function syncNow() {
     if (!sess || syncing) return;
     syncing = true;
-    renderModal();
+    changed();
     try {
       toast('Syncing with KazoQueue…');
       var remote = await fsLoad();
       lastRemote = remote;
+
+      // Avatar: custom KQ upload first, Google picture fallback.
+      var av = (lastProfile && lastProfile.avatar) || idPicture() || (sess && sess.avatar) || '';
+      if (av !== ((sess && sess.avatar) || '')) {
+        sess.avatar = av;
+        try { localStorage.setItem(LS_KEY, JSON.stringify(sess)); }
+        catch (_) {
+          try { localStorage.setItem(LS_KEY, JSON.stringify({ refreshToken: sess.refreshToken, uid: sess.uid, name: sess.name })); }
+          catch (_) {}
+        }
+      }
+
+      // Local-first dedup: resolve everything once; a KQ entry whose TMDB id
+      // is already watchlisted (e.g. a tv entry that's here as anime) must
+      // not come back as a VDT_ duplicate.
+      var pushable0 = await localPushable();
+      var covered = {};
+      pushable0.forEach(function (p) { covered[p.t.id + '-' + p.t.mediaType] = true; });
 
       // Pull: remote → local (bulk ops don't echo back)
       var toAdd = [], statusByKey = {}, datesByKey = {}, ratingsByKey = {};
       remote.forEach(function (k) {
         var v = kqToVw(k);
         if (!v) return;
+        if (covered[(k.tmdbId) + '-' + (k.mediaType === 'tv' ? 'tv' : 'movie')]) return;
         toAdd.push(v);
         statusByKey[v.key] = v.status;
         if (v.startedAt || v.completedAt) {
@@ -262,8 +293,7 @@
       if (window.vwlBulkSetRatings) window.vwlBulkSetRatings(ratingsByKey);
 
       // Push: local-only / local-newer items win, then write once
-      var pushable = await localPushable();
-      var localKq = pushable.map(function (p) { return vwToKq(p.item, p.t); }).filter(Boolean);
+      var localKq = pushable0.map(function (p) { return vwToKq(p.item, p.t); }).filter(Boolean);
       var merged = mergeKQ(remote, localKq);
       var pushed = 0;
       var remoteById = {};
@@ -282,7 +312,7 @@
       toast((e && e.message) || 'KazoQueue sync failed', true);
     } finally {
       syncing = false;
-      renderModal();
+      changed();
     }
   }
   window.vwKqSyncNow = syncNow;
@@ -310,8 +340,8 @@
     var to = location.origin === 'null' ? '' : location.origin;
     var pop = window.open(HANDOFF + '?to=' + encodeURIComponent(to) + '&req=' + encodeURIComponent(req),
       'kqsync', 'width=480,height=600,noopener=no');
-    if (!pop) { setStatus('Popup blocked — allow popups and try again.'); return; }
-    setStatus('Waiting for KazoQueue login…');
+    if (!pop) { toast('Popup blocked — allow popups and try again.', true); return; }
+    toast('Waiting for KazoQueue login…');
     var done = false;
     function onMsg(e) {
       if (e.origin !== KQ_ORIGIN) return;
@@ -322,8 +352,6 @@
       clearTimeout(popTid);
       try { pop.close(); } catch (_) {}
       saveSess({ refreshToken: d.refreshToken, uid: d.uid, name: d.name || 'KazoQueue user' });
-      updateRail();
-      renderModal();
       toast('Connected as ' + sess.name);
       syncNow().catch(function () {});
     }
@@ -332,101 +360,30 @@
     popTid = setTimeout(function () {
       if (done) return;
       window.removeEventListener('message', onMsg);
-      setStatus('No response — the handoff page may not be deployed yet (sync-handoff.html).');
+      toast('No response — the handoff page may not be deployed yet (sync-handoff.html).', true);
     }, 90000);
   }
 
   function logout() {
     saveSess(null);
     lastRemote = null;
-    updateRail();
-    renderModal();
     toast('Disconnected from KazoQueue');
   }
 
-  /* ── Rail + modal (same shell as anilist.js) ── */
-  var overlay = null;
-  function el(tag, cls, text) {
-    var n = document.createElement(tag);
-    if (cls) n.className = cls;
-    if (text != null) n.textContent = text;
-    return n;
+  /* ── Shared UI: rendered inside the AniList modal (anilist.js reads
+     window.vwKq and re-renders on 'vw-kq-changed') ── */
+  function changed() {
+    window.dispatchEvent(new CustomEvent('vw-kq-changed'));
   }
-  function setStatus(t) {
-    var s = overlay && overlay.querySelector('#kqStatus');
-    if (s) s.textContent = t;
-  }
-  function updateRail() {
-    var label = document.getElementById('railKqLabel');
-    var btn = document.getElementById('railKqBtn');
-    if (!label) return;
-    label.textContent = sess && sess.name ? sess.name : 'KazoQueue';
-    if (btn) btn.title = sess && sess.name ? 'KazoQueue — ' + sess.name : 'KazoQueue sync';
-  }
-  function ensureModal() {
-    if (overlay) return overlay;
-    overlay = document.createElement('div');
-    overlay.id = 'kqOverlay';
-    overlay.className = 'vws-overlay';
-    overlay.setAttribute('aria-hidden', 'true');
-    overlay.innerHTML =
-      '<div class="vws-modal" role="dialog" aria-modal="true" aria-label="KazoQueue">' +
-        '<div class="vws-header">' +
-          '<span class="anl-logo">▤</span>' +
-          '<div><div class="vws-title">KazoQueue</div>' +
-          '<div class="vws-sub">Watchlist sync</div></div>' +
-          '<button type="button" class="vws-close" id="kqClose" aria-label="Close">×</button>' +
-        '</div>' +
-        '<div class="vws-body" id="kqBody"></div>' +
-      '</div>';
-    document.body.appendChild(overlay);
-    overlay.addEventListener('mousedown', function (e) { if (e.target === overlay) closeModal(); });
-    overlay.querySelector('#kqClose').addEventListener('click', closeModal);
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && overlay.classList.contains('vws-open')) closeModal();
-    });
-    return overlay;
-  }
-  function openModal() {
-    ensureModal();
-    renderModal();
-    overlay.classList.add('vws-open');
-    overlay.setAttribute('aria-hidden', 'false');
-    if (window.vwSettingsClose) window.vwSettingsClose();
-  }
-  function closeModal() {
-    if (!overlay) return;
-    overlay.classList.remove('vws-open');
-    overlay.setAttribute('aria-hidden', 'true');
-  }
-  function renderModal() {
-    if (!overlay) return;
-    var body = overlay.querySelector('#kqBody');
-    if (!body) return;
-    body.innerHTML = '';
-    if (sess && sess.uid) {
-      body.appendChild(el('div', 'anilist-hint', 'Connected as ' + (sess.name || 'KazoQueue user') + '. Movies and shows sync both ways.'));
-      var syncBtn = el('button', 'app-sidebar-import-btn', syncing ? 'Syncing…' : '⇅ Sync now');
-      syncBtn.type = 'button';
-      syncBtn.disabled = syncing;
-      syncBtn.addEventListener('click', syncNow);
-      body.appendChild(syncBtn);
-      var outBtn = el('button', 'app-sidebar-import-btn anl-logout', 'Log out');
-      outBtn.type = 'button';
-      outBtn.addEventListener('click', logout);
-      body.appendChild(outBtn);
-    } else {
-      body.appendChild(el('div', 'anilist-hint',
-        'Log in with the same Google account you use on KazoQueue. A KazoQueue popup handles the login — Virowatch only keeps a sync token.'));
-      var goBtn = el('button', 'app-sidebar-import-btn', 'Continue with KazoQueue ↗');
-      goBtn.type = 'button';
-      goBtn.addEventListener('click', login);
-      body.appendChild(goBtn);
-    }
-    body.appendChild(el('div', 'anl-status', ''));
-    var st = body.lastChild;
-    st.id = 'kqStatus';
-  }
+  window.vwKq = {
+    connected: function () { return !!(sess && sess.uid); },
+    name: function () { return (sess && sess.name) || ''; },
+    avatar: function () { return (sess && sess.avatar) || ''; },
+    syncing: function () { return syncing; },
+    login: login,
+    logout: logout,
+    syncNow: syncNow,
+  };
 
   function toast(msg, isError) {
     var t = document.getElementById('vwl-toast');
@@ -439,12 +396,6 @@
   }
 
   function init() {
-    var btn = document.getElementById('railKqBtn');
-    if (btn) btn.addEventListener('click', function () {
-      if (overlay && overlay.classList.contains('vws-open')) closeModal();
-      else openModal();
-    });
-    updateRail();
     if (sess && sess.uid) {
       var last = parseInt(localStorage.getItem('vw_kq_last_sync') || '0', 10);
       if (Date.now() - last > 30 * 60 * 1000) {

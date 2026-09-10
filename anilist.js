@@ -8,7 +8,9 @@
  *    no Save button, and a first sync runs right away.
  *  - Logged in: avatar + name, "Sync now", "Log out".
  *  - While logged in, adding/removing anime on the watchlist is pushed to
- *    the AniList list automatically (watchlist.js calls vwAniListPush).
+ *    the AniList list automatically (watchlist.js calls vwAniListPush),
+ *    including start/finish dates: Watching stamps startedAt, Watched
+ *    stamps completedAt, and Sync now pulls both back down.
  *
  * SETUP (site owner, one time — makes the button one-click for everyone):
  *  1. anilist.co → Settings → Apps → Developer → "Create New Client"
@@ -27,16 +29,35 @@
   var Q_VIEWER = 'query{Viewer{id name avatar{medium}}}';
   var Q_LIST =
     'query($userId:Int){MediaListCollection(userId:$userId,type:ANIME,' +
-    'status_in:[CURRENT,REPEATING,PLANNING,PAUSED,COMPLETED]){lists{entries{status media{id ' +
+    'status_in:[CURRENT,REPEATING,PLANNING,PAUSED,COMPLETED]){lists{entries{status ' +
+    'startedAt{year month day}completedAt{year month day}media{id ' +
     'title{romaji english}coverImage{large}}}}}}';
   var Q_ENTRY = 'query($mediaId:Int,$userId:Int){MediaList(mediaId:$mediaId,userId:$userId){id}}';
   var Q_FIND =
     'query($q:String){Page(perPage:8){media(search:$q,type:ANIME){id format ' +
     'title{romaji english}synonyms}}}';
   var M_SAVE =
-    'mutation($mediaId:Int,$status:MediaListStatus){' +
-    'SaveMediaListEntry(mediaId:$mediaId,status:$status){id}}';
+    'mutation($mediaId:Int,$status:MediaListStatus,' +
+    '$startedAt:FuzzyDateInput,$completedAt:FuzzyDateInput){' +
+    'SaveMediaListEntry(mediaId:$mediaId,status:$status,' +
+    'startedAt:$startedAt,completedAt:$completedAt){id}}';
   var M_DEL   = 'mutation($id:Int){DeleteMediaListEntry(id:$id){deleted}}';
+
+  /* Local YYYY-MM-DD ↔ AniList FuzzyDateInput. Missing side stays
+     undefined so JSON.stringify drops it and the remote date is kept. */
+  function fuzzyDate(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+    if (!m) return undefined;
+    return { year: +m[1], month: +m[2], day: +m[3] };
+  }
+  function isoDate(f) {
+    if (!f || !f.year || !f.month || !f.day) return null;
+    function p(n) { return (n < 10 ? '0' : '') + n; }
+    return f.year + '-' + p(f.month) + '-' + p(f.day);
+  }
+  function dateVars(item) {
+    return { startedAt: fuzzyDate(item && item.startedAt), completedAt: fuzzyDate(item && item.completedAt) };
+  }
 
   /* Local watchlist statuses ↔ AniList list statuses */
   var TO_ANILIST = { watching: 'CURRENT', planning: 'PLANNING', watched: 'COMPLETED' };
@@ -239,10 +260,20 @@
     if (!mediaId) return;
     try {
       if (op === 'add') {
-        await gql(M_SAVE, { mediaId: mediaId, status: aniStatusOf(item) });
+        var addVars = { mediaId: mediaId, status: aniStatusOf(item) };
+        if (item.startedAt || item.completedAt) {
+          var ad = dateVars(item);
+          if (ad.startedAt) addVars.startedAt = ad.startedAt;
+          if (ad.completedAt) addVars.completedAt = ad.completedAt;
+        }
+        await gql(M_SAVE, addVars);
         toast('Added to AniList: ' + (item.title || ''));
       } else if (op === 'status') {
-        await gql(M_SAVE, { mediaId: mediaId, status: aniStatusOf(item) });
+        var stVars = { mediaId: mediaId, status: aniStatusOf(item) };
+        var sd = dateVars(item);
+        if (sd.startedAt) stVars.startedAt = sd.startedAt;
+        if (sd.completedAt) stVars.completedAt = sd.completedAt;
+        await gql(M_SAVE, stVars);
         toast('AniList: ' + (item.title || '') + ' → ' + aniStatusOf(item).toLowerCase());
       } else if (op === 'remove') {
         var d = await gql(Q_ENTRY, { mediaId: mediaId, userId: auth.userId });
@@ -286,6 +317,7 @@
       var remoteIds = new Set();
       var toAdd = [];
       var statusByKey = {}; // pull statuses onto items we already have
+      var datesByKey = {}; // pull start/finish dates the same way
       var missing = 0;
       entries.forEach(function (en) {
         var m = en.media;
@@ -295,6 +327,13 @@
         if (!c) { missing++; return; }
         var status = FROM_ANILIST[en.status] || 'planning';
         statusByKey['ANI_' + c.id] = status;
+        var startedAt = isoDate(en.startedAt);
+        var completedAt = isoDate(en.completedAt);
+        if (startedAt || completedAt) {
+          datesByKey['ANI_' + c.id] = {};
+          if (startedAt) datesByKey['ANI_' + c.id].startedAt = startedAt;
+          if (completedAt) datesByKey['ANI_' + c.id].completedAt = completedAt;
+        }
         toAdd.push({
           key: 'ANI_' + c.id,
           title: c.title || (m.title && (m.title.english || m.title.romaji)) || '',
@@ -302,10 +341,13 @@
           cat: 'anime',
           aniId: c.id,
           status: status,
+          startedAt: startedAt,
+          completedAt: completedAt,
         });
       });
       var added = window.vwlBulkAdd ? window.vwlBulkAdd(toAdd) : 0;
       if (window.vwlBulkSetStatus) window.vwlBulkSetStatus(statusByKey);
+      if (window.vwlBulkSetDates) window.vwlBulkSetDates(datesByKey);
 
       /* 2. Push — local anime entries missing on AniList (as PLANNING).
          Anikoto entries map by id; native Virowatch anime match by title. */
@@ -319,7 +361,11 @@
         var mediaId = await resolveAniListId(local[i]);
         if (!mediaId || remoteIds.has(Number(mediaId))) continue;
         try {
-          await gql(M_SAVE, { mediaId: mediaId, status: aniStatusOf(local[i]) });
+          var pushVars = { mediaId: mediaId, status: aniStatusOf(local[i]) };
+          var pd = dateVars(local[i]);
+          if (pd.startedAt) pushVars.startedAt = pd.startedAt;
+          if (pd.completedAt) pushVars.completedAt = pd.completedAt;
+          await gql(M_SAVE, pushVars);
           pushed++;
           await sleep(400); // stay well under AniList rate limits
         } catch (_) {}
@@ -456,6 +502,7 @@
 
       body.appendChild(el('div', 'anilist-hint',
         'Anime you add or remove on the watchlist is synced to your AniList list automatically.'));
+      renderKqSection(body);
       return;
     }
 
@@ -571,6 +618,45 @@
     input.addEventListener('paste', function () { setTimeout(attempt, 50); });
     input.addEventListener('input', function () { setTimeout(attempt, 300); });
     input.addEventListener('keydown', function (e) { if (e.key === 'Enter') attempt(); });
+    renderKqSection(body);
+  }
+
+  /* ── KazoQueue section (logic lives in kazoqueue-sync.js) ── */
+  function renderKqSection(body) {
+    if (typeof window.vwKq === 'undefined' || !window.vwKq) return;
+    var kq = window.vwKq;
+    var sep = el('div', 'anilist-hint');
+    sep.style.cssText = 'border-top:1px solid var(--vw-border,rgba(255,255,255,.1));padding-top:12px;margin-top:6px;font-weight:600;';
+    sep.textContent = 'KazoQueue sync';
+    body.appendChild(sep);
+    if (kq.connected()) {
+      var acc = el('div', 'anilist-account');
+      if (kq.avatar()) {
+        var img = el('img', 'anilist-avatar');
+        img.alt = '';
+        img.src = kq.avatar();
+        acc.appendChild(img);
+      }
+      acc.appendChild(el('span', 'anilist-name', kq.name() || 'KazoQueue user'));
+      acc.appendChild(el('span', 'anilist-badge', 'Connected'));
+      body.appendChild(acc);
+      var syncBtn = el('button', 'app-sidebar-import-btn', kq.syncing() ? 'Syncing…' : '⇅ Sync KazoQueue');
+      syncBtn.type = 'button';
+      syncBtn.disabled = kq.syncing();
+      syncBtn.addEventListener('click', function () { kq.syncNow(); });
+      body.appendChild(syncBtn);
+      var outBtn = el('button', 'app-sidebar-import-btn anl-logout', 'Disconnect KazoQueue');
+      outBtn.type = 'button';
+      outBtn.addEventListener('click', function () { kq.logout(); });
+      body.appendChild(outBtn);
+    } else {
+      body.appendChild(el('div', 'anilist-hint',
+        'Same Google account as KazoQueue — movies, shows and anime sync both ways.'));
+      var goBtn = el('button', 'app-sidebar-import-btn', 'Continue with KazoQueue ↗');
+      goBtn.type = 'button';
+      goBtn.addEventListener('click', function () { kq.login(); });
+      body.appendChild(goBtn);
+    }
   }
 
   /* ─────────────────────────────────────────────────────
@@ -593,6 +679,7 @@
     var btn = document.getElementById('railAniListBtn');
     if (btn) btn.addEventListener('click', toggleModal);
     updateRail();
+    window.addEventListener('vw-kq-changed', function () { renderModal(); });
     if (auth && auth.userId) {
       var last = parseInt(localStorage.getItem('vw_anilist_last_sync') || '0', 10);
       if (Date.now() - last > 30 * 60 * 1000) {
