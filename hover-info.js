@@ -447,6 +447,16 @@
       .vwh-desc{ word-spacing:normal !important; letter-spacing:normal !important; white-space:normal !important; }
       .vw-detail-cast b{ color:#fff; }
       @media(max-width:480px){ .vw-detail-body{ flex-direction:column; align-items:center; text-align:center; padding:0 16px 16px; } .vw-detail-poster{ width:140px; height:200px; margin-top:-50px; } .vw-detail-banner{ height: 200px; } .vw-detail-info{ width:100%; padding-top:8px; } }
+      .vw-detail-rate{ display:flex; align-items:center; gap:12px; margin:2px 0 12px; }
+      .vw-rate-label{ font-family:"Kanit",sans-serif; font-size:.78rem; color:var(--vw-muted,rgba(255,255,255,.6)); min-width:104px; }
+      .vw-rate-stars{ position:relative; display:inline-block; line-height:1; cursor:pointer; }
+      .vw-rate-base{ color:rgba(255,255,255,.22); font-size:1.6rem; letter-spacing:3px; }
+      .vw-rate-fill{ position:absolute; left:0; top:0; overflow:hidden; white-space:nowrap; width:0; color:#ffcf40; font-size:1.6rem; letter-spacing:3px; transition:width .16s ease; pointer-events:none; text-shadow:0 0 12px rgba(255,207,64,.45); }
+      .vw-rate-hit{ position:absolute; inset:0; display:flex; }
+      .vw-rate-hit button{ flex:1; background:none; border:none; padding:0; margin:0; cursor:pointer; transition:transform .12s ease; }
+      .vw-rate-hit button:hover{ transform:scale(1.3); }
+      .vw-rate-stars.pop .vw-rate-fill{ animation:vw-rate-pop .3s ease; }
+      @keyframes vw-rate-pop{ 40%{ transform:scale(1.12); } 100%{ transform:scale(1); } }
     `;
     document.head.appendChild(s);
   }
@@ -466,6 +476,7 @@
           '<div class="vw-detail-info">' +
             '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><div class="vw-detail-title" style="margin-bottom:0;flex:1;"></div><span class="vw-detail-age" style="display:none;"></span></div>' +
             '<div class="vw-detail-meta"></div>' +
+            '<div class="vw-detail-rate" style="display:none;"></div>' +
             '<div class="vw-detail-tags"></div>' +
             '<div class="vw-detail-desc"></div>' +
             '<div class="vw-detail-cast"></div>' +
@@ -536,6 +547,77 @@
       dTags.appendChild(pill);
     });
     dTags.style.display = meta.ge && meta.ge.length ? "" : "none";
+    // ── Your star rating (KazoQueue 1–10 ⇔ 5 stars, halves) ──
+    (function () {
+      var dRate = detailOverlay.querySelector(".vw-detail-rate");
+      dRate.innerHTML = "";
+      var rk = null, mv = el.dataset.movie;
+      if (mv) rk = { key: mv, cat: el.dataset.cat || (mv.indexOf("VDT_") === 0 ? "shows" : "movies") };
+      else if (el.dataset.aniId) rk = { key: "ANI_" + el.dataset.aniId, cat: "anime" };
+      if (!rk || typeof window.vwlGet !== "function" || typeof window.vwlSetRating !== "function") {
+        dRate.style.display = "none";
+        return;
+      }
+      dRate.style.display = "";
+      var item = { key: rk.key, cat: rk.cat, title: title, image: posterSrc };
+      function current() {
+        var list = window.vwlGet();
+        for (var i = 0; i < list.length; i++) if (list[i].key === rk.key) return list[i].rating || 0;
+        return 0;
+      }
+      var label = document.createElement("span");
+      label.className = "vw-rate-label";
+      var stars = document.createElement("div");
+      stars.className = "vw-rate-stars";
+      stars.setAttribute("role", "radiogroup");
+      stars.setAttribute("aria-label", "Your rating");
+      var base = document.createElement("div");
+      base.className = "vw-rate-base";
+      base.textContent = "★★★★★";
+      base.setAttribute("aria-hidden", "true");
+      var fill = document.createElement("div");
+      fill.className = "vw-rate-fill";
+      fill.textContent = "★★★★★";
+      fill.setAttribute("aria-hidden", "true");
+      var hit = document.createElement("div");
+      hit.className = "vw-rate-hit";
+      function show(v) {
+        v = Math.round(v * 2) / 2;
+        fill.style.width = (v / 5 * 100) + "%";
+        label.textContent = v > 0 ? "Your rating: " + v : "Rate it";
+      }
+      show(current());
+      for (var s = 0; s < 5; s++) {
+        (function (idx) {
+          var b = document.createElement("button");
+          b.type = "button";
+          b.setAttribute("aria-label", (idx + 1) + " star" + (idx ? "s" : ""));
+          function valFrom(e) {
+            var r = b.getBoundingClientRect();
+            var x = (e.clientX != null ? e.clientX : r.left + r.width / 2) - r.left;
+            return idx + (x >= r.width / 2 ? 1 : 0.5);
+          }
+          b.addEventListener("mousemove", function (e) { show(valFrom(e)); });
+          b.addEventListener("click", function (e) {
+            var v = valFrom(e);
+            if (window.vwlHas && !window.vwlHas(rk.key) && window.vwlToggle) window.vwlToggle(item);
+            if (v === current()) window.vwlSetRating(rk.key, 0); // tap again = clear
+            else window.vwlSetRating(rk.key, v);
+            stars.classList.remove("pop");
+            void stars.offsetWidth;
+            stars.classList.add("pop");
+            show(current());
+          });
+          hit.appendChild(b);
+        })(s);
+      }
+      stars.addEventListener("mouseleave", function () { show(current()); });
+      stars.appendChild(base);
+      stars.appendChild(fill);
+      stars.appendChild(hit);
+      dRate.appendChild(label);
+      dRate.appendChild(stars);
+    })();
     dMeta.textContent = "";
     dCast.innerHTML = '<span style="opacity:.6">Loading cast & rating…</span>';
     detailOverlay.classList.add("vws-open");

@@ -49,16 +49,72 @@
     if (window.vwAniListPush) window.vwAniListPush('add', item); // sync to AniList
   }
 
-  /* Status change from the watchlist view — pushes to AniList (anime) */
+  /* Status change from the watchlist view — pushes to AniList (anime).
+     Stamps startedAt/completedAt (YYYY-MM-DD) so AniList gets its
+     start/finish dates; existing stamps are never overwritten. */
+  function todayIso() {
+    var t = new Date();
+    function p(n) { return (n < 10 ? '0' : '') + n; }
+    return t.getFullYear() + '-' + p(t.getMonth() + 1) + '-' + p(t.getDate());
+  }
   window.vwlSetStatus = function (key, status) {
     var list = getList();
     var it = null;
     list.forEach(function (i) { if (i.key === key) it = i; });
     if (!it || it.status === status) return;
     it.status = status;
+    if (status === 'watching' && !it.startedAt) it.startedAt = todayIso();
+    if (status === 'watched') {
+      if (!it.completedAt) it.completedAt = todayIso();
+      if (!it.startedAt) it.startedAt = it.completedAt;
+    }
     setList(list);
     refreshSidebar();
     if (window.vwAniListPush) window.vwAniListPush('status', it);
+  };
+
+  /* Bulk date update without AniList pushes — pull-sync companion to
+     vwlBulkSetStatus. byKey = { key: { startedAt, completedAt } } */
+  window.vwlBulkSetDates = function (byKey) {
+    var list = getList();
+    var changed = 0;
+    list.forEach(function (i) {
+      var d = byKey && byKey[i.key];
+      if (!d) return;
+      if (d.startedAt && i.startedAt !== d.startedAt) { i.startedAt = d.startedAt; changed++; }
+      if (d.completedAt && i.completedAt !== d.completedAt) { i.completedAt = d.completedAt; changed++; }
+    });
+    if (changed) { setList(list); refreshSidebar(); }
+    return changed;
+  };
+
+  /* Star rating (0–5, halves) for the detail-card widget + KazoQueue sync.
+     Same value the widget shows; KQ stores it 1–10 (×2). Fires vwl-updated
+     so the KQ live push picks it up — no AniList op (scores differ per user). */
+  window.vwlSetRating = function (key, rating) {
+    var list = getList();
+    var it = null;
+    list.forEach(function (i) { if (i.key === key) it = i; });
+    if (!it) return false;
+    if (rating == null || rating <= 0) delete it.rating;
+    else it.rating = Math.min(5, Math.round(rating * 2) / 2);
+    setList(list);
+    window.dispatchEvent(new CustomEvent('vwl-updated'));
+    return true;
+  };
+
+  /* Bulk rating apply without pushes — pull-sync companion. byKey = { key: stars } */
+  window.vwlBulkSetRatings = function (byKey) {
+    var list = getList();
+    var changed = 0;
+    list.forEach(function (i) {
+      var r = byKey && byKey[i.key];
+      if (r == null) return;
+      r = Math.min(5, Math.round(r * 2) / 2);
+      if (i.rating !== r) { i.rating = r; changed++; }
+    });
+    if (changed) setList(list);
+    return changed;
   };
 
   /* Bulk status update without AniList pushes — used by the pull-sync so

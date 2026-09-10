@@ -182,6 +182,7 @@
   function kqToVw(k) {
     if (!k || !k.tmdbId) return null;
     var isMovie = k.mediaType !== 'tv';
+    var ur = parseFloat(k.userRating);
     return {
       key: (isMovie ? 'VDM_' : 'VDT_') + k.tmdbId,
       title: k.title || ('TMDB ' + k.tmdbId),
@@ -191,6 +192,7 @@
       kqStatus: k.status || 'Plan to Watch',
       startedAt: k.startDate || undefined,
       completedAt: k.endDate || undefined,
+      rating: ur > 0 ? Math.min(5, Math.round(ur) / 2) : undefined, // KQ 1–10 → VW stars
       updatedAt: k.updatedAt || 0,
     };
   }
@@ -211,7 +213,7 @@
       desc: '',
       genreIds: [],
       status: st,
-      userRating: '0',
+      userRating: it.rating ? String(Math.round(it.rating * 2)) : '0', // VW stars → KQ 1–10
       rewatches: '0',
       startDate: it.startedAt || '',
       endDate: it.completedAt || '',
@@ -241,7 +243,7 @@
       lastRemote = remote;
 
       // Pull: remote → local (bulk ops don't echo back)
-      var toAdd = [], statusByKey = {}, datesByKey = {};
+      var toAdd = [], statusByKey = {}, datesByKey = {}, ratingsByKey = {};
       remote.forEach(function (k) {
         var v = kqToVw(k);
         if (!v) return;
@@ -252,10 +254,12 @@
           if (v.startedAt) datesByKey[v.key].startedAt = v.startedAt;
           if (v.completedAt) datesByKey[v.key].completedAt = v.completedAt;
         }
+        if (v.rating) ratingsByKey[v.key] = v.rating;
       });
       var added = window.vwlBulkAdd ? window.vwlBulkAdd(toAdd) : 0;
       if (window.vwlBulkSetStatus) window.vwlBulkSetStatus(statusByKey);
       if (window.vwlBulkSetDates) window.vwlBulkSetDates(datesByKey);
+      if (window.vwlBulkSetRatings) window.vwlBulkSetRatings(ratingsByKey);
 
       // Push: local-only / local-newer items win, then write once
       var pushable = await localPushable();
