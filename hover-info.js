@@ -20,7 +20,7 @@
   // ms the pointer must rest before the card shows (localStorage override) — halved for quicker feel
   var HOVER_DELAY = Number(localStorage.getItem("vw_hover_delay")) || 750;
   var CARD_W = 340;
-  var META_KEY = "vw_ani_meta_v1";
+  var META_KEY = "vw_ani_meta_v2"; // v2: pre-fallback empty misses are ignored
   var META_TTL = 7 * 24 * 3600 * 1000;
   var META_MAX = 400; // prune oldest entries beyond this many titles
   var BACKDROP = "https://image.tmdb.org/t/p/w780";
@@ -70,7 +70,11 @@
     pending[key] = fetcher().then(
       function (meta) {
         delete pending[key];
-        store[key] = meta || emptyMeta("");
+        var m = meta || emptyMeta("");
+        // Total miss (AniList AND TMDB failed) — expire immediately so the
+        // next hover retries instead of sitting on empty for a week.
+        if (!m.ti && !m.de && !(m.ge || []).length && !m.ba) m.t = 0;
+        store[key] = m;
         saveStore();
         return store[key];
       },
