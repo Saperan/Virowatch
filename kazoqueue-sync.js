@@ -9,6 +9,8 @@
  * Mapping is TMDB-id based, so movies/TV match exactly:
  *   KQ { tmdbId, mediaType: movie } ⇔ VW { key: VDM_<id>, cat: movies }
  *   KQ { tmdbId, mediaType: tv }    ⇔ VW { key: VDT_<id>, cat: shows }
+ * Anime (incl. AniList entries) + native titles resolve through Vidnest's
+ * TMDB search and push as TV/movies; ids are cached in vw_kq_tmdb.
  * Statuses: Watching/Completed map over; On Hold/Dropped fold to planning
  * locally but are preserved on push (kqStatus) so nothing gets clobbered.
  * KQ startDate/endDate ride on the watchlist startedAt/completedAt stamps.
@@ -123,7 +125,60 @@
     if (!m) return null;
     return { id: +m[2], mediaType: m[1] === 'VDM_' ? 'movie' : 'tv' };
   }
-  // ponytail: KQ tv anime stays VDT_ — the ⇄ Source picker's cross-source row offers Anikoto anyway
+
+  // TMDB id cache for non-VD items (anime, native titles): watchlist key → {id, mediaType}
+  var TMDB_CACHE_KEY = 'vw_kq_tmdb';
+  function tmdbCacheGet(key) {
+    try { return JSON.parse(localStorage.getItem(TMDB_CACHE_KEY) || '{}')[key] || null; }
+    catch (_) { return null; }
+  }
+  function tmdbCacheSet(key, t) {
+    try {
+      var m = JSON.parse(localStorage.getItem(TMDB_CACHE_KEY) || '{}');
+      m[key] = t;
+      localStorage.setItem(TMDB_CACHE_KEY, JSON.stringify(m));
+    } catch (_) {}
+  }
+  function sleep(ms) { return new Promise(function (res) { setTimeout(res, ms); }); }
+
+  // Every watchlist item → TMDB {id, mediaType}, anime included (AniList
+  // entries sync here too — KQ gets them as TV). VD keys are direct;
+  // everything else resolves via Vidnest's TMDB search, then cached.
+  async function resolveTmdb(it) {
+    var direct = tmdbOf(it);
+    if (direct) return direct;
+    if (!it || !it.key || !it.title) return null;
+    var hit = tmdbCacheGet(it.key);
+    if (hit) return hit;
+    if (typeof window.vidnestSearch !== 'function') return null;
+    try {
+      var res = await window.vidnestSearch(it.title);
+      var pool = res || [];
+      if (it.cat === 'anime') pool = pool.filter(function (r) { return r.key.indexOf('VDT_') === 0; });
+      else if (it.cat === 'movies') pool = pool.filter(function (r) { return r.key.indexOf('VDM_') === 0; });
+      else if (it.cat === 'shows') pool = pool.filter(function (r) { return r.key.indexOf('VDT_') === 0; });
+      pool.sort(function (a, b) { return (b.score || 0) - (a.score || 0); });
+      if (!pool.length) return null;
+      var m = /^(VDM_|VDT_)(\d+)$/.exec(pool[0].key);
+      if (!m) return null;
+      var t = { id: +m[2], mediaType: m[1] === 'VDM_' ? 'movie' : 'tv' };
+      tmdbCacheSet(it.key, t);
+      return t;
+    } catch (_) { return null; }
+  }
+
+  // All pushable local items with their TMDB ids (searches run sequential +
+  // polite; cached after the first sync).
+  async function localPushable() {
+    var list = typeof window.vwlGet === 'function' ? window.vwlGet() : [];
+    var out = [];
+    for (var i = 0; i < list.length; i++) {
+      var t = await resolveTmdb(list[i]);
+      if (t) out.push({ item: list[i], t: t });
+      if (!tmdbOf(list[i])) await sleep(250);
+    }
+    return out;
+  }
   function kqToVw(k) {
     if (!k || !k.tmdbId) return null;
     var isMovie = k.mediaType !== 'tv';
@@ -139,9 +194,8 @@
       updatedAt: k.updatedAt || 0,
     };
   }
-  function vwToKq(it) {
-    var t = tmdbOf(it);
-    if (!t) return null;
+  function vwToKq(it, t) {
+    if (!it || !t) return null;
     var st = VW_TO_KQ[it.status] ||
       ((it.status === 'planning' && (it.kqStatus === 'On Hold' || it.kqStatus === 'Dropped')) ? it.kqStatus : 'Plan to Watch');
     return {
@@ -176,11 +230,6 @@
     return Array.from(byId.values());
   }
 
-  function localVD() {
-    return (typeof window.vwlGet === 'function' ? window.vwlGet() : [])
-      .filter(function (i) { return tmdbOf(i); });
-  }
-
   /* ── Sync ── */
   async function syncNow() {
     if (!sess || syncing) return;
@@ -209,7 +258,8 @@
       if (window.vwlBulkSetDates) window.vwlBulkSetDates(datesByKey);
 
       // Push: local-only / local-newer items win, then write once
-      var localKq = localVD().map(vwToKq).filter(Boolean);
+      var pushable = await localPushable();
+      var localKq = pushable.map(function (p) { return vwToKq(p.item, p.t); }).filter(Boolean);
       var merged = mergeKQ(remote, localKq);
       var pushed = 0;
       var remoteById = {};
@@ -241,7 +291,8 @@
     pushTid = setTimeout(async function () {
       try {
         var remote = lastRemote || await fsLoad();
-        var merged = mergeKQ(remote, localVD().map(vwToKq).filter(Boolean));
+        var pushable = await localPushable();
+        var merged = mergeKQ(remote, pushable.map(function (p) { return vwToKq(p.item, p.t); }).filter(Boolean));
         await fsSave(merged);
         lastRemote = merged;
       } catch (_) {}
