@@ -702,6 +702,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       iframe.removeAttribute("sandbox");
     }
     iframe.removeAttribute("referrerpolicy");
+    // MegaPlay's player page answers 410 ("file deleted") when the embed
+    // request carries no Referer — always our case: the no-referrer meta
+    // strips it, and file:// has no origin to send. Any value passes
+    // (even file://), and unsafe-url is the only policy that emits one
+    // from opaque origins — so force it for megaplay embeds only.
+    if (/megaplay\.buzz|vidwish\.live/i.test(vids[index] || "")) {
+      iframe.setAttribute("referrerpolicy", "unsafe-url");
+    }
 
     iframe.classList.add("fade-out");
     iframe.onload = () =>

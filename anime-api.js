@@ -239,7 +239,7 @@
     {
       api: "anikoto",
       name: "Anikoto API",
-      desc: "Fastest when it works — blocked on some networks (error 232011).",
+      desc: "Native MegaPlay player — biggest library, Cloudflare backup if blocked.",
     },
     {
       api: "vidcore",

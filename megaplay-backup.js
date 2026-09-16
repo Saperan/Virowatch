@@ -32,7 +32,7 @@
 
   const HLS_CDN    = "https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js";
   const DL_CONC    = 6;      // parallel segment fetches while downloading
-  // MegaPlay embed: .../stream/s-3/<id>/<sub|dub>.
+  // MegaPlay embed: .../stream/s-2/<id>/<sub|dub>.
   // Groups: 1 = host, 2 = id, 3 = sub|dub.
   const MEGA_RE    = /(megaplay\.buzz|vidwish\.live)\/stream\/s-\d+\/(\d+)\/(sub|dub)/i;
 
@@ -49,6 +49,7 @@
     // first — it loads earlier — so by the time we get here it has already
     // stopped/started its own player as needed).
     if (api === "cloudflare") {
+      backupDead = false; // explicit user pick retries even a dead backup
       if (current && mode === "embed") { playBackup(); return; }
     } else if (api !== "vidnest") {
       if (mode === "backup") {
@@ -76,6 +77,10 @@
   let hlsLoading    = null;     // promise
   let workerIdx     = 0;        // active worker in WORKERS
   let playToken     = 0;        // invalidates stale async work on new load
+  // All workers failed with an upstream/CDN error (e.g. CDN 403s worker
+  // egress) — auto-playing backup again would just black-screen, so stay on
+  // the embed until the user explicitly picks the backup or one succeeds.
+  let backupDead    = false;
   let userQuality   = null;     // null = use worker default; else "auto" or height
   let activeWorkerQuality = 720; // quality of the worker currently playing
   let captionTracks = [];        // subtitle tracks for the current episode
@@ -474,7 +479,18 @@
       loadFromWorker(token);
     } else {
       if (spinner()) spinner().style.display = "none";
-      toast("All backup servers unavailable — " + why);
+      // Backup dead on every worker — drop back to the native embed instead
+      // of leaving a black box. The embed plays region-side (anikoto.cz
+      // proves it); only take it when this episode is still current and
+      // Vidnest isn't owning the player.
+      const onVidnest = window.vwVidnestAnimeActive && window.vwVidnestAnimeActive();
+      if (!onVidnest && mode === "backup" && current) {
+        if (/upstream|403|resolve failed|playback error/i.test(why || "")) backupDead = true;
+        toast("Backup blocked — using embed");
+        useEmbed();
+      } else {
+        toast("All backup servers unavailable — " + why);
+      }
     }
   }
 
@@ -501,7 +517,7 @@
       v.src = fileUrl;
       v.addEventListener(
         "loadedmetadata",
-        () => { done(); resume(); },
+        () => { backupDead = false; done(); resume(); },
         { once: true },
       );
       v.play().catch(() => {});
@@ -528,6 +544,7 @@
       hls.loadSource(fileUrl);
       hls.attachMedia(v);
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        backupDead = false; // it plays — clear any earlier dead flag
         buildQualityMenu(); // populate + show the Auto/720p/360p picker
         applyQuality();     // apply user choice (or the worker default)
         done();
@@ -542,7 +559,7 @@
       v.src = fileUrl; // last resort
       v.addEventListener(
         "loadedmetadata",
-        () => { done(); resume(); },
+        () => { backupDead = false; done(); resume(); },
         { once: true },
       );
     }
@@ -559,6 +576,7 @@
   window.addEventListener("vw-party-changed", (e) => {
     const onVidnest = window.vwVidnestAnimeActive && window.vwVidnestAnimeActive();
     if (e.detail && e.detail.active && current && mode === "embed" && !onVidnest) {
+      if (backupDead) { toast("Backup blocked — staying on embed for party"); return; }
       toast("Watch party — using the Backup player so time sync works");
       playBackup();
     }
@@ -576,7 +594,8 @@
     window.dispatchEvent(new CustomEvent("vw-anime-embed", { detail: { active: false } }));
   }
 
-  // Anime embeds always play off megaplay.buzz at /stream/s-3/ (the Anikoto
+  // Anime embeds always play off megaplay.buzz at /stream/s-2/ (the full
+  // player — s-3 is a dead shell that never requests sources. The Anikoto
   // API now hands out s-2 URLs, so normalize the segment on the way in).
   function targetAnimeHost() {
     return "megaplay.buzz";
@@ -585,7 +604,7 @@
   function swapHost(url, host) {
     return url
       .replace(/(?:megaplay\.buzz|vidwish\.live)/i, host)
-      .replace(/\/stream\/s-\d+\//i, "/stream/s-3/");
+      .replace(/\/stream\/s-\d+\//i, "/stream/s-2/");
   }
 
   // ── React to a new episode loading in the iframe ──────────────────
@@ -625,9 +644,17 @@
     window.dispatchEvent(new CustomEvent("vw-anime-embed", { detail: { active: true } }));
 
     if (preferBackup || partyOn()) {
-      // Watch party: always go straight to the Backup player — it's the
-      // only anime player both sides can read/seek, so time sync works.
-      playBackup();
+      if (backupDead) {
+        // Workers were all failing — don't black-screen again; the user can
+        // still retry via the ⇄ Source picker (resets backupDead).
+        mode = "embed";
+        showEmbed();
+        setButtonLabel();
+      } else {
+        // Watch party: always go straight to the Backup player — it's the
+        // only anime player both sides can read/seek, so time sync works.
+        playBackup();
+      }
     } else {
       mode = "embed";
       showEmbed();

@@ -12,7 +12,7 @@
   "use strict";
 
   const BASE     = "https://anikotoapi.site";
-  const MEGAPLAY = "https://megaplay.buzz/stream/s-3";
+  const MEGAPLAY = "https://megaplay.buzz/stream/s-2";
   const PER_PAGE = 24;
   const TIMEOUT  = 10000;
 
@@ -110,13 +110,13 @@
   let searchTid  = null;
 
   // ── Embed URL ──────────────────────────────────────────────────────
-  // MegaPlay's s-2 route serves an error page when no Referer header is sent
-  // (always the case for pages opened via file://). The s-3 route wraps s-2
-  // in an iframe on megaplay's own origin, so the inner request has a
-  // Referer and plays everywhere.
+  // MegaPlay's player page 410s when the embed request carries no Referer,
+  // so the iframe forces referrerpolicy="unsafe-url" (see content.js) and
+  // we use the s-2 player route — the newer full player. (s-3 is a dead
+  // shell: loads but never requests sources.)
   function embedUrl(ep, type) {
     if (ep.embed_url?.[type])
-      return ep.embed_url[type].replace(/\/stream\/s-\d+\//, "/stream/s-3/");
+      return ep.embed_url[type].replace(/\/stream\/s-\d+\//, "/stream/s-2/");
     if (ep.episode_embed_id) return `${MEGAPLAY}/${ep.episode_embed_id}/${type}`;
     return "";
   }
