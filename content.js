@@ -674,11 +674,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (spinner) spinner.style.display = "block";
     const iframe = document.getElementById("videoPlayer");
 
-    // pitsport.xyz sends X-Frame-Options: sameorigin, so its own pages (the
-    // "no events" fallback + /watch pages) can't be framed. Framing them just
+    // pitsport.st sends X-Frame-Options: DENY, so its own pages (the
+    // "no events" fallback + /programs pages) can't be framed. Framing them just
     // shows a blank box + console error. Detect that and show a manual
     // open-in-new-tab panel instead of trying to embed it.
-    if (/^https?:\/\/(www\.)?pitsport\.xyz\//i.test(vids[index])) {
+    if (/^https?:\/\/(www\.)?pitsport\.(st|xyz)\//i.test(vids[index])) {
       showPitsportFallback(vids[index]);
       ep = index;
       saveState();
@@ -730,7 +730,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Show a "can't embed — open externally" panel over the player. Used when
-  // PitSport has no live events (fallback) or hands back a pitsport.xyz page.
+  // PitSport has no live events (fallback) or hands back a pitsport.st page.
   let pitsportHidIframe = false;
   function showPitsportFallback(url) {
     const iframe = document.getElementById("videoPlayer");

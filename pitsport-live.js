@@ -1,25 +1,22 @@
 /**
  * pitsport-live.js  —  Virowatch PitSport Live Integration
  *
- * PitSport's site is now a client-rendered Next.js app, so the event
+ * PitSport's site is a client-rendered SvelteKit app, so the event
  * listings and embed links don't exist in the raw HTML anymore — only
  * after the page hydrates in a real browser. Scraping it is no longer
  * viable. Instead this calls PitSport's own public JSON API directly,
- * which is CORS-open (Access-Control-Allow-Origin: *), so no proxy is
- * needed at all.
+ * which is CORS-open, so no proxy is needed at all.
  */
 
 (function () {
   'use strict';
 
-  // API host moved from api.pitsport.live → api.pitsport.st (2026-07-24; the
-  // old subdomain's DNS was pulled → ERR_NAME_NOT_RESOLVED). Same /v1 shape,
-  // still CORS-open (Access-Control-Allow-Origin: *). Base is read from the
-  // live site's JS chunks — re-check there if it 404s/ENOTFOUND again.
-  const API        = 'https://api.pitsport.st/v1';
-  const WATCH_BASE = 'https://pitsport.xyz/watch';
+  // API base is read from the live site's inline SvelteKit env
+  // (__sveltekit_*.env.PUBLIC_API_BASE_URL). Currently:
+  const API        = 'https://pitsport.st/api/v1';
+  const SITE       = 'https://pitsport.st';
   const TIMEOUT    = 7000;
-  // pitsport.xyz/favicon.ico stopped resolving — use the same logo as shows.js
+  // pitsport.st/favicon is unreliable — use the same logo as shows.js
   const PITSPORT_LOGO =
     'https://styles.redditmedia.com/t5_gimzou/styles/profileIcon_xcbdmlpt1vgg1.png?frame=1&auto=webp&crop=256%3A256%2Csmart&s=a81a6627212a1de0d75a0e4381aa963812a1da5c';
 
@@ -44,35 +41,31 @@
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // 2.  Turn the categorized API response into a flat event list
+  // 2.  Turn the /live-now response into a flat event list
   // ─────────────────────────────────────────────────────────────────
 
-  function flattenStreams(data) {
-    if (!data || !Array.isArray(data.categories)) return [];
-    const events = [];
-    for (const cat of data.categories) {
-      for (const s of cat.streams || []) {
-        const id = (s.uri || '').replace('/watch/', '');
-        if (!id) continue;
-        events.push({
-          id,
-          title     : cat.category ? `${cat.category} - ${s.title}` : s.title,
-          watchUrl  : `${WATCH_BASE}/${id}`,
-          timestamp : s.timestamp || 0,
-        });
-      }
-    }
-    return events;
+  function flattenPrograms(list) {
+    if (!Array.isArray(list)) return [];
+    return list
+      .filter(s => s && s.programId)
+      .map(s => ({
+        id        : s.programId,
+        title     : s.footer ? `${s.footer} - ${s.titleText}` : (s.titleText || String(s.programId)),
+        watchUrl  : `${SITE}${s.playHref || `/programs/${s.programId}/play`}`,
+        timestamp : s.sessionStart || 0,
+      }));
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // 3.  Embed resolution — per-stream API returns the real embed iframe
+  // 3.  Embed resolution — /programs/{id}/play returns the real embed
   // ─────────────────────────────────────────────────────────────────
 
   async function resolveEmbedUrl(ev) {
-    const data = await fetchJSON(`${API}/stream/${ev.id}`);
-    const iframe = data?.content?.[0]?.iframe;
-    return iframe || ev.watchUrl;
+    const data = await fetchJSON(`${API}/programs/${ev.id}/play`);
+    const d = data?.data || data;
+    // ponytail: first allowed video wins, per-feed picker if users ask
+    const vids = Array.isArray(d?.videos) ? d.videos.filter(v => v.allowed !== false && v.embedUrl) : [];
+    return d?.video?.embedUrl || vids[0]?.embedUrl || ev.watchUrl;
   }
 
   function probeIframe(url) {
@@ -112,7 +105,7 @@
       image : PITSPORT_LOGO,
       PSFallback: {
         chapter       : '⚠️ PitSport unavailable',
-        video         : ['https://pitsport.xyz/live-now'],
+        video         : ['https://pitsport.st/live-now'],
         episodeTitles : [`Open PitSport Live (${reason})`],
       },
     };
@@ -130,21 +123,19 @@
     if (window._pitsportLoading) return;
     window._pitsportLoading = true;
 
-    const [live, day] = await Promise.all([
-      fetchJSON(`${API}/streams/live`),
-      fetchJSON(`${API}/streams/24h`),
-    ]);
+    const res = await fetchJSON(`${API}/live-now`);
+    const payload = res?.data || res;
 
-    if (!live && !day) {
+    if (!payload || (!payload.live && !payload.upcoming)) {
       showFallback('PitSport API unreachable');
       return;
     }
 
-    const liveNowRaw = flattenStreams(live).slice(0, 20);
+    const liveNowRaw = flattenPrograms(payload.live).slice(0, 20);
     const liveIds    = new Set(liveNowRaw.map(e => e.id));
 
-    // "Upcoming" = 24h list minus anything already shown as live now
-    const upcomingRaw = flattenStreams(day)
+    // "Upcoming" = upcoming list minus anything already shown as live now
+    const upcomingRaw = flattenPrograms(payload.upcoming)
       .filter(e => !liveIds.has(e.id))
       .sort((a, b) => a.timestamp - b.timestamp)
       .slice(0, 20);
