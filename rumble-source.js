@@ -149,8 +149,10 @@
     window.viroResume(entry.cat, entry.key, p.sk, p.ep, !!(d.dubbed && p.hasDub));
   }
 
-  function apiRows() {
-    return ANIME_APIS.map(function (api) {
+  function apiRows(skipAnikoto) {
+    return ANIME_APIS.filter(function (api) {
+      return !(skipAnikoto && api === "anikoto");
+    }).map(function (api) {
       return {
         label: window.vwAnimeApi ? window.vwAnimeApi.label(api) : api,
         active: !!(window.vwAnimeApi && window.vwAnimeApi.get() === api),
@@ -162,8 +164,45 @@
     });
   }
 
+  // Per-episode MegaPlay servers (anikoto.cz's Vidstream/HD list). They
+  // replace the single "Anikoto" API row for ANI_ entries — picking one is
+  // the only way to choose the player route/CDN. The pick is saved, so
+  // future episodes use it too.
+  function megaRows() {
+    if (!window.vwMegaServer) return [];
+    var cur = window.vwMegaServer.get();
+    var api = window.vwAnimeApi ? window.vwAnimeApi.get() : "anikoto";
+    return window.vwMegaServer.list().map(function (s) {
+      var active = api === "anikoto" && cur === s.id;
+      return {
+        label: s.label,
+        active: active,
+        onClick: active
+          ? function () { if (window.vwSrcClose) window.vwSrcClose(); }
+          : function () { switchMega(s.id); },
+      };
+    });
+  }
+
+  // Nothing here touches the iframe: saving the pick makes megaplay-backup.js
+  // re-point the live embed (it owns that src and also restores the embed
+  // when the Cloudflare backup was playing).
+  function switchMega(id) {
+    if (window.vwVidnestStopAll) window.vwVidnestStopAll();
+    if (window.vwMegaServer) window.vwMegaServer.set(id);
+    if (window.vwAnimeApi) window.vwAnimeApi.set("anikoto"); // fires the re-point
+    if (window.vwSrcClose) window.vwSrcClose();
+  }
+
   function currentLabel(d) {
     var key = d.mov || "";
+    if (
+      key.indexOf("ANI_") === 0 &&
+      window.vwMegaServer &&
+      (!window.vwAnimeApi || window.vwAnimeApi.get() === "anikoto")
+    ) {
+      return window.vwMegaServer.label(window.vwMegaServer.get());
+    }
     if (key.indexOf("ANI_") === 0 || key.indexOf("VDA_") === 0) {
       return window.vwAnimeApi
         ? window.vwAnimeApi.label(window.vwAnimeApi.get())
@@ -247,7 +286,11 @@
     var rows = [];
     var key = d.mov;
 
-    if (key.indexOf("ANI_") === 0 || key.indexOf("VDA_") === 0) {
+    if (key.indexOf("ANI_") === 0) {
+      var mrows = megaRows();
+      rows.push.apply(rows, mrows);
+      rows.push.apply(rows, apiRows(mrows.length > 0));
+    } else if (key.indexOf("VDA_") === 0) {
       rows.push.apply(rows, apiRows());
     } else if (key.indexOf("VDT_") === 0 || key.indexOf("VDM_") === 0) {
       rows.push({

@@ -32,9 +32,9 @@
 
   const HLS_CDN    = "https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js";
   const DL_CONC    = 6;      // parallel segment fetches while downloading
-  // MegaPlay embed: .../stream/s-2/<id>/<sub|dub>.
+  // MegaPlay embed: [videojs/]stream/s-2/<id>/<sub|dub> (+ optional ?s=cdn).
   // Groups: 1 = host, 2 = id, 3 = sub|dub.
-  const MEGA_RE    = /(megaplay\.buzz|vidwish\.live)\/stream\/s-\d+\/(\d+)\/(sub|dub)/i;
+  const MEGA_RE    = /(megaplay\.buzz|vidwish\.live)\/(?:videojs\/)?stream\/s-\d+\/(\d+)\/(sub|dub)/i;
 
   let mode          = "embed"; // "embed" | "backup"
   // Sticky once the user chooses backup; starts on when the default anime
@@ -602,9 +602,12 @@
   }
 
   function swapHost(url, host) {
-    return url
+    const u = url
       .replace(/(?:megaplay\.buzz|vidwish\.live)/i, host)
       .replace(/\/stream\/s-\d+\//i, "/stream/s-2/");
+    // Apply the chosen MegaPlay server (Vidstream-2/Vidstream-1/HD-1/HD-2) —
+    // this handler is the single choke point every anime embed load passes.
+    return window.vwMegaServer ? window.vwMegaServer.apply(u) : u;
   }
 
   // ── React to a new episode loading in the iframe ──────────────────

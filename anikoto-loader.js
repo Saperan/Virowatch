@@ -1,5 +1,5 @@
 /**
- * anikoto-loader.js  —  Virowatch × Anikoto / MegaPlay  v3.2
+ * anikoto-loader.js  —  Virowatch × Anikoto / MegaPlay  v3.3
  *
  * Fixes:
  * - Reliable proxy chain with retries + safe JSON parsing
@@ -7,6 +7,8 @@
  * - Background preloads extra pages so search has real coverage
  * - Search shows result count + "still loading" hint
  * - Deep master database search endpoint queries included
+ * - MegaPlay server variants (Vidstream-2/Vidstream-1/HD-1/HD-2) selectable
+ *   via the ⇄ Source picker (window.vwMegaServer; applied by megaplay-backup)
  */
 (function () {
   "use strict";
@@ -108,6 +110,52 @@
   let fetching   = false;
   let cache      = [];   // all fetched anime metadata (drives instant search)
   let searchTid  = null;
+
+  // ── MegaPlay server variants ───────────────────────────────────────
+  // anikoto.cz fans every episode over the same MegaPlay player on several
+  // routes/CDNs: Vidstream-2 (default), Vidstream-1 (the /videojs/ vidstack
+  // player), and HD-1/HD-2 (the ?s=tcdn / ?s=bcdn alternate CDNs). Same
+  // episode id either way — pure URL rewrite, so we derive them locally
+  // instead of scraping anikoto.cz's server list (3 signed, CORS-blocked
+  // requests). megaplay-backup.js applies the pick to every embed load.
+  const SRV_KEY = "vw_mega_server";
+  const SERVERS = [
+    { id: "v2",  label: "Vidstream-2" },
+    { id: "v1",  label: "Vidstream-1" },
+    { id: "hd1", label: "HD-1" },
+    { id: "hd2", label: "HD-2" },
+  ];
+  function serverId() {
+    let v = null;
+    try { v = localStorage.getItem(SRV_KEY); } catch (_) {}
+    return SERVERS.some((s) => s.id === v) ? v : "v2";
+  }
+  // Idempotent: strips any variant already on the URL, then applies the
+  // chosen one (so re-applying to a live iframe src is safe).
+  function serverApply(url) {
+    if (!url || !/megaplay\.buzz|vidwish\.live/i.test(url)) return url;
+    let u = String(url)
+      .replace(/\/videojs\/stream\//i, "/stream/")
+      .replace(/([?&])s=[^&#]*/gi, "$1")
+      .replace(/\?&/g, "?")
+      .replace(/&&/g, "&")
+      .replace(/[?&]$/, "");
+    const id = serverId();
+    if (id === "v1") u = u.replace(/^(https?:\/\/[^/]+)\//i, "$1/videojs/");
+    else if (id === "hd1") u += (u.indexOf("?") === -1 ? "?" : "&") + "s=tcdn";
+    else if (id === "hd2") u += (u.indexOf("?") === -1 ? "?" : "&") + "s=bcdn";
+    return u;
+  }
+  window.vwMegaServer = {
+    list : () => SERVERS.slice(),
+    get  : serverId,
+    label: (id) => (SERVERS.find((s) => s.id === id) || {}).label || id,
+    set  : (id) => {
+      if (!SERVERS.some((s) => s.id === id)) return;
+      try { localStorage.setItem(SRV_KEY, id); } catch (_) {}
+    },
+    apply: serverApply,
+  };
 
   // ── Embed URL ──────────────────────────────────────────────────────
   // MegaPlay's player page 410s when the embed request carries no Referer,
